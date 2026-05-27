@@ -1,0 +1,29 @@
+[project]
+name = "jats-exporters"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lxml>=5.0",
+    "xmlschema>=4.3.1",
+    "jats_classes"
+]
+
+[dependency-groups]
+dev = [
+    "lxml-stubs>=0.5.1",
+    "ruff>=0.9",
+    "ty>=0.0.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12"]
+build-backend = "uv_build"
+
+[[tool.uv.index]]
+name = "uvc-plone"
+url = "https://pypi.bg-kooperation.de"
+
+[tool.uv.sources]
+jats_classes = {workspace = true}

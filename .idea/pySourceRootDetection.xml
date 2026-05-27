@@ -4,6 +4,10 @@
     <option name="sourcePathsSet">
       <set>
         <option value="$PROJECT_DIR$/packages/classes/src" />
+        <option value="$PROJECT_DIR$/packages/classes" />
+        <option value="$PROJECT_DIR$/packages/jats-classes/src" />
+        <option value="$PROJECT_DIR$/packages/jats-exporters/src" />
+        <option value="$PROJECT_DIR$/packages/jats-exporters" />
       </set>
     </option>
   </component>
