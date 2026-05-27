@@ -4,4 +4,25 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "ty>=0.0.1",
+]
+
+[tool.uv.workspace]
+members = ["packages/*","applications/*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = []
+
+[tool.ty.environment]
+python-version = "3.13"

@@ -1,5 +1,5 @@
 def main():
-    print("Hello from jats-importexport!")
+    print("Hello from api!")
 
 
 if __name__ == "__main__":
