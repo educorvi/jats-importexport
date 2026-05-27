@@ -10,7 +10,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.9",
-    "ty>=0.0.1",
+    "ty>=0.0.40",
     "jats_classes"
 ]
 
