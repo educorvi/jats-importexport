@@ -2,7 +2,7 @@
 <module external.system.id="pyproject.toml" type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$/packages/jats-storage-adapters">
-      <sourceFolder url="file://$MODULE_DIR$/packages/jats-storage-adapters/src" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/jats-storage-adapters/src" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
