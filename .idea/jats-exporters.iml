@@ -4,7 +4,6 @@
     <content url="file://$MODULE_DIR$/packages/jats-exporters">
       <sourceFolder url="file://$MODULE_DIR$/packages/jats-exporters" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/packages/jats-exporters/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/packages/jats-exporters/src/jats_exporters" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
