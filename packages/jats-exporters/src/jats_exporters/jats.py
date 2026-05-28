@@ -93,4 +93,3 @@ class JatsExporter(Exporter[str]):
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument to XML string format."""
         return _get_article_jats(document.article)
-

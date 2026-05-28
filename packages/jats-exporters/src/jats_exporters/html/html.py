@@ -60,4 +60,3 @@ class HtmlExporterStandalone(HtmlExporterGeneric):
     """Standalone HTML exporter using 'jats-html-standalone.xsl'."""
 
     XSL_PATH = os.path.join(os.path.dirname(__file__), "jats-html-standalone.xsl")
-

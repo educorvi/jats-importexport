@@ -50,7 +50,6 @@ class JATSDocument:
         article = Article.from_xml_element(root)
         return cls(article=article)
 
-
     @staticmethod
     def _file_exists(file_path: str) -> bool:
         """Check if the given path points to an existing file."""

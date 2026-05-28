@@ -53,4 +53,3 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             The URL of the saved file or main container object.
         """
         raise NotImplementedError
-
