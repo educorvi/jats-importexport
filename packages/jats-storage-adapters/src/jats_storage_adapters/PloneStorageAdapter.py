@@ -1,26 +1,45 @@
+"""Plone Storage Adapter implementation.
+
+Connects to a live Plone CMS instance via its REST API to perform file uploads,
+fetch JATS content, parse it into JATSDocument models, and serialize models back to Plone.
+"""
+
 import base64
 import mimetypes
 import os
 from typing import BinaryIO
 
 import httpx
+
 from jats_classes import (
     Appendix,
+    AppendixGroup,
     Article,
+    Back,
     Body,
     Front,
+    GenericSection,
     JATSDocument,
-    Section, Back, AppendixGroup, GenericSection,
+    Section,
 )
 
 from .interface import StorageAdapter
 
 
 class PloneStorageAdapter(StorageAdapter):
+    """Storage adapter interacting with a Plone instance over the REST API.
+
+    Requires the following environment variables:
+    - PLONE_BASE_URL: Root URL of Plone CMS (e.g. http://localhost:8080/Plone).
+    - PLONE_USERNAME: Authenticated username for API operations.
+    - PLONE_PASSWORD: Password corresponding to user credentials.
+    """
+
     base_url: str
     auth: tuple[str, str]
 
     def __init__(self):
+        """Initialize the storage adapter by loading credentials from the environment."""
         base_url = os.environ.get("PLONE_BASE_URL")
         if base_url is None:
             raise ValueError("PLONE_BASE_URL environment variable is not set")
@@ -34,9 +53,13 @@ class PloneStorageAdapter(StorageAdapter):
             )
         self.auth = (username, password)
 
-        super()
+        super().__init__()
 
     def upload_file(self, file: BinaryIO, container: str) -> str:
+        """Upload a binary file to Plone.
+
+        Converts the stream content into base64 and posts a new 'File' content type.
+        """
         filename = os.path.basename(getattr(file, "name", "") or "upload")
 
         content_type, _ = mimetypes.guess_type(filename)
@@ -45,9 +68,7 @@ class PloneStorageAdapter(StorageAdapter):
 
         encoded = base64.b64encode(file.read()).decode("ascii")
 
-
         url = self.__get_container_url(container)
-
 
         response = httpx.post(
             url,
@@ -69,20 +90,127 @@ class PloneStorageAdapter(StorageAdapter):
         return response.json().get("@id", url)
 
     def get_jats_document(self, path: str) -> JATSDocument:
-        pass
+        """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
+        url = f"{self.base_url}/{path.strip('/')}"
+        article = self.__fetch_article(url)
+        return JATSDocument(article=article)
+
+    def __get_json(self, url: str) -> dict:
+        """Fetch JSON data from a Plone API endpoint."""
+        response = httpx.get(
+            url,
+            params={"fullobjects": 1},
+            auth=self.auth,
+            headers={"Accept": "application/json"},
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def __fetch_front(self, data: dict) -> Front:
+        """Convert Plone front node data into a Front domain model."""
+        return Front(content_raw=data.get("content_raw"))
+
+    def __fetch_section(self, url: str) -> Section:
+        """Fetch and reconstruct a Section and its subsections from Plone REST endpoints."""
+        data = self.__get_json(url)
+        sections = [
+            self.__fetch_section(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Section"
+        ]
+        return Section(
+            sec_type=data.get("sec_type"),
+            label=data.get("label"),
+            title=data.get("title"),
+            label_title_raw=data.get("label_title_raw") or "",
+            content_raw=data.get("content_raw"),
+            sections=sections,
+        )
+
+    def __fetch_appendix(self, url: str) -> Appendix:
+        """Fetch and reconstruct an Appendix and its subsections from Plone REST endpoints."""
+        data = self.__get_json(url)
+        sections = [
+            self.__fetch_section(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Section"
+        ]
+        return Appendix(
+            sec_type=data.get("sec_type"),
+            label=data.get("label"),
+            title=data.get("title"),
+            label_title_raw=data.get("label_title_raw") or "",
+            content_raw=data.get("content_raw"),
+            sections=sections,
+        )
+
+    def __fetch_appendix_group(self, url: str) -> AppendixGroup:
+        """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
+        data = self.__get_json(url)
+        appendixes = [
+            self.__fetch_appendix(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Appendix"
+        ]
+        return AppendixGroup(
+            sec_type=data.get("sec_type"),
+            label=data.get("label"),
+            title=data.get("title"),
+            label_title_raw=data.get("label_title_raw") or "",
+            content_raw=data.get("content_raw"),
+            appendixes=appendixes,
+        )
+
+    def __fetch_body(self, url: str) -> Body:
+        """Fetch and reconstruct the Body node and its sections from Plone REST endpoints."""
+        data = self.__get_json(url)
+        sections = [
+            self.__fetch_section(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Section"
+        ]
+        return Body(sections=sections)
+
+    def __fetch_back(self, url: str) -> Back:
+        """Fetch and reconstruct the Back node and its appendix groups from Plone REST endpoints."""
+        data = self.__get_json(url)
+        appendix_groups = [
+            self.__fetch_appendix_group(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "AppendixGroup"
+        ]
+        return Back(appendix_groups=appendix_groups)
+
+    def __fetch_article(self, url: str) -> Article:
+        """Fetch and build an Article node with Front, Body, and Back children from Plone."""
+        data = self.__get_json(url)
+        front = body = back = None
+        for item in data.get("items", []):
+            pt = item.get("@type")
+            item_url = item.get("@id")
+            if pt == "Front":
+                front = self.__fetch_front(item)
+            elif pt == "Body":
+                body = self.__fetch_body(item_url)
+            elif pt == "Back":
+                back = self.__fetch_back(item_url)
+        if not all([front, body, back]):
+            raise ValueError("Article must contain Front, Body, and Back")
+        assert front is not None and body is not None and back is not None
+        return Article(front=front, body=body, back=back)
 
     def save_jats_document(self, document: JATSDocument, container: str) -> str:
-        # get path without document name
+        """Serialize and upload a JATSDocument object graph to Plone."""
         self.__create_container(container)
         result_url = self.__create_article(document.article, container)
-
-
         return result_url
 
     def __get_container_url(self, container: str) -> str:
+        """Build the complete Plone API URL for a container folder."""
         return f"{self.base_url}/{container.strip('/')}"
 
     def __create_front(self, front: Front, container_url: str) -> str:
+        """Create a Front object inside a Plone Article container."""
         response = httpx.post(
             container_url,
             json={
@@ -97,6 +225,7 @@ class PloneStorageAdapter(StorageAdapter):
         return response.json().get("@id")
 
     def __create_section(self, section: GenericSection, container_url: str) -> str:
+        """Recursively create a Section/Appendix node structure inside a Plone container."""
         portal_type: str
         if isinstance(section, Section):
             portal_type = "Section"
@@ -111,7 +240,6 @@ class PloneStorageAdapter(StorageAdapter):
                 "label": section.label,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
-
             },
             auth=self.auth,
             headers={"Accept": "application/json"},
@@ -120,9 +248,10 @@ class PloneStorageAdapter(StorageAdapter):
         response_url: str = response.json().get("@id")
         for sub_section in section.sections:
             self.__create_section(sub_section, response_url)
-        return response_url 
+        return response_url
 
     def __create_body(self, body: Body, container_url: str) -> str:
+        """Create a Body node inside a Plone Article and upload its sections."""
         response = httpx.post(
             container_url,
             json={
@@ -138,7 +267,8 @@ class PloneStorageAdapter(StorageAdapter):
             self.__create_section(section, response_url)
         return response_url
 
-    def __create_appendix_group(self, app_group: AppendixGroup, container_url: str):
+    def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
+        """Create an AppendixGroup node inside a Plone Back node and upload its sections."""
         response = httpx.post(
             container_url,
             json={
@@ -157,6 +287,7 @@ class PloneStorageAdapter(StorageAdapter):
         return response_url
 
     def __create_back(self, back: Back, container_url: str) -> str:
+        """Create a Back node inside a Plone Article and upload its appendix groups."""
         response = httpx.post(
             container_url,
             json={
@@ -173,6 +304,7 @@ class PloneStorageAdapter(StorageAdapter):
         return response_url
 
     def __create_article(self, article: Article, container: str) -> str:
+        """Create an Article root node and its Front, Body, and Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
         response = httpx.post(
             url,
@@ -190,14 +322,16 @@ class PloneStorageAdapter(StorageAdapter):
         self.__create_back(article.back, result_url)
         return result_url
 
-
     def __get_container_path(self, path: str) -> str:
+        """Split a URL path to obtain the parent container's path."""
         return "/".join(path.split("/")[:-1])
 
-    def __create_container_for_file(self, path: str):
+    def __create_container_for_file(self, path: str) -> None:
+        """Ensure parent folders exist for a given file path in Plone."""
         self.__create_container(self.__get_container_path(path))
 
     def __create_container(self, container: str) -> None:
+        """Recursively create folder structures ('Folder' type) in Plone if missing."""
         print(f"Creating container: {container}")
         parts = [p for p in container.strip("/").split("/") if p]
         current_path = ""
