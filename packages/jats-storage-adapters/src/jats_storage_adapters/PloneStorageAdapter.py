@@ -6,6 +6,7 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 import base64
 import mimetypes
 import os
+from logging import debug
 from typing import BinaryIO
 
 import httpx
@@ -333,7 +334,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_container(self, container: str) -> None:
         """Recursively create folder structures ('Folder' type) in Plone if missing."""
-        print(f"Creating container: {container}")
+        debug(f"Creating container: {container}")
         parts = [p for p in container.strip("/").split("/") if p]
         current_path = ""
 
