@@ -312,7 +312,7 @@ class PloneStorageAdapter(StorageAdapter):
             url,
             json={
                 "@type": "Article",
-                "title": "Placeholder",
+                "title": article.front.get_title() or "Article",
             },
             auth=self.auth,
             headers={"Accept": "application/json"},

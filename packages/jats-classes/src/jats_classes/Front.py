@@ -30,6 +30,22 @@ class Front:
         content_raw = cls._get_raw_content(element)
         return cls(content_raw=content_raw)
 
+    def get_title(self) -> str | None:
+        """Extract the article title from the front-matter.
+
+        Looks for the title in ``<article-meta>/<title-group>/<article-title>``.
+
+        Returns:
+            The article title as a plain-text string, or ``None`` if not found.
+        """
+        if self.content_raw is None:
+            return None
+        root = etree.fromstring(f"<front>{self.content_raw}</front>")
+        title_el = root.find(".//article-meta/title-group/article-title")
+        if title_el is None:
+            return None
+        return "".join(str(t) for t in title_el.itertext()) or None
+
     @classmethod
     def _get_raw_content(cls, front: etree._Element) -> str | None:
         """Extract internal XML markup string from the JATS <front> node."""
