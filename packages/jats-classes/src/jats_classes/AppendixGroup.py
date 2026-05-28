@@ -60,34 +60,3 @@ class AppendixGroup(GenericSection):
             content_raw=content_raw,
             appendixes=appendixes,
         )
-
-    @classmethod
-    def from_plone(cls, plone_app_group: Any) -> AppendixGroup:
-        """Construct an AppendixGroup from a Plone AppendixGroup object.
-
-        Args:
-            plone_app_group: A Plone AppendixGroup object.
-
-        Returns:
-            An AppendixGroup instance.
-        """
-        if getattr(plone_app_group, "portal_type", None) != "AppendixGroup":
-            raise ValueError("Provided object is not an AppendixGroup")
-        content_type = getattr(plone_app_group, "sec_type", None)
-        label = getattr(plone_app_group, "label", None)
-        title = getattr(plone_app_group, "title", None)
-        label_title_raw = getattr(plone_app_group, "label_title_raw", "")
-        content_raw = getattr(plone_app_group, "content_raw", None)
-        appendixes = []
-        for app in plone_app_group.restrictedTraverse("contentlisting")():
-            app = app.getObject()
-            if getattr(app, "portal_type", None) == "Appendix":
-                appendixes.append(Appendix.from_plone(app))
-        return cls(
-            sec_type=content_type,
-            label=label,
-            title=title,
-            label_title_raw=label_title_raw,
-            content_raw=content_raw,
-            appendixes=appendixes,
-        )

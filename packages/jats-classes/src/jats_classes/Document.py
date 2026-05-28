@@ -50,21 +50,6 @@ class JATSDocument:
         article = Article.from_xml_element(root)
         return cls(article=article)
 
-    @classmethod
-    def from_plone(cls, plone_article: object) -> JATSDocument:
-        """Construct a JATSDocument by traversing and parsing a Plone Article object.
-
-        Args:
-            plone_article: A Plone Content object representing the article root.
-
-        Returns:
-            A JATSDocument instance.
-        """
-        if getattr(plone_article, "portal_type", None) != "Article":
-            raise ValueError("Provided object is not an Article")
-
-        article = Article.from_plone(plone_article)
-        return cls(article=article)
 
     @staticmethod
     def _file_exists(file_path: str) -> bool:

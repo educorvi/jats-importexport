@@ -58,34 +58,3 @@ class Section(GenericSection):
             content_raw=content_raw,
             sections=sections,
         )
-
-    @classmethod
-    def from_plone(cls, plone_section: Any) -> Section:
-        """Construct a Section from a Plone Section object by traversing subsections.
-
-        Args:
-            plone_section: A Plone Section object.
-
-        Returns:
-            A Section instance.
-        """
-        if getattr(plone_section, "portal_type", None) != "Section":
-            raise ValueError("Provided object is not a Section")
-        sec_type = getattr(plone_section, "sec_type", None)
-        label = getattr(plone_section, "label", None)
-        title = getattr(plone_section, "title", None)
-        label_title_raw = getattr(plone_section, "label_title_raw", "")
-        content_raw = getattr(plone_section, "content_raw", None)
-        sections = []
-        for sec in plone_section.restrictedTraverse("contentlisting")():
-            sec = sec.getObject()
-            if getattr(sec, "portal_type", None) == "Section":
-                sections.append(cls.from_plone(sec))
-        return cls(
-            sec_type=sec_type,
-            label=label,
-            title=title,
-            label_title_raw=label_title_raw,
-            content_raw=content_raw,
-            sections=sections,
-        )

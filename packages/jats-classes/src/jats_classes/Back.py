@@ -36,22 +36,3 @@ class Back:
             for app_group in element.findall("app-group")
         ]
         return cls(appendix_groups=appendix_groups)
-
-    @classmethod
-    def from_plone(cls, plone_back: Any) -> Back:
-        """Construct a Back instance from a Plone Back object.
-
-        Args:
-            plone_back: A Plone Back object.
-
-        Returns:
-            A Back instance.
-        """
-        if getattr(plone_back, "portal_type", None) != "Back":
-            raise ValueError("Provided object is not a Back")
-        appendix_groups = []
-        for app_group in plone_back.restrictedTraverse("contentlisting")():
-            app_group = app_group.getObject()
-            if getattr(app_group, "portal_type", None) == "AppendixGroup":
-                appendix_groups.append(AppendixGroup.from_plone(app_group))
-        return cls(appendix_groups=appendix_groups)

@@ -59,34 +59,3 @@ class Appendix(GenericSection):
             content_raw=content_raw,
             sections=sections,
         )
-
-    @classmethod
-    def from_plone(cls, plone_appendix: Any) -> Appendix:
-        """Construct an Appendix from a Plone Appendix object by traversing subsections.
-
-        Args:
-            plone_appendix: A Plone Appendix object.
-
-        Returns:
-            An Appendix instance.
-        """
-        if getattr(plone_appendix, "portal_type", None) != "Appendix":
-            raise ValueError("Provided object is not an Appendix")
-        app_type = getattr(plone_appendix, "sec_type", None)
-        label = getattr(plone_appendix, "label", None)
-        title = getattr(plone_appendix, "title", None)
-        label_title_raw = getattr(plone_appendix, "label_title_raw", "")
-        content_raw = getattr(plone_appendix, "content_raw", None)
-        sections = []
-        for sec in plone_appendix.restrictedTraverse("contentlisting")():
-            sec = sec.getObject()
-            if getattr(sec, "portal_type", None) == "Section":
-                sections.append(Section.from_plone(sec))
-        return cls(
-            sec_type=app_type,
-            label=label,
-            title=title,
-            label_title_raw=label_title_raw,
-            content_raw=content_raw,
-            sections=sections,
-        )

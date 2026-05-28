@@ -33,21 +33,6 @@ class Front:
         return cls(content_raw=content_raw)
 
     @classmethod
-    def from_plone(cls, plone_front: Any) -> Front:
-        """Construct a Front instance from a Plone Front object.
-
-        Args:
-            plone_front: Plone Front object.
-
-        Returns:
-            A Front instance.
-        """
-        if getattr(plone_front, "portal_type", None) != "Front":
-            raise ValueError("Provided object is not a Front")
-        content_raw = getattr(plone_front, "content_raw", None)
-        return cls(content_raw=content_raw)
-
-    @classmethod
     def _get_raw_content(cls, front: etree._Element) -> str | None:
         """Extract internal XML markup string from the JATS <front> node."""
         result = ""
