@@ -37,8 +37,8 @@ with open("figure.png", "rb") as f:
 The `jats-plone` command provides a quick way to interact with a Plone instance:
 
 ```
-jats-plone upload-file <file> [--container PATH]
-jats-plone save-document <xml> <path> [--xsd SCHEMA]
+jats-plone upload-file <file> [--container CONTAINER]
+jats-plone save-document <xml> <container> [--xsd SCHEMA]
 jats-plone get-document <path>
 ```
 

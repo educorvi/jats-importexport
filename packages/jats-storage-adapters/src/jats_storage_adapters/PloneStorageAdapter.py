@@ -279,6 +279,7 @@ class PloneStorageAdapter(StorageAdapter):
                 "content_raw": app_group.content_raw,
             },
             auth=self.auth,
+            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -345,6 +346,8 @@ class PloneStorageAdapter(StorageAdapter):
             )
             if response.status_code == 200:
                 continue
+            if response.status_code != 404:
+                response.raise_for_status()
 
             parent_url = (
                 f"{self.base_url}/{current_path.rsplit('/', 1)[0]}"

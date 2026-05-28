@@ -25,7 +25,7 @@ def cmd_save_document(args):
 
     document = JATSDocument.from_xml(xml_content, args.xsd)
     adapter = PloneStorageAdapter()
-    url = adapter.save_jats_document(document, args.path)
+    url = adapter.save_jats_document(document, args.container)
     print(f"Saved to: {url}")
 
 
@@ -57,8 +57,8 @@ def main():
     upload_parser.add_argument("file", help="Path to the local file to upload")
     upload_parser.add_argument(
         "--container",
-        default=None,
-        help="Target container path in Plone (e.g. 'vol1/issue2')",
+        default="",
+        help="Target container path in Plone (e.g. 'vol1/issue2'). Defaults to the Plone root.",
     )
 
     # save-document
@@ -67,8 +67,8 @@ def main():
     )
     save_parser.add_argument("xml", help="Path to the JATS XML file")
     save_parser.add_argument(
-        "path",
-        help="Target path in Plone (e.g. 'vol1/issue2/article')",
+        "container",
+        help="Target container path in Plone (e.g. 'vol1/issue2')",
     )
     save_parser.add_argument(
         "--xsd",

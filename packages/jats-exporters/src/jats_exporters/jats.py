@@ -1,6 +1,6 @@
 """JATS XML exporter implementation.
 
-Serializes domestic JATS class models (Article, Front, Body, Back, etc.) back into
+Serializes domain JATS class models (Article, Front, Body, Back, etc.) back into
 valid XML format adhering to JATS schema requirements.
 """
 
