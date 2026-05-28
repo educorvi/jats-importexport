@@ -4,7 +4,7 @@ from typing import Any
 
 from lxml import etree
 
-from .Section import Section
+from .section import Section
 
 
 class Body:

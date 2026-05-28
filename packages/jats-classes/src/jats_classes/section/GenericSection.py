@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import cast
 
 from lxml import etree
 
 
 class GenericSection:
+    sections: Sequence[GenericSection]
     sec_type: str | None
     label: str | None
     title: str | None

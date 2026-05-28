@@ -4,7 +4,7 @@ from typing import Any
 
 from lxml import etree
 
-from .Section import Appendix, GenericSection
+from .section import Appendix, GenericSection
 
 
 class AppendixGroup(GenericSection):

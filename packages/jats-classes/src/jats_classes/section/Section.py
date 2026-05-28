@@ -5,11 +5,9 @@ from typing import Any
 from lxml import etree
 
 from .GenericSection import GenericSection
-from .Section import Section
 
 
-class Appendix(GenericSection):
-    sections: list[Section]
+class Section(GenericSection):
 
     def __init__(
         self,
@@ -30,15 +28,15 @@ class Appendix(GenericSection):
         self.sections = sections
 
     @classmethod
-    def from_xml_element(cls, app: etree._Element) -> Appendix:
-        app_type = app.attrib.get("app-type")
-        label, title, label_title_raw = cls._get_label_and_title(app)
-        content_raw = cls._get_raw_content(app)
+    def from_xml_element(cls, section: etree._Element) -> Section:
+        sec_type = section.attrib.get("sec-type")
+        label, title, label_title_raw = cls._get_label_and_title(section)
+        content_raw = cls._get_raw_content(section)
         sections = [
-            Section.from_xml_element(sec_elem) for sec_elem in app.findall("sec")
+            cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")
         ]
         return cls(
-            sec_type=app_type,
+            sec_type=sec_type,
             label=label,
             title=title,
             label_title_raw=label_title_raw,
@@ -47,21 +45,21 @@ class Appendix(GenericSection):
         )
 
     @classmethod
-    def from_plone(cls, plone_appendix: Any) -> Appendix:
-        if getattr(plone_appendix, "portal_type", None) != "Appendix":
-            raise ValueError("Provided object is not an Appendix")
-        app_type = getattr(plone_appendix, "sec_type", None)
-        label = getattr(plone_appendix, "label", None)
-        title = getattr(plone_appendix, "title", None)
-        label_title_raw = getattr(plone_appendix, "label_title_raw", "")
-        content_raw = getattr(plone_appendix, "content_raw", None)
+    def from_plone(cls, plone_section: Any) -> Section:
+        if getattr(plone_section, "portal_type", None) != "Section":
+            raise ValueError("Provided object is not a Section")
+        sec_type = getattr(plone_section, "sec_type", None)
+        label = getattr(plone_section, "label", None)
+        title = getattr(plone_section, "title", None)
+        label_title_raw = getattr(plone_section, "label_title_raw", "")
+        content_raw = getattr(plone_section, "content_raw", None)
         sections = []
-        for sec in plone_appendix.restrictedTraverse("contentlisting")():
+        for sec in plone_section.restrictedTraverse("contentlisting")():
             sec = sec.getObject()
             if getattr(sec, "portal_type", None) == "Section":
-                sections.append(Section.from_plone(sec))
+                sections.append(cls.from_plone(sec))
         return cls(
-            sec_type=app_type,
+            sec_type=sec_type,
             label=label,
             title=title,
             label_title_raw=label_title_raw,
