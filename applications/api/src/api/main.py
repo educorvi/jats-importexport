@@ -19,7 +19,7 @@ from .models import (
     JatsDocumentResponse,
     UploadFileResponse,
 )
-from .services import jats_upload
+from .services.upload import upload_zip
 from .services.export import ReturnType, jats_export
 
 
@@ -56,7 +56,7 @@ def create_app() -> FastAPI:
         description="This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend.",
     )
     async def upload(zip_file: UploadFile = File(...)):
-        return await jats_upload.upload(zip_file)
+        return await upload_zip(zip_file)
 
     # More endpoints can be added here. If we have to add more endpoints, we should use routers
 

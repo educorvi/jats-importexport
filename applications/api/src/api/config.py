@@ -12,4 +12,6 @@ class APIConfig:
 
 class StorageConfig:
     STORAGE_ADAPTER: str = os.environ.get("STORAGE_ADAPTER", "plone")
-    CONTAINER: str | None = os.environ.get("STORAGE_CONTAINER", None)
+    CONTAINER: str = os.environ.get("STORAGE_CONTAINER", "jats-file")
+    MAX_ZIP_FILE_COUNT: int = int(os.environ.get("MAX_ZIP_FILE_COUNT", 10000)) # Maximum number of files allowed in the uploaded ZIP archive
+    MAX_ZIP_UNCOMPRESSED_SIZE: int = int(os.environ.get("MAX_ZIP_UNCOMPRESSED_SIZE", 512 * 1024 * 1024)) # Maximum total uncompressed size of the uploaded ZIP archive (default: 512 MB)
