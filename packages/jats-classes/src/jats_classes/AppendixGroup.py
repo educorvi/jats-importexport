@@ -5,8 +5,6 @@ Represents a JATS <app-group> container wrapping multiple Appendix sections.
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml import etree
 
 from .section import Appendix, GenericSection

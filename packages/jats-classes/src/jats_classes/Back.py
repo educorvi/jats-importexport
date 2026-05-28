@@ -5,8 +5,6 @@ Defines the structure of a JATS <back> element containing appendix groups.
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml import etree
 
 from .AppendixGroup import AppendixGroup

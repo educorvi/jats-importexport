@@ -5,8 +5,6 @@ Defines the structure of a complete JATS Article composed of Front, Body, and Ba
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml import etree
 
 from .Back import Back

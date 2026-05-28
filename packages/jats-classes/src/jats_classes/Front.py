@@ -5,8 +5,6 @@ Represents article front-matter metadata, publisher, author, and journal info.
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml import etree
 
 

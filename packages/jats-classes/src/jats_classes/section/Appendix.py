@@ -5,8 +5,6 @@ Defines a JATS <app> (Appendix) element and its parser/converter logic.
 
 from __future__ import annotations
 
-from typing import Any
-
 from lxml import etree
 
 from .GenericSection import GenericSection
