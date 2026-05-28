@@ -1,7 +1,6 @@
 """Plone Storage Adapter implementation.
 
-Connects to a live Plone CMS instance via its REST API to perform file uploads,
-fetch JATS content, parse it into JATSDocument models, and serialize models back to Plone.
+Connects to a live Plone CMS REST API to manage JATS documents and files.
 """
 
 import base64
@@ -10,7 +9,6 @@ import os
 from typing import BinaryIO
 
 import httpx
-
 from jats_classes import (
     Appendix,
     AppendixGroup,
@@ -39,7 +37,7 @@ class PloneStorageAdapter(StorageAdapter):
     auth: tuple[str, str]
 
     def __init__(self):
-        """Initialize the storage adapter by loading credentials from the environment."""
+        """Initialize storage adapter loading credentials from environment."""
         base_url = os.environ.get("PLONE_BASE_URL")
         if base_url is None:
             raise ValueError("PLONE_BASE_URL environment variable is not set")
@@ -111,7 +109,7 @@ class PloneStorageAdapter(StorageAdapter):
         return Front(content_raw=data.get("content_raw"))
 
     def __fetch_section(self, url: str) -> Section:
-        """Fetch and reconstruct a Section and its subsections from Plone REST endpoints."""
+        """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
         data = self.__get_json(url)
         sections = [
             self.__fetch_section(item["@id"])
@@ -128,7 +126,7 @@ class PloneStorageAdapter(StorageAdapter):
         )
 
     def __fetch_appendix(self, url: str) -> Appendix:
-        """Fetch and reconstruct an Appendix and its subsections from Plone REST endpoints."""
+        """Fetch and reconstruct an Appendix and subsections from Plone."""
         data = self.__get_json(url)
         sections = [
             self.__fetch_section(item["@id"])
@@ -162,7 +160,7 @@ class PloneStorageAdapter(StorageAdapter):
         )
 
     def __fetch_body(self, url: str) -> Body:
-        """Fetch and reconstruct the Body node and its sections from Plone REST endpoints."""
+        """Fetch and reconstruct the Body node and its sections from Plone."""
         data = self.__get_json(url)
         sections = [
             self.__fetch_section(item["@id"])
@@ -172,7 +170,7 @@ class PloneStorageAdapter(StorageAdapter):
         return Body(sections=sections)
 
     def __fetch_back(self, url: str) -> Back:
-        """Fetch and reconstruct the Back node and its appendix groups from Plone REST endpoints."""
+        """Fetch and reconstruct the Back node and its appendix groups from Plone."""
         data = self.__get_json(url)
         appendix_groups = [
             self.__fetch_appendix_group(item["@id"])
@@ -182,7 +180,7 @@ class PloneStorageAdapter(StorageAdapter):
         return Back(appendix_groups=appendix_groups)
 
     def __fetch_article(self, url: str) -> Article:
-        """Fetch and build an Article node with Front, Body, and Back children from Plone."""
+        """Fetch and build an Article node with Front, Body, and Back from Plone."""
         data = self.__get_json(url)
         front = body = back = None
         for item in data.get("items", []):
@@ -225,7 +223,7 @@ class PloneStorageAdapter(StorageAdapter):
         return response.json().get("@id")
 
     def __create_section(self, section: GenericSection, container_url: str) -> str:
-        """Recursively create a Section/Appendix node structure inside a Plone container."""
+        """Recursively create a Section/Appendix node structure in a Plone container."""
         portal_type: str
         if isinstance(section, Section):
             portal_type = "Section"
@@ -267,8 +265,10 @@ class PloneStorageAdapter(StorageAdapter):
             self.__create_section(section, response_url)
         return response_url
 
-    def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
-        """Create an AppendixGroup node inside a Plone Back node and upload its sections."""
+    def __create_appendix_group(
+        self, app_group: AppendixGroup, container_url: str
+    ) -> str:
+        """Create an AppendixGroup node inside Plone Back and upload sections."""
         response = httpx.post(
             container_url,
             json={
@@ -304,7 +304,7 @@ class PloneStorageAdapter(StorageAdapter):
         return response_url
 
     def __create_article(self, article: Article, container: str) -> str:
-        """Create an Article root node and its Front, Body, and Back children in Plone."""
+        """Create an Article root node and Front, Body, Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
         response = httpx.post(
             url,

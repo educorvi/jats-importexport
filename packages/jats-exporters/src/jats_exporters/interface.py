@@ -1,3 +1,9 @@
+"""Interface definitions for JATS document exporters.
+
+Defines the abstract base Exporter class that all format-specific
+exporters must inherit from and implement.
+"""
+
 import abc
 
 from jats_classes import JATSDocument

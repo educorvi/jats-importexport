@@ -5,6 +5,7 @@ import sys
 
 
 def cmd_upload_file(args):
+    """Execute the upload-file subcommand to post a local binary to Plone."""
     from .PloneStorageAdapter import PloneStorageAdapter
 
     adapter = PloneStorageAdapter()
@@ -14,10 +15,12 @@ def cmd_upload_file(args):
 
 
 def cmd_save_document(args):
+    """Execute the save-document subcommand to serialize a local JATS XML to Plone."""
     from jats_classes import JATSDocument
+
     from .PloneStorageAdapter import PloneStorageAdapter
 
-    with open(args.xml, "r", encoding="utf-8") as f:
+    with open(args.xml, encoding="utf-8") as f:
         xml_content = f.read()
 
     document = JATSDocument.from_xml(xml_content, args.xsd)
@@ -27,6 +30,7 @@ def cmd_save_document(args):
 
 
 def cmd_get_document(args):
+    """Execute the get-document subcommand to fetch article structure from Plone."""
     from .PloneStorageAdapter import PloneStorageAdapter
 
     adapter = PloneStorageAdapter()
@@ -35,6 +39,7 @@ def cmd_get_document(args):
 
 
 def main():
+    """Configure argparse and dispatch to CLI subcommand execution functions."""
     parser = argparse.ArgumentParser(
         prog="jats-plone",
         description="Test the PloneStorageAdapter against a Plone instance.\n\n"
@@ -61,11 +66,21 @@ def main():
         "save-document", help="Parse a JATS XML file and save it to Plone"
     )
     save_parser.add_argument("xml", help="Path to the JATS XML file")
-    save_parser.add_argument("path", help="Target path in Plone (e.g. 'vol1/issue2/article')")
-    save_parser.add_argument("--xsd", default=None, help="Path to XSD schema for validation")
+    save_parser.add_argument(
+        "path",
+        help="Target path in Plone (e.g. 'vol1/issue2/article')",
+    )
+    save_parser.add_argument(
+        "--xsd",
+        default=None,
+        help="Path to XSD schema for validation",
+    )
 
     # get-document
-    get_parser = subparsers.add_parser("get-document", help="Retrieve a JATS document from Plone")
+    get_parser = subparsers.add_parser(
+        "get-document",
+        help="Retrieve a JATS document from Plone",
+    )
     get_parser.add_argument("path", help="Path of the document in Plone")
 
     args = parser.parse_args()

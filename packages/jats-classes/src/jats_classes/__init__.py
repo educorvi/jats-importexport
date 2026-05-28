@@ -1,3 +1,8 @@
+"""JATS Classes package.
+
+Contains domain models and parser/converter logic for JATS XML entities.
+"""
+
 from .AppendixGroup import AppendixGroup
 from .Article import Article
 from .Back import Back

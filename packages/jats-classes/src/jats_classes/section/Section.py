@@ -1,3 +1,8 @@
+"""JATS Section model.
+
+Defines a basic JATS <sec> (Section) element and its parser/converter logic.
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -8,6 +13,7 @@ from .GenericSection import GenericSection
 
 
 class Section(GenericSection):
+    """Represents a basic JATS <sec> element which can recursively nest subsections."""
 
     def __init__(
         self,
@@ -18,6 +24,7 @@ class Section(GenericSection):
         content_raw: str | None,
         sections: list[Section],
     ):
+        """Initialize Section with type, title, label, contents, and nested sections."""
         super().__init__(
             sec_type=sec_type,
             label=label,
@@ -29,6 +36,14 @@ class Section(GenericSection):
 
     @classmethod
     def from_xml_element(cls, section: etree._Element) -> Section:
+        """Construct a Section from an lxml element representing a JATS <sec> tag.
+
+        Args:
+            section: lxml _Element node representing the <sec> tag.
+
+        Returns:
+            A Section instance.
+        """
         sec_type = section.attrib.get("sec-type")
         label, title, label_title_raw = cls._get_label_and_title(section)
         content_raw = cls._get_raw_content(section)
@@ -46,6 +61,14 @@ class Section(GenericSection):
 
     @classmethod
     def from_plone(cls, plone_section: Any) -> Section:
+        """Construct a Section from a Plone Section object by traversing subsections.
+
+        Args:
+            plone_section: A Plone Section object.
+
+        Returns:
+            A Section instance.
+        """
         if getattr(plone_section, "portal_type", None) != "Section":
             raise ValueError("Provided object is not a Section")
         sec_type = getattr(plone_section, "sec_type", None)
