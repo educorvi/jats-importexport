@@ -23,12 +23,38 @@ CONTAINER = StorageConfig.CONTAINER
 STORAGE_ADAPTER = StorageConfig.STORAGE_ADAPTER
 
 
-async def upload_zip(uploaded_file: UploadFile = File(...)):
-    # Initialize the storage adapter
+async def upload_xml(uploaded_file: UploadFile = File(...)):
+    adapter_instance = _get_adapter_instance()
+
     try:
-        adapter_instance = AvailableStorageAdapters.create_instance_by_name(STORAGE_ADAPTER)
-    except ValueError:
-        raise HTTPException(status_code=500, detail="Could not connect to the storage adapter.")
+        # Check file size
+        uploaded_file.file.seek(0, 2)
+        file_size = uploaded_file.file.tell()
+        if file_size > MAX_ZIP_UNCOMPRESSED_SIZE:
+            raise HTTPException(status_code=413, detail="Uploaded file is too large.")
+        uploaded_file.file.seek(0)
+
+        parser = etree.XMLParser(resolve_entities=False, no_network=True)
+        xml_tree = etree.parse(uploaded_file.file, parser=parser)
+
+        document = _create_JATSDocument_from_xml_tree(xml_tree)
+
+        url = _save_jats_document(adapter_instance, document)
+
+        return UploadFileResponse(url=url)
+
+    except HTTPException:
+        raise
+    except etree.XMLSyntaxError as e:
+        raise HTTPException(status_code=400, detail=f"Uploaded XML is malformed: {e}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
+    finally:
+        await uploaded_file.close()
+
+
+async def upload_zip(uploaded_file: UploadFile = File(...)):
+    adapter_instance = _get_adapter_instance()
 
     try:
         # Check if file is a ZIP
@@ -47,25 +73,13 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
             parser = etree.XMLParser(resolve_entities=False, no_network=True)
             xml_tree = etree.parse(str(xml_file), parser=parser)
 
-            original_xml_content = etree.tostring(xml_tree.getroot(), encoding="unicode")
-            try:
-                JATSDocument.from_xml(original_xml_content, xsd_path=None)
-            except Exception as e:
-                raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
+            _create_JATSDocument_from_xml_tree(xml_tree)
 
-            if error := _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance):
-                return error
+            _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance)
 
-            modified_xml_content = etree.tostring(xml_tree.getroot(), encoding="unicode")
-            try:
-                modified_document = JATSDocument.from_xml(modified_xml_content, xsd_path=None)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Modified JATS XML is invalid: {e}")
+            modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
 
-            try:
-                url = adapter_instance.save_jats_document(modified_document, CONTAINER)
-            except Exception:
-                raise HTTPException(status_code=500, detail="Could not save the JATS document to the storage adapter.")
+            url = _save_jats_document(adapter_instance, modified_document)
 
             return UploadFileResponse(url=url)
 
@@ -80,6 +94,31 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
     finally:
         await uploaded_file.close()
 
+
+# General helper functions for file processing
+
+def _get_adapter_instance() -> StorageAdapter:
+    try:
+        return AvailableStorageAdapters.create_instance_by_name(STORAGE_ADAPTER)
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Could not connect to the storage adapter.")
+
+
+def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JATSDocument:
+    xml_content = etree.tostring(xml_tree.getroot(), encoding="unicode")
+    try:
+        return JATSDocument.from_xml(xml_content, xsd_path=None)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
+
+def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument) -> str:
+    try:
+        return adapter_instance.save_jats_document(document, CONTAINER)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Could not save the JATS document to the storage adapter.")
+
+
+# Helper functions for ZIP processing and XML reference handling
 
 def _is_path_within(parent: Path, child: Path) -> bool:
     """Check if the child path is within the parent directory."""
