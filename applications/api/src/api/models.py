@@ -28,3 +28,6 @@ class HTTP500InternalServerError(BaseModel):
 
 class UploadFileResponse(BaseModel):
     url: str = Field(description="The URL of the uploaded file", examples=["http://example.com/files/uploaded_file"])
+
+class JatsDocumentResponse(BaseModel):
+    jats: str = Field(description="The JATS XML document")

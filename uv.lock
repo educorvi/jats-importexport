@@ -48,9 +48,12 @@ wheels = [
 [[package]]
 name = "api"
 version = "0.1.0"
-source = { virtual = "applications/api" }
+source = { editable = "applications/api" }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
+    { name = "jats-classes" },
+    { name = "jats-exporters" },
+    { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
@@ -60,7 +63,12 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" }]
+requires-dist = [
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
+    { name = "jats-classes", editable = "packages/jats-classes" },
+    { name = "jats-exporters", editable = "packages/jats-exporters" },
+    { name = "uvicorn", specifier = ">=0.48.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
