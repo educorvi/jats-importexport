@@ -19,8 +19,9 @@ from .models import (
     JatsDocumentResponse,
     UploadFileResponse,
 )
-from .services.upload import upload_zip as upload_zip_service, upload_xml as upload_xml_service
 from .services.export import ReturnType, jats_export
+from .services.upload import upload_xml as upload_xml_service
+from .services.upload import upload_zip as upload_zip_service
 
 
 def create_app() -> FastAPI:
@@ -53,7 +54,8 @@ def create_app() -> FastAPI:
             500: {"model": HTTP500InternalServerError},
         },
         summary="Upload a JATS Document (ZIP-file) to the storage",
-        description="This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend.",
+        description=("This endpoint accepts a ZIP file containing a JATS document (XML file)"
+                     " and optional referenced files and uploads it to the storage backend."),
     )
     async def upload_zip(zip_file: UploadFile = File(...)):
         return await upload_zip_service(zip_file)
@@ -67,7 +69,10 @@ def create_app() -> FastAPI:
             500: {"model": HTTP500InternalServerError},
         },
         summary="Upload a JATS Document (XML) to the storage",
-        description="This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references.",
+        description=("This endpoint accepts a JATS document as an XML file upload and uploads it to the"
+                     " storage backend."
+                     " Note that this endpoint does not support uploading referenced files, so it should"
+                     " only be used for simple JATS documents without external file references."),
     )
     async def upload_xml(xml_file: UploadFile = File(...)):
         return await upload_xml_service(xml_file)

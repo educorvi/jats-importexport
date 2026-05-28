@@ -1,20 +1,18 @@
-from pathlib import Path
 import shutil
 import stat
 import tempfile
+import zipfile
+from pathlib import Path
 from typing import Any, BinaryIO
 from urllib.parse import unquote, urlparse
-import zipfile
 
 from fastapi import File, HTTPException, UploadFile
-from lxml import etree
-
 from jats_classes import JATSDocument
 from jats_storage_adapters.interface import AvailableStorageAdapters, StorageAdapter
+from lxml import etree
 
 from ..config import StorageConfig
 from ..models import UploadFileResponse
-
 
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
@@ -170,7 +168,8 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
             relative_path = Path(member.filename)
             target_path = (target_root / relative_path).resolve()
             if not _is_path_within(target_root, target_path):
-                raise HTTPException(status_code=400, detail="ZIP archive contains invalid file paths that escape the target directory.")
+                raise HTTPException(status_code=400,
+                                    detail="ZIP archive contains invalid file paths that escape the target directory.")
 
             if member.is_dir():
                 target_path.mkdir(parents=True, exist_ok=True)
@@ -204,9 +203,13 @@ def _find_xml_file(extraction_root: Path) -> Path:
     return xml_files[0]
 
 
-def _upload_files_and_update_references(xml_tree: etree._ElementTree | Any, xml_file: Path, extraction_root: Path, adapter_instance: StorageAdapter) -> None:
-    """Find all xlink:href attributes in the XML tree, upload the referenced files to the storage adapter, and update the href values to point to the uploaded file URLs.
-    Only local file references that are within the extracted archive directory are processed. External URLs and fragment identifiers are ignored.
+def _upload_files_and_update_references(xml_tree: etree._ElementTree | Any, xml_file: Path,
+                                        extraction_root: Path, adapter_instance: StorageAdapter) -> None:
+    """Find all xlink:href attributes in the XML tree,
+    upload the referenced files to the storage adapter
+    and update the href values to point to the uploaded file URLs.
+    Only local file references that are within the extracted archive directory are processed.
+    External URLs and fragment identifiers are ignored.
     """
     href_attr = f"{{{XLINK_NAMESPACE}}}href"
     uploaded_files: dict[Path, str] = {}
@@ -242,6 +245,7 @@ def _upload_files_and_update_references(xml_tree: etree._ElementTree | Any, xml_
                 with referenced_path.open("rb") as referenced_file:
                     uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, CONTAINER)
             except Exception:
-                raise HTTPException(status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}' to the storage adapter.")
+                raise HTTPException(status_code=500,
+                                    detail=f"Failed to upload referenced file '{referenced_path.name}'.")
 
         element.set(href_attr, uploaded_files[referenced_path])

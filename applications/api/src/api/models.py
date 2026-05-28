@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 
-
 # HTTP Error Responses
 
 # 400 Bad Request
@@ -9,7 +8,8 @@ class HTTP400BadRequest(BaseModel):
 
 # 404 Not Found
 class HTTP404NotFound(BaseModel):
-    detail: str = Field(default="The requested resource was not found.", examples=["The requested resource was not found."])
+    detail: str = Field(default="The requested resource was not found.",
+                        examples=["The requested resource was not found."])
 
 # 413 Payload Too Large
 class HTTP413PayloadTooLarge(BaseModel):

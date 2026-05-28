@@ -56,7 +56,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-class AvailableStorageAdapters(str, enum.Enum):
+class AvailableStorageAdapters(enum.StrEnum):
     """Enumeration of available storage adapter implementations."""
     PLONE = "plone"
 
@@ -69,7 +69,9 @@ class AvailableStorageAdapters(str, enum.Enum):
 
     @classmethod
     def create_instance_by_name(cls, name: str) -> StorageAdapter:
-        """Create a storage adapter instance based on the adapter name. Throws ValueError if the adapter name is not supported."""
+        """Create a storage adapter instance based on the adapter name.
+        Throws ValueError if the adapter name is not supported.
+        """
         try:
             adapter_enum = cls(name)
             return adapter_enum.create_instance()
