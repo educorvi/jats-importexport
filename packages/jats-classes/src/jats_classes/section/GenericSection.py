@@ -1,11 +1,25 @@
+"""Generic JATS section base class.
+
+Defines properties and helper methods for extraction and representation shared by
+Section and Appendix nodes.
+"""
+
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import cast
 
 from lxml import etree
 
 
 class GenericSection:
+    """Base class for JATS Section and Appendix components.
+
+    Holds common fields such as label, title, section type, and raw markup content,
+    and provides utility methods to extract these elements from raw XML elements.
+    """
+
+    sections: Sequence[GenericSection]
     sec_type: str | None
     label: str | None
     title: str | None
@@ -20,6 +34,7 @@ class GenericSection:
         label_title_raw: str,
         content_raw: str | None,
     ):
+        """Initialize the GenericSection base properties."""
         self.sec_type = sec_type
         self.label = label
         self.title = title
@@ -30,6 +45,7 @@ class GenericSection:
     def _get_label_and_title(
         cls, section: etree._Element
     ) -> tuple[str | None, str | None, str]:
+        """Extract label, title, and raw combined label+title XML string."""
         label_element = section.find("label")
         label_string = (
             etree.tostring(label_element, encoding="unicode")
@@ -49,6 +65,7 @@ class GenericSection:
 
     @classmethod
     def _get_title(cls, title_or_named_content: etree._Element | None) -> str | None:
+        """Recursively resolve textual title content, bypassing <named-content> tags."""
         if title_or_named_content is None:
             return None
         named_content = title_or_named_content.find("named-content")
@@ -59,6 +76,7 @@ class GenericSection:
 
     @classmethod
     def _get_raw_content(cls, section: etree._Element) -> str | None:
+        """Extract inner raw XML content, ignoring label, title, and nested sections."""
         result = ""
         nodes = cast(list[etree._Element | str], section.xpath("./node()"))
         for node in nodes:

@@ -27,3 +27,6 @@ ignore = []
 
 [tool.ty.environment]
 python-version = "3.13"
+
+[tool.uv.sources]
+jats_classes = {workspace = true}
