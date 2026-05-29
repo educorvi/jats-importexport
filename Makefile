@@ -32,7 +32,7 @@ build:
 applications/api/openapi.json: $(shell find applications/api/src -type f)
 	uv run --package api export-openapi applications/api/openapi.json
 
-update-client:
+update-client: applications/api/openapi.json
 	uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties library=httpx --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=hatchling
 
 # Remove build artefacts

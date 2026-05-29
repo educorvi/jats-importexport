@@ -277,7 +277,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JatsDocumentResponse"
+                  "$ref": "#/components/schemas/HtmlDocumentResponse"
                 }
               },
               "text/html": {
@@ -371,6 +371,20 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HtmlDocumentResponse": {
+        "properties": {
+          "html": {
+            "type": "string",
+            "title": "Html",
+            "description": "The HTML document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "html"
+        ],
+        "title": "HtmlDocumentResponse"
       },
       "JatsDocumentResponse": {
         "properties": {

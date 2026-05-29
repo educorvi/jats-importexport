@@ -99,6 +99,7 @@ Class | Method | HTTP request | Description
  - [HTTP415UnsupportedMediaType](docs/HTTP415UnsupportedMediaType.md)
  - [HTTP500InternalServerError](docs/HTTP500InternalServerError.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
+ - [HtmlDocumentResponse](docs/HtmlDocumentResponse.md)
  - [JatsDocumentResponse](docs/JatsDocumentResponse.md)
  - [LocationInner](docs/LocationInner.md)
  - [UploadFileResponse](docs/UploadFileResponse.md)

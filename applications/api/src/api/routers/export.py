@@ -1,3 +1,4 @@
+from api.models import HtmlDocumentResponse
 from fastapi import APIRouter, Request
 
 from api.services.export import get_return_type, html_export
@@ -30,7 +31,7 @@ async def export_jats(request: Request, path: str):
 @router.get(
     "/html",
     operation_id="export_html",
-    response_model=JatsDocumentResponse,
+    response_model=HtmlDocumentResponse,
     responses={200: {"content": {"text/html": {"schema": {"type": "string"}}}}},
 )
 async def export_html(request: Request, path: str):

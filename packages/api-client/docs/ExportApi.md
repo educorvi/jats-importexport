@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **export_html**
-> JatsDocumentResponse export_html(path)
+> HtmlDocumentResponse export_html(path)
 
 Export Html
 
@@ -18,7 +18,7 @@ Export Html
 
 ```python
 import jats_importexport_client
-from jats_importexport_client.models.jats_document_response import JatsDocumentResponse
+from jats_importexport_client.models.html_document_response import HtmlDocumentResponse
 from jats_importexport_client.rest import ApiException
 from pprint import pprint
 
@@ -55,7 +55,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**JatsDocumentResponse**](JatsDocumentResponse.md)
+[**HtmlDocumentResponse**](HtmlDocumentResponse.md)
 
 ### Authorization
 

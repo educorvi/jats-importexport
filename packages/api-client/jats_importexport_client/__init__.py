@@ -35,6 +35,7 @@ __all__ = [
     "HTTP415UnsupportedMediaType",
     "HTTP500InternalServerError",
     "HTTPValidationError",
+    "HtmlDocumentResponse",
     "JatsDocumentResponse",
     "LocationInner",
     "UploadFileResponse",
@@ -65,6 +66,7 @@ from jats_importexport_client.models.http413_payload_too_large import HTTP413Pay
 from jats_importexport_client.models.http415_unsupported_media_type import HTTP415UnsupportedMediaType as HTTP415UnsupportedMediaType
 from jats_importexport_client.models.http500_internal_server_error import HTTP500InternalServerError as HTTP500InternalServerError
 from jats_importexport_client.models.http_validation_error import HTTPValidationError as HTTPValidationError
+from jats_importexport_client.models.html_document_response import HtmlDocumentResponse as HtmlDocumentResponse
 from jats_importexport_client.models.jats_document_response import JatsDocumentResponse as JatsDocumentResponse
 from jats_importexport_client.models.location_inner import LocationInner as LocationInner
 from jats_importexport_client.models.upload_file_response import UploadFileResponse as UploadFileResponse
