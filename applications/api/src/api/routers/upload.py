@@ -10,7 +10,7 @@ from ..models import (
 from ..services.upload import upload_xml as upload_xml_service
 from ..services.upload import upload_zip as upload_zip_service
 
-router = APIRouter(prefix="/upload")
+router = APIRouter(prefix="/upload", tags=["Upload"])
 
 
 @router.post(

@@ -1,3 +1,4 @@
+from api.services.export import html_export
 from typing import Annotated
 
 from fastapi import APIRouter, Header
@@ -6,7 +7,7 @@ from fastapi.responses import Response
 from ..models import JatsDocumentResponse
 from ..services.export import ReturnType, jats_export
 
-router = APIRouter(prefix="/export")
+router = APIRouter(prefix="/export", tags=["Export"])
 
 
 @router.get(
@@ -23,11 +24,16 @@ router = APIRouter(prefix="/export")
         }
     },
 )
-async def export_jats(
-    path: str, accept: Annotated[ReturnType | None, Header()] = None
-):
+async def export_jats(path: str, accept: Annotated[ReturnType | None, Header()] = None):
     return_type = accept or ReturnType.JSON
-    result = jats_export(path, return_type)
-    if return_type == ReturnType.XML:
-        return Response(content=result, media_type="application/xml")
-    return result
+    return jats_export(path, return_type)
+
+
+@router.get(
+    "/html",
+    response_model=JatsDocumentResponse,
+    responses={200: {"content": {"text/html": {"schema": {"type": "string"}}}}},
+)
+async def export_html(path: str, accept: Annotated[ReturnType | None, Header()] = None):
+    return_type = accept or ReturnType.JSON
+    return html_export(path, return_type)

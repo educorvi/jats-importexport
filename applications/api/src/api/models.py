@@ -31,3 +31,6 @@ class UploadFileResponse(BaseModel):
 
 class JatsDocumentResponse(BaseModel):
     jats: str = Field(description="The JATS XML document")
+
+class HtmlDocumentResponse(BaseModel):
+    html: str = Field(description="The HTML document")
