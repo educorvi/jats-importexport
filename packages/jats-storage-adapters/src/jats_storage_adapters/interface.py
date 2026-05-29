@@ -51,7 +51,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             container: The path to the target container in the storage system.
 
         Returns:
-            The URL of the saved file or main container object.
+            The path of the saved file or main container object.
         """
         raise NotImplementedError
 

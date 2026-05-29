@@ -85,7 +85,7 @@ class PloneStorageAdapter(StorageAdapter):
         )
         response.raise_for_status()
 
-        return urlparse(response.json().get("@id", url)).path
+        return response.json().get("@id", url)
 
     def get_jats_document(self, path: str) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
