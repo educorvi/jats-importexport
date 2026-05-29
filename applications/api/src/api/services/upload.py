@@ -11,6 +11,7 @@ from jats_classes import JATSDocument
 from jats_storage_adapters.interface import AvailableStorageAdapters, StorageAdapter
 from lxml import etree
 
+from .common import get_adapter_instance
 from ..config import StorageConfig
 from ..models import UploadFileResponse
 
@@ -18,11 +19,10 @@ XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
 MAX_ZIP_UNCOMPRESSED_SIZE = StorageConfig.MAX_ZIP_UNCOMPRESSED_SIZE
 CONTAINER = StorageConfig.CONTAINER
-STORAGE_ADAPTER = StorageConfig.STORAGE_ADAPTER
 
 
 async def upload_xml(uploaded_file: UploadFile = File(...)):
-    adapter_instance = _get_adapter_instance()
+    adapter_instance = get_adapter_instance()
 
     try:
         # Check file size
@@ -52,7 +52,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...)):
 
 
 async def upload_zip(uploaded_file: UploadFile = File(...)):
-    adapter_instance = _get_adapter_instance()
+    adapter_instance = get_adapter_instance()
 
     try:
         # Check if file is a ZIP
@@ -94,12 +94,6 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
 
 
 # General helper functions for file processing
-
-def _get_adapter_instance() -> StorageAdapter:
-    try:
-        return AvailableStorageAdapters.create_instance_by_name(STORAGE_ADAPTER)
-    except ValueError:
-        raise HTTPException(status_code=500, detail="Could not connect to the storage adapter.")
 
 
 def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JATSDocument:
