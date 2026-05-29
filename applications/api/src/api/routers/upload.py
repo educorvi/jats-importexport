@@ -73,19 +73,19 @@ def _upload_file_from_data_uri(data_uri: str, filename: str) -> UploadFile:
 )
 async def upload_zip(request: Request):
     content_type = request.headers.get("content-type", "")
-    if content_type.startswith("application/json"):
-        body = await request.json()
-        data_uri = body.get("zip_file")
-        if not data_uri:
-            raise HTTPException(status_code=400, detail="Missing 'zip_file' field in JSON body.")
-        zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
-    else:
+    if content_type.startswith("application/xml"):
         form = await request.form()
         zip_file = form.get("zip_file")
         if zip_file is None:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' form field.")
         if not isinstance(zip_file, UploadFile):
             raise HTTPException(status_code=422, detail="Invalid 'zip_file' form field.")
+    else:
+        body = await request.json()
+        data_uri = body.get("zip_file")
+        if not data_uri:
+            raise HTTPException(status_code=422, detail="Missing 'zip_file' field in JSON body.")
+        zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
     return await upload_zip_service(zip_file)
 
 
@@ -112,17 +112,17 @@ async def upload_zip(request: Request):
 )
 async def upload_xml(request: Request):
     content_type = request.headers.get("content-type", "")
-    if content_type.startswith("application/json"):
-        body = await request.json()
-        data_uri = body.get("xml_file")
-        if not data_uri:
-            raise HTTPException(status_code=400, detail="Missing 'xml_file' field in JSON body.")
-        xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
-    else:
+    if content_type.startswith("application/xml"):
         form = await request.form()
         xml_file = form.get("xml_file")
         if xml_file is None:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' form field.")
         if not isinstance(xml_file, UploadFile):
             raise HTTPException(status_code=422, detail="Invalid 'zip_file' form field.")
+    else:
+        body = await request.json()
+        data_uri = body.get("xml_file")
+        if not data_uri:
+            raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
+        xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
     return await upload_xml_service(xml_file)

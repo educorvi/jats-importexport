@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 from pathlib import Path
 
 import uvicorn
@@ -11,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import APIConfig
 from .routers import export, status, upload
 
+logger = logging.getLogger(__name__)
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
