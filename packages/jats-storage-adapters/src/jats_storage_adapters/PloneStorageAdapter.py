@@ -8,6 +8,7 @@ import mimetypes
 import os
 from logging import debug
 from typing import BinaryIO
+from urllib.parse import urlparse
 
 import httpx
 from jats_classes import (
@@ -84,7 +85,7 @@ class PloneStorageAdapter(StorageAdapter):
         )
         response.raise_for_status()
 
-        return response.json().get("@id", url)
+        return urlparse(response.json().get("@id", url)).path
 
     def get_jats_document(self, path: str) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
@@ -192,7 +193,7 @@ class PloneStorageAdapter(StorageAdapter):
         """Serialize and upload a JATSDocument object graph to Plone."""
         self.__create_container(container)
         result_url = self.__create_article(document.article, container)
-        return result_url
+        return urlparse(result_url).path
 
     def __get_container_url(self, container: str) -> str:
         """Build the complete Plone API URL for a container folder."""
