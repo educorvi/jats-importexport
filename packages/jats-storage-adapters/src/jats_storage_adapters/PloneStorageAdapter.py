@@ -196,7 +196,7 @@ class PloneStorageAdapter(StorageAdapter):
         base_path = urlparse(self.base_url).path.rstrip("/")
         result_path = urlparse(result_url).path
         if result_path.lower().startswith(base_path.lower()):
-            return result_path[len(base_path):]
+            return result_path[len(base_path) :]
         return result_path
 
     def __get_container_url(self, container: str) -> str:
