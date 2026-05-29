@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import cast
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from starlette.datastructures import UploadFile as StarletteUploadFile
@@ -87,7 +88,7 @@ async def upload_zip(request: Request):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' field in JSON body.")
         zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
-    return await upload_zip_service(zip_file)
+    return await upload_zip_service(cast(UploadFile, zip_file))
 
 
 @router.post(
@@ -126,4 +127,4 @@ async def upload_xml(request: Request):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
         xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
-    return await upload_xml_service(xml_file)
+    return await upload_xml_service(cast(UploadFile, xml_file))
