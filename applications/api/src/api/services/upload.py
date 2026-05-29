@@ -166,10 +166,12 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
             raise HTTPException(status_code=413, detail="ZIP archive is too large after extraction.")
 
         for member in members:
-            if not member.filename:
+            filename = member.filename
+            if not filename:
                 continue
 
-            member_path = Path(member.filename)
+            normalized_name = filename.replace("\\", "/")
+            member_path = Path(normalized_name)
             if member_path.is_absolute() or ".." in member_path.parts:
                 raise HTTPException(status_code=400, detail="ZIP archive contains invalid file paths.")
 
@@ -178,10 +180,7 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
             if stat.S_ISLNK(mode):
                 raise HTTPException(status_code=400, detail="ZIP archive must not contain symbolic links.")
 
-            if not member.filename:
-                continue
-
-            relative_path = Path(member.filename)
+            relative_path = Path(normalized_name)
             target_path = (target_root / relative_path).resolve()
             if not _is_path_within(target_root, target_path):
                 raise HTTPException(
