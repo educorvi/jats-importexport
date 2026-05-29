@@ -1,0 +1,462 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "JATS Import/Export API",
+    "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/status": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Health Status",
+        "operationId": "get_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/zip": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a JATS Document (ZIP-file) to the storage",
+        "description": "This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`).",
+        "operationId": "upload_zip",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "zip_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "zip_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "zip_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "zip_file"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Content Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/xml": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a JATS Document (XML) to the storage",
+        "description": "This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).",
+        "operationId": "upload_xml",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "xml_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "xml_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "xml_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "xml_file"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/jats": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export Jats",
+        "operationId": "export_jats",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JatsDocumentResponse"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "<article>...</article>"
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/html": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export Html",
+        "operationId": "export_html",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlDocumentResponse"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTP400BadRequest": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Bad request.",
+            "examples": [
+              "Bad request."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP400BadRequest"
+      },
+      "HTTP413PayloadTooLarge": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "The uploaded file is too large.",
+            "examples": [
+              "The uploaded file is too large."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP413PayloadTooLarge"
+      },
+      "HTTP415UnsupportedMediaType": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Unsupported media type.",
+            "examples": [
+              "Unsupported media type."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP415UnsupportedMediaType"
+      },
+      "HTTP500InternalServerError": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "An unexpected error occurred.",
+            "examples": [
+              "An unexpected error occurred."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP500InternalServerError"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HtmlDocumentResponse": {
+        "properties": {
+          "html": {
+            "type": "string",
+            "title": "Html",
+            "description": "The HTML document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "html"
+        ],
+        "title": "HtmlDocumentResponse"
+      },
+      "JatsDocumentResponse": {
+        "properties": {
+          "jats": {
+            "type": "string",
+            "title": "Jats",
+            "description": "The JATS XML document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jats"
+        ],
+        "title": "JatsDocumentResponse"
+      },
+      "UploadFileResponse": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL of the uploaded file",
+            "examples": [
+              "http://example.com/files/uploaded_file"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "UploadFileResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

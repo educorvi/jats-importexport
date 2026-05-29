@@ -5,6 +5,7 @@ and store JATS documents and arbitrary files in a repository backend.
 """
 
 import abc
+import enum
 from typing import BinaryIO
 
 from jats_classes import JATSDocument
@@ -50,6 +51,33 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             container: The path to the target container in the storage system.
 
         Returns:
-            The URL of the saved file or main container object.
+            The path of the saved file or main container object.
         """
         raise NotImplementedError
+
+
+class AvailableStorageAdapters(enum.StrEnum):
+    """Enumeration of available storage adapter implementations."""
+
+    PLONE = "plone"
+
+    def create_instance(self) -> StorageAdapter:
+        """Factory method to create an instance of the storage adapter."""
+        match self:
+            case AvailableStorageAdapters.PLONE:
+                from .PloneStorageAdapter import PloneStorageAdapter
+
+                return PloneStorageAdapter()
+            case _:
+                raise ValueError(f"Storage adapter '{self.value}' is not supported.")
+
+    @classmethod
+    def create_instance_by_name(cls, name: str) -> StorageAdapter:
+        """Create a storage adapter instance based on the adapter name.
+        Throws ValueError if the adapter name is not supported.
+        """
+        try:
+            adapter_enum = cls(name)
+        except ValueError:
+            raise ValueError(f"Storage adapter '{name}' is not supported.")
+        return adapter_enum.create_instance()

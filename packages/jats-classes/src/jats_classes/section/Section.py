@@ -45,9 +45,7 @@ class Section(GenericSection):
         sec_type = section.attrib.get("sec-type")
         label, title, label_title_raw = cls._get_label_and_title(section)
         content_raw = cls._get_raw_content(section)
-        sections = [
-            cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")
-        ]
+        sections = [cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")]
         return cls(
             sec_type=sec_type,
             label=label,

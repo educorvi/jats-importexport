@@ -42,22 +42,12 @@ class GenericSection:
         self.content_raw = content_raw
 
     @classmethod
-    def _get_label_and_title(
-        cls, section: etree._Element
-    ) -> tuple[str | None, str | None, str]:
+    def _get_label_and_title(cls, section: etree._Element) -> tuple[str | None, str | None, str]:
         """Extract label, title, and raw combined label+title XML string."""
         label_element = section.find("label")
-        label_string = (
-            etree.tostring(label_element, encoding="unicode")
-            if label_element is not None
-            else ""
-        )
+        label_string = etree.tostring(label_element, encoding="unicode") if label_element is not None else ""
         title_element = section.find("title")
-        title_string = (
-            etree.tostring(title_element, encoding="unicode")
-            if title_element is not None
-            else ""
-        )
+        title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
         label_title_raw = label_string + title_string
         label = label_element.text if label_element is not None else None
         title = cls._get_title(title_element)

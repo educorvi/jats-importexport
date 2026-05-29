@@ -6,10 +6,28 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.136.3",
+    "uvicorn>=0.48.0",
+    "jats-exporters",
+    "jats-classes"
 ]
+
+[project.scripts]
+start-api = "api.main:start"
+export-openapi = "api.main:export_openapi"
 
 [dependency-groups]
 dev = [
     "ruff>=0.9",
     "ty>=0.0.1",
 ]
+
+[tool.uv.sources]
+jats-classes = {workspace = true}
+jats-exporters = {workspace = true}
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12"]
+build-backend = "uv_build"

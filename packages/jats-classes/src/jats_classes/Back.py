@@ -29,8 +29,5 @@ class Back:
         Returns:
             A Back instance.
         """
-        appendix_groups = [
-            AppendixGroup.from_xml_element(app_group)
-            for app_group in element.findall("app-group")
-        ]
+        appendix_groups = [AppendixGroup.from_xml_element(app_group) for app_group in element.findall("app-group")]
         return cls(appendix_groups=appendix_groups)

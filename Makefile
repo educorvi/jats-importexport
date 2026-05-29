@@ -1,8 +1,8 @@
-.PHONY: install lint format format-check typecheck build clean
+.PHONY: install lint lint-fix format format-check typecheck test build clean
 
 # Install all workspace dependencies
 install:
-	uv sync --all-packages
+	uv sync --all-packages --all-groups
 
 # Lint with ruff
 lint:
@@ -24,9 +24,20 @@ format-check:
 typecheck:
 	uv run ty check
 
+# Run tests in all packages
+test:
+	uv run pytest
+
 # Build all workspace packages
 build:
 	uv build --all-packages
+
+# Export API OpenAPI schema to JSON
+applications/api/openapi.json: $(shell find applications/api/src -type f)
+	uv run --package api export-openapi applications/api/openapi.json
+
+update-client: applications/api/openapi.json
+	uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties library=httpx --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=hatchling
 
 # Remove build artefacts
 clean:
