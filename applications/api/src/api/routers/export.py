@@ -1,11 +1,9 @@
-from typing import Annotated
+from fastapi import APIRouter, Request
 
-from fastapi import APIRouter, Header
-
-from api.services.export import html_export
+from api.services.export import get_return_type, html_export
 
 from ..models import JatsDocumentResponse
-from ..services.export import ReturnType, jats_export
+from ..services.export import jats_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -24,9 +22,8 @@ router = APIRouter(prefix="/export", tags=["Export"])
         }
     },
 )
-async def export_jats(path: str, accept: Annotated[ReturnType | None, Header()] = None):
-    return_type = accept or ReturnType.JSON
-    return jats_export(path, return_type)
+async def export_jats(request: Request, path: str):
+    return jats_export(path, get_return_type(request))
 
 
 @router.get(
@@ -34,6 +31,5 @@ async def export_jats(path: str, accept: Annotated[ReturnType | None, Header()] 
     response_model=JatsDocumentResponse,
     responses={200: {"content": {"text/html": {"schema": {"type": "string"}}}}},
 )
-async def export_html(path: str, accept: Annotated[ReturnType | None, Header()] = None):
-    return_type = accept or ReturnType.JSON
-    return html_export(path, return_type)
+async def export_html(request: Request, path: str):
+    return html_export(path, get_return_type(request))

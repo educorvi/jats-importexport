@@ -1,5 +1,6 @@
 from enum import Enum
 
+from fastapi import Request
 from fastapi.responses import Response
 from jats_exporters import HtmlExporter, JatsExporter
 
@@ -13,6 +14,18 @@ class ReturnType(Enum):
     XML = "application/xml"
     JSON = "application/json"
     HTML = "text/html"
+
+
+def get_return_type(request: Request) -> ReturnType:
+    match request.headers.get("Accept"):
+        case "application/xml":
+            return ReturnType.XML
+        case "application/json":
+            return ReturnType.JSON
+        case "text/html":
+            return ReturnType.HTML
+        case _:
+            return ReturnType.JSON
 
 
 def jats_export(path: str, return_type: ReturnType):

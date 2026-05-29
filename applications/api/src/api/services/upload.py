@@ -1,3 +1,4 @@
+import base64
 import shutil
 import stat
 import tempfile
@@ -91,6 +92,25 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
     finally:
         await uploaded_file.close()
+
+
+# Data URI helper
+
+
+def decode_data_uri(data_uri: str) -> bytes:
+    """Decode a base64-encoded data URI (``data:<mime>;base64,<data>``) and return the raw bytes."""
+    if not data_uri.startswith("data:"):
+        raise HTTPException(status_code=400, detail="Invalid data URI: must start with 'data:'.")
+    try:
+        header, encoded = data_uri.split(",", 1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid data URI format.")
+    if ";base64" not in header:
+        raise HTTPException(status_code=400, detail="Data URI must be base64 encoded.")
+    try:
+        return base64.b64decode(encoded)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Failed to decode base64 data in data URI.")
 
 
 # General helper functions for file processing
