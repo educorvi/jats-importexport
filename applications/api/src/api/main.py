@@ -6,9 +6,10 @@ import logging
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .auth import verify_api_key
 from .config import APIConfig
 from .routers import export, status, upload
 
@@ -17,6 +18,12 @@ logger = logging.getLogger(__name__)
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
+
+    if not APIConfig.API_KEY:
+        logger.warning(
+            "API_KEY is not set — authentication is DISABLED. "
+            "Set the API_KEY environment variable to protect all endpoints."
+        )
 
     app = FastAPI(
         title=APIConfig.API_TITLE,
@@ -32,8 +39,8 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(status.router)
-    app.include_router(upload.router)
-    app.include_router(export.router)
+    app.include_router(upload.router, dependencies=[Depends(verify_api_key)])
+    app.include_router(export.router, dependencies=[Depends(verify_api_key)])
 
     return app
 
