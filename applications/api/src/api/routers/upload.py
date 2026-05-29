@@ -97,6 +97,7 @@ async def upload_zip(request: Request):
     response_model=UploadFileResponse,
     responses={
         400: {"model": HTTP400BadRequest},
+        413: {"model": HTTP413PayloadTooLarge},
         415: {"model": HTTP415UnsupportedMediaType},
         500: {"model": HTTP500InternalServerError},
     },
