@@ -13,6 +13,7 @@ Provides Python classes that map to the core JATS article structure:
 | `Front` | `<front>` (metadata) |
 | `Body` | `<body>` |
 | `Back` | `<back>` |
+| `GenericSection` | Base class for `Section` and `Appendix` |
 | `Section` | `<sec>` |
 | `Appendix` | `<app>` |
 | `AppendixGroup` | `<app-group>` |

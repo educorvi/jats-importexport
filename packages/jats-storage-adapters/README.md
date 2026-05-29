@@ -32,16 +32,6 @@ with open("figure.png", "rb") as f:
     url = adapter.upload_file(f, "vol1/issue2")
 ```
 
-## CLI
-
-The `jats-plone` command provides a quick way to interact with a Plone instance:
-
-```
-jats-plone upload-file <file> [--container CONTAINER]
-jats-plone save-document <xml> <container> [--xsd SCHEMA]
-jats-plone get-document <path>
-```
-
 ## Extending
 
 Implement `StorageAdapter` to support other backends:
