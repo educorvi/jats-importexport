@@ -1,7 +1,8 @@
-"""Entrypoint API application module for jats-importexport.
+"""Entrypoint API application module for jats-importexport."""
 
-Provides a simple CLI startup for verifying the API environment.
-"""
+import argparse
+import json
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
@@ -46,3 +47,25 @@ def start() -> None:
         reload=APIConfig.RELOAD,
         workers=APIConfig.WORKERS,
     )
+
+
+def export_openapi() -> None:
+    """Console script entry point – run with ``uv run export-openapi``."""
+    parser = argparse.ArgumentParser(description="Export the FastAPI OpenAPI schema as JSON.")
+    parser.add_argument(
+        "output",
+        nargs="?",
+        default="openapi.json",
+        help="Output file path for the generated OpenAPI JSON.",
+    )
+    parser.add_argument(
+        "--indent",
+        type=int,
+        default=2,
+        help="JSON indentation to use for the generated schema.",
+    )
+    args = parser.parse_args()
+
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(f"{json.dumps(app.openapi(), indent=args.indent)}\n", encoding="utf-8")

@@ -10,6 +10,7 @@ router = APIRouter(prefix="/export", tags=["Export"])
 
 @router.get(
     "/jats",
+    operation_id="export_jats",
     response_model=JatsDocumentResponse,
     responses={
         200: {
@@ -28,6 +29,7 @@ async def export_jats(request: Request, path: str):
 
 @router.get(
     "/html",
+    operation_id="export_html",
     response_model=JatsDocumentResponse,
     responses={200: {"content": {"text/html": {"schema": {"type": "string"}}}}},
 )

@@ -53,6 +53,7 @@ def _upload_file_from_data_uri(data_uri: str, filename: str) -> UploadFile:
 
 @router.post(
     "/zip",
+    operation_id="upload_zip",
     response_model=UploadFileResponse,
     responses={
         400: {"model": HTTP400BadRequest},
@@ -90,6 +91,7 @@ async def upload_zip(request: Request):
 
 @router.post(
     "/xml",
+    operation_id="upload_xml",
     response_model=UploadFileResponse,
     responses={
         400: {"model": HTTP400BadRequest},

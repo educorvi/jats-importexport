@@ -13,6 +13,7 @@ dependencies = [
 
 [project.scripts]
 start-api = "api.main:start"
+export-openapi = "api.main:export_openapi"
 
 [dependency-groups]
 dev = [
