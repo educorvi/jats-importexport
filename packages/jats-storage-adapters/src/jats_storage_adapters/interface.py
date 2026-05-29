@@ -61,6 +61,7 @@ class AvailableStorageAdapters(enum.StrEnum):
 
     PLONE = "plone"
 
+
 def create_instance(self) -> StorageAdapter:
     """Factory method to create an instance of the storage adapter."""
     match self:
@@ -70,6 +71,7 @@ def create_instance(self) -> StorageAdapter:
             return PloneStorageAdapter()
         case _:
             raise ValueError(f"Storage adapter '{self.value}' is not supported.")
+
     @classmethod
     def create_instance_by_name(cls, name: str) -> StorageAdapter:
         """Create a storage adapter instance based on the adapter name.
