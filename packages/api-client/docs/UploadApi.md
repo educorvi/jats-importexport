@@ -74,6 +74,7 @@ No authorization required
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
 **400** | Bad Request |  -  |
+**413** | Content Too Large |  -  |
 **415** | Unsupported Media Type |  -  |
 **500** | Internal Server Error |  -  |
 
