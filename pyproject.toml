@@ -25,10 +25,22 @@ members = ["packages/*","applications/*"]
 [tool.ruff]
 line-length = 120
 target-version = "py313"
+exclude = [
+    "**/tests/*",
+    "**/test/*",
+    "packages/api-client"
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 ignore = []
+
+[tool.ty.src]
+exclude = [
+    "packages/api-client",
+    "**/tests/*",
+    "**/test/*",
+]
 
 [tool.ty.environment]
 python-version = "3.13"

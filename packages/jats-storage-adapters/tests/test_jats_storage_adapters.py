@@ -1,15 +1,14 @@
-import os
 import io
-import pytest
+import os
+
 import httpx
+import pytest
 from jats_classes import (
-    JATSDocument,
     Article,
-    Front,
-    Body,
     Back,
-    AppendixGroup,
-    Appendix,
+    Body,
+    Front,
+    JATSDocument,
     Section,
 )
 from jats_storage_adapters.interface import AvailableStorageAdapters
@@ -18,6 +17,7 @@ from jats_storage_adapters.PloneStorageAdapter import PloneStorageAdapter
 # ----------------------------------------------------
 # Setup / Teardown env variables for storage adapters
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def clean_env():
@@ -36,6 +36,7 @@ def make_response(status_code=200, json=None, method="GET", url="http://localhos
 # ----------------------------------------------------
 # Tests for PloneStorageAdapter Initialization & Factory
 # ----------------------------------------------------
+
 
 def test_plone_storage_adapter_init_missing_env(clean_env):
     os.environ.clear()
@@ -75,6 +76,7 @@ def test_available_storage_adapters_factory(clean_env):
 # Tests for PloneStorageAdapter Upload File
 # ----------------------------------------------------
 
+
 def test_plone_storage_adapter_upload_file(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
@@ -87,7 +89,7 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
         status_code=201,
         json={"@id": "http://localhost:8080/Plone/jats-assets/image.png"},
         method="POST",
-        url="http://localhost:8080/Plone/jats-assets"
+        url="http://localhost:8080/Plone/jats-assets",
     )
     mock_post = mocker.patch("httpx.post", return_value=mock_response)
 
@@ -134,6 +136,7 @@ def test_plone_storage_adapter_upload_file_default_mimetype(clean_env, mocker):
 # Tests for PloneStorageAdapter get_jats_document (Retrieve)
 # ----------------------------------------------------
 
+
 def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
@@ -144,91 +147,112 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     def mock_get_side_effect(url, *args, **kwargs):
         if url == "http://localhost:8080/Plone/my-doc":
             # Article
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Article",
-                "items": [
-                    {"@type": "Front", "@id": "http://localhost:8080/Plone/my-doc/front", "content_raw": "<article-title>Hello</article-title>"},
-                    {"@type": "Body", "@id": "http://localhost:8080/Plone/my-doc/body"},
-                    {"@type": "Back", "@id": "http://localhost:8080/Plone/my-doc/back"},
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Article",
+                    "items": [
+                        {
+                            "@type": "Front",
+                            "@id": "http://localhost:8080/Plone/my-doc/front",
+                            "content_raw": "<article-title>Hello</article-title>",
+                        },
+                        {"@type": "Body", "@id": "http://localhost:8080/Plone/my-doc/body"},
+                        {"@type": "Back", "@id": "http://localhost:8080/Plone/my-doc/back"},
+                    ],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/body":
             # Body
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Body",
-                "items": [
-                    {"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/body/sec1"}
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Body",
+                    "items": [{"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/body/sec1"}],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/body/sec1":
             # Section 1
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Section",
-                "sec_type": "intro",
-                "label": "1.",
-                "title": "Intro Title",
-                "label_title_raw": "<label>1.</label><title>Intro Title</title>",
-                "content_raw": "<p>Content</p>",
-                "items": [
-                    {"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/body/sec1/sub1"}
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Section",
+                    "sec_type": "intro",
+                    "label": "1.",
+                    "title": "Intro Title",
+                    "label_title_raw": "<label>1.</label><title>Intro Title</title>",
+                    "content_raw": "<p>Content</p>",
+                    "items": [{"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/body/sec1/sub1"}],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/body/sec1/sub1":
             # Subsection
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Section",
-                "sec_type": "subsection",
-                "label": "1.1",
-                "title": "Sub Title",
-                "content_raw": "Sub Content",
-                "items": []
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Section",
+                    "sec_type": "subsection",
+                    "label": "1.1",
+                    "title": "Sub Title",
+                    "content_raw": "Sub Content",
+                    "items": [],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/back":
             # Back
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Back",
-                "items": [
-                    {"@type": "AppendixGroup", "@id": "http://localhost:8080/Plone/my-doc/back/appg1"}
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Back",
+                    "items": [{"@type": "AppendixGroup", "@id": "http://localhost:8080/Plone/my-doc/back/appg1"}],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/back/appg1":
             # Appendix Group
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "AppendixGroup",
-                "title": "App Group",
-                "label": "G1",
-                "content_raw": "Group Content",
-                "items": [
-                    {"@type": "Appendix", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1"}
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "AppendixGroup",
+                    "title": "App Group",
+                    "label": "G1",
+                    "content_raw": "Group Content",
+                    "items": [{"@type": "Appendix", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1"}],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/back/appg1/app1":
             # Appendix
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Appendix",
-                "sec_type": "appendix",
-                "label": "A1",
-                "title": "Appendix 1",
-                "content_raw": "Appendix Content",
-                "items": [
-                    {"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1/appsec1"}
-                ]
-            }, url=url)
+            return make_response(
+                status_code=200,
+                json={
+                    "@id": url,
+                    "@type": "Appendix",
+                    "sec_type": "appendix",
+                    "label": "A1",
+                    "title": "Appendix 1",
+                    "content_raw": "Appendix Content",
+                    "items": [
+                        {"@type": "Section", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1/appsec1"}
+                    ],
+                },
+                url=url,
+            )
         elif url == "http://localhost:8080/Plone/my-doc/back/appg1/app1/appsec1":
             # Section inside Appendix
-            return make_response(status_code=200, json={
-                "@id": url,
-                "@type": "Section",
-                "title": "App Sec Title",
-                "items": []
-            }, url=url)
+            return make_response(
+                status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "items": []}, url=url
+            )
         else:
             return make_response(status_code=404, url=url)
 
@@ -241,20 +265,20 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert isinstance(doc, JATSDocument)
     assert doc.article.front.content_raw == "<article-title>Hello</article-title>"
     assert len(doc.article.body.sections) == 1
-    
+
     sec = doc.article.body.sections[0]
     assert sec.title == "Intro Title"
     assert sec.sec_type == "intro"
     assert len(sec.sections) == 1
-    
+
     sub = sec.sections[0]
     assert sub.title == "Sub Title"
-    
+
     assert len(doc.article.back.appendix_groups) == 1
     app_group = doc.article.back.appendix_groups[0]
     assert app_group.label == "G1"
     assert len(app_group.appendixes) == 1
-    
+
     app = app_group.appendixes[0]
     assert app.title == "Appendix 1"
     assert len(app.sections) == 1
@@ -268,13 +292,15 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
     adapter = PloneStorageAdapter()
 
     # Return incomplete article structure (missing Front/Body/Back)
-    mock_response = make_response(status_code=200, json={
-        "@id": "http://localhost:8080/Plone/my-doc",
-        "@type": "Article",
-        "items": [
-            {"@type": "Front", "@id": "http://localhost/front", "content_raw": "..."}
-        ]
-    }, url="http://localhost:8080/Plone/my-doc")
+    mock_response = make_response(
+        status_code=200,
+        json={
+            "@id": "http://localhost:8080/Plone/my-doc",
+            "@type": "Article",
+            "items": [{"@type": "Front", "@id": "http://localhost/front", "content_raw": "..."}],
+        },
+        url="http://localhost:8080/Plone/my-doc",
+    )
     mocker.patch("httpx.get", return_value=mock_response)
 
     with pytest.raises(ValueError, match="Article must contain Front, Body, and Back"):
@@ -284,6 +310,7 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
 # ----------------------------------------------------
 # Tests for PloneStorageAdapter save_jats_document (Save)
 # ----------------------------------------------------
+
 
 def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
@@ -308,29 +335,21 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     def mock_get_side_effect(url, *args, **kwargs):
         # We need to simulate folder existence check.
         if url == "http://localhost:8080/Plone/jats-file":
-            return res_404(url) # doesn't exist, will be created
+            return res_404(url)  # doesn't exist, will be created
         return res_200(url)
 
     mocker.patch("httpx.get", side_effect=mock_get_side_effect)
     mocker.patch("httpx.post", side_effect=mock_post_side_effect)
 
     # Let's create a minimal JATSDocument to save
-    front = Front(content_raw="<article-meta><title-group><article-title>Save Test</article-title></title-group></article-meta>")
+    front = Front(
+        content_raw="<article-meta><title-group><article-title>Save Test</article-title></title-group></article-meta>"
+    )
     sub_sec = Section(
-        sec_type="sub",
-        label=None,
-        title="Sub",
-        label_title_raw="",
-        content_raw="Subcontent",
-        sections=[]
+        sec_type="sub", label=None, title="Sub", label_title_raw="", content_raw="Subcontent", sections=[]
     )
     body_sec = Section(
-        sec_type="main",
-        label=None,
-        title="Main",
-        label_title_raw="",
-        content_raw="Maincontent",
-        sections=[sub_sec]
+        sec_type="main", label=None, title="Main", label_title_raw="", content_raw="Maincontent", sections=[sub_sec]
     )
     body = Body(sections=[body_sec])
     back = Back(appendix_groups=[])
@@ -354,7 +373,7 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     # Verify section nesting posting URL
     sec_posts = [p for p in created_posts if p[1]["@type"] == "Section"]
     assert len(sec_posts) == 2
-    
+
     sub_sec_url = sec_posts[1][0]
     # Subsection is posted *inside* parent section URL
     assert "main" in sub_sec_url

@@ -1,7 +1,7 @@
 from io import BytesIO
 
-from fastapi import APIRouter, HTTPException, Request
-from starlette.datastructures import UploadFile
+from fastapi import APIRouter, HTTPException, Request, UploadFile
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from ..models import (
     HTTP400BadRequest,
@@ -79,7 +79,7 @@ async def upload_zip(request: Request):
         zip_file = form.get("zip_file")
         if zip_file is None:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' form field.")
-        if not isinstance(zip_file, UploadFile):
+        if not isinstance(zip_file, StarletteUploadFile):
             raise HTTPException(status_code=422, detail="Invalid 'zip_file' form field.")
     else:
         body = await request.json()
@@ -118,7 +118,7 @@ async def upload_xml(request: Request):
         xml_file = form.get("xml_file")
         if xml_file is None:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' form field.")
-        if not isinstance(xml_file, UploadFile):
+        if not isinstance(xml_file, StarletteUploadFile):
             raise HTTPException(status_code=422, detail="Invalid 'xml_file' form field.")
     else:
         body = await request.json()

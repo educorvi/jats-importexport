@@ -1,17 +1,11 @@
+import base64
 import io
 import zipfile
-import base64
-import stat
-import pytest
-from fastapi.testclient import TestClient
-from fastapi import HTTPException
-from lxml import etree
-import jats_storage_adapters.interface
-from jats_classes import JATSDocument, Article, Front, Body, Back
 
+import pytest
 from api.main import app
-from api.services.common import get_adapter_instance
-from api.config import StorageConfig
+from fastapi.testclient import TestClient
+from jats_classes import JATSDocument
 
 client = TestClient(app)
 
@@ -61,6 +55,7 @@ XML_WITH_IMAGE = """<?xml version="1.0" encoding="UTF-8"?>
 # Helper to build in-memory ZIPs
 # ----------------------------------------------------
 
+
 def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: str = "link") -> bytes:
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
@@ -79,6 +74,7 @@ def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: st
 # Mock Storage Adapter
 # ----------------------------------------------------
 
+
 class MockStorageAdapter:
     def __init__(self):
         self.uploaded_files = []
@@ -86,6 +82,7 @@ class MockStorageAdapter:
 
     def upload_file(self, file, container) -> str:
         import os
+
         name = os.path.basename(getattr(file, "name", "file") or "file")
         url = f"http://mockstore/assets/{name}"
         self.uploaded_files.append((name, container, url))
@@ -115,6 +112,7 @@ def mock_adapter(mocker):
 # Tests for Status Endpoint
 # ----------------------------------------------------
 
+
 def test_status_endpoint():
     response = client.get("/status")
     assert response.status_code == 200
@@ -124,6 +122,7 @@ def test_status_endpoint():
 # ----------------------------------------------------
 # Tests for Export Endpoints
 # ----------------------------------------------------
+
 
 def test_export_jats(mock_adapter):
     # Standard JSON accept
@@ -157,6 +156,7 @@ def test_export_html(mock_adapter):
 # Tests for XML Upload Endpoint
 # ----------------------------------------------------
 
+
 def test_upload_xml_multipart_success(mock_adapter):
     file_payload = {"xml_file": ("test.xml", VALID_JATS_XML, "application/xml")}
     response = client.post("/upload/xml", files=file_payload)
@@ -184,7 +184,7 @@ def test_upload_xml_multipart_too_large(mock_adapter, mocker):
 def test_upload_xml_json_data_uri_success(mock_adapter):
     encoded = base64.b64encode(VALID_JATS_XML.encode("utf-8")).decode("ascii")
     data_uri = f"data:application/xml;base64,{encoded}"
-    
+
     response = client.post("/upload/xml", json={"xml_file": data_uri})
     assert response.status_code == 200
     assert response.json()["url"] == "http://mockstore/jats-file/api-test-article"
@@ -205,6 +205,7 @@ def test_upload_xml_json_data_uri_malformed_base64(mock_adapter):
 # ----------------------------------------------------
 # Tests for ZIP Upload Endpoint (Security & Validation)
 # ----------------------------------------------------
+
 
 def test_upload_zip_not_a_zip(mock_adapter):
     # Uploading raw non-zip bytes
@@ -289,15 +290,13 @@ def test_upload_zip_multiple_xml_files(mock_adapter):
 # Success ZIP Upload & Asset Processing Verification
 # ----------------------------------------------------
 
+
 def test_upload_zip_success(mock_adapter):
     # Create valid zip containing XML referencing an image file and the image file itself.
-    files = {
-        "article.xml": XML_WITH_IMAGE,
-        "images/pic.png": b"fake-png-bytes"
-    }
+    files = {"article.xml": XML_WITH_IMAGE, "images/pic.png": b"fake-png-bytes"}
     zip_bytes = make_zip_bytes(files)
     file_payload = {"zip_file": ("test.zip", zip_bytes, "application/zip")}
-    
+
     response = client.post("/upload/zip", files=file_payload)
     assert response.status_code == 200
     assert response.json()["url"] == "http://mockstore/jats-file/image-reference-article"
@@ -312,7 +311,9 @@ def test_upload_zip_success(mock_adapter):
     # Verify that the saved JATSDocument was updated to point to the uploaded image URL!
     saved_doc, container = mock_adapter.saved_docs[0]
     assert isinstance(saved_doc, JATSDocument)
-    
+
     # Check content_raw of the section for updated xlink:href reference modification
     xml_str = saved_doc.article.body.sections[0].content_raw
-    assert 'xlink:href="http://mockstore/assets/pic.png"' in xml_str or 'href="http://mockstore/assets/pic.png"' in xml_str
+    assert (
+        'xlink:href="http://mockstore/assets/pic.png"' in xml_str or 'href="http://mockstore/assets/pic.png"' in xml_str
+    )

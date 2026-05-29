@@ -1,6 +1,6 @@
-from api.models import HtmlDocumentResponse
 from fastapi import APIRouter, Request
 
+from api.models import HtmlDocumentResponse
 from api.services.export import get_return_type, html_export
 
 from ..models import JatsDocumentResponse

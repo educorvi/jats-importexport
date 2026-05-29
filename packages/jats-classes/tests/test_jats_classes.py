@@ -1,18 +1,19 @@
 import os
 import tempfile
+
 import pytest
-from lxml import etree
 from jats_classes import (
-    JATSDocument,
-    Article,
-    Front,
-    Body,
-    Back,
-    AppendixGroup,
     Appendix,
-    Section,
+    AppendixGroup,
+    Article,
+    Back,
+    Body,
+    Front,
     GenericSection,
+    JATSDocument,
+    Section,
 )
+from lxml import etree
 
 # ----------------------------------------------------
 # XML Snippets for testing
@@ -104,6 +105,7 @@ MINIMAL_VALID_XSD = """<?xml version="1.0" encoding="UTF-8"?>
 # Tests for JATSDocument
 # ----------------------------------------------------
 
+
 def test_jats_document_from_xml_valid():
     doc = JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
     assert isinstance(doc, JATSDocument)
@@ -152,6 +154,7 @@ def test_jats_document_xsd_validation():
 # Tests for Front Title Extraction
 # ----------------------------------------------------
 
+
 def test_front_get_title_success():
     doc = JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
     assert doc.article.front.get_title() == "My Test JATS Article"
@@ -184,6 +187,7 @@ def test_front_get_title_raw_content_none():
 # Tests for Body & Sections
 # ----------------------------------------------------
 
+
 def test_body_and_sections_recursive():
     doc = JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
     body = doc.article.body
@@ -213,6 +217,7 @@ def test_body_and_sections_recursive():
 # Tests for Back, AppendixGroups, Appendices
 # ----------------------------------------------------
 
+
 def test_back_appendix_parsing():
     doc = JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
     back = doc.article.back
@@ -224,7 +229,7 @@ def test_back_appendix_parsing():
     assert app_group.sec_type == "appendices"  # maps to content-type attribute
     assert app_group.label == "Appendix Group Label"
     assert app_group.title == "Appendix Group Title"
-    
+
     assert len(app_group.appendixes) == 1
     app = app_group.appendixes[0]
     assert isinstance(app, Appendix)
