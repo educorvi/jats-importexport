@@ -29,7 +29,5 @@ class Body:
         Returns:
             A Body instance.
         """
-        sections = [
-            Section.from_xml_element(sec_elem) for sec_elem in body.findall("sec")
-        ]
+        sections = [Section.from_xml_element(sec_elem) for sec_elem in body.findall("sec")]
         return cls(sections=sections)

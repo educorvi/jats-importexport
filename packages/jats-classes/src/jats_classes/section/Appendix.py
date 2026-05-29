@@ -46,9 +46,7 @@ class Appendix(GenericSection):
         app_type = app.attrib.get("app-type")
         label, title, label_title_raw = cls._get_label_and_title(app)
         content_raw = cls._get_raw_content(app)
-        sections = [
-            Section.from_xml_element(sec_elem) for sec_elem in app.findall("sec")
-        ]
+        sections = [Section.from_xml_element(sec_elem) for sec_elem in app.findall("sec")]
         return cls(
             sec_type=app_type,
             label=label,

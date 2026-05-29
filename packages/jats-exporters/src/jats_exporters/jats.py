@@ -38,11 +38,7 @@ def _wrap_article_jats(jats: str) -> str:
 
 def _get_article_jats(article: Article) -> str:
     """Serialize an entire Article structure to JATS XML."""
-    content = (
-        f"{_get_front_jats(article.front)}"
-        f"{_get_body_jats(article.body)}"
-        f"{_get_back_jats(article.back)}"
-    )
+    content = f"{_get_front_jats(article.front)}{_get_body_jats(article.body)}{_get_back_jats(article.back)}"
     return _wrap_article_jats(content)
 
 
@@ -65,9 +61,7 @@ def _get_back_jats(back: Back) -> str:
 
 def _get_appendix_group_jats(appendix_group: AppendixGroup) -> str:
     """Serialize an AppendixGroup element and its appendices to JATS XML."""
-    appendix_content = "\n".join(
-        map(_get_general_section_jats, appendix_group.appendixes)
-    )
+    appendix_content = "\n".join(map(_get_general_section_jats, appendix_group.appendixes))
     return f"<appendix-group>{appendix_content}</appendix-group>"
 
 
@@ -80,10 +74,7 @@ def _get_general_section_jats(section: GenericSection) -> str:
     else:
         sub_content = ""
     sec_type = f' sec-type="{section.sec_type}"' if section.sec_type else ""
-    return (
-        f"<sec{sec_type}>{section.label_title_raw}\n"
-        f"{section.content_raw or ''}\n{sub_content}</sec>"
-    )
+    return f"<sec{sec_type}>{section.label_title_raw}\n{section.content_raw or ''}\n{sub_content}</sec>"
 
 
 class JatsExporter(Exporter[str]):

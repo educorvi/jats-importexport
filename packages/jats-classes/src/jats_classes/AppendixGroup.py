@@ -47,9 +47,7 @@ class AppendixGroup(GenericSection):
         content_type = app_group.attrib.get("content-type")
         label, title, label_title_raw = cls._get_label_and_title(app_group)
         content_raw = cls._get_raw_content(app_group)
-        appendixes = [
-            Appendix.from_xml_element(app_elem) for app_elem in app_group.findall("app")
-        ]
+        appendixes = [Appendix.from_xml_element(app_elem) for app_elem in app_group.findall("app")]
         return cls(
             sec_type=content_type,
             label=label,

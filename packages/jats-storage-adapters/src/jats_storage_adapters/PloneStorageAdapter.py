@@ -47,9 +47,7 @@ class PloneStorageAdapter(StorageAdapter):
         username = os.environ.get("PLONE_USERNAME")
         password = os.environ.get("PLONE_PASSWORD")
         if username is None or password is None:
-            raise ValueError(
-                "PLONE_USERNAME and PLONE_PASSWORD environment variables must be set"
-            )
+            raise ValueError("PLONE_USERNAME and PLONE_PASSWORD environment variables must be set")
         self.auth = (username, password)
 
         super().__init__()
@@ -113,9 +111,7 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"])
-            for item in data.get("items", [])
-            if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
         ]
         return Section(
             sec_type=data.get("sec_type"),
@@ -130,9 +126,7 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct an Appendix and subsections from Plone."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"])
-            for item in data.get("items", [])
-            if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
         ]
         return Appendix(
             sec_type=data.get("sec_type"),
@@ -147,9 +141,7 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
         data = self.__get_json(url)
         appendixes = [
-            self.__fetch_appendix(item["@id"])
-            for item in data.get("items", [])
-            if item.get("@type") == "Appendix"
+            self.__fetch_appendix(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Appendix"
         ]
         return AppendixGroup(
             sec_type=data.get("sec_type"),
@@ -164,9 +156,7 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct the Body node and its sections from Plone."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"])
-            for item in data.get("items", [])
-            if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
         ]
         return Body(sections=sections)
 
@@ -266,9 +256,7 @@ class PloneStorageAdapter(StorageAdapter):
             self.__create_section(section, response_url)
         return response_url
 
-    def __create_appendix_group(
-        self, app_group: AppendixGroup, container_url: str
-    ) -> str:
+    def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
         """Create an AppendixGroup node inside Plone Back and upload sections."""
         response = httpx.post(
             container_url,
@@ -342,19 +330,13 @@ class PloneStorageAdapter(StorageAdapter):
             current_path = f"{current_path}/{part}" if current_path else part
             url = f"{self.base_url}/{current_path}"
 
-            response = httpx.get(
-                url, auth=self.auth, headers={"Accept": "application/json"}
-            )
+            response = httpx.get(url, auth=self.auth, headers={"Accept": "application/json"})
             if response.status_code == 200:
                 continue
             if response.status_code != 404:
                 response.raise_for_status()
 
-            parent_url = (
-                f"{self.base_url}/{current_path.rsplit('/', 1)[0]}"
-                if "/" in current_path
-                else self.base_url
-            )
+            parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
             response = httpx.post(
                 parent_url,
                 json={"@type": "Folder", "title": part, "id": part},

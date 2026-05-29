@@ -43,9 +43,7 @@ class Article:
         body_element = article.find("body")
         back_element = article.find("back")
         if front_element is None or body_element is None or back_element is None:
-            raise ValueError(
-                "Article element must contain 'front', 'body', and 'back' elements"
-            )
+            raise ValueError("Article element must contain 'front', 'body', and 'back' elements")
         front = Front.from_xml_element(front_element)
         body = Body.from_xml_element(body_element)
         back = Back.from_xml_element(back_element)

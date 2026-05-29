@@ -58,6 +58,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
 
 class AvailableStorageAdapters(enum.StrEnum):
     """Enumeration of available storage adapter implementations."""
+
     PLONE = "plone"
 
     def create_instance(self) -> StorageAdapter:
@@ -65,6 +66,7 @@ class AvailableStorageAdapters(enum.StrEnum):
         match self:
             case AvailableStorageAdapters.PLONE:
                 from .PloneStorageAdapter import PloneStorageAdapter
+
                 return PloneStorageAdapter()
 
     @classmethod

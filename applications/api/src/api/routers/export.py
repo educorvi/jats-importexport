@@ -1,8 +1,8 @@
-from api.services.export import html_export
 from typing import Annotated
 
 from fastapi import APIRouter, Header
-from fastapi.responses import Response
+
+from api.services.export import html_export
 
 from ..models import JatsDocumentResponse
 from ..services.export import ReturnType, jats_export

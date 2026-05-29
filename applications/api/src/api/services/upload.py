@@ -8,12 +8,12 @@ from urllib.parse import unquote, urlparse
 
 from fastapi import File, HTTPException, UploadFile
 from jats_classes import JATSDocument
-from jats_storage_adapters.interface import AvailableStorageAdapters, StorageAdapter
+from jats_storage_adapters.interface import StorageAdapter
 from lxml import etree
 
-from .common import get_adapter_instance
 from ..config import StorageConfig
 from ..models import UploadFileResponse
+from .common import get_adapter_instance
 
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
@@ -103,6 +103,7 @@ def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JA
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
 
+
 def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument) -> str:
     try:
         return adapter_instance.save_jats_document(document, CONTAINER)
@@ -111,6 +112,7 @@ def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument
 
 
 # Helper functions for ZIP processing and XML reference handling
+
 
 def _is_path_within(parent: Path, child: Path) -> bool:
     """Check if the child path is within the parent directory."""
@@ -162,8 +164,9 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
             relative_path = Path(member.filename)
             target_path = (target_root / relative_path).resolve()
             if not _is_path_within(target_root, target_path):
-                raise HTTPException(status_code=400,
-                                    detail="ZIP archive contains invalid file paths that escape the target directory.")
+                raise HTTPException(
+                    status_code=400, detail="ZIP archive contains invalid file paths that escape the target directory."
+                )
 
             if member.is_dir():
                 target_path.mkdir(parents=True, exist_ok=True)
@@ -179,9 +182,7 @@ def _find_xml_file(extraction_root: Path) -> Path:
     """Search for a single XML file within the given directory and its subdirectories.
     Returns the path to the XML file if exactly one is found, or raises an HTTPException if none or multiple are found.
     """
-    top_level_entries = [
-        entry for entry in extraction_root.iterdir()
-    ]
+    top_level_entries = [entry for entry in extraction_root.iterdir()]
     if len(top_level_entries) == 1 and top_level_entries[0].is_dir():
         search_root = top_level_entries[0]
     else:
@@ -197,8 +198,9 @@ def _find_xml_file(extraction_root: Path) -> Path:
     return xml_files[0]
 
 
-def _upload_files_and_update_references(xml_tree: etree._ElementTree | Any, xml_file: Path,
-                                        extraction_root: Path, adapter_instance: StorageAdapter) -> None:
+def _upload_files_and_update_references(
+    xml_tree: etree._ElementTree | Any, xml_file: Path, extraction_root: Path, adapter_instance: StorageAdapter
+) -> None:
     """Find all xlink:href attributes in the XML tree,
     upload the referenced files to the storage adapter
     and update the href values to point to the uploaded file URLs.
@@ -239,7 +241,8 @@ def _upload_files_and_update_references(xml_tree: etree._ElementTree | Any, xml_
                 with referenced_path.open("rb") as referenced_file:
                     uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, CONTAINER)
             except Exception:
-                raise HTTPException(status_code=500,
-                                    detail=f"Failed to upload referenced file '{referenced_path.name}'.")
+                raise HTTPException(
+                    status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}'."
+                )
 
         element.set(href_attr, uploaded_files[referenced_path])

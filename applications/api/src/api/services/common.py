@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from jats_storage_adapters.interface import StorageAdapter, AvailableStorageAdapters
+from jats_storage_adapters.interface import AvailableStorageAdapters, StorageAdapter
 
 from api.config import StorageConfig
 
