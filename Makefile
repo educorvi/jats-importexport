@@ -1,4 +1,4 @@
-.PHONY: install lint lint-fix format format-check typecheck test build clean
+.PHONY: install lint lint-fix format format-check typecheck test build clean build-image push-image
 
 # Install all workspace dependencies
 install:
@@ -44,3 +44,9 @@ clean:
 	find . -type d -name "dist" -exec rm -rf {} +
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
+
+build-image:
+	docker build . -t ghcr.io/educorvi/jats-importexport:latest
+
+push-image: build-image
+	docker push ghcr.io/educorvi/jats-importexport:latest

@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.venv
+.pytest_cache
+.ruff_cache
+.coverage
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/tests
+**/test
+**/node_modules
+*.md
+*.log
+packages/api-client
