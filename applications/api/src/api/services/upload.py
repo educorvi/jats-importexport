@@ -259,7 +259,9 @@ def _upload_files_and_update_references(
         if referenced_path not in uploaded_files:
             try:
                 with referenced_path.open("rb") as referenced_file:
-                    uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, CONTAINER)
+                    uploaded_files[referenced_path] = adapter_instance.upload_file(
+                        referenced_file, StorageConfig.ASSETS_CONTAINER
+                    )
             except Exception:
                 raise HTTPException(
                     status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}'."
