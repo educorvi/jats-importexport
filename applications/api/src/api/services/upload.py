@@ -192,6 +192,8 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
                 target_path.mkdir(parents=True, exist_ok=True)
                 continue
 
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+
             with archive.open(member) as source, target_path.open("wb") as destination:
                 shutil.copyfileobj(source, destination)
 

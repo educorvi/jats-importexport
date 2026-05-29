@@ -12,7 +12,11 @@ dev = [
     "ruff>=0.9",
     "ty>=0.0.40",
     "pre-commit>=4.6.0",
-    "openapi-generator-cli"
+    "openapi-generator-cli",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0"
 ]
 
 [tool.uv.workspace]
