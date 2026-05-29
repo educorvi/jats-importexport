@@ -76,6 +76,6 @@ class AvailableStorageAdapters(enum.StrEnum):
         """
         try:
             adapter_enum = cls(name)
-            return adapter_enum.create_instance()
         except ValueError:
             raise ValueError(f"Storage adapter '{name}' is not supported.")
+        return adapter_enum.create_instance()
