@@ -1,0 +1,4 @@
+recursive-include jats_importexport_client *
+recursive-include docs *
+include *
+global-exclude *.pyc

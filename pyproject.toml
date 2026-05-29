@@ -2,6 +2,13 @@
 name = "jats-importexport"
 version = "0.1.0"
 description = "Add your description here"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
