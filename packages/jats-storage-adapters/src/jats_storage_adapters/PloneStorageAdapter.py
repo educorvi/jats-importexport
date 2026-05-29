@@ -193,7 +193,11 @@ class PloneStorageAdapter(StorageAdapter):
         """Serialize and upload a JATSDocument object graph to Plone."""
         self.__create_container(container)
         result_url = self.__create_article(document.article, container)
-        return urlparse(result_url).path
+        base_path = urlparse(self.base_url).path.rstrip("/")
+        result_path = urlparse(result_url).path
+        if result_path.lower().startswith(base_path.lower()):
+            return result_path[len(base_path):]
+        return result_path
 
     def __get_container_url(self, container: str) -> str:
         """Build the complete Plone API URL for a container folder."""

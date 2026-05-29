@@ -98,10 +98,10 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
     file_stream = io.BytesIO(file_content)
     file_stream.name = "image.png"
 
-    path = adapter.upload_file(file_stream, "jats-assets")
+    url = adapter.upload_file(file_stream, "jats-assets")
 
     # Assert returned path is extracted from Plone URL @id
-    assert path == "/Plone/jats-assets/image.png"
+    assert url == "http://localhost:8080/Plone/jats-assets/image.png"
 
     # Verify httpx payload and headers
     mock_post.assert_called_once()
@@ -360,7 +360,7 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     path = adapter.save_jats_document(document, "jats-file")
 
     # Verify return value is path of created article
-    assert path == "/Plone/jats-file/save test".lower()
+    assert path == "/jats-file/save test".lower()
 
     # Check that Folders, Article, Front, Body, Sections were recursively posted
     post_types = [p[1]["@type"] for p in created_posts]
