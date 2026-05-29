@@ -1,8 +1,8 @@
-.PHONY: install lint lint-fix format format-check typecheck build clean
+.PHONY: install lint lint-fix format format-check typecheck test build clean
 
 # Install all workspace dependencies
 install:
-	uv sync --all-packages
+	uv sync --all-packages --all-groups
 
 # Lint with ruff
 lint:
@@ -23,6 +23,10 @@ format-check:
 # Type-check with ty
 typecheck:
 	uv run ty check
+
+# Run tests in all packages
+test:
+	uv run pytest
 
 # Build all workspace packages
 build:
