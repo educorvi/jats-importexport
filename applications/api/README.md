@@ -28,12 +28,29 @@ Or with Docker (from the repo root):
 
 ```sh
 docker run -p 8000:8000 \
+  -e API_KEY=your-secret-key \
   -e STORAGE_ADAPTER=plone \
   -e PLONE_BASE_URL=http://localhost:8080/Plone \
   -e PLONE_USERNAME=admin \
   -e PLONE_PASSWORD=admin \
   ghcr.io/educorvi/jats-importexport:latest
 ```
+
+## Authentication
+
+All `/upload/*` and `/export/*` endpoints require an API key when `API_KEY` is set.
+`/status` is always public.
+
+Pass the key in the `X-API-Key` request header:
+
+```sh
+curl -H "X-API-Key: <your-key>" http://localhost:8000/export/jats?path=vol1/article
+```
+
+When `API_KEY` is **not** set, authentication is disabled and all endpoints are open.
+The server logs a warning on startup in that case.
+
+> **Production note:** always set `API_KEY` in production deployments.
 
 ## Configuration
 
@@ -43,6 +60,7 @@ All settings are read from environment variables.
 
 | Variable | Default | Description |
 |---|---|---|
+| `API_KEY` | *(unset)* | API key required in `X-API-Key` header; auth disabled when unset |
 | `API_HOST` | `0.0.0.0` | Bind host |
 | `API_PORT` | `8000` | Bind port |
 | `API_RELOAD` | `false` | Enable auto-reload (development only) |

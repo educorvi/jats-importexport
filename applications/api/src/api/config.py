@@ -7,6 +7,7 @@ class APIConfig:
     RELOAD: bool = os.environ.get("API_RELOAD", "false").lower() in ("true", "1", "t")
     WORKERS: int = int(os.environ.get("API_WORKERS", 1))
     CORS_ORIGINS: list[str] = [origin.strip() for origin in os.environ.get("API_CORS_ORIGINS", "*").split(",")]
+    API_KEY: str | None = os.environ.get("API_KEY") or None
     API_TITLE: str = "JATS Import/Export API"
     API_DESCRIPTION: str = (
         "An API for uploading JATS documents, importing them to different storage backends"

@@ -3,6 +3,7 @@ import io
 import zipfile
 
 import pytest
+from api.config import APIConfig
 from api.main import app
 from fastapi.testclient import TestClient
 from jats_classes import JATSDocument
@@ -317,3 +318,49 @@ def test_upload_zip_success(mock_adapter):
     assert (
         'xlink:href="http://mockstore/assets/pic.png"' in xml_str or 'href="http://mockstore/assets/pic.png"' in xml_str
     )
+
+
+# ----------------------------------------------------
+# Tests for API Key Authentication
+# ----------------------------------------------------
+
+
+def test_auth_status_is_always_public(mocker):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/status")
+    assert response.status_code == 200
+
+
+def test_auth_disabled_when_no_api_key_set(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", None)
+    response = client.get("/export/jats?path=doc1")
+    assert response.status_code == 200
+
+
+def test_auth_rejects_missing_key(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/export/jats?path=doc1")
+    assert response.status_code == 401
+
+
+def test_auth_rejects_wrong_key(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/export/jats?path=doc1", headers={"X-API-Key": "wrong"})
+    assert response.status_code == 401
+
+
+def test_auth_accepts_correct_key(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/export/jats?path=doc1", headers={"X-API-Key": "secret"})
+    assert response.status_code == 200
+
+
+def test_auth_upload_requires_key(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    file_payload = {"xml_file": ("test.xml", VALID_JATS_XML, "application/xml")}
+    response = client.post("/upload/xml", files=file_payload)
+    assert response.status_code == 401
+
+    response = client.post("/upload/xml", files=file_payload, headers={"X-API-Key": "secret"})
+    assert response.status_code == 200
+
