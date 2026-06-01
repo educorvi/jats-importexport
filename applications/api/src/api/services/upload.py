@@ -1,4 +1,5 @@
 import base64
+import logging
 import shutil
 import stat
 import tempfile
@@ -20,6 +21,8 @@ XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
 MAX_ZIP_UNCOMPRESSED_SIZE = StorageConfig.MAX_ZIP_UNCOMPRESSED_SIZE
 CONTAINER = StorageConfig.CONTAINER
+
+logger = logging.getLogger(__name__)
 
 
 async def upload_xml(uploaded_file: UploadFile = File(...)):
@@ -127,8 +130,9 @@ def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JA
 def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument) -> str:
     try:
         return adapter_instance.save_jats_document(document, CONTAINER)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Could not save the JATS document to the storage adapter.")
+    except Exception as e:
+        logger.error(f"Error saving JATS document: {e}")
+        raise HTTPException(status_code=500, detail=f"Could not save the JATS document to the storage adapter: {e}")
 
 
 # Helper functions for ZIP processing and XML reference handling
