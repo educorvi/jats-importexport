@@ -32,14 +32,14 @@ configuration = jats_importexport_client.Configuration(
 
 
 # Enter a context with an instance of the API client
-async with jats_importexport_client.ApiClient(configuration) as api_client:
+with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.UploadApi(api_client)
     xml_file = None # bytes | 
 
     try:
         # Upload a JATS Document (XML) to the storage
-        api_response = await api_instance.upload_xml(xml_file)
+        api_response = api_instance.upload_xml(xml_file)
         print("The response of UploadApi->upload_xml:\n")
         pprint(api_response)
     except Exception as e:
@@ -104,14 +104,14 @@ configuration = jats_importexport_client.Configuration(
 
 
 # Enter a context with an instance of the API client
-async with jats_importexport_client.ApiClient(configuration) as api_client:
+with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.UploadApi(api_client)
     zip_file = None # bytes | 
 
     try:
         # Upload a JATS Document (ZIP-file) to the storage
-        api_response = await api_instance.upload_zip(zip_file)
+        api_response = api_instance.upload_zip(zip_file)
         print("The response of UploadApi->upload_zip:\n")
         pprint(api_response)
     except Exception as e:

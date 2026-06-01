@@ -30,14 +30,14 @@ configuration = jats_importexport_client.Configuration(
 
 
 # Enter a context with an instance of the API client
-async with jats_importexport_client.ApiClient(configuration) as api_client:
+with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
     path = 'path_example' # str | 
 
     try:
         # Export Html
-        api_response = await api_instance.export_html(path)
+        api_response = api_instance.export_html(path)
         print("The response of ExportApi->export_html:\n")
         pprint(api_response)
     except Exception as e:
@@ -97,14 +97,14 @@ configuration = jats_importexport_client.Configuration(
 
 
 # Enter a context with an instance of the API client
-async with jats_importexport_client.ApiClient(configuration) as api_client:
+with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
     path = 'path_example' # str | 
 
     try:
         # Export Jats
-        api_response = await api_instance.export_jats(path)
+        api_response = api_instance.export_jats(path)
         print("The response of ExportApi->export_jats:\n")
         pprint(api_response)
     except Exception as e:

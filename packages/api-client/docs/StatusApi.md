@@ -28,13 +28,13 @@ configuration = jats_importexport_client.Configuration(
 
 
 # Enter a context with an instance of the API client
-async with jats_importexport_client.ApiClient(configuration) as api_client:
+with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.StatusApi(api_client)
 
     try:
         # Health Status
-        api_response = await api_instance.get_status()
+        api_response = api_instance.get_status()
         print("The response of StatusApi->get_status:\n")
         pprint(api_response)
     except Exception as e:
