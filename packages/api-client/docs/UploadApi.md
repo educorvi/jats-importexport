@@ -17,6 +17,7 @@ This endpoint accepts a JATS document as an XML file upload and uploads it to th
 
 ### Example
 
+* Api Key Authentication (APIKeyHeader):
 
 ```python
 import jats_importexport_client
@@ -30,6 +31,16 @@ configuration = jats_importexport_client.Configuration(
     host = "http://localhost"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: APIKeyHeader
+configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['APIKeyHeader'] = 'Bearer'
 
 # Enter a context with an instance of the API client
 with jats_importexport_client.ApiClient(configuration) as api_client:
@@ -61,7 +72,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[APIKeyHeader](../README.md#APIKeyHeader)
 
 ### HTTP request headers
 
@@ -89,6 +100,7 @@ This endpoint accepts a ZIP file containing a JATS document (XML file) and optio
 
 ### Example
 
+* Api Key Authentication (APIKeyHeader):
 
 ```python
 import jats_importexport_client
@@ -102,6 +114,16 @@ configuration = jats_importexport_client.Configuration(
     host = "http://localhost"
 )
 
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: APIKeyHeader
+configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['APIKeyHeader'] = 'Bearer'
 
 # Enter a context with an instance of the API client
 with jats_importexport_client.ApiClient(configuration) as api_client:
@@ -133,7 +155,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[APIKeyHeader](../README.md#APIKeyHeader)
 
 ### HTTP request headers
 
