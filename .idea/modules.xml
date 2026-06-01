@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/api.iml" filepath="$PROJECT_DIR$/.idea/api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/cli.iml" filepath="$PROJECT_DIR$/.idea/cli.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/jats-classes.iml" filepath="$PROJECT_DIR$/.idea/jats-classes.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/jats-exporters.iml" filepath="$PROJECT_DIR$/.idea/jats-exporters.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/jats-importexport.iml" filepath="$PROJECT_DIR$/.idea/jats-importexport.iml" />
