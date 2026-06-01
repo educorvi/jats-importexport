@@ -21,8 +21,8 @@ def create_app() -> FastAPI:
 
     if not APIConfig.API_KEY:
         logger.warning(
-            "API_KEY is not set — authentication is DISABLED. "
-            "Set the API_KEY environment variable to protect all endpoints."
+            "API_KEY is not set — authentication is DISABLED for /upload/* and /export/* endpoints. "
+            "Set the API_KEY environment variable to require the X-API-Key header."
         )
 
     app = FastAPI(

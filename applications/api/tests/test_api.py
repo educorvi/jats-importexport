@@ -331,9 +331,8 @@ def test_auth_status_is_always_public(mocker):
     assert response.status_code == 200
 
 
-def test_auth_disabled_when_no_api_key_set(mock_adapter):
-    # API_KEY is None by default in the test environment
-    assert APIConfig.API_KEY is None
+def test_auth_disabled_when_no_api_key_set(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", None)
     response = client.get("/export/jats?path=doc1")
     assert response.status_code == 200
 
