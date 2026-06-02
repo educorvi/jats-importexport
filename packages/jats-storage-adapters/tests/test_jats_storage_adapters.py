@@ -92,6 +92,8 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
         url="http://localhost:8080/Plone/jats-assets",
     )
     mock_post = mocker.patch("httpx.post", return_value=mock_response)
+    # Container already exists — __create_container skips folder creation
+    mocker.patch("httpx.get", return_value=make_response(status_code=200, json={}, method="GET"))
 
     # Perform file upload
     file_content = b"fake-png-binary-data"
@@ -122,6 +124,7 @@ def test_plone_storage_adapter_upload_file_default_mimetype(clean_env, mocker):
 
     mock_response = make_response(status_code=201, json={"@id": "http://localhost/path"}, method="POST")
     mocker.patch("httpx.post", return_value=mock_response)
+    mocker.patch("httpx.get", return_value=make_response(status_code=200, json={}, method="GET"))
 
     # Upload file with no extension/unknown mimetype
     file_stream = io.BytesIO(b"data")
