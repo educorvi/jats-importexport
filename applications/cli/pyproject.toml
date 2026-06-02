@@ -1,0 +1,30 @@
+[project]
+name = "cli"
+version = "0.1.0"
+description = "CLI Application for uploading JATS documents"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jats-importexport-client",
+    "typer>=0.12",
+    "rich>=13.0",
+]
+
+[project.scripts]
+jats-cli = "cli.main:main"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "ty>=0.0.1",
+]
+
+[tool.uv.sources]
+jats-importexport-client = {workspace = true}
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["uv_build>=0.11.16,<0.12"]
+build-backend = "uv_build"

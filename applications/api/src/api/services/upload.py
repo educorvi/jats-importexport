@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 import shutil
@@ -31,18 +32,21 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
 
     try:
         # Check file size
+        # These are synchronous operations, but for small files are usually fast enough
+        # For very large files, this might still block, but typically file.read() is awaited.
         uploaded_file.file.seek(0, 2)
         file_size = uploaded_file.file.tell()
         if file_size > MAX_ZIP_UNCOMPRESSED_SIZE:
             raise HTTPException(status_code=413, detail="Uploaded file is too large.")
         uploaded_file.file.seek(0)
 
+        # Synchronous XML parsing, offload to thread
         parser = etree.XMLParser(resolve_entities=False, no_network=True)
-        xml_tree = etree.parse(uploaded_file.file, parser=parser)
+        xml_tree = await asyncio.to_thread(etree.parse, uploaded_file.file, parser=parser)
 
-        document = _create_JATSDocument_from_xml_tree(xml_tree)
+        document = await asyncio.to_thread(_create_JATSDocument_from_xml_tree, xml_tree)
 
-        url = _save_jats_document(adapter_instance, document, container)
+        url = await asyncio.to_thread(_save_jats_document, adapter_instance, document, container)
 
         return UploadFileResponse(url=url)
 
@@ -50,7 +54,8 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
         raise
     except etree.XMLSyntaxError as e:
         raise HTTPException(status_code=400, detail=f"Uploaded XML is malformed: {e}")
-    except Exception:
+    except Exception as e:
+        logger.error(f"Unexpected error while processing the upload: {e}")
         raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
     finally:
         await uploaded_file.close()
@@ -60,31 +65,37 @@ async def upload_zip(uploaded_file: UploadFile = File(...), container: str | Non
     adapter_instance = get_adapter_instance()
 
     try:
-        # Check if file is a ZIP
         uploaded_file.file.seek(0)
-        if not zipfile.is_zipfile(uploaded_file.file):
+        is_zip = await asyncio.to_thread(zipfile.is_zipfile, uploaded_file.file)
+        if not is_zip:
             raise HTTPException(status_code=415, detail="Uploaded file must be a ZIP archive.")
         uploaded_file.file.seek(0)
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_dir_path = Path(tmp_dir)
+        # Most of the ZIP processing and XML parsing is synchronous and I/O-bound.
+        # Offload the entire block to a thread to avoid blocking the event loop.
+        def blocking_zip_processing():
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_dir_path = Path(tmp_dir)
 
-            _validate_and_extract_zip(uploaded_file.file, tmp_dir_path)
+                _validate_and_extract_zip(uploaded_file.file, tmp_dir_path)
 
-            xml_file = _find_xml_file(tmp_dir_path)
+                xml_file = _find_xml_file(tmp_dir_path)
 
-            parser = etree.XMLParser(resolve_entities=False, no_network=True)
-            xml_tree = etree.parse(str(xml_file), parser=parser)
+                parser = etree.XMLParser(resolve_entities=False, no_network=True)
+                xml_tree = etree.parse(str(xml_file), parser=parser)
 
-            _create_JATSDocument_from_xml_tree(xml_tree)
+                _create_JATSDocument_from_xml_tree(xml_tree)
 
-            _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container)
+                _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance, asset_container)
 
-            modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
+                modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
 
-            url = _save_jats_document(adapter_instance, modified_document, container)
+                url = _save_jats_document(adapter_instance, modified_document, container)
+            return url
 
-            return UploadFileResponse(url=url)
+        url = await asyncio.to_thread(blocking_zip_processing)
+
+        return UploadFileResponse(url=url)
 
     except HTTPException:
         raise
@@ -146,6 +157,32 @@ def _is_path_within(parent: Path, child: Path) -> bool:
         return True
     except ValueError:
         return False
+
+
+def _find_case_insensitive_path(base_path: Path, relative_path: Path) -> Path | None:
+    """
+    Attempts to find a file within `base_path` matching `relative_path`
+    case-insensitively. Returns the actual Path object with correct casing
+    if found, otherwise None.
+    """
+    parts = relative_path.parts
+    current_path = base_path
+
+    for part in parts:
+        found_part = None
+        # Check if the current_path is a directory before iterating its contents
+        if not current_path.is_dir():
+            return None
+
+        for entry in current_path.iterdir():
+            if entry.name.lower() == part.lower():
+                found_part = entry
+                break
+        if found_part:
+            current_path = found_part
+        else:
+            return None
+    return current_path
 
 
 def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> None:
@@ -253,11 +290,13 @@ def _upload_files_and_update_references(
         if not local_reference:
             continue
 
-        # TODO unix path could also contain windows backslashes in the filename
         local_reference = local_reference.replace("\\", "/")
 
-        referenced_path = (xml_directory / local_reference).resolve()
-        if not _is_path_within(archive_root, referenced_path):
+        # Resolve the referenced path case-insensitively
+        relative_to_xml_dir = Path(local_reference)
+        referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
+
+        if not referenced_path or not _is_path_within(archive_root, referenced_path):
             continue
         if not referenced_path.is_file():
             continue
@@ -268,7 +307,8 @@ def _upload_files_and_update_references(
                     uploaded_files[referenced_path] = adapter_instance.upload_file(
                         referenced_file, asset_container or ASSETS_CONTAINER
                     )
-            except Exception:
+            except Exception as e:
+                logger.error(f"Failed to upload referenced file '{referenced_path.name}': {e}")
                 raise HTTPException(
                     status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}'."
                 )

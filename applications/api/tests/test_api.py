@@ -106,6 +106,7 @@ def mock_adapter(mocker):
     adapter = MockStorageAdapter()
     mocker.patch("api.services.upload.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
+    mocker.patch.object(APIConfig, "API_KEY", None)
     return adapter
 
 
