@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import cast
+from typing import Any, cast
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from starlette.datastructures import UploadFile as StarletteUploadFile
@@ -18,7 +18,7 @@ from ..services.upload import upload_zip as upload_zip_service
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
 
-def _request_body_extra(field: str) -> dict:
+def _request_body_extra(field: str) -> dict[str, Any]:
     """Build the openapi_extra requestBody dict for a given field name."""
     return {
         "requestBody": {
@@ -66,14 +66,16 @@ def _upload_file_from_data_uri(data_uri: str, filename: str) -> UploadFile:
     summary="Upload a JATS Document (ZIP-file) to the storage",
     description=(
         "This endpoint accepts a ZIP file containing a JATS document (XML file)"
-        " and optional referenced files and uploads it to the storage backend."
+        " and optional referenced asset files and uploads it to the storage backend."
         " The file can be provided either as a multipart form upload (`zip_file` field)"
         " or as a JSON body with the `zip_file` field set to a base64-encoded data URI"
         " (e.g. `data:application/zip;base64,<data>`)."
+        " The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters."
+        " If not specified, the default containers will be used."
     ),
     openapi_extra=_request_body_extra("zip_file"),
 )
-async def upload_zip(request: Request):
+async def upload_zip(request: Request, container: str | None = None, assets_container: str | None = None):
     content_type = request.headers.get("content-type", "")
     if content_type.startswith("multipart/"):
         form = await request.form()
@@ -88,7 +90,7 @@ async def upload_zip(request: Request):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' field in JSON body.")
         zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
-    return await upload_zip_service(cast(UploadFile, zip_file))
+    return await upload_zip_service(cast(UploadFile, zip_file), container, assets_container)
 
 
 @router.post(
@@ -110,10 +112,12 @@ async def upload_zip(request: Request):
         " The file can be provided either as a multipart form upload (`xml_file` field)"
         " or as a JSON body with the `xml_file` field set to a base64-encoded data URI"
         " (e.g. `data:application/xml;base64,<data>`)."
+        " The target container for the uploaded file can be specified using the `container` query parameter."
+        " If not specified, the default container will be used."
     ),
     openapi_extra=_request_body_extra("xml_file"),
 )
-async def upload_xml(request: Request):
+async def upload_xml(request: Request, container: str | None = None):
     content_type = request.headers.get("content-type", "")
     if content_type.startswith("multipart/"):
         form = await request.form()
@@ -128,4 +132,4 @@ async def upload_xml(request: Request):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
         xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
-    return await upload_xml_service(cast(UploadFile, xml_file))
+    return await upload_xml_service(cast(UploadFile, xml_file), container)

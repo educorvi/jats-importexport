@@ -21,11 +21,12 @@ XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
 MAX_ZIP_UNCOMPRESSED_SIZE = StorageConfig.MAX_ZIP_UNCOMPRESSED_SIZE
 CONTAINER = StorageConfig.CONTAINER
+ASSETS_CONTAINER = StorageConfig.ASSETS_CONTAINER
 
 logger = logging.getLogger(__name__)
 
 
-async def upload_xml(uploaded_file: UploadFile = File(...)):
+async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None):
     adapter_instance = get_adapter_instance()
 
     try:
@@ -41,7 +42,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...)):
 
         document = _create_JATSDocument_from_xml_tree(xml_tree)
 
-        url = _save_jats_document(adapter_instance, document)
+        url = _save_jats_document(adapter_instance, document, container)
 
         return UploadFileResponse(url=url)
 
@@ -55,7 +56,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...)):
         await uploaded_file.close()
 
 
-async def upload_zip(uploaded_file: UploadFile = File(...)):
+async def upload_zip(uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None):
     adapter_instance = get_adapter_instance()
 
     try:
@@ -77,11 +78,11 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
 
             _create_JATSDocument_from_xml_tree(xml_tree)
 
-            _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance)
+            _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container)
 
             modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
 
-            url = _save_jats_document(adapter_instance, modified_document)
+            url = _save_jats_document(adapter_instance, modified_document, container)
 
             return UploadFileResponse(url=url)
 
@@ -127,9 +128,9 @@ def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JA
         raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
 
 
-def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument) -> str:
+def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument, container: str | None = None) -> str:
     try:
-        return adapter_instance.save_jats_document(document, CONTAINER)
+        return adapter_instance.save_jats_document(document, container or CONTAINER)
     except Exception as e:
         logger.error(f"Error saving JATS document: {e}")
         raise HTTPException(status_code=500, detail=f"Could not save the JATS document to the storage adapter: {e}")
@@ -224,7 +225,7 @@ def _find_xml_file(extraction_root: Path) -> Path:
 
 
 def _upload_files_and_update_references(
-    xml_tree: etree._ElementTree | Any, xml_file: Path, extraction_root: Path, adapter_instance: StorageAdapter
+    xml_tree: etree._ElementTree | Any, xml_file: Path, extraction_root: Path, adapter_instance: StorageAdapter, asset_container: str | None = None
 ) -> None:
     """Find all xlink:href attributes in the XML tree,
     upload the referenced files to the storage adapter
@@ -265,7 +266,7 @@ def _upload_files_and_update_references(
             try:
                 with referenced_path.open("rb") as referenced_file:
                     uploaded_files[referenced_path] = adapter_instance.upload_file(
-                        referenced_file, StorageConfig.ASSETS_CONTAINER
+                        referenced_file, asset_container or ASSETS_CONTAINER
                     )
             except Exception:
                 raise HTTPException(
