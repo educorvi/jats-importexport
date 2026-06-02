@@ -1,5 +1,9 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class APIConfig:
     HOST: str = os.environ.get("API_HOST", "0.0.0.0")
