@@ -58,6 +58,8 @@ class PloneStorageAdapter(StorageAdapter):
 
         Converts the stream content into base64 and posts a new 'File' content type.
         """
+        self.__create_container(container)
+
         filename = os.path.basename(getattr(file, "name", "") or "upload")
 
         content_type, _ = mimetypes.guess_type(filename)
