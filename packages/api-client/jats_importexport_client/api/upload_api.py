@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import StrictBytes, StrictStr
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 from jats_importexport_client.models.upload_file_response import UploadFileResponse
 
 from jats_importexport_client.api_client import ApiClient, RequestSerialized
@@ -41,6 +41,7 @@ class UploadApi:
     def upload_xml(
         self,
         xml_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -56,10 +57,12 @@ class UploadApi:
     ) -> UploadFileResponse:
         """Upload a JATS Document (XML) to the storage
 
-        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
+        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`). The target container for the uploaded file can be specified using the `container` query parameter. If not specified, the default container will be used.
 
         :param xml_file: (required)
         :type xml_file: bytes
+        :param container:
+        :type container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -84,6 +87,7 @@ class UploadApi:
 
         _param = self._upload_xml_serialize(
             xml_file=xml_file,
+            container=container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -96,6 +100,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -112,6 +117,7 @@ class UploadApi:
     def upload_xml_with_http_info(
         self,
         xml_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -127,10 +133,12 @@ class UploadApi:
     ) -> ApiResponse[UploadFileResponse]:
         """Upload a JATS Document (XML) to the storage
 
-        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
+        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`). The target container for the uploaded file can be specified using the `container` query parameter. If not specified, the default container will be used.
 
         :param xml_file: (required)
         :type xml_file: bytes
+        :param container:
+        :type container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -155,6 +163,7 @@ class UploadApi:
 
         _param = self._upload_xml_serialize(
             xml_file=xml_file,
+            container=container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -167,6 +176,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -183,6 +193,7 @@ class UploadApi:
     def upload_xml_without_preload_content(
         self,
         xml_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -198,10 +209,12 @@ class UploadApi:
     ) -> RESTResponseType:
         """Upload a JATS Document (XML) to the storage
 
-        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
+        This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`). The target container for the uploaded file can be specified using the `container` query parameter. If not specified, the default container will be used.
 
         :param xml_file: (required)
         :type xml_file: bytes
+        :param container:
+        :type container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -226,6 +239,7 @@ class UploadApi:
 
         _param = self._upload_xml_serialize(
             xml_file=xml_file,
+            container=container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -238,6 +252,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -249,6 +264,7 @@ class UploadApi:
     def _upload_xml_serialize(
         self,
         xml_file,
+        container,
         _request_auth,
         _content_type,
         _headers,
@@ -271,6 +287,10 @@ class UploadApi:
 
         # process the path parameters
         # process the query parameters
+        if container is not None:
+            
+            _query_params.append(('container', container))
+            
         # process the header parameters
         # process the form parameters
         if xml_file is not None:
@@ -328,6 +348,8 @@ class UploadApi:
     def upload_zip(
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
+        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -343,10 +365,14 @@ class UploadApi:
     ) -> UploadFileResponse:
         """Upload a JATS Document (ZIP-file) to the storage
 
-        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`).
+        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced asset files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.
 
         :param zip_file: (required)
         :type zip_file: bytes
+        :param container:
+        :type container: str
+        :param assets_container:
+        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -371,6 +397,8 @@ class UploadApi:
 
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
+            container=container,
+            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -383,6 +411,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -399,6 +428,8 @@ class UploadApi:
     def upload_zip_with_http_info(
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
+        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -414,10 +445,14 @@ class UploadApi:
     ) -> ApiResponse[UploadFileResponse]:
         """Upload a JATS Document (ZIP-file) to the storage
 
-        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`).
+        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced asset files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.
 
         :param zip_file: (required)
         :type zip_file: bytes
+        :param container:
+        :type container: str
+        :param assets_container:
+        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -442,6 +477,8 @@ class UploadApi:
 
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
+            container=container,
+            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -454,6 +491,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -470,6 +508,8 @@ class UploadApi:
     def upload_zip_without_preload_content(
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        container: Optional[StrictStr] = None,
+        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -485,10 +525,14 @@ class UploadApi:
     ) -> RESTResponseType:
         """Upload a JATS Document (ZIP-file) to the storage
 
-        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`).
+        This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced asset files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.
 
         :param zip_file: (required)
         :type zip_file: bytes
+        :param container:
+        :type container: str
+        :param assets_container:
+        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -513,6 +557,8 @@ class UploadApi:
 
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
+            container=container,
+            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -525,6 +571,7 @@ class UploadApi:
             '413': "HTTP413PayloadTooLarge",
             '415': "HTTP415UnsupportedMediaType",
             '500': "HTTP500InternalServerError",
+            '422': "HTTPValidationError",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -536,6 +583,8 @@ class UploadApi:
     def _upload_zip_serialize(
         self,
         zip_file,
+        container,
+        assets_container,
         _request_auth,
         _content_type,
         _headers,
@@ -558,6 +607,14 @@ class UploadApi:
 
         # process the path parameters
         # process the query parameters
+        if container is not None:
+            
+            _query_params.append(('container', container))
+            
+        if assets_container is not None:
+            
+            _query_params.append(('assets_container', assets_container))
+            
         # process the header parameters
         # process the form parameters
         if zip_file is not None:
