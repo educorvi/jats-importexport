@@ -5,7 +5,7 @@ import stat
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Optional
 from urllib.parse import unquote, urlparse
 
 from fastapi import File, HTTPException, UploadFile
@@ -147,6 +147,32 @@ def _is_path_within(parent: Path, child: Path) -> bool:
         return False
 
 
+def _find_case_insensitive_path(base_path: Path, relative_path: Path) -> Path | None:
+    """
+    Attempts to find a file within `base_path` matching `relative_path`
+    case-insensitively. Returns the actual Path object with correct casing
+    if found, otherwise None.
+    """
+    parts = relative_path.parts
+    current_path = base_path
+
+    for part in parts:
+        found_part = None
+        # Check if the current_path is a directory before iterating its contents
+        if not current_path.is_dir():
+            return None
+
+        for entry in current_path.iterdir():
+            if entry.name.lower() == part.lower():
+                found_part = entry
+                break
+        if found_part:
+            current_path = found_part
+        else:
+            return None
+    return current_path
+
+
 def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> None:
     """Perform security and size validations on the ZIP file and extract it to the target directory if valid.
     Validations include:
@@ -252,11 +278,13 @@ def _upload_files_and_update_references(
         if not local_reference:
             continue
 
-        # TODO unix path could also contain windows backslashes in the filename
         local_reference = local_reference.replace("\\", "/")
 
-        referenced_path = (xml_directory / local_reference).resolve()
-        if not _is_path_within(archive_root, referenced_path):
+        # Resolve the referenced path case-insensitively
+        relative_to_xml_dir = Path(local_reference)
+        referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
+
+        if not referenced_path or not _is_path_within(archive_root, referenced_path):
             continue
         if not referenced_path.is_file():
             continue
@@ -267,7 +295,8 @@ def _upload_files_and_update_references(
                     uploaded_files[referenced_path] = adapter_instance.upload_file(
                         referenced_file, StorageConfig.ASSETS_CONTAINER
                     )
-            except Exception:
+            except Exception as e:
+                logger.error(f"Failed to upload referenced file '{referenced_path.name}': {e}")
                 raise HTTPException(
                     status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}'."
                 )
