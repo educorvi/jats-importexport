@@ -70,7 +70,8 @@ def _upload_file_from_data_uri(data_uri: str, filename: str) -> UploadFile:
         " The file can be provided either as a multipart form upload (`zip_file` field)"
         " or as a JSON body with the `zip_file` field set to a base64-encoded data URI"
         " (e.g. `data:application/zip;base64,<data>`)."
-        " The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters."
+        " The target containers for the uploaded files and assets can be specified using"
+        " the `container` and `assets_container` query parameters."
         " If not specified, the default containers will be used."
     ),
     openapi_extra=_request_body_extra("zip_file"),

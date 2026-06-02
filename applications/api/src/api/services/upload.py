@@ -61,7 +61,9 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
         await uploaded_file.close()
 
 
-async def upload_zip(uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None):
+async def upload_zip(
+    uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
+):
     adapter_instance = get_adapter_instance()
 
     try:
@@ -86,7 +88,7 @@ async def upload_zip(uploaded_file: UploadFile = File(...), container: str | Non
 
                 _create_JATSDocument_from_xml_tree(xml_tree)
 
-                _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance, asset_container)
+                _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container)
 
                 modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
 
@@ -262,7 +264,11 @@ def _find_xml_file(extraction_root: Path) -> Path:
 
 
 def _upload_files_and_update_references(
-    xml_tree: etree._ElementTree | Any, xml_file: Path, extraction_root: Path, adapter_instance: StorageAdapter, asset_container: str | None = None
+    xml_tree: etree._ElementTree | Any,
+    xml_file: Path,
+    extraction_root: Path,
+    adapter_instance: StorageAdapter,
+    asset_container: str | None = None,
 ) -> None:
     """Find all xlink:href attributes in the XML tree,
     upload the referenced files to the storage adapter
