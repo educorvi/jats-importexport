@@ -1,7 +1,6 @@
-from pathlib import Path
-from typing import List
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from pathlib import Path
 
 import typer
 from jats_importexport_client import ApiClient, Configuration
@@ -13,29 +12,28 @@ from rich.panel import Panel
 console = Console()
 
 
-def _upload_single_file(file: Path, upload_api: UploadApi, host: str) -> int:
+def _upload_single_file(file: Path, configuration: Configuration, host: str) -> int:
     exit_code = 0
     file_ext = file.suffix.lower()
     if file_ext not in [".xml", ".zip"]:
-        console.print(f"[bold red]✖ Error:[/bold red] Unsupported file extension '{file_ext}' for file '{file.name}'. Must be .xml or .zip")
+        console.print(
+            f"[bold red]✖ Error:[/bold red] Unsupported file extension '{file_ext}' for file '{file.name}'. Must be .xml or .zip"  # noqa: E501
+        )
         return 1
 
+    # Each call gets its own ApiClient to avoid thread-safety issues with shared connections.
     try:
-        with console.status(
-            f"[bold cyan]Uploading {file_ext[1:].upper()} file '{file.name}' to {host}...[/bold cyan]", spinner="dots"
-        ):
+        with ApiClient(configuration) as api_client:
+            upload_api = UploadApi(api_client)
+            console.print(f"[bold cyan]↑ Uploading {file_ext[1:].upper()} file '{file.name}' to {host}...[/bold cyan]")
             if file_ext == ".xml":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                upload_api.upload_xml(
-                    xml_file=file_bytes, _content_type="multipart/form-data"
-                )
+                upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data")
             elif file_ext == ".zip":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                response = upload_api.upload_zip(
-                    zip_file=file_bytes, _content_type="multipart/form-data"
-                )
+                response = upload_api.upload_zip(zip_file=file_bytes, _content_type="multipart/form-data")
 
         console.print(f"[bold green]✔ Upload successful for '{file.name}'![/bold green]")
         console.print(Panel(str(response), title=f"API Response for '{file.name}'", border_style="green"))
@@ -46,12 +44,12 @@ def _upload_single_file(file: Path, upload_api: UploadApi, host: str) -> int:
     except Exception as e:
         console.print(f"[bold red]✖ An unexpected error occurred for '{file.name}':[/bold red] {e}")
         exit_code = 1
-    
+
     return exit_code
 
 
 def upload_command(
-    files: List[Path] = typer.Option(
+    files: list[Path] = typer.Option(
         ...,
         "--file",
         "-f",
@@ -71,27 +69,22 @@ def upload_command(
     configuration = Configuration(host=host)
     if api_key:
         configuration.api_key["APIKeyHeader"] = api_key
-    api_client = ApiClient(configuration)
-    upload_api = UploadApi(api_client)
 
     overall_exit_code = 0
+    func = partial(_upload_single_file, configuration=configuration, host=host)
     if workers > 1:
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            # Using partial to pass fixed arguments to _upload_single_file
-            func = partial(_upload_single_file, upload_api=upload_api, host=host)
             results = list(executor.map(func, files))
             if any(result != 0 for result in results):
                 overall_exit_code = 1
     else:
         for file in files:
-            result = _upload_single_file(file, upload_api, host)
+            result = func(file)
             if result != 0:
                 overall_exit_code = 1
-    
+
     if overall_exit_code != 0:
         raise typer.Exit(code=overall_exit_code)
-
-
 
 
 def main():

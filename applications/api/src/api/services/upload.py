@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 import shutil
@@ -5,7 +6,7 @@ import stat
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, BinaryIO, Optional
+from typing import Any, BinaryIO
 from urllib.parse import unquote, urlparse
 
 from fastapi import File, HTTPException, UploadFile
@@ -30,18 +31,21 @@ async def upload_xml(uploaded_file: UploadFile = File(...)):
 
     try:
         # Check file size
+        # These are synchronous operations, but for small files are usually fast enough
+        # For very large files, this might still block, but typically file.read() is awaited.
         uploaded_file.file.seek(0, 2)
         file_size = uploaded_file.file.tell()
         if file_size > MAX_ZIP_UNCOMPRESSED_SIZE:
             raise HTTPException(status_code=413, detail="Uploaded file is too large.")
         uploaded_file.file.seek(0)
 
+        # Synchronous XML parsing, offload to thread
         parser = etree.XMLParser(resolve_entities=False, no_network=True)
-        xml_tree = etree.parse(uploaded_file.file, parser=parser)
+        xml_tree = await asyncio.to_thread(etree.parse, uploaded_file.file, parser=parser)
 
-        document = _create_JATSDocument_from_xml_tree(xml_tree)
+        document = await asyncio.to_thread(_create_JATSDocument_from_xml_tree, xml_tree)
 
-        url = _save_jats_document(adapter_instance, document)
+        url = await asyncio.to_thread(_save_jats_document, adapter_instance, document)
 
         return UploadFileResponse(url=url)
 
@@ -49,7 +53,8 @@ async def upload_xml(uploaded_file: UploadFile = File(...)):
         raise
     except etree.XMLSyntaxError as e:
         raise HTTPException(status_code=400, detail=f"Uploaded XML is malformed: {e}")
-    except Exception:
+    except Exception as e:
+        logger.error(f"Unexpected error while processing the upload: {e}")
         raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
     finally:
         await uploaded_file.close()
@@ -59,31 +64,37 @@ async def upload_zip(uploaded_file: UploadFile = File(...)):
     adapter_instance = get_adapter_instance()
 
     try:
-        # Check if file is a ZIP
         uploaded_file.file.seek(0)
-        if not zipfile.is_zipfile(uploaded_file.file):
+        is_zip = await asyncio.to_thread(zipfile.is_zipfile, uploaded_file.file)
+        if not is_zip:
             raise HTTPException(status_code=415, detail="Uploaded file must be a ZIP archive.")
         uploaded_file.file.seek(0)
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_dir_path = Path(tmp_dir)
+        # Most of the ZIP processing and XML parsing is synchronous and I/O-bound.
+        # Offload the entire block to a thread to avoid blocking the event loop.
+        def blocking_zip_processing():
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_dir_path = Path(tmp_dir)
 
-            _validate_and_extract_zip(uploaded_file.file, tmp_dir_path)
+                _validate_and_extract_zip(uploaded_file.file, tmp_dir_path)
 
-            xml_file = _find_xml_file(tmp_dir_path)
+                xml_file = _find_xml_file(tmp_dir_path)
 
-            parser = etree.XMLParser(resolve_entities=False, no_network=True)
-            xml_tree = etree.parse(str(xml_file), parser=parser)
+                parser = etree.XMLParser(resolve_entities=False, no_network=True)
+                xml_tree = etree.parse(str(xml_file), parser=parser)
 
-            _create_JATSDocument_from_xml_tree(xml_tree)
+                _create_JATSDocument_from_xml_tree(xml_tree)
 
-            _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance)
+                _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance=adapter_instance)
 
-            modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
+                modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
 
-            url = _save_jats_document(adapter_instance, modified_document)
+                url = _save_jats_document(adapter_instance, modified_document)
+            return url
 
-            return UploadFileResponse(url=url)
+        url = await asyncio.to_thread(blocking_zip_processing)
+
+        return UploadFileResponse(url=url)
 
     except HTTPException:
         raise
