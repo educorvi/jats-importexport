@@ -72,8 +72,8 @@ All settings are read from environment variables.
 | Variable | Default | Description |
 |---|---|---|
 | `STORAGE_ADAPTER` | `plone` | Storage backend to use (`plone`) |
-| `STORAGE_CONTAINER` | `jats-file` | Container path for JATS XML files |
-| `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Container path for referenced asset files |
+| `STORAGE_CONTAINER` | `jats-file` | Default container path for JATS XML files |
+| `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Default container path for referenced asset files |
 | `MAX_ZIP_FILE_COUNT` | `10000` | Maximum number of files allowed in an uploaded ZIP |
 | `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912` | Maximum uncompressed ZIP size in bytes (512 MB) |
 
