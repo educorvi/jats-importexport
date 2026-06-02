@@ -60,6 +60,7 @@ class AvailableStorageAdapters(enum.StrEnum):
     """Enumeration of available storage adapter implementations."""
 
     PLONE = "plone"
+    LOCAL = "local"
 
     def create_instance(self) -> StorageAdapter:
         """Factory method to create an instance of the storage adapter."""
@@ -68,6 +69,10 @@ class AvailableStorageAdapters(enum.StrEnum):
                 from .PloneStorageAdapter import PloneStorageAdapter
 
                 return PloneStorageAdapter()
+            case AvailableStorageAdapters.LOCAL:
+                from .LocalDiskStorageAdapter import LocalDiskStorageAdapter
+                
+                return LocalDiskStorageAdapter()
             case _:
                 raise ValueError(f"Storage adapter '{self.value}' is not supported.")
 
