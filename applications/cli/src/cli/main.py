@@ -12,7 +12,13 @@ from rich.panel import Panel
 console = Console()
 
 
-def _upload_single_file(file: Path, configuration: Configuration, host: str) -> int:
+def _upload_single_file(
+    file: Path,
+    configuration: Configuration,
+    host: str,
+    container: str | None,
+    assets_container: str | None,
+) -> int:
     exit_code = 0
     file_ext = file.suffix.lower()
     if file_ext not in [".xml", ".zip"]:
@@ -29,11 +35,16 @@ def _upload_single_file(file: Path, configuration: Configuration, host: str) -> 
             if file_ext == ".xml":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data")
+                upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data", container=container)
             elif file_ext == ".zip":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                response = upload_api.upload_zip(zip_file=file_bytes, _content_type="multipart/form-data")
+                response = upload_api.upload_zip(
+                    zip_file=file_bytes,
+                    _content_type="multipart/form-data",
+                    container=container,
+                    assets_container=assets_container,
+                )
 
         console.print(f"[bold green]✔ Upload successful for '{file.name}'![/bold green]")
         console.print(Panel(str(response), title=f"API Response for '{file.name}'", border_style="green"))
@@ -61,6 +72,20 @@ def upload_command(
     ),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
     api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+    container: str = typer.Option(
+        None,
+        "--container",
+        "-c",
+        help="Optional: Target container for the uploaded JATS file(s).",
+        rich_help_panel="Advanced",
+    ),
+    assets_container: str = typer.Option(
+        None,
+        "--assets-container",
+        "-a",
+        help="Optional: Target container for the uploaded asset files (ZIP uploads only).",
+        rich_help_panel="Advanced",
+    ),
     workers: int = typer.Option(1, "--workers", "-w", min=1, help="Number of concurrent upload workers."),
 ):
     """
@@ -71,7 +96,13 @@ def upload_command(
         configuration.api_key["APIKeyHeader"] = api_key
 
     overall_exit_code = 0
-    func = partial(_upload_single_file, configuration=configuration, host=host)
+    func = partial(
+        _upload_single_file, 
+        configuration=configuration, 
+        host=host, 
+        container=container, 
+        assets_container=assets_container
+    )
     if workers > 1:
         with ThreadPoolExecutor(max_workers=workers) as executor:
             results = list(executor.map(func, files))
