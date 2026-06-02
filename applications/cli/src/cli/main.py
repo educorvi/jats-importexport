@@ -22,6 +22,7 @@ def upload_command(
         resolve_path=True,
     ),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
 ):
     """
     Upload a JATS document (XML or ZIP) via the API.
@@ -32,6 +33,8 @@ def upload_command(
         raise typer.Exit(code=1)
 
     configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
     api_client = ApiClient(configuration)
     upload_api = UploadApi(api_client)
 
@@ -42,11 +45,15 @@ def upload_command(
             if file_ext == ".xml":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                response = upload_api.upload_xml(xml_file=file_bytes)
+                response = upload_api.upload_xml(
+                    xml_file=file_bytes, _content_type="multipart/form-data"
+                )
             elif file_ext == ".zip":
                 with open(file, "rb") as f:
                     file_bytes = f.read()
-                response = upload_api.upload_zip(zip_file=file_bytes)
+                response = upload_api.upload_zip(
+                    zip_file=file_bytes, _content_type="multipart/form-data"
+                )
 
         console.print("[bold green]✔ Upload successful![/bold green]")
         console.print(Panel(str(response), title="API Response", border_style="green"))
