@@ -28,3 +28,4 @@ class StorageConfig:
     MAX_ZIP_FILE_COUNT: int = int(os.environ.get("MAX_ZIP_FILE_COUNT", 10000))
     # Maximum total uncompressed size of the uploaded ZIP archive (default: 512 MB)
     MAX_ZIP_UNCOMPRESSED_SIZE: int = int(os.environ.get("MAX_ZIP_UNCOMPRESSED_SIZE", 512 * 1024 * 1024))
+    CACHE_PREFIX: str = os.environ.get("CACHE_PREFIX", "jats-importexport-cache")
