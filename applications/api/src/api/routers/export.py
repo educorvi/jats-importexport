@@ -1,4 +1,4 @@
-from api.models import HtmlDocumentResponse, JatsDocumentResponse
+from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse
 import logging
 from collections.abc import Callable
 from typing import Any, Optional
@@ -51,7 +51,7 @@ async def export_html(path: str):
     return await html_export(path)
 
 
-@router.delete("/cache", operation_id="clear_export_cache")
+@router.delete("/cache", operation_id="clear_export_cache", response_model=CacheClearedResponse)
 async def clear_export_cache(path: Optional[str] = None):
     if path:
         prefix = FastAPICache.get_prefix()
@@ -59,19 +59,17 @@ async def clear_export_cache(path: Optional[str] = None):
         await FastAPICache.clear(key=f"{prefix}:export:export_jats:{path}")
         # Clear HTML export cache for the specific path
         await FastAPICache.clear(key=f"{prefix}:export:export_html:{path}")
-        return {"message": f"Export cache cleared for path: {path}"}
+        return CacheClearedResponse(message=f"Cleared cache for {path}")
     else:
         await FastAPICache.clear(namespace="export")
-        return {"message": "Export cache cleared"}
+        return CacheClearedResponse(message="Cleared cache")
 
 
-@router.get("/cache", operation_id="get_cache_status")
+@router.get("/cache", operation_id="get_cache_status", response_model=CacheStatusResponse)
 async def get_cache_status():
-    cache_info = {
-        "enabled": FastAPICache.get_enable(),
-        "prefix": FastAPICache.get_prefix(),
-        "backend_type": FastAPICache._backend.__class__.__name__ if FastAPICache._backend else "None",
-    }
 
-    return cache_info
+    return CacheStatusResponse(
+        enabled=FastAPICache.get_enable(),
+        prefix=FastAPICache.get_prefix()
+    )
 
