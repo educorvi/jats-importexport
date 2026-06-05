@@ -3,11 +3,18 @@
 import argparse
 import json
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
+import redis.asyncio as aioredis
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+
+from api.config import StorageConfig
 
 from .auth import verify_api_key
 from .config import APIConfig
@@ -19,16 +26,26 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
 
+    logging.basicConfig(level=logging.INFO)
+
     if not APIConfig.API_KEY:
         logger.warning(
             "API_KEY is not set — authentication is DISABLED for /upload/* and /export/* endpoints. "
             "Set the API_KEY environment variable to require the X-API-Key header."
         )
 
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        redis = aioredis.from_url(f"redis://{StorageConfig.REDIS_HOST}", encoding="utf8", decode_responses=False)
+        FastAPICache.init(RedisBackend(redis), prefix=StorageConfig.CACHE_PREFIX)
+        yield
+        await redis.close()
+
     app = FastAPI(
         title=APIConfig.API_TITLE,
         description=APIConfig.API_DESCRIPTION,
         version=APIConfig.API_VERSION,
+        lifespan=lifespan,
     )
 
     app.add_middleware(

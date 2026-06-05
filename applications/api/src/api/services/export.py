@@ -1,8 +1,8 @@
 import asyncio
+import logging
 from enum import Enum
 
 from fastapi import Request
-from fastapi.responses import Response
 from jats_exporters import HtmlExporter, JatsExporter
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse
@@ -10,6 +10,8 @@ from api.services.common import get_adapter_instance
 
 JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()
+
+logger = logging.getLogger(__name__)
 
 
 class ReturnType(Enum):
@@ -30,19 +32,13 @@ def get_return_type(request: Request) -> ReturnType:
             return ReturnType.JSON
 
 
-async def jats_export(path: str, return_type: ReturnType):
+async def jats_export(path: str):
     document = await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
     jats = await asyncio.to_thread(JATS_EXPORTER.export, document)
-    if return_type == ReturnType.XML:
-        return Response(content=jats, media_type="application/xml")
-    else:
-        return JatsDocumentResponse(jats=jats)
+    return JatsDocumentResponse(jats=jats)
 
 
-async def html_export(path: str, return_type: ReturnType):
+async def html_export(path: str):
     document = await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
-    html = await asyncio.to_thread(HTML_EXPORTER.export, document)
-    if return_type == ReturnType.HTML:
-        return Response(content=html, media_type="text/html")
-    else:
-        return HtmlDocumentResponse(html=html)
+    html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
+    return HtmlDocumentResponse(html=html_content)

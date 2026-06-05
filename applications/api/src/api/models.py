@@ -43,3 +43,12 @@ class JatsDocumentResponse(BaseModel):
 
 class HtmlDocumentResponse(BaseModel):
     html: str = Field(description="The HTML document")
+
+
+class CacheClearedResponse(BaseModel):
+    message: str = Field(description="Confirmation message for cache clearance")
+
+
+class CacheStatusResponse(BaseModel):
+    enabled: bool = Field(description="Indicates if FastAPICache is enabled")
+    prefix: str = Field(description="The cache prefix used by FastAPICache")

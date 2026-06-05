@@ -77,15 +77,15 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
+    path = 'path_example' # str |  (optional)
 
     try:
-        # Export Html
-        api_response = api_instance.export_html(path)
-        print("The response of ExportApi->export_html:\n")
+        # Clear Export Cache
+        api_response = api_instance.clear_export_cache(path=path)
+        print("The response of ExportApi->clear_export_cache:\n")
         pprint(api_response)
     except ApiException as e:
-        print("Exception when calling ExportApi->export_html: %s\n" % e)
+        print("Exception when calling ExportApi->clear_export_cache: %s\n" % e)
 
 ```
 
@@ -95,8 +95,10 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*ExportApi* | [**clear_export_cache**](docs/ExportApi.md#clear_export_cache) | **DELETE** /export/cache | Clear Export Cache
 *ExportApi* | [**export_html**](docs/ExportApi.md#export_html) | **GET** /export/html | Export Html
 *ExportApi* | [**export_jats**](docs/ExportApi.md#export_jats) | **GET** /export/jats | Export Jats
+*ExportApi* | [**get_cache_status**](docs/ExportApi.md#get_cache_status) | **GET** /export/cache | Get Cache Status
 *StatusApi* | [**get_status**](docs/StatusApi.md#get_status) | **GET** /status | Health Status
 *UploadApi* | [**upload_xml**](docs/UploadApi.md#upload_xml) | **POST** /upload/xml | Upload a JATS Document (XML) to the storage
 *UploadApi* | [**upload_zip**](docs/UploadApi.md#upload_zip) | **POST** /upload/zip | Upload a JATS Document (ZIP-file) to the storage
@@ -104,6 +106,8 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [CacheClearedResponse](docs/CacheClearedResponse.md)
+ - [CacheStatusResponse](docs/CacheStatusResponse.md)
  - [HTTP400BadRequest](docs/HTTP400BadRequest.md)
  - [HTTP413PayloadTooLarge](docs/HTTP413PayloadTooLarge.md)
  - [HTTP415UnsupportedMediaType](docs/HTTP415UnsupportedMediaType.md)

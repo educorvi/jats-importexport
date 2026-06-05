@@ -30,6 +30,8 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
+    "CacheClearedResponse",
+    "CacheStatusResponse",
     "HTTP400BadRequest",
     "HTTP413PayloadTooLarge",
     "HTTP415UnsupportedMediaType",
@@ -61,6 +63,8 @@ from jats_importexport_client.exceptions import ApiAttributeError as ApiAttribut
 from jats_importexport_client.exceptions import ApiException as ApiException
 
 # import models into sdk package
+from jats_importexport_client.models.cache_cleared_response import CacheClearedResponse as CacheClearedResponse
+from jats_importexport_client.models.cache_status_response import CacheStatusResponse as CacheStatusResponse
 from jats_importexport_client.models.http400_bad_request import HTTP400BadRequest as HTTP400BadRequest
 from jats_importexport_client.models.http413_payload_too_large import HTTP413PayloadTooLarge as HTTP413PayloadTooLarge
 from jats_importexport_client.models.http415_unsupported_media_type import HTTP415UnsupportedMediaType as HTTP415UnsupportedMediaType

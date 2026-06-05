@@ -3,6 +3,8 @@
 .gitlab-ci.yml
 .travis.yml
 README.md
+docs/CacheClearedResponse.md
+docs/CacheStatusResponse.md
 docs/ExportApi.md
 docs/HTTP400BadRequest.md
 docs/HTTP413PayloadTooLarge.md
@@ -29,6 +31,8 @@ jats_importexport_client/api_response.py
 jats_importexport_client/configuration.py
 jats_importexport_client/exceptions.py
 jats_importexport_client/models/__init__.py
+jats_importexport_client/models/cache_cleared_response.py
+jats_importexport_client/models/cache_status_response.py
 jats_importexport_client/models/html_document_response.py
 jats_importexport_client/models/http400_bad_request.py
 jats_importexport_client/models/http413_payload_too_large.py
@@ -49,4 +53,6 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_cache_cleared_response.py
+test/test_cache_status_response.py
 tox.ini

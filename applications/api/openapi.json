@@ -328,12 +328,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/JatsDocumentResponse"
                 }
-              },
-              "application/xml": {
-                "schema": {
-                  "type": "string"
-                },
-                "example": "<article>...</article>"
               }
             }
           },
@@ -381,11 +375,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/HtmlDocumentResponse"
                 }
-              },
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
               }
             }
           },
@@ -401,10 +390,122 @@
           }
         }
       }
+    },
+    "/export/cache": {
+      "delete": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Clear Export Cache",
+        "operationId": "clear_export_cache",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheClearedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Get Cache Status",
+        "operationId": "get_cache_status",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "CacheClearedResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Confirmation message for cache clearance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "CacheClearedResponse"
+      },
+      "CacheStatusResponse": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Indicates if FastAPICache is enabled"
+          },
+          "prefix": {
+            "type": "string",
+            "title": "Prefix",
+            "description": "The cache prefix used by FastAPICache"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "prefix"
+        ],
+        "title": "CacheStatusResponse"
+      },
       "HTTP400BadRequest": {
         "properties": {
           "detail": {
