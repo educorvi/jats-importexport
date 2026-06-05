@@ -25,6 +25,7 @@ from jats_classes import (
 
 from .interface import StorageAdapter
 
+httpx_client = httpx.Client(timeout=15)
 
 class PloneStorageAdapter(StorageAdapter):
     """Storage adapter interacting with a Plone instance over the REST API.
@@ -70,7 +71,7 @@ class PloneStorageAdapter(StorageAdapter):
 
         url = self.__get_container_url(container)
 
-        response = httpx.post(
+        response = httpx_client.post(
             url,
             json={
                 "@type": "File",
@@ -97,7 +98,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __get_json(self, url: str) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
-        response = httpx.get(
+        response = httpx_client.get(
             url,
             params={"fullobjects": 1},
             auth=self.auth,
@@ -207,7 +208,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_front(self, front: Front, container_url: str) -> str:
         """Create a Front object inside a Plone Article container."""
-        response = httpx.post(
+        response = httpx_client.post(
             container_url,
             json={
                 "@type": "Front",
@@ -227,7 +228,7 @@ class PloneStorageAdapter(StorageAdapter):
             portal_type = "Section"
         else:
             portal_type = "Appendix"
-        response = httpx.post(
+        response = httpx_client.post(
             container_url,
             json={
                 "@type": portal_type,
@@ -248,7 +249,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_body(self, body: Body, container_url: str) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
-        response = httpx.post(
+        response = httpx_client.post(
             container_url,
             json={
                 "@type": "Body",
@@ -265,7 +266,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
         """Create an AppendixGroup node inside Plone Back and upload sections."""
-        response = httpx.post(
+        response = httpx_client.post(
             container_url,
             json={
                 "@type": "AppendixGroup",
@@ -285,7 +286,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_back(self, back: Back, container_url: str) -> str:
         """Create a Back node inside a Plone Article and upload its appendix groups."""
-        response = httpx.post(
+        response = httpx_client.post(
             container_url,
             json={
                 "@type": "Back",
@@ -303,7 +304,7 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_article(self, article: Article, container: str) -> str:
         """Create an Article root node and Front, Body, Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
-        response = httpx.post(
+        response = httpx_client.post(
             url,
             json={
                 "@type": "Article",
@@ -337,14 +338,14 @@ class PloneStorageAdapter(StorageAdapter):
             current_path = f"{current_path}/{part}" if current_path else part
             url = f"{self.base_url}/{current_path}"
 
-            response = httpx.get(url, auth=self.auth, headers={"Accept": "application/json"})
+            response = httpx_client.get(url, auth=self.auth, headers={"Accept": "application/json"})
             if response.status_code == 200:
                 continue
             if response.status_code != 404:
                 response.raise_for_status()
 
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
-            response = httpx.post(
+            response = httpx_client.post(
                 parent_url,
                 json={"@type": "Folder", "title": part, "id": part},
                 auth=self.auth,
