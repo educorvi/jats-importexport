@@ -36,8 +36,15 @@ async def clear_cache(path: str):
     html_key = f"{prefix}:export:export_html:{path}"
 
     # Delete them from the backend (works for both Redis and InMemory)
-    await backend.clear(key=jats_key)
-    await backend.clear(key=html_key)
+    # InMemoryBackend raises KeyError for missing keys, so we suppress that.
+    try:
+        await backend.clear(key=jats_key)
+    except KeyError:
+        pass
+    try:
+        await backend.clear(key=html_key)
+    except KeyError:
+        pass
 
     return {"status": "success", "message": f"Cache cleared for path: {path}", "cleared_keys": [jats_key, html_key]}
 

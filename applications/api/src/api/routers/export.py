@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 from collections.abc import Callable
 from typing import Any
 
@@ -26,6 +27,7 @@ def export_cache_key_builder(
 ) -> str:
     # The endpoint parameters (like 'path') are explicitly inside the 'kwargs' dictionary
     path = kwargs.get("path", "").lstrip("/").rstrip("/")
+    path = urllib.parse.quote_plus(path)
 
     # Format: "namespace:function_name:path"
     func_name = getattr(func, "__name__", "unknown_function")
@@ -53,6 +55,7 @@ async def export_html(path: str):
 async def clear_export_cache(path: str | None = None):
     if path:
         path = path.lstrip("/").rstrip("/")
+        path = urllib.parse.quote_plus(path)
         prefix = FastAPICache.get_prefix()
         # Clear JATS export cache for the specific path
         await FastAPICache.clear(key=f"{prefix}:export:export_jats:{path}")

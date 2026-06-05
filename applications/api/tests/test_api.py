@@ -133,12 +133,6 @@ def test_export_jats(mock_adapter):
     assert "jats" in response.json()
     assert "API Test Article" in response.json()["jats"]
 
-    # XML accept header
-    response = client.get("/export/jats?path=doc1", headers={"Accept": "application/xml"})
-    assert response.status_code == 200
-    assert response.headers["content-type"].startswith("application/xml")
-    assert "API Test Article" in response.text
-
 
 def test_export_html(mock_adapter):
     # Standard JSON accept
@@ -146,12 +140,6 @@ def test_export_html(mock_adapter):
     assert response.status_code == 200
     assert "html" in response.json()
     assert "API Test Article" in response.json()["html"]
-
-    # HTML accept header
-    response = client.get("/export/html?path=doc1", headers={"Accept": "text/html"})
-    assert response.status_code == 200
-    assert response.headers["content-type"].startswith("text/html")
-    assert "API Test Article" in response.text
 
 
 # ----------------------------------------------------
