@@ -29,3 +29,4 @@ class StorageConfig:
     # Maximum total uncompressed size of the uploaded ZIP archive (default: 512 MB)
     MAX_ZIP_UNCOMPRESSED_SIZE: int = int(os.environ.get("MAX_ZIP_UNCOMPRESSED_SIZE", 512 * 1024 * 1024))
     CACHE_PREFIX: str = os.environ.get("CACHE_PREFIX", "jats-importexport-cache")
+    REDIS_HOST: str = os.environ.get("REDIS_HOST", "localhost")

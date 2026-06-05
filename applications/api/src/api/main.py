@@ -35,7 +35,7 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        redis = aioredis.from_url("redis://localhost", encoding="utf8", decode_responses=False)
+        redis = aioredis.from_url(f"redis://{StorageConfig.REDIS_HOST}", encoding="utf8", decode_responses=False)
         FastAPICache.init(RedisBackend(redis), prefix=StorageConfig.CACHE_PREFIX)
         yield
         await redis.close()
