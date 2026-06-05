@@ -11,7 +11,6 @@ from urllib.parse import unquote, urlparse
 
 from fastapi import File, HTTPException, UploadFile
 from fastapi_cache import FastAPICache
-
 from jats_classes import JATSDocument
 from jats_storage_adapters.interface import StorageAdapter
 from lxml import etree
@@ -28,6 +27,7 @@ ASSETS_CONTAINER = StorageConfig.ASSETS_CONTAINER
 
 logger = logging.getLogger(__name__)
 
+
 async def clear_cache(path: str):
     backend = FastAPICache.get_backend()
     prefix = FastAPICache.get_prefix()
@@ -40,6 +40,7 @@ async def clear_cache(path: str):
     await backend.clear(key=html_key)
 
     return {"status": "success", "message": f"Cache cleared for path: {path}", "cleared_keys": [jats_key, html_key]}
+
 
 async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None):
     adapter_instance = get_adapter_instance()

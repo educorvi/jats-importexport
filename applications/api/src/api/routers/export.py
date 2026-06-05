@@ -1,12 +1,12 @@
-from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse
 import logging
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Request, Response
 from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
+
+from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse
 
 from ..services.export import html_export, jats_export
 
@@ -14,12 +14,13 @@ router = APIRouter(prefix="/export", tags=["Export"])
 
 logger = logging.getLogger(__name__)
 
+
 def export_cache_key_builder(
     func: Callable[..., Any],
     namespace: str = "",
     *,
-    request: Optional[Request] = None,
-    response: Optional[Response] = None,
+    request: Request | None = None,
+    response: Response | None = None,
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> str:
@@ -31,6 +32,7 @@ def export_cache_key_builder(
 
     return f"{namespace}:{func_name}:{path}"
 
+
 @router.get(
     "/jats",
     operation_id="export_jats",
@@ -41,18 +43,14 @@ async def export_jats(path: str):
     return await jats_export(path)
 
 
-@router.get(
-    "/html",
-    operation_id="export_html",
-    response_model=HtmlDocumentResponse
-)
+@router.get("/html", operation_id="export_html", response_model=HtmlDocumentResponse)
 @cache(namespace="export", key_builder=export_cache_key_builder)
 async def export_html(path: str):
     return await html_export(path)
 
 
 @router.delete("/cache", operation_id="clear_export_cache", response_model=CacheClearedResponse)
-async def clear_export_cache(path: Optional[str] = None):
+async def clear_export_cache(path: str | None = None):
     if path:
         path = path.lstrip("/").rstrip("/")
         prefix = FastAPICache.get_prefix()
@@ -69,8 +67,4 @@ async def clear_export_cache(path: Optional[str] = None):
 @router.get("/cache", operation_id="get_cache_status", response_model=CacheStatusResponse)
 async def get_cache_status():
 
-    return CacheStatusResponse(
-        enabled=FastAPICache.get_enable(),
-        prefix=FastAPICache.get_prefix()
-    )
-
+    return CacheStatusResponse(enabled=FastAPICache.get_enable(), prefix=FastAPICache.get_prefix())

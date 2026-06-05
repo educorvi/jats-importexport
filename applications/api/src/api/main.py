@@ -1,4 +1,5 @@
 """Entrypoint API application module for jats-importexport."""
+
 import argparse
 import json
 import logging
@@ -6,12 +7,12 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import redis.asyncio as aioredis
 import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-import redis.asyncio as aioredis
 
 from api.config import StorageConfig
 

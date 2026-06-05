@@ -3,7 +3,6 @@ import logging
 from enum import Enum
 
 from fastapi import Request
-from fastapi.responses import Response
 from jats_exporters import HtmlExporter, JatsExporter
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse
