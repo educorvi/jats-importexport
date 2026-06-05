@@ -24,7 +24,7 @@ def export_cache_key_builder(
     kwargs: dict[str, Any],
 ) -> str:
     # The endpoint parameters (like 'path') are explicitly inside the 'kwargs' dictionary
-    path = kwargs.get("path", "")
+    path = kwargs.get("path", "").lstrip("/").rstrip("/")
 
     # Format: "namespace:function_name:path"
     func_name = getattr(func, "__name__", "unknown_function")
@@ -54,6 +54,7 @@ async def export_html(path: str):
 @router.delete("/cache", operation_id="clear_export_cache", response_model=CacheClearedResponse)
 async def clear_export_cache(path: Optional[str] = None):
     if path:
+        path = path.lstrip("/").rstrip("/")
         prefix = FastAPICache.get_prefix()
         # Clear JATS export cache for the specific path
         await FastAPICache.clear(key=f"{prefix}:export:export_jats:{path}")
