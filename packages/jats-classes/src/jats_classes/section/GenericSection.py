@@ -12,6 +12,10 @@ from typing import cast
 from lxml import etree
 
 
+def clean_string(string: str | None) -> str:
+    """Remove leading and trailing whitespace and newlines from a string."""
+    return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ") if string else ""
+
 class GenericSection:
     """Base class for JATS Section and Appendix components.
 
@@ -49,8 +53,12 @@ class GenericSection:
         title_element = section.find("title")
         title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
         label_title_raw = label_string + title_string
-        label = label_element.text if label_element is not None else None
-        title = cls._get_title(title_element)
+        label = (
+            clean_string(label_element.text)
+            if label_element is not None and label_element.text
+            else None
+        )
+        title = clean_string(cls._get_title(title_element))
         return label, title, label_title_raw
 
     @classmethod
@@ -62,7 +70,7 @@ class GenericSection:
         if named_content is not None:
             return cls._get_title(named_content)
         else:
-            return title_or_named_content.text
+            return title_or_named_content.text.strip() if title_or_named_content.text else None
 
     @classmethod
     def _get_raw_content(cls, section: etree._Element) -> str | None:
