@@ -16,6 +16,7 @@ def clean_string(string: str | None) -> str:
     """Remove leading and trailing whitespace and newlines from a string."""
     return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ") if string else ""
 
+
 class GenericSection:
     """Base class for JATS Section and Appendix components.
 
@@ -53,11 +54,7 @@ class GenericSection:
         title_element = section.find("title")
         title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
         label_title_raw = label_string + title_string
-        label = (
-            clean_string(label_element.text)
-            if label_element is not None and label_element.text
-            else None
-        )
+        label = clean_string(label_element.text) if label_element is not None and label_element.text else None
         title = clean_string(cls._get_title(title_element))
         return label, title, label_title_raw
 

@@ -10,7 +10,6 @@ from typing import Any, BinaryIO
 from urllib.parse import unquote, urlparse
 
 from fastapi import File, HTTPException, UploadFile
-from fastapi_cache import FastAPICache
 from jats_classes import JATSDocument
 from jats_storage_adapters.interface import StorageAdapter
 from lxml import etree
