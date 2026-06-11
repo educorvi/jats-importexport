@@ -4,6 +4,8 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 """
 
 import base64
+import json
+import logging
 import mimetypes
 import os
 from logging import debug
@@ -25,7 +27,11 @@ from jats_classes import (
 
 from .interface import StorageAdapter
 
+logger = logging.getLogger(__name__)
+
+
 httpx_client = httpx.Client(timeout=15)
+
 
 class PloneStorageAdapter(StorageAdapter):
     """Storage adapter interacting with a Plone instance over the REST API.
@@ -194,13 +200,17 @@ class PloneStorageAdapter(StorageAdapter):
 
     def save_jats_document(self, document: JATSDocument, container: str) -> str:
         """Serialize and upload a JATSDocument object graph to Plone."""
-        self.__create_container(container)
-        result_url = self.__create_article(document.article, container)
-        base_path = urlparse(self.base_url).path.rstrip("/")
-        result_path = urlparse(result_url).path
-        if result_path.lower().startswith(base_path.lower()):
-            return result_path[len(base_path) :]
-        return result_path
+        try:
+            self.__create_container(container)
+            result_url = self.__create_article(document.article, container)
+            base_path = urlparse(self.base_url).path.rstrip("/")
+            result_path = urlparse(result_url).path
+            if result_path.lower().startswith(base_path.lower()):
+                return result_path[len(base_path) :]
+            return result_path
+        except Exception as e:
+            logger.error(f"Error saving JATS document: {e}")
+            raise
 
     def __get_container_url(self, container: str) -> str:
         """Build the complete Plone API URL for a container folder."""
@@ -208,6 +218,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_front(self, front: Front, container_url: str) -> str:
         """Create a Front object inside a Plone Article container."""
+        logger.debug(f"Creating front node for article: {container_url}")
         response = httpx_client.post(
             container_url,
             json={
@@ -228,6 +239,9 @@ class PloneStorageAdapter(StorageAdapter):
             portal_type = "Section"
         else:
             portal_type = "Appendix"
+
+        logger.debug(f"Creating section node for article: {container_url}")
+        logger.debug(f"Section title: {json.dumps(section.title or portal_type)}")
         response = httpx_client.post(
             container_url,
             json={
@@ -249,6 +263,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_body(self, body: Body, container_url: str) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
+        logger.debug(f"Creating body node for article: {container_url}")
         response = httpx_client.post(
             container_url,
             json={
@@ -266,6 +281,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
         """Create an AppendixGroup node inside Plone Back and upload sections."""
+        logger.debug(f"Creating appendix group node for article: {container_url}")
         response = httpx_client.post(
             container_url,
             json={
@@ -286,6 +302,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __create_back(self, back: Back, container_url: str) -> str:
         """Create a Back node inside a Plone Article and upload its appendix groups."""
+        logger.debug(f"Creating back node for article: {container_url}")
         response = httpx_client.post(
             container_url,
             json={
@@ -304,6 +321,7 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_article(self, article: Article, container: str) -> str:
         """Create an Article root node and Front, Body, Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
+        debug(f"Creating article node in container: {url}")
         response = httpx_client.post(
             url,
             json={
