@@ -111,6 +111,8 @@ class PloneStorageAdapter(StorageAdapter):
             article = self.__fetch_article(url)
         except HTTPStatusError as e:
             raise PathNotFoundExpection(path) from e
+        except ValueError:
+            raise
         except Exception as e:
             raise InternalError(f"Error fetching article at {url}") from e
         return JATSDocument(article=article)

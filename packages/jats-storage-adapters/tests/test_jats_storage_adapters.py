@@ -91,9 +91,9 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
         method="POST",
         url="http://localhost:8080/Plone/jats-assets",
     )
-    mock_post = mocker.patch("httpx.post", return_value=mock_response)
+    mock_post = mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.post", return_value=mock_response)
     # Container already exists — __create_container skips folder creation
-    mocker.patch("httpx.get", return_value=make_response(status_code=200, json={}, method="GET"))
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.get", return_value=make_response(status_code=200, json={}, method="GET"))
 
     # Perform file upload
     file_content = b"fake-png-binary-data"
@@ -123,15 +123,15 @@ def test_plone_storage_adapter_upload_file_default_mimetype(clean_env, mocker):
     adapter = PloneStorageAdapter()
 
     mock_response = make_response(status_code=201, json={"@id": "http://localhost/path"}, method="POST")
-    mocker.patch("httpx.post", return_value=mock_response)
-    mocker.patch("httpx.get", return_value=make_response(status_code=200, json={}, method="GET"))
+    mock_post = mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.post", return_value=mock_response)
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.get", return_value=make_response(status_code=200, json={}, method="GET"))
 
     # Upload file with no extension/unknown mimetype
     file_stream = io.BytesIO(b"data")
     file_stream.name = "unknown_file_type"
 
     adapter.upload_file(file_stream, "jats-assets")
-    _, kwargs = httpx.post.call_args
+    _, kwargs = mock_post.call_args
     assert kwargs["json"]["file"]["content-type"] == "application/octet-stream"
 
 
@@ -259,7 +259,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
         else:
             return make_response(status_code=404, url=url)
 
-    mocker.patch("httpx.get", side_effect=mock_get_side_effect)
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.get", side_effect=mock_get_side_effect)
 
     # Perform document retrieval
     doc = adapter.get_jats_document("/my-doc")
@@ -304,7 +304,7 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
         },
         url="http://localhost:8080/Plone/my-doc",
     )
-    mocker.patch("httpx.get", return_value=mock_response)
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.get", return_value=mock_response)
 
     with pytest.raises(ValueError, match="Article must contain Front, Body, and Back"):
         adapter.get_jats_document("/my-doc")
@@ -341,8 +341,8 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
             return res_404(url)  # doesn't exist, will be created
         return res_200(url)
 
-    mocker.patch("httpx.get", side_effect=mock_get_side_effect)
-    mocker.patch("httpx.post", side_effect=mock_post_side_effect)
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.get", side_effect=mock_get_side_effect)
+    mocker.patch("jats_storage_adapters.PloneStorageAdapter.httpx_client.post", side_effect=mock_post_side_effect)
 
     # Let's create a minimal JATSDocument to save
     front = Front(
