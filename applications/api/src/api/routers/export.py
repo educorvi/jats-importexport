@@ -7,9 +7,10 @@ from fastapi import APIRouter, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 
-from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse
+from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse, \
+    MarkdownDocumentResponse
 
-from ..services.export import html_export, jats_export
+from ..services.export import html_export, jats_export, md_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -51,6 +52,12 @@ async def export_html(path: str):
     return await html_export(path)
 
 
+@router.get("/md", operation_id="export_md", response_model=MarkdownDocumentResponse)
+@cache(namespace="export", key_builder=export_cache_key_builder)
+async def export_md(path: str):
+    return await md_export(path)
+
+
 @router.delete("/cache", operation_id="clear_export_cache", response_model=CacheClearedResponse)
 async def clear_export_cache(path: str | None = None):
     if path:
@@ -61,6 +68,7 @@ async def clear_export_cache(path: str | None = None):
         await FastAPICache.clear(key=f"{prefix}:export:export_jats:{path}")
         # Clear HTML export cache for the specific path
         await FastAPICache.clear(key=f"{prefix}:export:export_html:{path}")
+        await FastAPICache.clear(key=f"{prefix}:export:export_md:{path}")
         return CacheClearedResponse(message=f"Cleared cache for {path}")
     else:
         await FastAPICache.clear(namespace="export")

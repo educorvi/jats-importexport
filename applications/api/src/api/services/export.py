@@ -4,12 +4,14 @@ from enum import Enum
 
 from fastapi import Request
 from jats_exporters import HtmlExporter, JatsExporter
+from jats_exporters.markdown import MarkdownExporter
 
-from api.models import HtmlDocumentResponse, JatsDocumentResponse
+from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance
 
 JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()
+MARKDOWN_EXPORTER = MarkdownExporter()
 
 logger = logging.getLogger(__name__)
 
@@ -42,3 +44,8 @@ async def html_export(path: str):
     document = await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
     html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
     return HtmlDocumentResponse(html=html_content)
+
+async def md_export(path: str):
+    document = await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
+    md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
+    return MarkdownDocumentResponse(md=md_content)

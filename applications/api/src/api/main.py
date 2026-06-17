@@ -1,5 +1,4 @@
 """Entrypoint API application module for jats-importexport."""
-
 import argparse
 import json
 import logging
@@ -12,6 +11,7 @@ import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
 
 from api.config import StorageConfig
@@ -37,7 +37,12 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         redis = aioredis.from_url(f"redis://{StorageConfig.REDIS_HOST}", encoding="utf8", decode_responses=False)
-        FastAPICache.init(RedisBackend(redis), prefix=StorageConfig.CACHE_PREFIX)
+        try:
+            await redis.ping()
+            FastAPICache.init(RedisBackend(redis), prefix=StorageConfig.CACHE_PREFIX)
+        except Exception as e:
+            logger.error(f"Failed to connect to Redis, falling back to In-Memory cache: {str(e)}")
+            FastAPICache.init(InMemoryBackend(), prefix=StorageConfig.CACHE_PREFIX)
         yield
         await redis.close()
 

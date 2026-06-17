@@ -5,8 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "lxml>=5.0",
-    "xmlschema>=4.3.1",
+    "lxml~=6.1.1",
+    "markdownify~=1.2.2",
+    "xmlschema~=4.3.1",
     "jats_classes"
 ]
 

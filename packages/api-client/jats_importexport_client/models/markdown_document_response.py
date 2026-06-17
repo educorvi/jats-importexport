@@ -23,12 +23,12 @@ from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class HtmlDocumentResponse(BaseModel):
+class MarkdownDocumentResponse(BaseModel):
     """
-    HtmlDocumentResponse
+    MarkdownDocumentResponse
     """ # noqa: E501
-    html: StrictStr = Field(description="The HTML document")
-    __properties: ClassVar[List[str]] = ["html"]
+    md: StrictStr = Field(description="The Markdown document")
+    __properties: ClassVar[List[str]] = ["md"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +48,7 @@ class HtmlDocumentResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HtmlDocumentResponse from a JSON string"""
+        """Create an instance of MarkdownDocumentResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +73,7 @@ class HtmlDocumentResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HtmlDocumentResponse from a dict"""
+        """Create an instance of MarkdownDocumentResponse from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +81,7 @@ class HtmlDocumentResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "html": obj.get("html")
+            "md": obj.get("md")
         })
         return _obj
 

@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a4"
+    "version": "1.0.0a5"
   },
   "paths": {
     "/status": {
@@ -391,6 +391,53 @@
         }
       }
     },
+    "/export/md": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export Md",
+        "operationId": "export_md",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkdownDocumentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/export/cache": {
       "delete": {
         "tags": [
@@ -602,6 +649,20 @@
           "jats"
         ],
         "title": "JatsDocumentResponse"
+      },
+      "MarkdownDocumentResponse": {
+        "properties": {
+          "md": {
+            "type": "string",
+            "title": "Md",
+            "description": "The Markdown document"
+          }
+        },
+        "type": "object",
+        "required": [
+          "md"
+        ],
+        "title": "MarkdownDocumentResponse"
       },
       "UploadFileResponse": {
         "properties": {

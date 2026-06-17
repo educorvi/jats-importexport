@@ -14,6 +14,7 @@ docs/HTTPValidationError.md
 docs/HtmlDocumentResponse.md
 docs/JatsDocumentResponse.md
 docs/LocationInner.md
+docs/MarkdownDocumentResponse.md
 docs/StatusApi.md
 docs/UploadApi.md
 docs/UploadFileResponse.md
@@ -41,6 +42,7 @@ jats_importexport_client/models/http500_internal_server_error.py
 jats_importexport_client/models/http_validation_error.py
 jats_importexport_client/models/jats_document_response.py
 jats_importexport_client/models/location_inner.py
+jats_importexport_client/models/markdown_document_response.py
 jats_importexport_client/models/upload_file_response.py
 jats_importexport_client/models/upload_xml_request1.py
 jats_importexport_client/models/upload_zip_request1.py
@@ -53,6 +55,5 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_cache_cleared_response.py
-test/test_cache_status_response.py
+test/test_markdown_document_response.py
 tox.ini
