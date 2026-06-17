@@ -44,6 +44,7 @@ class JatsDocumentResponse(BaseModel):
 class HtmlDocumentResponse(BaseModel):
     html: str = Field(description="The HTML document")
 
+
 class MarkdownDocumentResponse(BaseModel):
     md: str = Field(description="The Markdown document")
 

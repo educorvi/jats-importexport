@@ -26,7 +26,7 @@ from jats_classes import (
     Section,
 )
 
-from .errors import PathNotFoundExpection, InternalError
+from .errors import InternalError, PathNotFoundExpection
 from .interface import StorageAdapter
 
 logger = logging.getLogger(__name__)

@@ -1,4 +1,5 @@
 """Entrypoint API application module for jats-importexport."""
+
 import argparse
 import json
 import logging

@@ -7,8 +7,13 @@ from fastapi import APIRouter, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 
-from api.models import CacheClearedResponse, CacheStatusResponse, HtmlDocumentResponse, JatsDocumentResponse, \
-    MarkdownDocumentResponse
+from api.models import (
+    CacheClearedResponse,
+    CacheStatusResponse,
+    HtmlDocumentResponse,
+    JatsDocumentResponse,
+    MarkdownDocumentResponse,
+)
 
 from ..services.export import html_export, jats_export, md_export
 

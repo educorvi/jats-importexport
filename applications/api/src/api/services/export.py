@@ -34,6 +34,7 @@ def get_return_type(request: Request) -> ReturnType:
         case _:
             return ReturnType.JSON
 
+
 async def __load_document(path: str):
     try:
         return await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
@@ -41,6 +42,7 @@ async def __load_document(path: str):
         raise HTTPException(status_code=404, detail=f"Document not found: {e}") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}") from e
+
 
 async def jats_export(path: str):
     document = await __load_document(path)
@@ -52,6 +54,7 @@ async def html_export(path: str):
     document = await __load_document(path)
     html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
     return HtmlDocumentResponse(html=html_content)
+
 
 async def md_export(path: str):
     document = await __load_document(path)
