@@ -1,3 +1,4 @@
+from jats_storage_adapters.errors import PathNotFoundExpection
 import base64
 import io
 import zipfile
@@ -91,7 +92,7 @@ class MockStorageAdapter:
 
     def get_jats_document(self, path: str) -> JATSDocument:
         if path == "nonexistent":
-            raise Exception("Not found")
+            raise PathNotFoundExpection(path)
         # Return a valid JATSDocument
         return JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
 
@@ -140,6 +141,27 @@ def test_export_html(mock_adapter):
     assert response.status_code == 200
     assert "html" in response.json()
     assert "API Test Article" in response.json()["html"]
+
+
+def test_export_md(mock_adapter):
+    response = client.get("/export/md?path=doc1")
+    assert response.status_code == 200
+    assert "md" in response.json()
+    assert "API Test Article" in response.json()["md"]
+
+
+def test_export_md_nonexistent_path(mock_adapter):
+    response = client.get("/export/md?path=nonexistent")
+    assert response.status_code == 404
+
+
+def test_export_md_requires_auth(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/export/md?path=doc1")
+    assert response.status_code == 401
+
+    response = client.get("/export/md?path=doc1", headers={"X-API-Key": "secret"})
+    assert response.status_code == 200
 
 
 # ----------------------------------------------------

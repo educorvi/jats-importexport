@@ -119,7 +119,8 @@ or pipeline) parameterized.
       doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/>-->
 
 
-    <xsl:output doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
+    <xsl:output method="html"
+                doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
                 doctype-system="http://www.w3.org/TR/html4/loose.dtd"
                 encoding="UTF-8"/>
 

@@ -13,6 +13,7 @@ from typing import BinaryIO
 from urllib.parse import urlparse
 
 import httpx
+from httpx import HTTPStatusError
 from jats_classes import (
     Appendix,
     AppendixGroup,
@@ -25,6 +26,7 @@ from jats_classes import (
     Section,
 )
 
+from .errors import PathNotFoundExpection, InternalError
 from .interface import StorageAdapter
 
 logger = logging.getLogger(__name__)
@@ -60,11 +62,7 @@ class PloneStorageAdapter(StorageAdapter):
 
         super().__init__()
 
-    def upload_file(self, file: BinaryIO, container: str) -> str:
-        """Upload a binary file to Plone.
-
-        Converts the stream content into base64 and posts a new 'File' content type.
-        """
+    def __upload_file(self, file: BinaryIO, container: str) -> str:
         self.__create_container(container)
 
         filename = os.path.basename(getattr(file, "name", "") or "upload")
@@ -96,10 +94,25 @@ class PloneStorageAdapter(StorageAdapter):
 
         return response.json().get("@id", url)
 
+    def upload_file(self, file: BinaryIO, container: str) -> str:
+        """Upload a binary file to Plone.
+
+        Converts the stream content into base64 and posts a new 'File' content type.
+        """
+        try:
+            return self.__upload_file(file, container)
+        except Exception as e:
+            raise InternalError(f"Error uploading file to {container}") from e
+
     def get_jats_document(self, path: str) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
         url = f"{self.base_url}/{path.strip('/')}"
-        article = self.__fetch_article(url)
+        try:
+            article = self.__fetch_article(url)
+        except HTTPStatusError as e:
+            raise PathNotFoundExpection(path) from e
+        except Exception as e:
+            raise InternalError(f"Error fetching article at {url}") from e
         return JATSDocument(article=article)
 
     def __get_json(self, url: str) -> dict:
