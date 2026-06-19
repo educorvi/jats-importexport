@@ -11,6 +11,7 @@ import os
 from logging import debug
 from typing import BinaryIO
 from urllib.parse import urlparse
+from lxml import etree
 
 import httpx
 from httpx import HTTPStatusError
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 httpx_client = httpx.Client(timeout=15)
 
+XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
 
 class PloneStorageAdapter(StorageAdapter):
     """Storage adapter interacting with a Plone instance over the REST API.
@@ -59,6 +61,10 @@ class PloneStorageAdapter(StorageAdapter):
         if username is None or password is None:
             raise ValueError("PLONE_USERNAME and PLONE_PASSWORD environment variables must be set")
         self.auth = (username, password)
+
+        xsl_path = os.path.abspath(XSL_PATH)
+        self.xsl_doc = etree.parse(xsl_path)
+        self.transform = etree.XSLT(self.xsl_doc)
 
         super().__init__()
 
@@ -136,16 +142,34 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
         ]
-        return Section(
-            sec_type=data.get("sec_type"),
-            label=data.get("label"),
-            title=data.get("title"),
-            label_title_raw=data.get("label_title_raw") or "",
-            content_raw=data.get("content_raw"),
-            sections=sections,
-        )
+        if data.get("@type") == "Section":
+            return Section(
+                sec_type=data.get("sec_type"),
+                label=data.get("label"),
+                title=data.get("title"),
+                label_title_raw=data.get("label_title_raw") or "",
+                content_raw=data.get("content_raw"),
+                sections=sections,
+            )
+        elif data.get("@type") == "EasySection":
+            content: str = data.get("content", {}).get("data", "")
+            content = f"<main>{content}</main>" if content else ""
+            jats_content = str(self.transform(etree.fromstring(content)))
+            print(jats_content)
+            return Section(
+                sec_type="",
+                label=data.get("label"),
+                title=data.get("title"),
+                label_title_raw="",
+                content_raw=jats_content,
+                sections=sections,
+            )
+        else:
+            raise ValueError(f"Unsupported section type: {data.get('@type')}")
 
     def __fetch_appendix(self, url: str) -> Appendix:
         """Fetch and reconstruct an Appendix and subsections from Plone."""
@@ -181,7 +205,9 @@ class PloneStorageAdapter(StorageAdapter):
         """Fetch and reconstruct the Body node and its sections from Plone."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"])
+            for item in data.get("items", [])
+            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
         ]
         return Body(sections=sections)
 
