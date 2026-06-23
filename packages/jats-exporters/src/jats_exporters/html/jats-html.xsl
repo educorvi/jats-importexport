@@ -2920,9 +2920,9 @@ or pipeline) parameterized.
 
 
     <xsl:template match="italic">
-        <i>
+        <em>
             <xsl:apply-templates/>
-        </i>
+        </em>
     </xsl:template>
 
 
