@@ -57,8 +57,8 @@
         </section>
     </xsl:template>
 
-    <xsl:template match="h2 | h3 | h4 | h5 | h6">
-        <heading>
+    <xsl:template match="h1 | h2 | h3 | h4 | h5 | h6">
+        <heading level="{local-name()}">
             <xsl:apply-templates/>
         </heading>
     </xsl:template>
