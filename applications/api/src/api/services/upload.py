@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None):
-    adapter_instance = get_adapter_instance()
-
     try:
+        adapter_instance = get_adapter_instance()
+
         # Check file size
         # These are synchronous operations, but for small files are usually fast enough
         # For very large files, this might still block, but typically file.read() is awaited.
@@ -106,6 +106,7 @@ async def upload_zip(
     except OSError as e:
         raise HTTPException(status_code=400, detail=f"Could not process uploaded ZIP content: {e}")
     except Exception:
+        logger.error("Unexpected error while processing the upload.", exc_info=True)
         raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
     finally:
         await uploaded_file.close()

@@ -19,9 +19,8 @@ from api.config import StorageConfig
 
 from .auth import verify_api_key
 from .config import APIConfig
+from .logging import logger
 from .routers import export, status, upload
-
-logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
