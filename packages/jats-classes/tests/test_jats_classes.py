@@ -268,3 +268,141 @@ def test_generic_section_content_raw_extraction_edge_cases():
     xml_empty = "<sec><label>L</label><title>T</title></sec>"
     elem_empty = etree.fromstring(xml_empty)
     assert GenericSection._get_raw_content(elem_empty) is None
+
+
+# ----------------------------------------------------
+# Tests for Durchführungsanweisung subsection split
+# ----------------------------------------------------
+
+
+def test_section_split_on_durchfuehrungsanweisung():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Normal content.</p>
+        <p><italic>Durchführungsanweisung</italic> instruction text</p>
+        <p>Following content.</p>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+
+    # Main section still has normal content before split point
+    assert "Normal content." in sec.content_raw
+
+    # One auto-generated subsection containing split content
+    assert len(sec.sections) == 1
+    sub = sec.sections[0]
+    assert "Durchführungsanweisung" in sub.content_raw
+    assert "Following content." in sub.content_raw
+
+
+def test_section_no_split_without_durchfuehrungsanweisung():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Some content.</p>
+        <p>More content.</p>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+    assert len(sec.sections) == 0
+    assert "Some content." in sec.content_raw
+
+
+def test_section_split_ignores_italic_in_nested_sec():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Intro content.</p>
+        <sec>
+            <title>Nested</title>
+            <p><italic>Durchführungsanweisung</italic> inside nested sec</p>
+        </sec>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+    # The italic is inside an existing nested sec — no extra split at top level
+    assert len(sec.sections) == 1
+    assert sec.sections[0].title == "Nested"
+
+
+# ----------------------------------------------------
+# Tests for Vorbemerkungen subsection split
+# ----------------------------------------------------
+
+
+def test_section_split_on_vorbemerkungen():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Normal content.</p>
+        <p><span>Vorbemerkungen</span> introductory text</p>
+        <p>Following content.</p>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+
+    assert "Normal content." in sec.content_raw
+
+    assert len(sec.sections) == 1
+    sub = sec.sections[0]
+    assert "Vorbemerkungen" in sub.content_raw
+    assert "Following content." in sub.content_raw
+
+
+def test_section_no_split_without_vorbemerkungen():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Some content.</p>
+        <p>More content.</p>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+    assert len(sec.sections) == 0
+    assert "Some content." in sec.content_raw
+
+
+def test_section_split_ignores_span_in_nested_sec():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Intro content.</p>
+        <sec>
+            <title>Nested</title>
+            <p><span>Vorbemerkungen</span> inside nested sec</p>
+        </sec>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+    # The span is inside an existing nested sec — no extra split at top level
+    assert len(sec.sections) == 1
+    assert sec.sections[0].title == "Nested"
+
+
+def test_section_no_split_vorbemerkungen_partial_text():
+    xml_str = """
+    <sec>
+        <label>1.</label>
+        <title>Main Section</title>
+        <p>Normal content.</p>
+        <p><span>Vorbemerkungen und mehr</span> extra text</p>
+        <p>Following content.</p>
+    </sec>
+    """
+    elem = etree.fromstring(xml_str)
+    sec = Section.from_xml_element(elem)
+    # Partial text match should not trigger a split
+    assert len(sec.sections) == 0

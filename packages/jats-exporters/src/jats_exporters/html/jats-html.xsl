@@ -1954,7 +1954,7 @@ or pipeline) parameterized.
                 <xsl:otherwise>h6</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <div class="section">
+        <div class="section" data-sec-type="{@sec-type}">
             <xsl:call-template name="named-anchor"/>
             <xsl:if test="label or title">
                 <xsl:element name="{$heading-tag}">
