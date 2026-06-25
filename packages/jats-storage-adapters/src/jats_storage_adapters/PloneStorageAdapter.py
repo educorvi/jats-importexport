@@ -81,12 +81,16 @@ class PloneStorageAdapter(StorageAdapter):
 
         url = self.__get_container_url(container)
 
+        is_image = content_type.startswith("image/")
+        portal_type = "Image" if is_image else "File"
+        field_name = "image" if is_image else "file"
+
         response = httpx_client.post(
             url,
             json={
-                "@type": "File",
+                "@type": portal_type,
                 "title": filename,
-                "file": {
+                field_name: {
                     "data": encoded,
                     "encoding": "base64",
                     "filename": filename,
