@@ -8,7 +8,7 @@ ccgreen=\033[0;32m
 .PHONY: install lint lint-fix format format-check typecheck test build clean build-image push-image generate-client get-api-version
 
 check_dependency_%:
-	@printf '\e$(ccyellow)%-40s' "Checking dependency $*... "
+	@printf '$(ccyellow)%-40s' "Checking dependency $*... "
 	@command -v $* >/dev/null 2>&1 && echo -e "$(ccgreen)found$(ccend)" || (echo -e "$(ccred)$* is not in PATH, please install it$(ccend)" && exit 1)
 
 
