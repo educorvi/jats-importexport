@@ -73,17 +73,11 @@ class Section(GenericSection):
             section.remove(elem)
             new_sec.append(elem)
         section.append(new_sec)
-
+        
     @classmethod
-    def _split_on_vorbemerkungen(cls, section: etree._Element) -> None:
-        """Split section at span 'Vorbemerkungen' into a new subsection.
-
-        If the section contains a <span> element whose text is exactly
-        "Vorbemerkungen", the direct-child ancestor of that element
-        (within this section) and all its following siblings are moved into a
-        newly created <sec> child appended to the section.
-        """
-        xpath_result = section.xpath('.//named-content[text()="Vorbemerkungen"]')
+    def _apply_section_type_based_on_heading(cls, section: etree._Element, heading: str, sec_type: str) -> None:
+        """Set section type based on heading."""
+        xpath_result = section.xpath(f".//named-content[text()=\"{heading}\"]")
         if not isinstance(xpath_result, list):
             return
         raw_matches: list[etree._Element] = [e for e in xpath_result if isinstance(e, etree._Element)]
@@ -98,7 +92,20 @@ class Section(GenericSection):
                 break
             node = parent
         if parent:
-            parent.set("sec-type", "preamble")
+            parent.set("sec-type", sec_type)
+
+    @classmethod
+    def _split_on_vorbemerkungen(cls, section: etree._Element) -> None:
+        """Split section at span 'Vorbemerkungen' into a new subsection.
+        """
+        cls._apply_section_type_based_on_heading(section, "Vorbemerkungen", "preamble")
+
+    @classmethod
+    def _split_on_inhaltsverzeichnis(cls, section: etree._Element) -> None:
+        """Split section at span 'Inhaltsverzeichnis' into a new subsection.
+        """
+        cls._apply_section_type_based_on_heading(section, "Inhaltsverzeichnis", "toc")
+
 
     @classmethod
     def from_xml_element(cls, section: etree._Element) -> Section:
@@ -112,6 +119,7 @@ class Section(GenericSection):
         """
         cls._split_on_durchfuehrungsanweisung(section)
         cls._split_on_vorbemerkungen(section)
+        cls._split_on_inhaltsverzeichnis(section)
         sec_type = section.attrib.get("sec-type")
         label, title, label_title_raw = cls._get_label_and_title(section)
         content_raw = cls._get_raw_content(section)

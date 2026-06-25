@@ -305,40 +305,7 @@ or pipeline) parameterized.
     </xsl:template>
 
     <xsl:template match="front | front-stub">
-        <div class="metadata-and-toc">
-            <div class="metadata-small">
-                <table class="table table-bordered">
-                    <tr>
-                        <td>Vom
-                            <xsl:for-each select="article-meta/pub-date[1]">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>In der Fassung vom
-                            <xsl:for-each select="article-meta/pub-date[2]">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <xsl:for-each select="(article-meta/ext-link | article-meta/uri | article-meta/self-uri)[1]">
-                                <a href="{@xlink:href}">Document URI</a>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <nav class="jats-html-export-toc">
-                <xsl:call-template name="toc-sections">
-                    <xsl:with-param name="sections"
-                                    select="//body/sec[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
-                    <xsl:with-param name="depth" select="0"/>
-                </xsl:call-template>
-            </nav>
-        </div>
+        <xsl:call-template name="metadata-and-toc"/>
         <!-- First Table: journal and article metadata -->
         <!--        <div class="metadata-small">-->
         <!--            <table class="table table-bordered">-->
@@ -4199,35 +4166,49 @@ or pipeline) parameterized.
 
     <!-- <?dguv toc?> — inserts a table of contents linking to all
          section headings (sec elements with a non-empty title) in the document. -->
-    <!--    <xsl:template match="processing-instruction('dguv')[normalize-space(.) = 'toc']">-->
-    <!--        <div class="metadata-and-toc">-->
-    <!--            <div class="metadata-small">-->
-    <!--                <table class="table table-bordered">-->
-    <!--                    <tr>-->
-    <!--                        <td>Vom-->
-    <!--                            <xsl:for-each select="//front/article-meta/pub-date[1]">-->
-    <!--                                <xsl:call-template name="format-date"/>-->
-    <!--                            </xsl:for-each>-->
-    <!--                        </td>-->
-    <!--                    </tr>-->
-    <!--                    <tr>-->
-    <!--                        <td>In der Fassung vom-->
-    <!--                            <xsl:for-each select="//front/article-meta/pub-date[2]">-->
-    <!--                                <xsl:call-template name="format-date"/>-->
-    <!--                            </xsl:for-each>-->
-    <!--                        </td>-->
-    <!--                    </tr>-->
-    <!--                </table>-->
-    <!--            </div>-->
-    <!--            <nav class="jats-html-export-toc">-->
-    <!--                <xsl:call-template name="toc-sections">-->
-    <!--                    <xsl:with-param name="sections"-->
-    <!--                                    select="//body/sec[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>-->
-    <!--                    <xsl:with-param name="depth" select="0"/>-->
-    <!--                </xsl:call-template>-->
-    <!--            </nav>-->
-    <!--        </div>-->
-    <!--    </xsl:template>-->
+        <xsl:template match="processing-instruction('dguv')[normalize-space(.) = 'toc']">
+            <xsl:call-template name="metadata-and-toc">
+                <xsl:with-param name="front-node" select="//front"/>
+            </xsl:call-template>
+        </xsl:template>
+
+    <xsl:template name="metadata-and-toc">
+        <xsl:param name="front-node" select="."/>
+        <div class="metadata-and-toc">
+            <div class="metadata-small">
+                <table class="table table-bordered">
+                    <tr>
+                        <td>Vom
+                            <xsl:for-each select="$front-node/article-meta/pub-date[1]">
+                                <xsl:call-template name="format-date"/>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>In der Fassung vom
+                            <xsl:for-each select="$front-node/article-meta/pub-date[2]">
+                                <xsl:call-template name="format-date"/>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <xsl:for-each select="($front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri)[1]">
+                                <a href="{@xlink:href}">Document URI</a>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <nav class="jats-html-export-toc">
+                <xsl:call-template name="toc-sections">
+                    <xsl:with-param name="sections"
+                                    select="//body/sec[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
+                    <xsl:with-param name="depth" select="0"/>
+                </xsl:call-template>
+            </nav>
+        </div>
+    </xsl:template>
 
     <xsl:template name="toc-sections">
         <xsl:param name="sections"/>
