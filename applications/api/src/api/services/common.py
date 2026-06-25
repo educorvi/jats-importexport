@@ -10,6 +10,6 @@ STORAGE_ADAPTER = StorageConfig.STORAGE_ADAPTER
 def get_adapter_instance() -> StorageAdapter:
     try:
         return AvailableStorageAdapters.create_instance_by_name(STORAGE_ADAPTER)
-    except ValueError as e:
+    except ValueError:
         logger.error("Could not connect to the storage adapter.", exc_info=True)
         raise HTTPException(status_code=500, detail="Could not connect to the storage adapter.")

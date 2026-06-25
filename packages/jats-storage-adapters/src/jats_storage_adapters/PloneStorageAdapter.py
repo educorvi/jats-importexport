@@ -11,7 +11,6 @@ import os
 from logging import debug
 from typing import BinaryIO
 from urllib.parse import urlparse
-from lxml import etree
 
 import httpx
 from httpx import HTTPStatusError
@@ -26,6 +25,7 @@ from jats_classes import (
     JATSDocument,
     Section,
 )
+from lxml import etree
 
 from .errors import InternalError, PathNotFoundExpection
 from .interface import StorageAdapter
@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 httpx_client = httpx.Client(timeout=15)
 
 XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
+
 
 class PloneStorageAdapter(StorageAdapter):
     """Storage adapter interacting with a Plone instance over the REST API.
