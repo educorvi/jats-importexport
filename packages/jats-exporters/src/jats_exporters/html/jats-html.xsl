@@ -292,11 +292,11 @@ or pipeline) parameterized.
             </div>
         </xsl:for-each>
 
-        <!-- more metadata goes in the footer -->
-        <div id="{$this-article}-footer" class="footer">
-            <xsl:call-template name="footer-metadata"/>
-            <xsl:call-template name="footer-branding"/>
-        </div>
+<!--        &lt;!&ndash; more metadata goes in the footer &ndash;&gt;-->
+<!--        <div id="{$this-article}-footer" class="footer">-->
+<!--            <xsl:call-template name="footer-metadata"/>-->
+<!--            <xsl:call-template name="footer-branding"/>-->
+<!--        </div>-->
 
         <!-- sub-article or response (recursively calls
                  this template) -->
