@@ -56,13 +56,11 @@ def _upload_single_file(
             console.print(
                 f"[bold cyan]↑ Uploading {file_ext[1:].upper()} file '{file_to_process.name}' to {host}...[/bold cyan]"
             )
+            with open(file_to_process, "rb") as f:
+                file_bytes = f.read()
             if file_ext == ".xml":
-                with open(file_to_process, "rb") as f:
-                    file_bytes = f.read()
-                upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data", container=container)
+                response = upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data", container=container)
             elif file_ext == ".zip":
-                with open(file_to_process, "rb") as f:
-                    file_bytes = f.read()
                 response = upload_api.upload_zip(
                     zip_file=file_bytes,
                     _content_type="multipart/form-data",
