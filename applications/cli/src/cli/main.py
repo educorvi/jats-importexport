@@ -59,7 +59,9 @@ def _upload_single_file(
             with open(file_to_process, "rb") as f:
                 file_bytes = f.read()
             if file_ext == ".xml":
-                response = upload_api.upload_xml(xml_file=file_bytes, _content_type="multipart/form-data", container=container)
+                response = upload_api.upload_xml(
+                    xml_file=file_bytes, _content_type="multipart/form-data", container=container
+                )
             elif file_ext == ".zip":
                 response = upload_api.upload_zip(
                     zip_file=file_bytes,

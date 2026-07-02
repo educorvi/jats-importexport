@@ -73,11 +73,11 @@ class Section(GenericSection):
             section.remove(elem)
             new_sec.append(elem)
         section.append(new_sec)
-        
+
     @classmethod
     def _apply_section_type_based_on_heading(cls, section: etree._Element, heading: str, sec_type: str) -> None:
         """Set section type based on heading."""
-        xpath_result = section.xpath(f".//named-content[text()=\"{heading}\"]")
+        xpath_result = section.xpath(f'.//named-content[text()="{heading}"]')
         if not isinstance(xpath_result, list):
             return
         raw_matches: list[etree._Element] = [e for e in xpath_result if isinstance(e, etree._Element)]
@@ -96,16 +96,13 @@ class Section(GenericSection):
 
     @classmethod
     def _split_on_vorbemerkungen(cls, section: etree._Element) -> None:
-        """Split section at span 'Vorbemerkungen' into a new subsection.
-        """
+        """Split section at span 'Vorbemerkungen' into a new subsection."""
         cls._apply_section_type_based_on_heading(section, "Vorbemerkungen", "preamble")
 
     @classmethod
     def _split_on_inhaltsverzeichnis(cls, section: etree._Element) -> None:
-        """Split section at span 'Inhaltsverzeichnis' into a new subsection.
-        """
+        """Split section at span 'Inhaltsverzeichnis' into a new subsection."""
         cls._apply_section_type_based_on_heading(section, "Inhaltsverzeichnis", "toc")
-
 
     @classmethod
     def from_xml_element(cls, section: etree._Element) -> Section:

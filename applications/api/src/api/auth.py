@@ -1,4 +1,5 @@
 """API key authentication dependency."""
+
 import secrets
 
 import httpx

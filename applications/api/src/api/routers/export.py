@@ -3,7 +3,7 @@ import urllib.parse
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import APIRouter, Request, Response, Depends
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 
@@ -14,8 +14,8 @@ from api.models import (
     JatsDocumentResponse,
     MarkdownDocumentResponse,
 )
-from ..auth import require_permission
 
+from ..auth import require_permission
 from ..services.export import html_export, jats_export, md_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
