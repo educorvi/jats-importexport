@@ -3,7 +3,7 @@ import urllib.parse
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Depends
 from fastapi_cache import FastAPICache
 from fastapi_cache.decorator import cache
 
@@ -14,6 +14,7 @@ from api.models import (
     JatsDocumentResponse,
     MarkdownDocumentResponse,
 )
+from ..auth import require_permission
 
 from ..services.export import html_export, jats_export, md_export
 
@@ -63,7 +64,12 @@ async def export_md(path: str):
     return await md_export(path)
 
 
-@router.delete("/cache", operation_id="clear_export_cache", response_model=CacheClearedResponse)
+@router.delete(
+    "/cache",
+    operation_id="clear_export_cache",
+    response_model=CacheClearedResponse,
+    dependencies=[Depends(require_permission("manage"))],
+)
 async def clear_export_cache(path: str | None = None):
     if path:
         path = path.lstrip("/").rstrip("/")

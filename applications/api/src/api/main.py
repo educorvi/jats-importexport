@@ -17,7 +17,7 @@ from fastapi_cache.backends.redis import RedisBackend
 
 from api.config import StorageConfig
 
-from .auth import verify_api_key
+from .auth import require_permission
 from .config import APIConfig
 from .logging import logger
 from .routers import export, status, upload
@@ -61,8 +61,8 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(status.router)
-    app.include_router(upload.router, dependencies=[Depends(verify_api_key)])
-    app.include_router(export.router, dependencies=[Depends(verify_api_key)])
+    app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
+    app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
 
     return app
 
