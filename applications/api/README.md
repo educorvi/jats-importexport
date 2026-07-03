@@ -11,10 +11,12 @@ FastAPI REST service for uploading, storing, and exporting [JATS XML](https://ja
 | `POST` | `/upload/zip` | Upload a JATS document as a ZIP archive |
 | `GET` | `/export/jats` | Retrieve and export a stored document as JATS XML |
 | `GET` | `/export/html` | Retrieve and export a stored document as HTML |
+| `GET` | `/export/cache` | Get Redis cache status (enabled flag and prefix) |
+| `DELETE` | `/export/cache` | Clear the export cache (optionally for a specific `path`) |
 
 Upload endpoints accept either a `multipart/form-data` upload or a JSON body with a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
 
-Export endpoints honour the `Accept` header: `application/json` (default), `application/xml`, or `text/html`.
+Export endpoints always return JSON.
 
 An interactive API reference is available at `/docs` when the server is running.
 
@@ -76,8 +78,31 @@ All settings are read from environment variables.
 | `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Default container path for referenced asset files |
 | `MAX_ZIP_FILE_COUNT` | `10000` | Maximum number of files allowed in an uploaded ZIP |
 | `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912` | Maximum uncompressed ZIP size in bytes (512 MB) |
+| `REDIS_HOST` | `localhost` | Hostname of the Redis instance used for caching |
+| `CACHE_PREFIX` | `jats-importexport-cache` | Key prefix used by the Redis cache |
 
 Plone-specific environment variables are documented in [`jats-storage-adapters`](../../packages/jats-storage-adapters).
+
+## Caching
+
+Export responses are cached in Redis via [FastAPI Cache 2](https://github.com/long2ice/fastapi-cache).
+
+Cache keys encode the export function name and the (URL-encoded) document path, e.g. `jats-importexport-cache:export:export_jats:vol1%2Farticle`.
+
+When a document is **uploaded or overwritten**, the cache entries for that document path are automatically invalidated.
+
+You can also manage the cache manually:
+
+```sh
+# Check cache status
+curl -H "X-API-Key: <your-key>" http://localhost:8000/export/cache
+
+# Clear the entire export cache
+curl -X DELETE -H "X-API-Key: <your-key>" http://localhost:8000/export/cache
+
+# Clear cache for a specific document
+curl -X DELETE -H "X-API-Key: <your-key>" "http://localhost:8000/export/cache?path=vol1/article"
+```
 
 ## Generating the OpenAPI client
 
