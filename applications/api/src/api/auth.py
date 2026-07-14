@@ -35,15 +35,18 @@ def require_permission(permission: str = "write"):
         if api_key and secrets.compare_digest(api_key, APIConfig.API_KEY):
             return
         if APIConfig.API_KEY_MANAGER_URL and APIConfig.API_KEY_MANAGER_API_ID:
-            request = httpx.post(
-                APIConfig.API_KEY_MANAGER_URL.rstrip("/") + "/api/key/check",
-                json={"api_id": APIConfig.API_KEY_MANAGER_API_ID, "api_key": api_key, "permission": permission},
-            )
-            if request.status_code >= 400:
-                logger.error("API key check failed: %s", request.json())
-                raise HTTPException(status_code=500, detail="Internal error while checking API key")
-            if request.json().get("valid") is True:
-                return
+            try:
+                request = httpx.post(
+                    APIConfig.API_KEY_MANAGER_URL.rstrip("/") + "/api/key/check",
+                    json={"api_id": APIConfig.API_KEY_MANAGER_API_ID, "api_key": api_key, "permission": permission},
+                )
+                if request.status_code >= 400:
+                    logger.error("API key check failed: %s", request.json())
+                    raise HTTPException(status_code=500, detail="Internal error while checking API key")
+                if request.json().get("valid") is True:
+                    return
+            except httpx.RequestError as e:
+                logger.error("API key check failed: %s", e)
 
         raise HTTPException(status_code=401, detail="Invalid or missing API key or insufficient privileges.")
 
