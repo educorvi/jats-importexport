@@ -14,3 +14,4 @@
 *.md
 *.log
 packages/api-client
+scripts
