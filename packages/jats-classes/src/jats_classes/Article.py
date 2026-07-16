@@ -21,9 +21,9 @@ class Article:
 
     front: Front
     body: Body
-    back: Back
+    back: Back | None
 
-    def __init__(self, front: Front, body: Body, back: Back):
+    def __init__(self, front: Front, body: Body, back: Back | None):
         """Initialize Article with front, body, and back components."""
         self.front = front
         self.body = body
@@ -42,9 +42,12 @@ class Article:
         front_element = article.find("front")
         body_element = article.find("body")
         back_element = article.find("back")
-        if front_element is None or body_element is None or back_element is None:
-            raise ValueError("Article element must contain 'front', 'body', and 'back' elements")
+        if front_element is None or body_element is None:
+            raise ValueError("Article element must contain 'front' and 'body' elements")
         front = Front.from_xml_element(front_element)
         body = Body.from_xml_element(body_element)
-        back = Back.from_xml_element(back_element)
+        if back_element:
+            back = Back.from_xml_element(back_element)
+        else:
+            back = None
         return cls(front=front, body=body, back=back)

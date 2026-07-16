@@ -53,8 +53,10 @@ def _get_body_jats(body: Body) -> str:
     return f"<body>{body_content}</body>"
 
 
-def _get_back_jats(back: Back) -> str:
+def _get_back_jats(back: Back | None) -> str:
     """Serialize the Back element and its appendix groups to JATS XML."""
+    if back is None:
+        return ""
     back_content = "\n".join(map(_get_appendix_group_jats, back.appendix_groups))
     return f"<back>{back_content}</back>"
 

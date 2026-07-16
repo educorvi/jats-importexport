@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**url** | **str** | The URL of the uploaded file | 
+**urls** | **List[str]** | The URLs of the uploaded files | 
 
 ## Example
 

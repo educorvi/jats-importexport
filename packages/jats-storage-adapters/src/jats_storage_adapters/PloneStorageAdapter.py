@@ -239,9 +239,9 @@ class PloneStorageAdapter(StorageAdapter):
                 body = self.__fetch_body(item_url)
             elif pt == "Back":
                 back = self.__fetch_back(item_url)
-        if not all([front, body, back]):
-            raise ValueError("Article must contain Front, Body, and Back")
-        assert front is not None and body is not None and back is not None
+        if not all([front, body]):
+            raise ValueError("Article must contain Front and Body")
+        assert front is not None and body is not None
         return Article(front=front, body=body, back=back)
 
     def save_jats_document(self, document: JATSDocument, container: str) -> str:
@@ -346,8 +346,10 @@ class PloneStorageAdapter(StorageAdapter):
             self.__create_section(app, response_url)
         return response_url
 
-    def __create_back(self, back: Back, container_url: str) -> str:
+    def __create_back(self, back: Back | None, container_url: str) -> str | None:
         """Create a Back node inside a Plone Article and upload its appendix groups."""
+        if back is None:
+            return None
         logger.debug(f"Creating back node for article: {container_url}")
         response = httpx_client.post(
             container_url,

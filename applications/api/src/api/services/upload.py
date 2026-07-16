@@ -48,7 +48,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
 
         url = await asyncio.to_thread(_save_jats_document, adapter_instance, document, container)
 
-        return UploadFileResponse(url=url)
+        return UploadFileResponse(urls=[url])
 
     except HTTPException:
         raise
@@ -81,24 +81,25 @@ async def upload_zip(
 
                 _validate_and_extract_zip(uploaded_file.file, tmp_dir_path)
 
-                xml_file = _find_xml_file(tmp_dir_path)
+                xml_files = _find_xml_file(tmp_dir_path)
 
-                parser = etree.XMLParser(resolve_entities=False, no_network=True)
-                xml_tree = etree.parse(str(xml_file), parser=parser)
+                urls = []
+                for xml_file in xml_files:
+                    parser = etree.XMLParser(resolve_entities=False, no_network=True)
+                    xml_tree = etree.parse(str(xml_file), parser=parser)
 
-                _create_JATSDocument_from_xml_tree(xml_tree)
+                    _create_JATSDocument_from_xml_tree(xml_tree)
 
-                _upload_files_and_update_references(xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container)
+                    _upload_files_and_update_references(
+                        xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container
+                    )
 
-                modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
+                    modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
+                    urls.append(_save_jats_document(adapter_instance, modified_document, container))
+            return urls
 
-                url = _save_jats_document(adapter_instance, modified_document, container)
-            return url
-
-        url = await asyncio.to_thread(blocking_zip_processing)
-
-        return UploadFileResponse(url=url)
-
+        results = await asyncio.to_thread(blocking_zip_processing)
+        return UploadFileResponse(urls=results)
     except HTTPException:
         raise
     except etree.XMLSyntaxError as e:
@@ -245,7 +246,7 @@ def _validate_and_extract_zip(zip_file: BinaryIO, target_directory: Path) -> Non
     return None
 
 
-def _find_xml_file(extraction_root: Path) -> Path:
+def _find_xml_file(extraction_root: Path) -> list[Path]:
     """Search for a single XML file within the given directory and its subdirectories.
     Returns the path to the XML file if exactly one is found, or raises an HTTPException if none or multiple are found.
     """
@@ -259,10 +260,8 @@ def _find_xml_file(extraction_root: Path) -> Path:
 
     if not xml_files:
         raise HTTPException(status_code=400, detail="No XML file found in uploaded ZIP archive.")
-    if len(xml_files) > 1:
-        raise HTTPException(status_code=400, detail="Multiple XML files found in uploaded ZIP archive.")
 
-    return xml_files[0]
+    return xml_files
 
 
 def _upload_files_and_update_references(

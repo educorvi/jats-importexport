@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a8"
+    "version": "1.0.0a9"
   },
   "paths": {
     "/status": {
@@ -666,18 +666,24 @@
       },
       "UploadFileResponse": {
         "properties": {
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL of the uploaded file",
+          "urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Urls",
+            "description": "The URLs of the uploaded files",
             "examples": [
-              "http://example.com/files/uploaded_file"
+              [
+                "http://example.com/files/uploaded_file1",
+                "http://example.com/files/uploaded_file2"
+              ]
             ]
           }
         },
         "type": "object",
         "required": [
-          "url"
+          "urls"
         ],
         "title": "UploadFileResponse"
       },
