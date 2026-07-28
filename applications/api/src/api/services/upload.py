@@ -18,7 +18,7 @@ from lxml import etree
 from ..config import StorageConfig
 from ..models import UploadFileResponse
 from .common import get_adapter_instance
-from .upload_docx import get_xml_from_docx_content, parse_and_add_metadata_to_docx_tree
+from .upload_docx import adapt_docx_xml, get_xml_from_docx_content
 
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 XML_NAMESPACE = "http://www.w3.org/XML/1998/namespace"
@@ -178,12 +178,19 @@ async def upload_docx(
             parser = etree.XMLParser(resolve_entities=False, no_network=True)
             xml_tree = await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser)
 
-            # Parse metadata from DOCX and populate the XML structure
-            await asyncio.to_thread(parse_and_add_metadata_to_docx_tree, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
+            # Adapt the converted DOCX XML tree to conform to JATS structure and conventions
+            await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
 
             await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
-            await asyncio.to_thread(_upload_files_and_update_references_root,
-                                    xml_tree, dummy_xml_path, media_dir, adapter_instance, asset_container, True)
+            await asyncio.to_thread(
+                _upload_files_and_update_references_root,
+                xml_tree,
+                dummy_xml_path,
+                media_dir,
+                adapter_instance,
+                asset_container,
+                True,
+            )
             modified_document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
             url = await asyncio.to_thread(_save_jats_document, adapter_instance, modified_document, container)
 

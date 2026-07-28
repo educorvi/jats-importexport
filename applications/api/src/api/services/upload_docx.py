@@ -35,9 +35,20 @@ def get_xml_from_docx_content(docx_content: str) -> str:
     return XML_WORD_TEMPLATE.format(docx_content=docx_content)
 
 
+def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str) -> None:
+    """Adapt the converted DOCX XML tree to conform to JATS structure and conventions."""
+    _parse_and_add_metadata_to_docx_tree(xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
+    has_toc = _remove_table_of_contents(xml_tree)
+    _add_sec_type_to_sections(xml_tree)
+    if has_toc:
+        _add_new_table_of_contents(xml_tree)
+    _convert_textboxes_to_boxed_text(xml_tree)
+
+
 def _get_metadata_dict_from_docx_tree(xml_tree: etree._Element) -> dict[str, str]:
     """Extract metadata from the converted and parsed DOCX content represented as an lxml XML tree.
     The document must contain a table at the beginning with two columns.
+    The table will be removed from the XML tree after extracting the metadata.
     """
 
     metadata_dict: dict[str, str] = {}
@@ -65,6 +76,9 @@ def _get_metadata_dict_from_docx_tree(xml_tree: etree._Element) -> dict[str, str
         value = " ".join(" ".join(str(t).split()) for t in cells[1].itertext()).strip()
         if key:
             metadata_dict[key] = value
+
+    # Remove the table from the XML tree after extracting metadata
+    body.remove(table_wrap)
 
     return metadata_dict
 
@@ -135,7 +149,7 @@ def _add_author_to_contrib(contrib: etree._Element, name_dict: dict[str, str]) -
         aff.text = name_dict["aff"]
 
 
-def parse_and_add_metadata_to_docx_tree(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str) -> None:
+def _parse_and_add_metadata_to_docx_tree(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str) -> None:
     """Parse the metadata from the converted DOCX content represented as an lxml XML tree
     and add it to the <front> section of the JATS XML structure.
     """
@@ -390,3 +404,293 @@ def parse_and_add_metadata_to_docx_tree(xml_tree: etree._Element, XML_NAMESPACE:
                 meta_name.text = key
                 meta_value = etree.SubElement(custom_meta, "meta-value")
                 meta_value.text = metadata_dict[key]
+
+
+def _remove_table_of_contents(xml_tree: etree._Element) -> bool:
+    """Remove the docx table of contents. Only works if the table of contents is
+    the first element after the metadata table in the <body> section of the XML tree.
+    """
+    body = xml_tree.find("body")
+    if body is None:
+        return False
+    if len(body) < 1 or body[0].tag != "sec":
+        return False
+    toc_sec = body[0]
+    if toc_sec.attrib.get("id") != "inhaltsverzeichnis":
+        return False
+
+    if len(toc_sec) > 0 and (toc_title := toc_sec[0]).tag == "title":
+        if toc_title.text:
+            toc_title.text = toc_title.text + " (content)"
+        else:
+            toc_title.text = "Inhaltsverzeichnis (content)"
+
+    is_in_toc = False
+    for child in list(toc_sec):
+        if child.tag == "p" and len(child) == 1 and child[0].tag == "xref":
+            is_in_toc = True
+            toc_sec.remove(child)
+        elif is_in_toc:
+            break
+    return True
+
+
+XML_TOC = """<sec sec-type="_1KapitelUeberschrift">
+    <title>
+        <named-content content-type="span" specific-use="keyword">Inhaltsverzeichnis</named-content>
+    </title>
+    <?dguv toc?>
+    <p><?dguv pbr6?></p>
+</sec>"""
+
+
+def _add_new_table_of_contents(xml_tree: etree._Element) -> None:
+    """Add a new table of contents in the converted DOCX content represented as an lxml XML tree
+    with the typical JATS table of contents structure.
+    """
+    body = xml_tree.find("body")
+    if body is None:
+        return
+    new_toc_sec = etree.fromstring(XML_TOC)
+    body.insert(0, new_toc_sec)
+
+
+def _get_sec_type_from_level(level: int) -> str | None:
+    """Return the sec-type string based on the level of the section."""
+    if level < 1:
+        return None
+    if level == 1:
+        return "_1KapitelUeberschrift"
+    else:
+        return f"_1Ueberschrift{level}"
+
+
+def _get_sec_label(parent_label: str, number: int) -> str:
+    """Return the label string for the section based on the parent label and the section number."""
+    if parent_label:
+        return f"{parent_label}.{number}"
+    else:
+        return str(number)
+
+
+def _add_sec_type_to_sections(xml_tree: etree._Element) -> None:
+    """Add sec-type attributes to all <sec> elements in the XML tree based on their level.
+    Embed the title of the section in a <named-content> element with content-type="span" and specific-use="keyword".
+    Add a label based on the level.
+    """
+    body = xml_tree.find("body")
+    if body is None:
+        return
+    _add_sec_type_to_sections_helper(body)
+
+
+def _add_sec_type_to_sections_helper(xml_tree: etree._Element, level: int = 1, parent_label: str = "") -> None:
+    """Helper function to recursively add sec-type attributes to <sec> elements."""
+    for sec_num, sec in enumerate(xml_tree.findall("sec")):
+        sec_type = _get_sec_type_from_level(level)
+        if sec_type:
+            sec.set("sec-type", sec_type)
+
+        title_elem = sec.find("title")
+        if title_elem is not None and title_elem.text:
+            named_content = etree.Element("named-content")
+            named_content.set("content-type", "span")
+            named_content.set("specific-use", "keyword")
+            named_content.text = title_elem.text
+            title_elem.clear()
+            title_elem.append(named_content)
+
+        label = _get_sec_label(parent_label, sec_num + 1)
+        label_elem = etree.Element("label")
+        label_elem.text = label
+        sec.insert(0, label_elem)
+
+        _add_sec_type_to_sections_helper(sec, level + 1, label)
+
+
+def _extract_textbox_metadata(table_wrap: etree._Element) -> dict:
+    """Extract metadata from a textbox table-wrap element.
+
+    Returns a dictionary with:
+    - content_type: The box type (e.g., "oct_ext_Blau")
+    - title: The title of the textbox
+    - keywords: List of keywords
+    """
+    metadata: dict[str, str | list[str] | None] = {
+        "content_type": None,
+        "title": None,
+        "keywords": [],
+    }
+
+    table = table_wrap.find("table")
+    if table is None:
+        return metadata
+
+    tbody = table.find("tbody")
+    if tbody is None:
+        return metadata
+
+    rows = tbody.findall("tr")
+    if len(rows) < 2:
+        return metadata
+
+    # First row contains metadata tables (Box-Type and Title/Keywords)
+    first_row = rows[0]
+    first_td = first_row.find("td")
+    if first_td is None:
+        return metadata
+
+    # Extract Box-Type from first metadata table
+    metadata_tables = first_td.findall(".//table-wrap")
+    for meta_table_wrap in metadata_tables:
+        meta_table = meta_table_wrap.find("table")
+        if meta_table is None:
+            continue
+
+        # Look for the Box-Type table
+        thead = meta_table.find("thead")
+        if thead is not None:
+            header_row = thead.find("tr")
+            if header_row is not None:
+                header_cell = header_row.find("th")
+                if header_cell is not None:
+                    header_text = "".join(str(t) for t in header_cell.itertext()).strip()
+
+                    # This is the Box-Type table
+                    if "Box-Type" in header_text:
+                        meta_tbody = meta_table.find("tbody")
+                        if meta_tbody is not None:
+                            # Look for rows with box types and check which one is marked
+                            for row in meta_tbody.findall("tr"):
+                                cells = row.findall("td")
+                                if len(cells) >= 2:
+                                    box_type_text = "".join(str(t) for t in cells[0].itertext()).strip()
+                                    is_marked = "".join(str(t) for t in cells[1].itertext()).strip()
+                                    # Check if this is marked (has content in second cell)
+                                    if is_marked and box_type_text:
+                                        metadata["content_type"] = box_type_text
+                                        break
+
+                    # This is the Metadata table (Title and Keywords)
+                    elif "Metadaten" in header_text:
+                        meta_tbody = meta_table.find("tbody")
+                        if meta_tbody is not None:
+                            for row in meta_tbody.findall("tr"):
+                                cells = row.findall("td")
+                                if len(cells) >= 2:
+                                    key = "".join(str(t) for t in cells[0].itertext()).strip()
+                                    value = "".join(str(t) for t in cells[1].itertext()).strip()
+
+                                    if key == "Titel":
+                                        metadata["title"] = value
+                                    elif key == "Stichwörter":
+                                        # Split keywords by comma
+                                        keywords = [kw.strip() for kw in value.split(",")]
+                                        metadata["keywords"] = keywords
+
+    return metadata
+
+
+def _convert_textboxes_to_boxed_text(xml_tree: etree._Element) -> None:
+    """Convert textboxes represented as <table-wrap> elements in the XML tree to <boxed-text> elements."""
+    body = xml_tree.find("body")
+    if body is None:
+        return
+    _convert_textboxes_to_boxed_text_helper(body)
+
+
+def _convert_textboxes_to_boxed_text_helper(xml_tree: etree._Element) -> None:
+    """Helper function to recursively convert textboxes to boxed-text."""
+    indices_to_replace = []
+
+    for index, child in enumerate(list(xml_tree)):
+        if child.tag == "table-wrap":
+            table = child.find("table")
+            if table is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            thead = table.find("thead")
+            if thead is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            first_row = thead.find("tr")
+            if first_row is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            first_cell = first_row.find("th")
+            if first_cell is None:
+                first_cell = first_row.find("td")
+
+            if first_cell is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            header_text = "".join(str(t) for t in first_cell.itertext()).strip()
+
+            # Check if this is a textbox (header contains "Textbox:")
+            if not header_text.startswith("Textbox"):
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            # This is a textbox - extract metadata
+            metadata = _extract_textbox_metadata(child)
+
+            # Get the content from the second row (the list)
+            tbody = table.find("tbody")
+            if tbody is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            rows = tbody.findall("tr")
+            if len(rows) < 2:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            # Second row contains the actual content
+            content_row = rows[1]
+            content_td = content_row.find("td")
+            if content_td is None:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            # Find the content (can be any element or multiple elements)
+            if len(content_td) == 0:
+                _convert_textboxes_to_boxed_text_helper(child)
+                continue
+
+            # Create the boxed-text element
+            boxed_text = etree.Element("boxed-text")
+            if metadata["content_type"]:
+                boxed_text.set("content-type", metadata["content_type"])
+
+            # Add sec-meta with keywords
+            if metadata["keywords"]:
+                sec_meta = etree.SubElement(boxed_text, "sec-meta")
+                kwd_group = etree.SubElement(sec_meta, "kwd-group")
+                for kwd in metadata["keywords"]:
+                    kwd_elem = etree.SubElement(kwd_group, "kwd")
+                    kwd_elem.text = kwd
+
+            # Add caption with title
+            if metadata["title"]:
+                caption = etree.SubElement(boxed_text, "caption")
+                title_elem = etree.SubElement(caption, "title")
+                title_elem.text = metadata["title"]
+
+            # Copy all content elements from the content_td
+            for content_elem in content_td:
+                content_copy = etree.fromstring(etree.tostring(content_elem))
+                boxed_text.append(content_copy)
+
+            # Replace the table-wrap with boxed-text
+            indices_to_replace.append((index, boxed_text))
+        else:
+            _convert_textboxes_to_boxed_text_helper(child)
+
+    # Replace in reverse order to maintain indices
+    for index, boxed_text in reversed(indices_to_replace):
+        xml_tree.remove(list(xml_tree)[index])
+        xml_tree.insert(index, boxed_text)
