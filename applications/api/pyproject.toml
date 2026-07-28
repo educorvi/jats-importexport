@@ -9,6 +9,7 @@ dependencies = [
     "fastapi-cache2 == 0.2.2",
     "uvicorn>=0.48.0",
     "python-dotenv>=1.0.0",
+    "pypandoc_binary>=1.17",
     "jats-exporters",
     "jats-classes",
     "jats-storage-adapters",

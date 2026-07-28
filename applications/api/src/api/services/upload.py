@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 from urllib.parse import unquote, urlparse
 
+import pypandoc
 from fastapi import File, HTTPException, UploadFile
 from jats_classes import JATSDocument
 from jats_storage_adapters.interface import StorageAdapter
@@ -17,8 +18,10 @@ from lxml import etree
 from ..config import StorageConfig
 from ..models import UploadFileResponse
 from .common import get_adapter_instance
+from .upload_docx import get_xml_from_docx_content, parse_and_add_metadata_to_docx_tree
 
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+XML_NAMESPACE = "http://www.w3.org/XML/1998/namespace"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
 MAX_ZIP_UNCOMPRESSED_SIZE = StorageConfig.MAX_ZIP_UNCOMPRESSED_SIZE
 CONTAINER = StorageConfig.CONTAINER
@@ -113,6 +116,84 @@ async def upload_zip(
         await uploaded_file.close()
 
 
+async def upload_docx(
+    uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
+):
+    adapter_instance = get_adapter_instance()
+
+    try:
+        uploaded_file.file.seek(0, 2)
+        file_size = uploaded_file.file.tell()
+        if file_size > MAX_ZIP_UNCOMPRESSED_SIZE:
+            raise HTTPException(status_code=413, detail="Uploaded file is too large.")
+        uploaded_file.file.seek(0)
+
+        is_zip = await asyncio.to_thread(zipfile.is_zipfile, uploaded_file.file)
+        if not is_zip:
+            raise HTTPException(status_code=415, detail="Uploaded file must be a DOCX archive.")
+        uploaded_file.file.seek(0)
+
+        def blocking_docx_processing() -> str:
+            with zipfile.ZipFile(uploaded_file.file) as archive:
+                members = set(archive.namelist())
+                if "[Content_Types].xml" not in members or "word/document.xml" not in members:
+                    raise HTTPException(status_code=415, detail="Uploaded file is not a valid DOCX document.")
+
+            uploaded_file.file.seek(0)
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_dir_path = Path(tmp_dir)
+                input_docx = tmp_dir_path / "uploaded.docx"
+                output_xml = tmp_dir_path / "converted.xml"
+
+                with input_docx.open("wb") as destination:
+                    shutil.copyfileobj(uploaded_file.file, destination)
+
+                try:
+                    pypandoc.convert_file(
+                        str(input_docx),
+                        to="jats_publishing",
+                        format="docx",
+                        outputfile=str(output_xml),
+                    )
+                except OSError:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Pandoc is not installed or not available on PATH.",
+                    )
+                except RuntimeError as e:
+                    raise HTTPException(status_code=400, detail=f"Could not convert uploaded DOCX: {e}")
+
+                xml_text = output_xml.read_text(encoding="utf-8")
+                return xml_text
+
+        xml_text = await asyncio.to_thread(blocking_docx_processing)
+
+        xml_text = get_xml_from_docx_content(xml_text)
+
+        # Synchronous XML parsing, offload to thread
+        parser = etree.XMLParser(resolve_entities=False, no_network=True)
+        xml_tree = await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser)
+
+        # Parse metadata from DOCX and populate the XML structure
+        await asyncio.to_thread(parse_and_add_metadata_to_docx_tree, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
+
+        document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
+
+        url = await asyncio.to_thread(_save_jats_document, adapter_instance, document, container)
+
+        return UploadFileResponse(urls=[url])
+
+    except HTTPException:
+        raise
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=f"Could not process uploaded DOCX content: {e}")
+    except Exception:
+        logger.error("Unexpected error while processing the DOCX upload.", exc_info=True)
+        raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
+    finally:
+        await uploaded_file.close()
+
+
 # Data URI helper
 
 
@@ -136,7 +217,12 @@ def decode_data_uri(data_uri: str) -> bytes:
 
 
 def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JATSDocument:
-    xml_content = etree.tostring(xml_tree.getroot(), encoding="unicode")
+    return _create_JATSDocument_from_xml_root(xml_tree.getroot())
+
+
+def _create_JATSDocument_from_xml_root(root: etree._Element) -> JATSDocument:
+    """Create a JATSDocument from an lxml root element."""
+    xml_content = etree.tostring(root, encoding="unicode")
     try:
         return JATSDocument.from_xml(xml_content, xsd_path=None)
     except Exception as e:
