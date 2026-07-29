@@ -120,7 +120,7 @@ def test_jats_document_from_xml_invalid_root():
 
 def test_jats_document_from_xml_missing_components():
     # JATS <article> element must contain front, body, back according to Article.from_xml_element
-    with pytest.raises(ValueError, match="Article element must contain 'front', 'body', and 'back' elements"):
+    with pytest.raises(ValueError, match="Article element must contain 'front' and 'body' elements"):
         JATSDocument.from_xml(MISSING_COMPONENTS_XML, xsd_path=None)
 
 

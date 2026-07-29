@@ -140,7 +140,7 @@ async def upload_xml(request: Request, container: str | None = None):
 @router.post(
     "/docx",
     operation_id="upload_docx",
-    # response_model=DownloadFileResponse,
+    response_model=UploadFileResponse,
     responses={
         400: {"model": HTTP400BadRequest},
         413: {"model": HTTP413PayloadTooLarge},
