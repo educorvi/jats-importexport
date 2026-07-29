@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "api.main",
+      "jinja": true,
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}/applications/api",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/applications/api/src",
+        "API_RELOAD": "true"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}

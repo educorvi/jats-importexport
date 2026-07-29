@@ -101,3 +101,7 @@ def export_openapi() -> None:
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(f"{json.dumps(app.openapi(), indent=args.indent)}\n", encoding="utf-8")
+
+
+if __name__ == "__main__":
+    start()
