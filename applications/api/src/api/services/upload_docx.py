@@ -806,7 +806,7 @@ def _convert_graphics_to_figures_helper(xml_tree: etree._Element, XLINK_NAMESPAC
                 end_label = p_text.find("#", 1)
                 if end_label != -1:
                     label_text = p_text[1:end_label].strip()
-                    caption_text = p_text[end_label + 1:].strip()
+                    caption_text = p_text[end_label + 1 :].strip()
                     caption_p = next_sibling
 
         # Create <fig> element
