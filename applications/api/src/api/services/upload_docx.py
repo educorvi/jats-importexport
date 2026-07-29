@@ -37,12 +37,19 @@ def get_xml_from_docx_content(docx_content: str) -> str:
 
 def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str) -> None:
     """Adapt the converted DOCX XML tree to conform to JATS structure and conventions."""
+
+    # Before adding sec-type attributes to ensure correct labeling / numbering
+    # Do not change the order of these function calls without testing
     _parse_and_add_metadata_to_docx_tree(xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
     has_toc = _remove_table_of_contents(xml_tree)
+    _wrap_content_in_sections(xml_tree)
+    _convert_textboxes_to_boxed_text(xml_tree)
+
     _add_sec_type_to_sections(xml_tree)
+
+    # After adding sec-type attributes (toc has no labels / numbering)
     if has_toc:
         _add_new_table_of_contents(xml_tree)
-    _convert_textboxes_to_boxed_text(xml_tree)
 
 
 def _get_metadata_dict_from_docx_tree(xml_tree: etree._Element) -> dict[str, str]:
@@ -694,3 +701,23 @@ def _convert_textboxes_to_boxed_text_helper(xml_tree: etree._Element) -> None:
     for index, boxed_text in reversed(indices_to_replace):
         xml_tree.remove(list(xml_tree)[index])
         xml_tree.insert(index, boxed_text)
+
+
+def _wrap_content_in_sections(xml_tree: etree._Element) -> None:
+    """Wrap all content in the <body> section that is currently not inside a <sec> element into new <sec> elements
+    with sec-type="_1KapitelUeberschrift"."""
+    body = xml_tree.find("body")
+    if body is None:
+        return
+
+    new_sec = None
+    for child in list(body):
+        if child.tag != "sec":
+            if new_sec is None:
+                new_sec = etree.Element("sec")
+                new_sec.set("sec-type", "_1KapitelUeberschrift")
+                body.insert(body.index(child), new_sec)
+            body.remove(child)
+            new_sec.append(child)
+        else:
+            new_sec = None

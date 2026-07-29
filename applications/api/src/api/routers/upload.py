@@ -147,7 +147,7 @@ async def upload_xml(request: Request, container: str | None = None):
         415: {"model": HTTP415UnsupportedMediaType},
         500: {"model": HTTP500InternalServerError},
     },
-    summary="Convert a docx file to JATS XML and return the JATS XML file",
+    summary="Upload a DOCX file, convert it to JATS XML, and upload to the storage",
     description=(
         "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend."
         " The file can be provided either as a multipart form upload (`docx_file` field)"
