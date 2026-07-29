@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import HTTPException
 from lxml import etree
 
@@ -35,7 +37,7 @@ def get_xml_from_docx_content(docx_content: str) -> str:
     return XML_WORD_TEMPLATE.format(docx_content=docx_content)
 
 
-def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str) -> None:
+def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE: str, media_dir: Path) -> None:
     """Adapt the converted DOCX XML tree to conform to JATS structure and conventions."""
 
     # Before adding sec-type attributes to ensure correct labeling / numbering
@@ -44,6 +46,8 @@ def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE
     has_toc = _remove_table_of_contents(xml_tree)
     _wrap_content_in_sections(xml_tree)
     _convert_textboxes_to_boxed_text(xml_tree)
+    _update_image_names(xml_tree, XLINK_NAMESPACE, media_dir)
+    _convert_graphics_to_figures(xml_tree, XLINK_NAMESPACE)
 
     _add_sec_type_to_sections(xml_tree)
 
@@ -721,3 +725,121 @@ def _wrap_content_in_sections(xml_tree: etree._Element) -> None:
             new_sec.append(child)
         else:
             new_sec = None
+
+
+def _update_image_names(xml_tree: etree._Element, XLINK_NAMESPACE: str, media_dir: Path) -> None:
+    """Rename all local file references in xlink:href attributes by prefixing the filename
+    with the article ID extracted from <front><article-meta><article-id>.
+    The corresponding files in media_dir are also renamed to match.
+    """
+    # Extract article ID
+    article_id_elem = xml_tree.find("front/article-meta/article-id")
+    if article_id_elem is None or not article_id_elem.text:
+        return
+    article_id = article_id_elem.text.strip()
+    if not article_id:
+        return
+    # replace all invalid characters in article_id with underscores for filenames
+    article_id = "".join(c if c.isalnum() else "_" for c in article_id)
+
+    href_attr = f"{{{XLINK_NAMESPACE}}}href"
+    renamed_files: dict[str, str] = {}
+
+    for element in xml_tree.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
+        href_value = element.get(href_attr)
+        if not href_value or href_value.startswith("#") or "://" in href_value:
+            continue
+
+        href_path = Path(href_value)
+        original_filename = href_path.name
+        new_filename = f"{article_id}_{original_filename}"
+        new_href = str(href_path.parent / new_filename)
+        new_path = Path(new_href)
+
+        # Rename the actual file on disk if not already renamed
+        if href_value not in renamed_files:
+            if href_path.is_file() and not new_path.exists():
+                href_path.rename(new_path)
+            renamed_files[href_value] = new_href
+
+        element.set(href_attr, renamed_files[href_value])
+
+
+def _convert_graphics_to_figures(xml_tree: etree._Element, XLINK_NAMESPACE: str) -> None:
+    """Convert all standalone <graphic> elements in the XML tree to <fig> elements.
+    Expects the next sibling of each <graphic> to be a <p> with the pattern #label# caption text.
+    """
+    body = xml_tree.find("body")
+    if body is None:
+        return
+    _convert_graphics_to_figures_helper(body, XLINK_NAMESPACE)
+
+
+def _convert_graphics_to_figures_helper(xml_tree: etree._Element, XLINK_NAMESPACE: str) -> None:
+    """Recursively find and convert standalone <graphic> elements to <fig> elements."""
+    indices_to_replace: list[int] = []
+
+    children = list(xml_tree)
+    for i, child in enumerate(list(xml_tree)):
+        if child.tag == "graphic":
+            indices_to_replace.append(i)
+        else:
+            _convert_graphics_to_figures_helper(child, XLINK_NAMESPACE)
+
+    for i in reversed(indices_to_replace):
+        children = list(xml_tree)
+        graphic = children[i]
+        next_sibling = children[i + 1] if i + 1 < len(children) else None
+
+        # Extract alt-text from graphic child element
+        alt_text_elem = graphic.find("alt-text")
+        alt_text = " ".join(str(t) for t in alt_text_elem.itertext()).strip() if alt_text_elem is not None else None
+
+        # Extract label and caption from next sibling paragraph with pattern #label# caption
+        label_text = None
+        caption_text = None
+        caption_p = None
+
+        if next_sibling is not None and next_sibling.tag == "p":
+            p_text = " ".join(str(t) for t in next_sibling.itertext()).strip()
+            if p_text.startswith("#"):
+                end_label = p_text.find("#", 1)
+                if end_label != -1:
+                    label_text = p_text[1:end_label].strip()
+                    caption_text = p_text[end_label + 1:].strip()
+                    caption_p = next_sibling
+
+        # Create <fig> element
+        fig = etree.Element("fig")
+
+        # Add label
+        if label_text:
+            label_elem = etree.SubElement(fig, "label")
+            label_elem.text = label_text
+
+        # Add caption with sentence breaks as <named-content specific-use="br"/>
+        if caption_text:
+            caption_elem = etree.SubElement(fig, "caption")
+            title_elem = etree.SubElement(caption_elem, "title")
+            title_elem.text = caption_text
+
+        # Add alt-text (moved out of graphic)
+        if alt_text:
+            alt_elem = etree.SubElement(fig, "alt-text")
+            alt_elem.text = alt_text
+
+        # Add graphic (copy all attributes, add specific-use, omit alt-text child)
+        new_graphic = etree.Element("graphic")
+        for attr_name, attr_value in graphic.attrib.items():
+            new_graphic.set(attr_name, attr_value)
+        # new_graphic.set("specific-use", "image-size:l")
+        fig.append(new_graphic)
+
+        # Add empty permissions
+        etree.SubElement(fig, "permissions")
+
+        # Remove caption paragraph and replace graphic with fig
+        if caption_p is not None:
+            xml_tree.remove(caption_p)
+        xml_tree.remove(graphic)
+        xml_tree.insert(i, fig)

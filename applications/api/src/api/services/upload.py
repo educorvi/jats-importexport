@@ -179,7 +179,7 @@ async def upload_docx(
             xml_tree = await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser)
 
             # Adapt the converted DOCX XML tree to conform to JATS structure and conventions
-            await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE)
+            await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE, media_dir)
 
             await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
             await asyncio.to_thread(
