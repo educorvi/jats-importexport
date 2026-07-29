@@ -34,7 +34,10 @@ class HTTP500InternalServerError(BaseModel):
 
 
 class UploadFileResponse(BaseModel):
-    urls: list[str] = Field(description="The URLs of the uploaded files", examples=[["http://example.com/files/uploaded_file1", "http://example.com/files/uploaded_file2"]])
+    urls: list[str] = Field(
+        description="The URLs of the uploaded files",
+        examples=[["http://example.com/files/uploaded_file1", "http://example.com/files/uploaded_file2"]],
+    )
 
 
 class JatsDocumentResponse(BaseModel):
