@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 from urllib.parse import unquote, urlparse
 
+import pypandoc
 from fastapi import File, HTTPException, UploadFile
 from jats_classes import JATSDocument
 from jats_storage_adapters.interface import StorageAdapter
@@ -17,8 +18,10 @@ from lxml import etree
 from ..config import StorageConfig
 from ..models import UploadFileResponse
 from .common import get_adapter_instance
+from .upload_docx import adapt_docx_xml, get_xml_from_docx_content
 
 XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+XML_NAMESPACE = "http://www.w3.org/XML/1998/namespace"
 MAX_ZIP_FILE_COUNT = StorageConfig.MAX_ZIP_FILE_COUNT
 MAX_ZIP_UNCOMPRESSED_SIZE = StorageConfig.MAX_ZIP_UNCOMPRESSED_SIZE
 CONTAINER = StorageConfig.CONTAINER
@@ -113,6 +116,97 @@ async def upload_zip(
         await uploaded_file.close()
 
 
+async def upload_docx(
+    uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
+):
+    adapter_instance = get_adapter_instance()
+
+    try:
+        uploaded_file.file.seek(0, 2)
+        file_size = uploaded_file.file.tell()
+        if file_size > MAX_ZIP_UNCOMPRESSED_SIZE:
+            raise HTTPException(status_code=413, detail="Uploaded file is too large.")
+        uploaded_file.file.seek(0)
+
+        is_zip = await asyncio.to_thread(zipfile.is_zipfile, uploaded_file.file)
+        if not is_zip:
+            raise HTTPException(status_code=415, detail="Uploaded file must be a DOCX archive.")
+        uploaded_file.file.seek(0)
+
+        def blocking_docx_processing(media_dir: Path) -> str:
+            with zipfile.ZipFile(uploaded_file.file) as archive:
+                members = set(archive.namelist())
+                if "[Content_Types].xml" not in members or "word/document.xml" not in members:
+                    raise HTTPException(status_code=415, detail="Uploaded file is not a valid DOCX document.")
+
+            uploaded_file.file.seek(0)
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                tmp_dir_path = Path(tmp_dir)
+                input_docx = tmp_dir_path / "uploaded.docx"
+                output_xml = tmp_dir_path / "converted.xml"
+
+                with input_docx.open("wb") as destination:
+                    shutil.copyfileobj(uploaded_file.file, destination)
+
+                try:
+                    pypandoc.convert_file(
+                        str(input_docx),
+                        to="jats_publishing",
+                        format="docx",
+                        outputfile=str(output_xml),
+                        extra_args=["--extract-media", str(media_dir)],
+                    )
+                except OSError:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Pandoc is not installed or not available on PATH.",
+                    )
+                except RuntimeError as e:
+                    raise HTTPException(status_code=400, detail=f"Could not convert uploaded DOCX: {e}")
+                xml_text = output_xml.read_text(encoding="utf-8")
+                return xml_text
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            media_dir = Path(tmp_dir)
+            dummy_xml_path = media_dir / "dummy.xml"
+
+            xml_text = await asyncio.to_thread(blocking_docx_processing, media_dir)
+
+            xml_text = get_xml_from_docx_content(xml_text)
+
+            # Synchronous XML parsing, offload to thread
+            parser = etree.XMLParser(resolve_entities=False, no_network=True)
+            xml_tree = await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser)
+
+            # Adapt the converted DOCX XML tree to conform to JATS structure and conventions
+            await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE, media_dir)
+
+            await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
+            await asyncio.to_thread(
+                _upload_files_and_update_references_root,
+                xml_tree,
+                dummy_xml_path,
+                media_dir,
+                adapter_instance,
+                asset_container,
+                True,
+            )
+            modified_document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
+            url = await asyncio.to_thread(_save_jats_document, adapter_instance, modified_document, container)
+
+            return UploadFileResponse(urls=[url])
+
+    except HTTPException:
+        raise
+    except OSError as e:
+        raise HTTPException(status_code=400, detail=f"Could not process uploaded DOCX content: {e}")
+    except Exception:
+        logger.error("Unexpected error while processing the DOCX upload.", exc_info=True)
+        raise HTTPException(status_code=500, detail="Unexpected error while processing the upload.")
+    finally:
+        await uploaded_file.close()
+
+
 # Data URI helper
 
 
@@ -136,7 +230,13 @@ def decode_data_uri(data_uri: str) -> bytes:
 
 
 def _create_JATSDocument_from_xml_tree(xml_tree: etree._ElementTree | Any) -> JATSDocument:
-    xml_content = etree.tostring(xml_tree.getroot(), encoding="unicode")
+    """Create a JATSDocument from an lxml ElementTree."""
+    return _create_JATSDocument_from_xml_root(xml_tree.getroot())
+
+
+def _create_JATSDocument_from_xml_root(root: etree._Element) -> JATSDocument:
+    """Create a JATSDocument from an lxml root element."""
+    xml_content = etree.tostring(root, encoding="unicode")
     try:
         return JATSDocument.from_xml(xml_content, xsd_path=None)
     except Exception as e:
@@ -265,7 +365,7 @@ def _find_xml_file(extraction_root: Path) -> list[Path]:
 
 
 def _upload_files_and_update_references(
-    xml_tree: etree._ElementTree | Any,
+    xml_tree: etree._ElementTree,
     xml_file: Path,
     extraction_root: Path,
     adapter_instance: StorageAdapter,
@@ -277,12 +377,32 @@ def _upload_files_and_update_references(
     Only local file references that are within the extracted archive directory are processed.
     External URLs and fragment identifiers are ignored.
     """
+    root = xml_tree.getroot()
+    _upload_files_and_update_references_root(root, xml_file, extraction_root, adapter_instance, asset_container)
+
+
+def _upload_files_and_update_references_root(
+    xml_root: etree._Element,
+    xml_file: Path,
+    extraction_root: Path,
+    adapter_instance: StorageAdapter,
+    asset_container: str | None = None,
+    skip_path_validation: bool = False,
+) -> None:
+    """Find all xlink:href attributes in the XML root element,
+    upload the referenced files to the storage adapter
+    and update the href values to point to the uploaded file URLs.
+    Only local file references that are within the extracted archive directory are processed.
+    External URLs and fragment identifiers are ignored.
+    If skip_path_validation is True, the function will not check if the referenced files are within the extraction_root.
+    It should only be set to True if the paths are known to be safe, such as when processing DOCX media extraction.
+    """
     href_attr = f"{{{XLINK_NAMESPACE}}}href"
     uploaded_files: dict[Path, str] = {}
     xml_directory = xml_file.parent.resolve()
     archive_root = extraction_root.resolve()
 
-    root = xml_tree.getroot()
+    root = xml_root
     for element in root.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
         href_value_raw = element.get(href_attr)
         href_value = href_value_raw if isinstance(href_value_raw, str) else ""
@@ -297,14 +417,18 @@ def _upload_files_and_update_references(
         if not local_reference:
             continue
 
-        local_reference = local_reference.replace("\\", "/")
+        if not skip_path_validation:
+            local_reference = local_reference.replace("\\", "/")
 
-        # Resolve the referenced path case-insensitively
-        relative_to_xml_dir = Path(local_reference)
-        referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
+            # Resolve the referenced path case-insensitively
+            relative_to_xml_dir = Path(local_reference)
+            referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
 
-        if not referenced_path or not _is_path_within(archive_root, referenced_path):
-            continue
+            if not referenced_path or not _is_path_within(archive_root, referenced_path):
+                continue
+        else:
+            referenced_path = Path(local_reference).resolve()
+
         if not referenced_path.is_file():
             continue
 

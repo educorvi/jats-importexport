@@ -17,6 +17,7 @@ docs/LocationInner.md
 docs/MarkdownDocumentResponse.md
 docs/StatusApi.md
 docs/UploadApi.md
+docs/UploadDocxRequest1.md
 docs/UploadFileResponse.md
 docs/UploadXmlRequest1.md
 docs/UploadZipRequest1.md
@@ -43,6 +44,7 @@ jats_importexport_client/models/http_validation_error.py
 jats_importexport_client/models/jats_document_response.py
 jats_importexport_client/models/location_inner.py
 jats_importexport_client/models/markdown_document_response.py
+jats_importexport_client/models/upload_docx_request1.py
 jats_importexport_client/models/upload_file_response.py
 jats_importexport_client/models/upload_xml_request1.py
 jats_importexport_client/models/upload_zip_request1.py

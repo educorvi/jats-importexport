@@ -12,9 +12,7 @@ from pathlib import Path
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Copy OCF ZIP containers to files with a .zip extension."
-    )
+    parser = argparse.ArgumentParser(description="Copy OCF ZIP containers to files with a .zip extension.")
     parser.add_argument(
         "inputs",
         nargs="+",
@@ -26,9 +24,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help="Put all ZIP files in this directory (default: beside each input)",
     )
-    parser.add_argument(
-        "-f", "--force", action="store_true", help="Overwrite existing ZIP files"
-    )
+    parser.add_argument("-f", "--force", action="store_true", help="Overwrite existing ZIP files")
     return parser.parse_args()
 
 

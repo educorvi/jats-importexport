@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a9"
+    "version": "1.0.0a10"
   },
   "paths": {
     "/status": {
@@ -290,6 +290,150 @@
                 },
                 "required": [
                   "xml_file"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/docx": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a DOCX file, convert it to JATS XML, and upload to the storage",
+        "description": "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.",
+        "operationId": "upload_docx",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Container"
+            }
+          },
+          {
+            "name": "assets_container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assets Container"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docx_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "docx_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docx_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "required": [
+                  "docx_file"
                 ]
               }
             }

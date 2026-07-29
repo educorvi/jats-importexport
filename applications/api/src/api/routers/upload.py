@@ -12,6 +12,7 @@ from ..models import (
     UploadFileResponse,
 )
 from ..services.upload import decode_data_uri
+from ..services.upload import upload_docx as upload_docx_service
 from ..services.upload import upload_xml as upload_xml_service
 from ..services.upload import upload_zip as upload_zip_service
 
@@ -134,3 +135,43 @@ async def upload_xml(request: Request, container: str | None = None):
             raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
         xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
     return await upload_xml_service(cast(UploadFile, xml_file), container)
+
+
+@router.post(
+    "/docx",
+    operation_id="upload_docx",
+    response_model=UploadFileResponse,
+    responses={
+        400: {"model": HTTP400BadRequest},
+        413: {"model": HTTP413PayloadTooLarge},
+        415: {"model": HTTP415UnsupportedMediaType},
+        500: {"model": HTTP500InternalServerError},
+    },
+    summary="Upload a DOCX file, convert it to JATS XML, and upload to the storage",
+    description=(
+        "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend."
+        " The file can be provided either as a multipart form upload (`docx_file` field)"
+        " or as a JSON body with the `docx_file` field set to a base64-encoded data URI"
+        " (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`)."
+        " The target containers for the uploaded files and assets can be specified using"
+        " the `container` and `assets_container` query parameters."
+        " If not specified, the default containers will be used."
+    ),
+    openapi_extra=_request_body_extra("docx_file"),
+)
+async def upload_docx(request: Request, container: str | None = None, assets_container: str | None = None):
+    content_type = request.headers.get("content-type", "")
+    if content_type.startswith("multipart/"):
+        form = await request.form()
+        docx_file = form.get("docx_file")
+        if docx_file is None:
+            raise HTTPException(status_code=422, detail="Missing 'docx_file' form field.")
+        if not isinstance(docx_file, StarletteUploadFile):
+            raise HTTPException(status_code=422, detail="Invalid 'docx_file' form field.")
+    else:
+        body = await request.json()
+        data_uri = body.get("docx_file")
+        if not data_uri:
+            raise HTTPException(status_code=422, detail="Missing 'docx_file' field in JSON body.")
+        docx_file = _upload_file_from_data_uri(data_uri, "upload.docx")
+    return await upload_docx_service(cast(UploadFile, docx_file), container, assets_container)

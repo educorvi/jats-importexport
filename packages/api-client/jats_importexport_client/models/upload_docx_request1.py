@@ -17,18 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class HTTP413PayloadTooLarge(BaseModel):
+class UploadDocxRequest1(BaseModel):
     """
-    HTTP413PayloadTooLarge
+    UploadDocxRequest1
     """ # noqa: E501
-    detail: Optional[StrictStr] = 'The uploaded file is too large.'
-    __properties: ClassVar[List[str]] = ["detail"]
+    docx_file: StrictStr = Field(description="Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)")
+    __properties: ClassVar[List[str]] = ["docx_file"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +48,7 @@ class HTTP413PayloadTooLarge(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HTTP413PayloadTooLarge from a JSON string"""
+        """Create an instance of UploadDocxRequest1 from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +73,7 @@ class HTTP413PayloadTooLarge(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HTTP413PayloadTooLarge from a dict"""
+        """Create an instance of UploadDocxRequest1 from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +81,7 @@ class HTTP413PayloadTooLarge(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "detail": obj.get("detail") if obj.get("detail") is not None else 'The uploaded file is too large.'
+            "docx_file": obj.get("docx_file")
         })
         return _obj
 

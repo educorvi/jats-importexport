@@ -173,7 +173,9 @@ def test_upload_xml_multipart_success(mock_adapter):
     file_payload = {"xml_file": ("test.xml", VALID_JATS_XML, "application/xml")}
     response = client.post("/upload/xml", files=file_payload)
     assert response.status_code == 200
-    assert response.json()["url"] == "http://mockstore/jats-file/api-test-article"
+    response_urls = response.json()["urls"]
+    assert len(response_urls) == 1
+    assert response_urls[0] == "http://mockstore/jats-file/api-test-article"
     assert len(mock_adapter.saved_docs) == 1
 
 
@@ -199,7 +201,9 @@ def test_upload_xml_json_data_uri_success(mock_adapter):
 
     response = client.post("/upload/xml", json={"xml_file": data_uri})
     assert response.status_code == 200
-    assert response.json()["url"] == "http://mockstore/jats-file/api-test-article"
+    response_urls = response.json()["urls"]
+    assert len(response_urls) == 1
+    assert response_urls[0] == "http://mockstore/jats-file/api-test-article"
 
 
 def test_upload_xml_json_data_uri_malformed_header(mock_adapter):
@@ -311,7 +315,9 @@ def test_upload_zip_success(mock_adapter):
 
     response = client.post("/upload/zip", files=file_payload)
     assert response.status_code == 200
-    assert response.json()["url"] == "http://mockstore/jats-file/image-reference-article"
+    response_urls = response.json()["urls"]
+    assert len(response_urls) == 1
+    assert response_urls[0] == "http://mockstore/jats-file/image-reference-article"
 
     # Verify that the image file was successfully uploaded to assets container
     assert len(mock_adapter.uploaded_files) == 1
