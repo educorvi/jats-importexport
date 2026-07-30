@@ -163,8 +163,16 @@ class PloneStorageAdapter(StorageAdapter):
         elif data.get("@type") == "EasySection":
             content: str = data.get("content", {}).get("data", "")
             content = f"<main>{content}</main>" if content else ""
-            jats_content = str(self.transform(etree.fromstring(content)))
-            print(jats_content)
+            try:
+                # Use HTML parser to recover from malformed HTML
+                # (e.g. unclosed <col> and <img> tags from plone richtext editor)
+                html_tree = etree.fromstring(content, parser=etree.HTMLParser(recover=True))
+                # HTMLParser wraps in <html><body> — extract the <main>
+                main_elem = html_tree.find(".//main")
+                xml_content = main_elem if main_elem is not None else html_tree
+            except Exception:
+                raise InternalError(f"Error parsing HTML content for EasySection at {url}")
+            jats_content = str(self.transform(xml_content))
             return Section(
                 sec_type="",
                 label=data.get("label"),
