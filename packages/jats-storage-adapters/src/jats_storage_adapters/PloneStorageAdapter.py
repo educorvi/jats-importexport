@@ -283,7 +283,7 @@ class PloneStorageAdapter(StorageAdapter):
             container_url,
             json={
                 "@type": "Front",
-                "title": "Front",
+                "title": "Metadaten",
                 "content_raw": front.content_raw,
             },
             auth=self.auth,
@@ -306,7 +306,7 @@ class PloneStorageAdapter(StorageAdapter):
             container_url,
             json={
                 "@type": portal_type,
-                "title": section.title or portal_type,
+                "title": section.title or "JATS-Abschnitt",
                 "sec_type": section.sec_type,
                 "label": section.label,
                 "label_title_raw": section.label_title_raw,
@@ -328,7 +328,7 @@ class PloneStorageAdapter(StorageAdapter):
             container_url,
             json={
                 "@type": "Body",
-                "title": "Body",
+                "title": "Textkörper",
             },
             auth=self.auth,
             headers={"Accept": "application/json"},
@@ -346,7 +346,7 @@ class PloneStorageAdapter(StorageAdapter):
             container_url,
             json={
                 "@type": "AppendixGroup",
-                "title": app_group.title or "AppendixGroup",
+                "title": app_group.title or "Anhanggruppe",
                 "label": app_group.label,
                 "label_title_raw": app_group.label_title_raw,
                 "content_raw": app_group.content_raw,
@@ -369,7 +369,7 @@ class PloneStorageAdapter(StorageAdapter):
             container_url,
             json={
                 "@type": "Back",
-                "title": "Back",
+                "title": "Anhang",
             },
             auth=self.auth,
             headers={"Accept": "application/json"},
@@ -388,7 +388,7 @@ class PloneStorageAdapter(StorageAdapter):
             url,
             json={
                 "@type": "Article",
-                "title": article.front.get_title() or "Article",
+                "title": article.front.get_title() or "Artikel",
             },
             auth=self.auth,
             headers={"Accept": "application/json"},
