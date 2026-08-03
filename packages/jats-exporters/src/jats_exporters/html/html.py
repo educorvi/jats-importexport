@@ -5,6 +5,7 @@ Defines exporters that process a JATSDocument into an HTML structure.
 
 import abc
 import os
+import re
 from functools import lru_cache
 
 from jats_classes import JATSDocument
@@ -43,6 +44,16 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
         """Apply XSLT transformation to the JATS XML string and return the HTML."""
         parsed_xml_doc = etree.fromstring(xml_doc)
         return str(self.transform(parsed_xml_doc))
+
+    @lru_cache(maxsize=128)
+    def transform_xml(self, xml_doc: str) -> str:
+        """Apply XSLT transformation to the JATS XML string.
+        The XML string does not need to have a single root element.
+        The returned HTML string does not include the <!DOCTYPE html> declaration.
+        """
+        wrapped_xml = f"<root>{xml_doc}</root>"
+        html_content = self._transform(wrapped_xml)
+        return re.sub(r"<!DOCTYPE[^>]*>\s*", "", html_content, flags=re.IGNORECASE)
 
     @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
