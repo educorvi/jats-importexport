@@ -161,6 +161,12 @@ class PloneStorageAdapter(StorageAdapter):
                 sections=sections,
             )
         elif data.get("@type") == "EasySection":
+            label = data.get("label") or ""
+            title = data.get("title") or ""
+            label_raw = f"<label>{label}</label>" if label else ""
+            title_raw = f"<title><named-content content-type=\"span\" specific-use=\"keyword\">{title}</named-content></title>" if title else ""
+            label_title_raw = label_raw + title_raw
+
             content: str = data.get("content", {}).get("data", "")
             content = f"<main>{content}</main>" if content else ""
             try:
@@ -177,7 +183,7 @@ class PloneStorageAdapter(StorageAdapter):
                 sec_type="",
                 label=data.get("label"),
                 title=data.get("title"),
-                label_title_raw="",
+                label_title_raw=label_title_raw,
                 content_raw=jats_content,
                 sections=sections,
             )
