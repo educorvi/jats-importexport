@@ -2303,6 +2303,22 @@ or pipeline) parameterized.
                     <xsl:value-of select="normalize-space(string(.))"/>
                 </xsl:attribute>
             </xsl:for-each>
+            <xsl:if test="@specific-use">
+                <xsl:choose>
+                    <xsl:when test="@specific-use='image-size:icon'">
+                        <xsl:attribute name="class">image-size-icon</xsl:attribute>
+                    </xsl:when>
+                    <xsl:when test="@specific-use='image-size:s'">
+                        <xsl:attribute name="class">image-size-small w-25</xsl:attribute>
+                    </xsl:when>
+                    <xsl:when test="@specific-use='image-size:m'">
+                        <xsl:attribute name="class">image-size-medium w-50</xsl:attribute>
+                    </xsl:when>
+                    <xsl:when test="@specific-use='image-size:l'">
+                        <xsl:attribute name="class">image-size-large w-100</xsl:attribute>
+                    </xsl:when>
+                </xsl:choose>
+            </xsl:if>
             <xsl:call-template name="assign-src"/>
         </img>
     </xsl:template>

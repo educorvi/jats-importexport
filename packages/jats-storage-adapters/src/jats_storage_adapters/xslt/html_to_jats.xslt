@@ -270,33 +270,32 @@
 
     <!-- Images -->
 
-    <!-- A <p> that contains only an <img> should produce <fig>, not <p><fig> -->
-    <xsl:template match="p[img]">
-        <xsl:apply-templates select="img"/>
+    <xsl:template match="p[figure or picture]">
+        <xsl:apply-templates select="figure | picture"/>
     </xsl:template>
 
-    <xsl:template match="img">
+    <xsl:template match="figure | picture">
+        <xsl:variable name="img" select="self::figure/picture/img | self::picture/img"/>
+        <xsl:variable name="img-class" select="concat(' ', self::figure/@class | self::picture/img/@class, ' ')"/>
         <fig>
-            <xsl:if test="@data-captiontext">
+            <xsl:if test="self::figure and figcaption">
                 <caption>
-                    <title><xsl:value-of select="@data-captiontext"/></title>
+                    <title><xsl:value-of select="figcaption"/></title>
                 </caption>
             </xsl:if>
-            <xsl:if test="@alt">
-                <alt-text><xsl:value-of select="@alt"/></alt-text>
+            <xsl:if test="$img/@alt">
+                <alt-text><xsl:value-of select="$img/@alt"/></alt-text>
             </xsl:if>
             <graphic>
-                <xsl:attribute name="xlink:href"><xsl:value-of select="@src"/></xsl:attribute>
-                <xsl:if test="@data-picturevariant">
-                    <xsl:attribute name="specific-use">
-                        <xsl:choose>
-                            <xsl:when test="@data-picturevariant='small'">image-size:s</xsl:when>
-                            <xsl:when test="@data-picturevariant='medium'">image-size:m</xsl:when>
-                            <xsl:when test="@data-picturevariant='large'">image-size:l</xsl:when>
-                            <xsl:otherwise>image-size:m</xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:attribute>
-                </xsl:if>
+                <xsl:attribute name="xlink:href"><xsl:value-of select="$img/@src"/></xsl:attribute>
+                <xsl:attribute name="specific-use">
+                    <xsl:choose>
+                        <xsl:when test="contains($img-class, ' picture-variant-small ')">image-size:s</xsl:when>
+                        <xsl:when test="contains($img-class, ' picture-variant-medium ')">image-size:m</xsl:when>
+                        <xsl:when test="contains($img-class, ' picture-variant-large ')">image-size:l</xsl:when>
+                        <xsl:otherwise>image-size:m</xsl:otherwise>
+                    </xsl:choose>
+                </xsl:attribute>
             </graphic>
         </fig>
     </xsl:template>
