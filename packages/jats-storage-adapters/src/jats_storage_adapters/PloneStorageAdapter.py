@@ -550,40 +550,18 @@ class PloneStorageAdapter(StorageAdapter):
 
                 if label or title:
                     figure = etree.SubElement(
-                        p,
-                        "figure",
-                        attrib={
-                            "class": "image-richtext picture-variant-medium captioned"
-                        }
+                        p, "figure", attrib={"class": "image-richtext picture-variant-medium captioned"}
                     )
 
-                    picture = etree.SubElement(
-                        figure,
-                        "picture",
-                        attrib={"class": "captioned"}
-                    )
+                    picture = etree.SubElement(figure, "picture", attrib={"class": "captioned"})
 
-                    _ = etree.SubElement(
-                        picture,
-                        "img",
-                        attrib={
-                            "alt": img.get("alt", ""),
-                            "src": img.get("src", "")
-                        }
-                    )
+                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": img.get("src", "")})
 
-                    caption = etree.SubElement(
-                        figure,
-                        "figcaption",
-                        attrib={"class": "image-caption"}
-                    )
+                    caption = etree.SubElement(figure, "figcaption", attrib={"class": "image-caption"})
                     caption.text = f"{label or ''} {title or ''}".strip()
 
                 else:
-                    picture = etree.SubElement(
-                        p,
-                        "picture"
-                    )
+                    picture = etree.SubElement(p, "picture")
 
                     _ = etree.SubElement(
                         picture,
@@ -591,8 +569,8 @@ class PloneStorageAdapter(StorageAdapter):
                         attrib={
                             "alt": img.get("alt", ""),
                             "class": "image-richtext picture-variant-medium",
-                            "src": img.get("src", "")
-                        }
+                            "src": img.get("src", ""),
+                        },
                     )
 
                 # Replace img with new structure
@@ -604,6 +582,5 @@ class PloneStorageAdapter(StorageAdapter):
 
                 if title_element is not None:
                     title_element.drop_tree()
-
 
         return etree.tostring(tree, encoding="unicode", method="html", pretty_print=True)
