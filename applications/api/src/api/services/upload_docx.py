@@ -669,7 +669,9 @@ def _convert_textboxes_to_boxed_text_helper(xml_tree: etree._Element) -> None:
                 continue
 
             # Find the content (can be any element or multiple elements)
-            if len(content_td) == 0:
+            has_children = len(content_td) > 0
+            has_text = bool(content_td.text and content_td.text.strip())
+            if not has_children and not has_text:
                 _convert_textboxes_to_boxed_text_helper(child)
                 continue
 
@@ -693,9 +695,14 @@ def _convert_textboxes_to_boxed_text_helper(xml_tree: etree._Element) -> None:
                 title_elem.text = metadata["title"]
 
             # Copy all content elements from the content_td
-            for content_elem in content_td:
-                content_copy = etree.fromstring(etree.tostring(content_elem))
-                boxed_text.append(content_copy)
+            if has_children:
+                for content_elem in content_td:
+                    content_copy = etree.fromstring(etree.tostring(content_elem))
+                    boxed_text.append(content_copy)
+            else:
+                # If there's only text, wrap it in a <p> element
+                p_elem = etree.SubElement(boxed_text, "p")
+                p_elem.text = content_td.text
 
             # Replace the table-wrap with boxed-text
             indices_to_replace.append((index, boxed_text))
