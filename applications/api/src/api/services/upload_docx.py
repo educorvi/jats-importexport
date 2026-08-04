@@ -48,6 +48,7 @@ def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE
     _convert_textboxes_to_boxed_text(xml_tree)
     _update_image_names(xml_tree, XLINK_NAMESPACE, media_dir)
     _convert_graphics_to_figures(xml_tree, XLINK_NAMESPACE)
+    _add_title_to_tables(xml_tree)
 
     _add_sec_type_to_sections(xml_tree)
 
@@ -779,7 +780,6 @@ def _convert_graphics_to_figures_helper(xml_tree: etree._Element, XLINK_NAMESPAC
     """Recursively find and convert standalone <graphic> elements to <fig> elements."""
     indices_to_replace: list[int] = []
 
-    children = list(xml_tree)
     for i, child in enumerate(list(xml_tree)):
         if child.tag == "graphic":
             indices_to_replace.append(i)
@@ -843,3 +843,54 @@ def _convert_graphics_to_figures_helper(xml_tree: etree._Element, XLINK_NAMESPAC
             xml_tree.remove(caption_p)
         xml_tree.remove(graphic)
         xml_tree.insert(i, fig)
+
+
+def _add_title_to_tables(xml_tree: etree._Element) -> None:
+    """Add <label>, <caption> and <title> elements to <table-wrap> elements
+    if a title exists as the previous sibling.
+    """
+    body = xml_tree.find("body")
+    if body is None:
+        return
+    _add_title_to_tables_helper(body)
+
+
+def _add_title_to_tables_helper(xml_tree: etree._Element) -> None:
+    """Recursively add titles to <table-wrap> elements."""
+    indices_to_process: list[int] = []
+
+    for i, child in enumerate(list(xml_tree)):
+        if child.tag == "table-wrap":
+            indices_to_process.append(i)
+        else:
+            _add_title_to_tables_helper(child)
+
+    for i in reversed(indices_to_process):
+        children = list(xml_tree)
+        table_wrap = children[i]
+        prev_sibling = children[i - 1] if i > 0 else None
+
+        # Check if previous sibling is a <p> with text (the title)
+        if prev_sibling is not None and prev_sibling.tag == "p":
+            title_text = " ".join(str(t) for t in prev_sibling.itertext()).strip()
+            if title_text.startswith("#"):
+                end_label = title_text.find("#", 1)
+                if end_label != -1:
+                    label_text = title_text[1:end_label].strip()
+                    title_text = title_text[end_label + 1 :].strip()
+
+                    # Create <label> element
+                    if label_text:
+                        label_elem = etree.Element("label")
+                        label_elem.text = label_text
+                        table_wrap.insert(0, label_elem)
+
+                    # Create <caption> and <title> elements
+                    if title_text:
+                        caption_elem = etree.Element("caption")
+                        title_elem = etree.SubElement(caption_elem, "title")
+                        title_elem.text = title_text
+                        table_wrap.insert(0, caption_elem)
+
+                    # Remove the previous sibling paragraph
+                    xml_tree.remove(prev_sibling)
