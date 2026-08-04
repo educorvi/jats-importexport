@@ -9,7 +9,7 @@ import logging
 import mimetypes
 import os
 from logging import debug
-from typing import BinaryIO
+from typing import BinaryIO, cast
 from urllib.parse import urlparse
 
 import httpx
@@ -26,7 +26,8 @@ from jats_classes import (
     Section,
 )
 from jats_exporters import HtmlExporter
-from lxml import etree
+from lxml import etree, html
+from lxml.html import HtmlElement
 
 from .errors import InternalError, PathNotFoundExpection
 from .interface import SaveJATSDocumentOptions, StorageAdapter
@@ -360,13 +361,15 @@ class PloneStorageAdapter(StorageAdapter):
         return response_url
 
     def __transform_section_to_easy_section(
-        self, section: GenericSection, html_exporter: HtmlExporter, level: int = 1
+        self, section: GenericSection, html_exporter: HtmlExporter, level: int = 3
     ) -> tuple[str | None, str | None, str]:
         """Recursively transform a Section instance to an EasySection representation."""
         label = section.label
         title = section.title
         xml_content = section.content_raw
         html_content = html_exporter.transform_xml(xml_content) if xml_content else ""
+        if html_content:
+            html_content = self.__sanitize_html_for_richtext(html_content)
 
         for child in section.sections:
             child_label, child_title, child_content = self.__transform_section_to_easy_section(
@@ -507,3 +510,100 @@ class PloneStorageAdapter(StorageAdapter):
                 headers={"Accept": "application/json"},
             )
             response.raise_for_status()
+
+    def __sanitize_html_for_richtext(self, html_content: str) -> str:
+        """Sanitize HTML content of an easy section for Plone richtext fields."""
+        tree = html.fromstring(html_content, parser=html.HTMLParser(recover=True, remove_comments=True))
+        tree = cast(HtmlElement, tree)
+
+        # remove <a> tags that have no content and only an id attribute
+        empty_a_tags = tree.xpath("//a[not(*) and normalize-space(.) = '' and @id and count(@*) = 1]")
+        if isinstance(empty_a_tags, list):
+            for a in empty_a_tags:
+                a.drop_tag()
+
+        # remove <div> tags but keep their content
+        etree.strip_tags(tree, "div")
+
+        # wrap <img> in <picture> tags
+        imgs = tree.xpath("//img")
+        if isinstance(imgs, list):
+            for img in imgs:
+                parent = img.getparent()
+                label = None
+                label_element = None
+                title = None
+                title_element = None
+
+                # Look at preceding siblings for optional caption elements
+                prev = img.getprevious()
+                if prev is not None and prev.tag == "h3" and "title" in prev.get("class", "").split():
+                    title = prev.text_content().strip()
+                    title_element = prev
+                    prev = prev.getprevious()
+                if prev is not None and prev.tag == "h5" and "label" in prev.get("class", "").split():
+                    label = prev.text_content().strip()
+                    label_element = prev
+
+                # Create new structure
+                p = etree.Element("p")
+
+                if label or title:
+                    figure = etree.SubElement(
+                        p,
+                        "figure",
+                        attrib={
+                            "class": "image-richtext picture-variant-medium captioned"
+                        }
+                    )
+
+                    picture = etree.SubElement(
+                        figure,
+                        "picture",
+                        attrib={"class": "captioned"}
+                    )
+
+                    _ = etree.SubElement(
+                        picture,
+                        "img",
+                        attrib={
+                            "alt": img.get("alt", ""),
+                            "src": img.get("src", "")
+                        }
+                    )
+
+                    caption = etree.SubElement(
+                        figure,
+                        "figcaption",
+                        attrib={"class": "image-caption"}
+                    )
+                    caption.text = f"{label or ''} {title or ''}".strip()
+
+                else:
+                    picture = etree.SubElement(
+                        p,
+                        "picture"
+                    )
+
+                    _ = etree.SubElement(
+                        picture,
+                        "img",
+                        attrib={
+                            "alt": img.get("alt", ""),
+                            "class": "image-richtext picture-variant-medium",
+                            "src": img.get("src", "")
+                        }
+                    )
+
+                # Replace img with new structure
+                parent.replace(img, p)
+
+                # Remove consumed caption elements
+                if label_element is not None:
+                    label_element.drop_tree()
+
+                if title_element is not None:
+                    title_element.drop_tree()
+
+
+        return etree.tostring(tree, encoding="unicode", method="html", pretty_print=True)
