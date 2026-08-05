@@ -1976,7 +1976,7 @@ or pipeline) parameterized.
 
 
     <xsl:template match="sec">
-        <xsl:variable name="level" select="count(ancestor::sec) + 2"/>
+        <xsl:variable name="level" select="count(ancestor::sec | ancestor::app-group | ancestor::app) + 2"/>
         <xsl:variable name="heading-tag">
             <xsl:choose>
                 <xsl:when test="$level &lt;= 6">
@@ -2035,8 +2035,20 @@ or pipeline) parameterized.
     <xsl:template match="app">
         <div class="section app">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="." mode="label"/>
-            <xsl:apply-templates/>
+            <!-- <xsl:apply-templates select="." mode="label"/> -->
+            <xsl:if test="label or title">
+                <h3>
+                    <xsl:attribute name="class">title</xsl:attribute>
+                    <xsl:if test="label">
+                        <span class="label">
+                            <xsl:apply-templates select="label/node()"/>
+                        </span>
+                        <xsl:text> </xsl:text>
+                    </xsl:if>
+                    <xsl:apply-templates select="title/node()"/>
+                </h3>
+            </xsl:if>
+            <xsl:apply-templates mode="drop-title"/>
         </div>
     </xsl:template>
 
@@ -3110,6 +3122,7 @@ or pipeline) parameterized.
     <xsl:template match="app-group">
         <xsl:call-template name="backmatter-section">
             <xsl:with-param name="generated-title">Anhänge</xsl:with-param>
+            <xsl:with-param name="is-app-group" select="true()"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -3154,11 +3167,28 @@ or pipeline) parameterized.
 
     <xsl:template name="backmatter-section">
         <xsl:param name="generated-title"/>
+        <xsl:param name="is-app-group" select="false()"/>
         <xsl:param name="contents">
-            <xsl:apply-templates/>
+            <xsl:if test="$is-app-group and title">
+                <xsl:apply-templates mode="drop-title"/>
+            </xsl:if>
+            <xsl:if test="not($is-app-group) or not(title)">
+                <xsl:apply-templates/>
+            </xsl:if>
         </xsl:param>
         <div class="back-section">
             <xsl:call-template name="named-anchor"/>
+            <xsl:if test="$is-app-group and title">
+                <h2 class="title">
+                    <xsl:if test="label">
+                        <span class="label">
+                            <xsl:apply-templates select="label/node()"/>
+                        </span>
+                        <xsl:text> </xsl:text>
+                    </xsl:if>
+                    <xsl:apply-templates select="title/node()"/>
+                </h2>
+            </xsl:if>
             <xsl:if test="not(title) and $generated-title">
                 <xsl:choose>
                     <!-- The level of title depends on whether the back matter itself
@@ -4219,7 +4249,7 @@ or pipeline) parameterized.
             <nav class="jats-html-export-toc">
                 <xsl:call-template name="toc-sections">
                     <xsl:with-param name="sections"
-                                    select="//body/sec[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
+                                    select="//body/sec[title[normalize-space(string(.))]] | //back/app-group[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
                     <xsl:with-param name="depth" select="0"/>
                 </xsl:call-template>
             </nav>
@@ -4252,9 +4282,9 @@ or pipeline) parameterized.
                         <a href="#{$anchor-id}">
                             <xsl:apply-templates select="title/node()"/>
                         </a>
-                        <xsl:if test="sec[title[normalize-space(string(.))]]">
+                        <xsl:if test="sec[title[normalize-space(string(.))]] or app[title[normalize-space(string(.))]]">
                             <xsl:call-template name="toc-sections">
-                                <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))]]"/>
+                                <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))]] | app[title[normalize-space(string(.))]]"/>
                                 <xsl:with-param name="depth" select="$depth + 1"/>
                             </xsl:call-template>
                         </xsl:if>

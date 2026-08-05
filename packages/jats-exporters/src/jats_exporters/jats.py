@@ -57,26 +57,29 @@ def _get_back_jats(back: Back | None) -> str:
     """Serialize the Back element and its appendix groups to JATS XML."""
     if back is None:
         return ""
-    back_content = "\n".join(map(_get_appendix_group_jats, back.appendix_groups))
+    back_content = "\n".join(map(_get_general_section_jats, back.appendix_groups))
     return f"<back>{back_content}</back>"
 
 
-def _get_appendix_group_jats(appendix_group: AppendixGroup) -> str:
-    """Serialize an AppendixGroup element and its appendices to JATS XML."""
-    appendix_content = "\n".join(map(_get_general_section_jats, appendix_group.appendixes))
-    return f"<appendix-group>{appendix_content}</appendix-group>"
-
-
 def _get_general_section_jats(section: GenericSection) -> str:
-    """Recursively serialize a generic section (Section or Appendix) to JATS XML."""
+    """Recursively serialize a generic section (Section, Appendix or AppendixGroup) to JATS XML."""
     if isinstance(section, Section):
         sub_content = "\n".join(map(_get_general_section_jats, section.sections))
+        tag_name = "sec"
+        sec_type_attr_name = "sec-type"
     elif isinstance(section, Appendix):
         sub_content = "\n".join(map(_get_general_section_jats, section.sections))
+        tag_name = "app"
+        sec_type_attr_name = "app-type"
+    elif isinstance(section, AppendixGroup):
+        sub_content = "\n".join(map(_get_general_section_jats, section.appendixes))
+        tag_name = "app-group"
+        sec_type_attr_name = "content-type"
     else:
-        sub_content = ""
-    sec_type = f' sec-type="{section.sec_type}"' if section.sec_type else ""
-    return f"<sec{sec_type}>{section.label_title_raw}\n{section.content_raw or ''}\n{sub_content}</sec>"
+        raise ValueError(f"Unsupported section type: {type(section)}")
+
+    sec_type = f' {sec_type_attr_name}="{section.sec_type}"' if section.sec_type else ""
+    return f"<{tag_name}{sec_type}>{section.label_title_raw}\n{section.content_raw or ''}\n{sub_content}</{tag_name}>"
 
 
 class JatsExporter(Exporter[str]):
