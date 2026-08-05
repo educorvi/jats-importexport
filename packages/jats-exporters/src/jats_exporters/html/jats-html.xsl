@@ -4223,20 +4223,30 @@ or pipeline) parameterized.
         <div class="metadata-and-toc">
             <div class="metadata-small">
                 <table class="table table-bordered">
-                    <tr>
-                        <td>Vom
-                            <xsl:for-each select="$front-node/article-meta/pub-date[1]">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>In der Fassung vom
-                            <xsl:for-each select="$front-node/article-meta/pub-date[2]">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
+                    <!-- Vom -->
+                    <xsl:variable name="issue-date" select="$front-node/article-meta/pub-date[@date-type='Ausgabedatum'][1] | $front-node/article-meta/pub-date[not(@date-type) and not(../pub-date[@date-type='Ausgabedatum'])][1]" />
+                    <xsl:if test="$issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
+                        <tr>
+                            <td>
+                                Vom
+                                <xsl:for-each select="$issue-date">
+                                    <xsl:call-template name="format-date"/>
+                                </xsl:for-each>
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    <!-- In der Fassung vom -->
+                    <xsl:variable name="revision-date" select="$front-node/article-meta/pub-date[@date-type='AktualisierteFassung'][1]" />
+                    <xsl:if test="$revision-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
+                        <tr>
+                            <td>
+                                In der Fassung vom
+                                <xsl:for-each select="$revision-date">
+                                    <xsl:call-template name="format-date"/>
+                                </xsl:for-each>
+                            </td>
+                        </tr>
+                    </xsl:if>
                     <tr>
                         <td>
                             <xsl:for-each select="($front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri)[1]">
