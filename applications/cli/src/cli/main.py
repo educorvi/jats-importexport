@@ -43,10 +43,10 @@ def _upload_single_file(
         else:
             file_ext = file_to_process.suffix.lower()
 
-        if file_ext not in [".xml", ".zip"]:
+        if file_ext not in [".xml", ".zip", ".ocf"]:
             console.print(
                 f"[bold red]✖ Error:[/bold red] Unsupported file extension '{file_ext}' for file "
-                f"'{file.name}'. Must be .xml or .zip"
+                f"'{file.name}'. Must be .xml, .zip, or .ocf"
             )
             return 1
 
@@ -62,7 +62,7 @@ def _upload_single_file(
                 response = upload_api.upload_xml(
                     xml_file=file_bytes, _content_type="multipart/form-data", container=container
                 )
-            elif file_ext == ".zip":
+            elif file_ext in [".zip", ".ocf"]:
                 response = upload_api.upload_zip(
                     zip_file=file_bytes,
                     _content_type="multipart/form-data",
