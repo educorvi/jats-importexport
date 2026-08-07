@@ -5,7 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/applications/cli" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/applications/cli/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="jats_importexport_client" exported="" />
+    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
   </component>
 </module>

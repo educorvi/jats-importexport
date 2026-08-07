@@ -4,7 +4,8 @@
     <content url="file://$MODULE_DIR$/packages/jats-storage-adapters">
       <sourceFolder url="file://$MODULE_DIR$/packages/jats-storage-adapters/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="jats-classes" exported="" />
+    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
   </component>
 </module>

@@ -5,7 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/packages/jats-exporters" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/packages/jats-exporters/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="jats-classes" exported="" />
+    <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
   </component>
 </module>
