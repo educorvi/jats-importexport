@@ -12,7 +12,7 @@ from urllib.parse import unquote, urlparse
 import pypandoc
 from fastapi import File, HTTPException, UploadFile
 from jats_classes import JATSDocument
-from jats_storage_adapters.interface import StorageAdapter
+from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
 from lxml import etree
 
 from ..config import StorageConfig
@@ -117,7 +117,10 @@ async def upload_zip(
 
 
 async def upload_docx(
-    uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
+    uploaded_file: UploadFile = File(...),
+    container: str | None = None,
+    asset_container: str | None = None,
+    use_html_sections: bool = False,
 ):
     adapter_instance = get_adapter_instance()
 
@@ -192,7 +195,13 @@ async def upload_docx(
                 True,
             )
             modified_document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
-            url = await asyncio.to_thread(_save_jats_document, adapter_instance, modified_document, container)
+            url = await asyncio.to_thread(
+                _save_jats_document,
+                adapter_instance,
+                modified_document,
+                container,
+                {"use_html_sections": use_html_sections},
+            )
 
             return UploadFileResponse(urls=[url])
 
@@ -243,9 +252,14 @@ def _create_JATSDocument_from_xml_root(root: etree._Element) -> JATSDocument:
         raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
 
 
-def _save_jats_document(adapter_instance: StorageAdapter, document: JATSDocument, container: str | None = None) -> str:
+def _save_jats_document(
+    adapter_instance: StorageAdapter,
+    document: JATSDocument,
+    container: str | None = None,
+    options: SaveJATSDocumentOptions | None = None,
+) -> str:
     try:
-        path = adapter_instance.save_jats_document(document, container or CONTAINER)
+        path = adapter_instance.save_jats_document(document, container or CONTAINER, options)
         return path
     except Exception as e:
         logger.error(f"Error saving JATS document: {e}")

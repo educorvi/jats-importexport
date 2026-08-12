@@ -3,6 +3,7 @@ import base64
 import io
 import zipfile
 
+from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
 import pytest
 from api.config import APIConfig
 from api.main import app
@@ -77,7 +78,7 @@ def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: st
 # ----------------------------------------------------
 
 
-class MockStorageAdapter:
+class MockStorageAdapter(StorageAdapter):
     def __init__(self):
         self.uploaded_files = []
         self.saved_docs = []
@@ -96,7 +97,7 @@ class MockStorageAdapter:
         # Return a valid JATSDocument
         return JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
 
-    def save_jats_document(self, document: JATSDocument, container: str) -> str:
+    def save_jats_document(self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         self.saved_docs.append((document, container))
         title = document.article.front.get_title() or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"

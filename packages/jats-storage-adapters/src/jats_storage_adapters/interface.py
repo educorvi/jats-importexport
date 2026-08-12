@@ -6,9 +6,15 @@ and store JATS documents and arbitrary files in a repository backend.
 
 import abc
 import enum
-from typing import BinaryIO
+from typing import BinaryIO, TypedDict
 
 from jats_classes import JATSDocument
+
+
+class SaveJATSDocumentOptions(TypedDict):
+    """Options for saving a JATSDocument to a storage adapter."""
+
+    use_html_sections: bool | None
 
 
 class StorageAdapter(metaclass=abc.ABCMeta):
@@ -43,12 +49,15 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def save_jats_document(self, document: JATSDocument, container: str) -> str:
+    def save_jats_document(
+        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
         """Save a JATSDocument structure into a target container.
 
         Args:
             document: The JATSDocument to save.
             container: The path to the target container in the storage system.
+            options: Additional options for saving the JATSDocument.
 
         Returns:
             The path of the saved file or main container object.
