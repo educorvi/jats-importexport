@@ -101,8 +101,9 @@ class Section(GenericSection):
 
     @classmethod
     def _split_on_inhaltsverzeichnis(cls, section: etree._Element) -> None:
-        """Split section at span 'Inhaltsverzeichnis' into a new subsection."""
+        """Split section at span 'Inhaltsverzeichnis' or 'Contents' into a new subsection."""
         cls._apply_section_type_based_on_heading(section, "Inhaltsverzeichnis", "toc")
+        cls._apply_section_type_based_on_heading(section, "Contents", "toc")
 
     @classmethod
     def from_xml_element(cls, section: etree._Element) -> Section:
