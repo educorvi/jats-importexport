@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a11"
+    "version": "1.0.0a13"
   },
   "paths": {
     "/status": {
@@ -303,7 +303,7 @@
           "Upload"
         ],
         "summary": "Upload a DOCX file, convert it to JATS XML, and upload to the storage",
-        "description": "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.",
+        "description": "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used. The `use_html_sections` query parameter can be set to `true` to transform sections into EasySection. This only works when using storage adapters that support EasySection, like PloneStorageAdapter.",
         "operationId": "upload_docx",
         "security": [
           {
@@ -341,6 +341,16 @@
                 }
               ],
               "title": "Assets Container"
+            }
+          },
+          {
+            "name": "use_html_sections",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Use Html Sections"
             }
           }
         ],

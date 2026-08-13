@@ -10,11 +10,11 @@ Method | HTTP request | Description
 
 
 # **upload_docx**
-> UploadFileResponse upload_docx(docx_file, container=container, assets_container=assets_container)
+> UploadFileResponse upload_docx(docx_file, container=container, assets_container=assets_container, use_html_sections=use_html_sections)
 
 Upload a DOCX file, convert it to JATS XML, and upload to the storage
 
-This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.
+This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used. The `use_html_sections` query parameter can be set to `true` to transform sections into EasySection. This only works when using storage adapters that support EasySection, like PloneStorageAdapter.
 
 ### Example
 
@@ -50,10 +50,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     docx_file = None # bytes | 
     container = 'container_example' # str |  (optional)
     assets_container = 'assets_container_example' # str |  (optional)
+    use_html_sections = False # bool |  (optional) (default to False)
 
     try:
         # Upload a DOCX file, convert it to JATS XML, and upload to the storage
-        api_response = api_instance.upload_docx(docx_file, container=container, assets_container=assets_container)
+        api_response = api_instance.upload_docx(docx_file, container=container, assets_container=assets_container, use_html_sections=use_html_sections)
         print("The response of UploadApi->upload_docx:\n")
         pprint(api_response)
     except Exception as e:
@@ -70,6 +71,7 @@ Name | Type | Description  | Notes
  **docx_file** | **bytes**|  | 
  **container** | **str**|  | [optional] 
  **assets_container** | **str**|  | [optional] 
+ **use_html_sections** | **bool**|  | [optional] [default to False]
 
 ### Return type
 
