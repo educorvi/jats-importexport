@@ -4207,6 +4207,98 @@ or pipeline) parameterized.
 
 
     <!-- ============================================================= -->
+    <!--  DGUV Freie Listen                                            -->
+    <!-- ============================================================= -->
+
+    <xsl:template match="p[@content-type='_4octextpara_ListeFrei']">
+        <xsl:variable name="level">
+            <xsl:call-template name="free-list-level">
+                <xsl:with-param name="node" select="."/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="type">
+            <xsl:call-template name="free-list-type">
+                <xsl:with-param name="node" select="."/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="label">
+            <xsl:call-template name="free-list-label">
+                <xsl:with-param name="node" select="."/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="count(*) = 1 and count(list) = 1">
+                <div class="list" data-list-level="{$level}">
+                    <xsl:call-template name="named-anchor"/>
+                    <xsl:apply-templates select="label | title"/>
+                    <xsl:apply-templates select="." mode="list"/>
+                </div>
+            </xsl:when>
+            <xsl:otherwise>
+                <div class="freie-liste" data-list-type="{$type}" data-list-level="{$level}">
+                    <p>
+                        <xsl:call-template name="assign-id"/>
+                        <xsl:apply-templates select="@content-type"/>
+                        <xsl:if test="normalize-space(string($label))">
+                            <span class="list-label">
+                                <xsl:copy-of select="$label"/>
+                            </span>
+                        </xsl:if>
+                        <span class="list-item">
+                            <xsl:apply-templates select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
+                        </span>
+                    </p>
+                </div>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="free-list-level">
+        <xsl:param name="node"/>
+        <xsl:variable name="pi"
+            select="$node/processing-instruction('dguv') [contains(normalize-space(.), 'ListeFrei level=')][1]"/>
+        <xsl:choose>
+            <xsl:when test="contains(normalize-space($pi), 'level=1')">
+                <xsl:text>1</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains(normalize-space($pi), 'level=2')">
+                <xsl:text>2</xsl:text>
+            </xsl:when>
+            <xsl:when test="contains(normalize-space($pi), 'level=3')">
+                <xsl:text>3</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text>1</xsl:text>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="free-list-type">
+        <xsl:param name="node"/>
+        <xsl:variable name="marker"
+            select="$node/named-content[@specific-use='_4octextinline_ListenpunktFrei'][1]"/>
+        <xsl:if test="$marker">
+            <xsl:text>ordered</xsl:text>
+        </xsl:if>
+        <xsl:if test="not($marker)">
+            <xsl:text>unordered</xsl:text>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template name="free-list-label">
+        <xsl:param name="node"/>
+        <xsl:variable name="marker"
+            select="$node/named-content[@specific-use='_4octextinline_ListenpunktFrei'][1]"/>
+        <xsl:if test="$marker">
+            <xsl:apply-templates select="$marker/node()"/>
+        </xsl:if>
+    </xsl:template>
+
+
+    <!-- ============================================================= -->
     <!--  DGUV processing instructions                                 -->
     <!-- ============================================================= -->
 
@@ -4226,7 +4318,7 @@ or pipeline) parameterized.
                     <!-- Vom -->
                     <xsl:variable name="issue-date" select="$front-node/article-meta/pub-date[@date-type='Ausgabedatum'][1] | $front-node/article-meta/pub-date[not(@date-type) and not(../pub-date[@date-type='Ausgabedatum'])][1]" />
                     <xsl:if test="$issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                        <tr>
+                        <tr data-meta-field="issue-date">
                             <td>
                                 Vom
                                 <xsl:for-each select="$issue-date">
@@ -4238,7 +4330,7 @@ or pipeline) parameterized.
                     <!-- In der Fassung vom -->
                     <xsl:variable name="revision-date" select="$front-node/article-meta/pub-date[@date-type='AktualisierteFassung'][1]" />
                     <xsl:if test="$revision-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                        <tr>
+                        <tr data-meta-field="revision-date">
                             <td>
                                 In der Fassung vom
                                 <xsl:for-each select="$revision-date">
@@ -4247,13 +4339,17 @@ or pipeline) parameterized.
                             </td>
                         </tr>
                     </xsl:if>
-                    <tr>
-                        <td>
-                            <xsl:for-each select="($front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri)[1]">
-                                <a href="{@xlink:href}">Document URI</a>
-                            </xsl:for-each>
-                        </td>
-                    </tr>
+                    <!-- Dokument-URI -->
+                    <xsl:variable name="document-uri" select="$front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri" />
+                    <xsl:if test="$document-uri">
+                        <tr data-meta-field="document-uri">
+                            <td>
+                                <xsl:for-each select="($front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri)[1]">
+                                    <a href="{@xlink:href}">Publikation</a>
+                                </xsl:for-each>
+                            </td>
+                        </tr>
+                    </xsl:if>
                 </table>
             </div>
             <nav class="jats-html-export-toc">
@@ -4283,15 +4379,20 @@ or pipeline) parameterized.
                                 </xsl:otherwise>
                             </xsl:choose>
                         </xsl:variable>
-                        <xsl:if test="label">
-                            <span class="toc-label">
-                                <xsl:apply-templates select="label/node()"/>
-                            </span>
-                            <xsl:text> </xsl:text>
-                        </xsl:if>
-                        <a href="#{$anchor-id}">
-                            <xsl:apply-templates select="title/node()"/>
-                        </a>
+                        <span class="toc-entry">
+                            <xsl:attribute name="data-toc-level">
+                                <xsl:value-of select="$depth + 1"/>
+                            </xsl:attribute>
+                            <xsl:if test="label">
+                                <span class="toc-label">
+                                    <xsl:apply-templates select="label/node()"/>
+                                </span>
+                                <xsl:text> </xsl:text>
+                            </xsl:if>
+                            <a href="#{$anchor-id}" class="toc-title">
+                                <xsl:apply-templates select="title/node()"/>
+                            </a>
+                        </span>
                         <xsl:if test="sec[title[normalize-space(string(.))]] or app[title[normalize-space(string(.))]]">
                             <xsl:call-template name="toc-sections">
                                 <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))]] | app[title[normalize-space(string(.))]]"/>
