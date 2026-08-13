@@ -173,8 +173,8 @@ class PloneStorageAdapter(StorageAdapter):
             )
             label_title_raw = label_raw + title_raw
 
-            content: str = data.get("content", {}).get("data", "")
-            content = f"<main>{content}</main>" if content else ""
+            content = data.get("content", {}).get("data", "")
+            content = f"<main>{content}</main>"
             try:
                 # Use HTML parser to recover from malformed HTML
                 # (e.g. unclosed <col> and <img> tags from plone richtext editor)
