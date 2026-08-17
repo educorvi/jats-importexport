@@ -52,7 +52,7 @@ update-client: generate-client
 
 generate-client: check_dependency_jq check_dependency_uvx applications/api/openapi.json
 	@VERSION=$$(jq -r .info.version applications/api/openapi.json) && \
-	uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=hatchling --additional-properties packageVersion=$$VERSION
+	uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=setuptools --additional-properties packageVersion=$$VERSION
 
 # Remove build artefacts
 clean:

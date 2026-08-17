@@ -1,6 +1,6 @@
 [project]
 name = "jats_importexport_client"
-version = "1.0.0a15"
+version = "1.0.0a16"
 description = "JATS Import/Export API"
 authors = [
   {name = "OpenAPI Generator Community",email = "team@openapitools.org"},
@@ -32,8 +32,8 @@ mypy = ">= 1.5"
 
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.pylint.'MESSAGES CONTROL']
 extension-pkg-whitelist = "pydantic"
