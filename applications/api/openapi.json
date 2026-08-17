@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a14"
+    "version": "1.0.0a15"
   },
   "paths": {
     "/status": {
@@ -519,6 +519,16 @@
               "type": "string",
               "title": "Path"
             }
+          },
+          {
+            "name": "include_edit_links",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Edit Links"
+            }
           }
         ],
         "responses": {
@@ -565,6 +575,16 @@
             "schema": {
               "type": "string",
               "title": "Path"
+            }
+          },
+          {
+            "name": "include_edit_links",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Edit Links"
             }
           }
         ],

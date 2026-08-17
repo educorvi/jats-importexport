@@ -90,7 +90,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_html**
-> HtmlDocumentResponse export_html(path)
+> HtmlDocumentResponse export_html(path, include_edit_links=include_edit_links)
 
 Export Html
 
@@ -126,10 +126,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
     path = 'path_example' # str | 
+    include_edit_links = False # bool |  (optional) (default to False)
 
     try:
         # Export Html
-        api_response = api_instance.export_html(path)
+        api_response = api_instance.export_html(path, include_edit_links=include_edit_links)
         print("The response of ExportApi->export_html:\n")
         pprint(api_response)
     except Exception as e:
@@ -144,6 +145,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **path** | **str**|  | 
+ **include_edit_links** | **bool**|  | [optional] [default to False]
 
 ### Return type
 
@@ -246,7 +248,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_md**
-> MarkdownDocumentResponse export_md(path)
+> MarkdownDocumentResponse export_md(path, include_edit_links=include_edit_links)
 
 Export Md
 
@@ -282,10 +284,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
     path = 'path_example' # str | 
+    include_edit_links = False # bool |  (optional) (default to False)
 
     try:
         # Export Md
-        api_response = api_instance.export_md(path)
+        api_response = api_instance.export_md(path, include_edit_links=include_edit_links)
         print("The response of ExportApi->export_md:\n")
         pprint(api_response)
     except Exception as e:
@@ -300,6 +303,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **path** | **str**|  | 
+ **include_edit_links** | **bool**|  | [optional] [default to False]
 
 ### Return type
 
