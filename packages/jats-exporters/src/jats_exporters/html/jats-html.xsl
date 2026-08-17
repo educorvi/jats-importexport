@@ -1997,6 +1997,11 @@ or pipeline) parameterized.
                         <xsl:text> </xsl:text>
                     </xsl:if>
                     <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
                 </xsl:element>
             </xsl:if>
             <xsl:apply-templates select="sec-meta"/>

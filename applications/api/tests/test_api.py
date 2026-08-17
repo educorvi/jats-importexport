@@ -3,7 +3,7 @@ import base64
 import io
 import zipfile
 
-from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
+from jats_storage_adapters.interface import GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
 import pytest
 from api.config import APIConfig
 from api.main import app
@@ -91,7 +91,7 @@ class MockStorageAdapter(StorageAdapter):
         self.uploaded_files.append((name, container, url))
         return url
 
-    def get_jats_document(self, path: str) -> JATSDocument:
+    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         if path == "nonexistent":
             raise PathNotFoundExpection(path)
         # Return a valid JATSDocument

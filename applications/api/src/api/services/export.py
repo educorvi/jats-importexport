@@ -6,6 +6,7 @@ from fastapi import HTTPException, Request
 from jats_exporters import HtmlExporter, JatsExporter
 from jats_exporters.markdown import MarkdownExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
+from jats_storage_adapters.interface import GetJATSDocumentOptions
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance
@@ -35,9 +36,9 @@ def get_return_type(request: Request) -> ReturnType:
             return ReturnType.JSON
 
 
-async def __load_document(path: str):
+async def __load_document(path: str, options: GetJATSDocumentOptions | None = None):
     try:
-        return await asyncio.to_thread(get_adapter_instance().get_jats_document, path)
+        return await asyncio.to_thread(get_adapter_instance().get_jats_document, path, options)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}") from e
     except Exception as e:
@@ -50,13 +51,13 @@ async def jats_export(path: str):
     return JatsDocumentResponse(jats=jats)
 
 
-async def html_export(path: str):
-    document = await __load_document(path)
+async def html_export(path: str, include_edit_links: bool = False):
+    document = await __load_document(path, {"include_edit_links": include_edit_links})
     html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
     return HtmlDocumentResponse(html=html_content)
 
 
-async def md_export(path: str):
-    document = await __load_document(path)
+async def md_export(path: str, include_edit_links: bool = False):
+    document = await __load_document(path, {"include_edit_links": include_edit_links})
     md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
     return MarkdownDocumentResponse(md=md_content)

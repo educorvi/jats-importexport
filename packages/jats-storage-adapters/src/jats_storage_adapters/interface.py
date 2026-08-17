@@ -10,6 +10,14 @@ from typing import BinaryIO, TypedDict
 
 from jats_classes import JATSDocument
 
+EDIT_PI = "<?section-edit-link {url}?>"
+
+
+class GetJATSDocumentOptions(TypedDict):
+    """Options for retrieving a JATSDocument from a storage adapter."""
+
+    include_edit_links: bool | None
+
 
 class SaveJATSDocumentOptions(TypedDict):
     """Options for saving a JATSDocument to a storage adapter."""
@@ -37,11 +45,12 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_jats_document(self, path: str) -> JATSDocument:
+    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve a JATSDocument from the storage system.
 
         Args:
             path: The path to the document in the storage system.
+            options: Additional options for retrieving the JATSDocument.
 
         Returns:
             A JATSDocument instance.

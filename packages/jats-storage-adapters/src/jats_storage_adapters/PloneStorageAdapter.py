@@ -30,7 +30,7 @@ from lxml import etree, html
 from lxml.html import HtmlElement
 
 from .errors import InternalError, PathNotFoundExpection
-from .interface import SaveJATSDocumentOptions, StorageAdapter
+from .interface import EDIT_PI, GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 httpx_client = httpx.Client(timeout=15)
 
 XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
+
+EDIT_PI_PLONE = EDIT_PI.format(url="{url}/edit")
 
 
 class PloneStorageAdapter(StorageAdapter):
@@ -117,11 +119,11 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error uploading file to {container}") from e
 
-    def get_jats_document(self, path: str) -> JATSDocument:
+    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
         url = f"{self.base_url}/{path.strip('/')}"
         try:
-            article = self.__fetch_article(url)
+            article = self.__fetch_article(url, options)
         except HTTPStatusError as e:
             raise PathNotFoundExpection(path) from e
         except ValueError:
@@ -141,28 +143,12 @@ class PloneStorageAdapter(StorageAdapter):
         response.raise_for_status()
         return response.json()
 
-    def __fetch_front(self, data: dict) -> Front:
-        """Convert Plone front node data into a Front domain model."""
-        return Front(content_raw=data.get("content_raw"))
-
-    def __fetch_section(self, url: str) -> Section:
-        """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
-        data = self.__get_json(url)
-        sections = [
-            self.__fetch_section(item["@id"])
-            for item in data.get("items", [])
-            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
-        ]
-        if data.get("@type") == "Section":
-            return Section(
-                sec_type=data.get("sec_type"),
-                label=data.get("label"),
-                title=data.get("title"),
-                label_title_raw=data.get("label_title_raw") or "",
-                content_raw=data.get("content_raw"),
-                sections=sections,
-            )
-        elif data.get("@type") == "EasySection":
+    def __get_label_title_raw(self, data: dict, url: str, options: GetJATSDocumentOptions | None = None) -> str:
+        """Construct the label_title_raw string for a section, including edit link if requested."""
+        section_type = data.get("@type")
+        if section_type in ["Section", "AppendixGroup", "Appendix"]:
+            label_title_raw = data.get("label_title_raw") or ""
+        elif section_type == "EasySection":
             label = data.get("label") or ""
             title = data.get("title") or ""
             label_raw = f"<label>{label}</label>" if label else ""
@@ -172,7 +158,38 @@ class PloneStorageAdapter(StorageAdapter):
                 else ""
             )
             label_title_raw = label_raw + title_raw
+        else:
+            raise ValueError(f"Unsupported section type: {section_type}")
 
+        if options and options.get("include_edit_links"):
+            edit_pi = EDIT_PI_PLONE.format(url=url)
+            label_title_raw += edit_pi
+
+        return label_title_raw
+
+    def __fetch_front(self, data: dict) -> Front:
+        """Convert Plone front node data into a Front domain model."""
+        return Front(content_raw=data.get("content_raw"))
+
+    def __fetch_section(self, url: str, options: GetJATSDocumentOptions | None = None) -> Section:
+        """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
+        data = self.__get_json(url)
+        sections = [
+            self.__fetch_section(item["@id"], options)
+            for item in data.get("items", [])
+            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
+        ]
+        label_title_raw = self.__get_label_title_raw(data, url, options)
+        if data.get("@type") == "Section":
+            return Section(
+                sec_type=data.get("sec_type"),
+                label=data.get("label"),
+                title=data.get("title"),
+                label_title_raw=label_title_raw,
+                content_raw=data.get("content_raw"),
+                sections=sections,
+            )
+        elif data.get("@type") == "EasySection":
             content = data.get("content", {}).get("data", "")
             content = f"<main>{content}</main>"
             try:
@@ -196,57 +213,61 @@ class PloneStorageAdapter(StorageAdapter):
         else:
             raise ValueError(f"Unsupported section type: {data.get('@type')}")
 
-    def __fetch_appendix(self, url: str) -> Appendix:
+    def __fetch_appendix(self, url: str, options: GetJATSDocumentOptions | None = None) -> Appendix:
         """Fetch and reconstruct an Appendix and subsections from Plone."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Section"
+            self.__fetch_section(item["@id"], options)
+            for item in data.get("items", [])
+            if item.get("@type") == "Section"
         ]
         return Appendix(
             sec_type=data.get("sec_type"),
             label=data.get("label"),
             title=data.get("title"),
-            label_title_raw=data.get("label_title_raw") or "",
+            label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             sections=sections,
         )
 
-    def __fetch_appendix_group(self, url: str) -> AppendixGroup:
+    def __fetch_appendix_group(self, url: str, options: GetJATSDocumentOptions | None = None) -> AppendixGroup:
         """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
         data = self.__get_json(url)
         appendixes = [
-            self.__fetch_appendix(item["@id"]) for item in data.get("items", []) if item.get("@type") == "Appendix"
+            self.__fetch_appendix(item["@id"], options)
+            for item in data.get("items", [])
+            if item.get("@type") == "Appendix"
         ]
         return AppendixGroup(
             sec_type=data.get("sec_type"),
             label=data.get("label"),
             title=data.get("title"),
-            label_title_raw=data.get("label_title_raw") or "",
+            label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             appendixes=appendixes,
         )
 
-    def __fetch_body(self, url: str) -> Body:
+    def __fetch_body(self, url: str, options: GetJATSDocumentOptions | None = None) -> Body:
         """Fetch and reconstruct the Body node and its sections from Plone."""
         data = self.__get_json(url)
         sections = [
-            self.__fetch_section(item["@id"])
+            self.__fetch_section(item["@id"], options)
             for item in data.get("items", [])
             if item.get("@type") == "Section" or item.get("@type") == "EasySection"
         ]
         return Body(sections=sections)
 
-    def __fetch_back(self, url: str) -> Back:
+    def __fetch_back(self, url: str, options: GetJATSDocumentOptions | None = None) -> Back:
         """Fetch and reconstruct the Back node and its appendix groups from Plone."""
         data = self.__get_json(url)
         appendix_groups = [
-            self.__fetch_appendix_group(item["@id"])
+            self.__fetch_appendix_group(item["@id"], options)
             for item in data.get("items", [])
             if item.get("@type") == "AppendixGroup"
         ]
         return Back(appendix_groups=appendix_groups)
 
-    def __fetch_article(self, url: str) -> Article:
+    def __fetch_article(self, url: str, options: GetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
         data = self.__get_json(url)
         front = body = back = None
@@ -256,9 +277,9 @@ class PloneStorageAdapter(StorageAdapter):
             if pt == "Front":
                 front = self.__fetch_front(item)
             elif pt == "Body":
-                body = self.__fetch_body(item_url)
+                body = self.__fetch_body(item_url, options)
             elif pt == "Back":
-                back = self.__fetch_back(item_url)
+                back = self.__fetch_back(item_url, options)
         if not all([front, body]):
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None

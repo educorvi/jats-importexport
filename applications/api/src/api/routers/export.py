@@ -54,14 +54,14 @@ async def export_jats(path: str):
 
 @router.get("/html", operation_id="export_html", response_model=HtmlDocumentResponse)
 @cache(namespace="export", key_builder=export_cache_key_builder)
-async def export_html(path: str):
-    return await html_export(path)
+async def export_html(path: str, include_edit_links: bool = False):
+    return await html_export(path, include_edit_links)
 
 
 @router.get("/md", operation_id="export_md", response_model=MarkdownDocumentResponse)
 @cache(namespace="export", key_builder=export_cache_key_builder)
-async def export_md(path: str):
-    return await md_export(path)
+async def export_md(path: str, include_edit_links: bool = False):
+    return await md_export(path, include_edit_links)
 
 
 @router.delete(
