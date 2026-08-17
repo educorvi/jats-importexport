@@ -54,6 +54,7 @@ exclude = [
 
 [tool.ty.environment]
 python-version = "3.13"
+extra-paths = ["./packages/api-client"]
 
 [tool.uv.sources]
 jats_classes = {workspace = true}
