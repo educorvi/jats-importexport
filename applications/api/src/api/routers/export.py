@@ -23,6 +23,34 @@ router = APIRouter(prefix="/export", tags=["Export"])
 logger = logging.getLogger(__name__)
 
 
+_CACHE_NAMESPACE = "export"
+_CACHE_UNKNOWN_FUNCTION = "unknown_function"
+_CACHE_FUNCTIONS = ["export_jats", "export_html", "export_md"] + [_CACHE_UNKNOWN_FUNCTION]
+_CACHE_PATH = "path"
+_CACHE_QUERY_PARAM = "include_edit_links"
+
+
+def _get_cache_key_path(path: str) -> str:
+    path = path.lstrip("/").rstrip("/")
+    return urllib.parse.quote_plus(path)
+
+
+def _get_cache_query_param(kwargs: dict[str, Any]) -> str:
+    param = {_CACHE_QUERY_PARAM: kwargs.get(_CACHE_QUERY_PARAM, False)}
+    return urllib.parse.urlencode(param)
+
+
+def _get_clear_keys(path: str) -> list[str]:
+    path = _get_cache_key_path(path)
+    prefix = FastAPICache.get_prefix()
+    keys = []
+    for func_name in _CACHE_FUNCTIONS:
+        key = f"{prefix}:{_CACHE_NAMESPACE}:{func_name}:{path}:"
+        keys.append(f"{key}{_get_cache_query_param({_CACHE_QUERY_PARAM: True})}")
+        keys.append(f"{key}{_get_cache_query_param({_CACHE_QUERY_PARAM: False})}")
+    return keys
+
+
 def export_cache_key_builder(
     func: Callable[..., Any],
     namespace: str = "",
@@ -33,13 +61,12 @@ def export_cache_key_builder(
     kwargs: dict[str, Any],
 ) -> str:
     # The endpoint parameters (like 'path') are explicitly inside the 'kwargs' dictionary
-    path = kwargs.get("path", "").lstrip("/").rstrip("/")
-    path = urllib.parse.quote_plus(path)
+    path = _get_cache_key_path(kwargs.get(_CACHE_PATH, ""))
+    param = _get_cache_query_param(kwargs)
+    func_name = getattr(func, "__name__", _CACHE_UNKNOWN_FUNCTION)
 
-    # Format: "namespace:function_name:path"
-    func_name = getattr(func, "__name__", "unknown_function")
-
-    return f"{namespace}:{func_name}:{path}"
+    # Format: "namespace:function_name:path:param"
+    return f"{namespace}:{func_name}:{path}:{param}"
 
 
 @router.get(
@@ -47,19 +74,19 @@ def export_cache_key_builder(
     operation_id="export_jats",
     response_model=JatsDocumentResponse,
 )
-@cache(namespace="export", key_builder=export_cache_key_builder)
+@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_jats(path: str):
     return await jats_export(path)
 
 
 @router.get("/html", operation_id="export_html", response_model=HtmlDocumentResponse)
-@cache(namespace="export", key_builder=export_cache_key_builder)
+@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_html(path: str, include_edit_links: bool = False):
     return await html_export(path, include_edit_links)
 
 
 @router.get("/md", operation_id="export_md", response_model=MarkdownDocumentResponse)
-@cache(namespace="export", key_builder=export_cache_key_builder)
+@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_md(path: str, include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
 
@@ -71,18 +98,13 @@ async def export_md(path: str, include_edit_links: bool = False):
     dependencies=[Depends(require_permission("manage"))],
 )
 async def clear_export_cache(path: str | None = None):
-    if path:
-        path = path.lstrip("/").rstrip("/")
-        path = urllib.parse.quote_plus(path)
-        prefix = FastAPICache.get_prefix()
-        # Clear JATS export cache for the specific path
-        await FastAPICache.clear(key=f"{prefix}:export:export_jats:{path}")
-        # Clear HTML export cache for the specific path
-        await FastAPICache.clear(key=f"{prefix}:export:export_html:{path}")
-        await FastAPICache.clear(key=f"{prefix}:export:export_md:{path}")
+    if path is not None:
+        key_list = _get_clear_keys(path)
+        for key in key_list:
+            await FastAPICache.clear(key=key)
         return CacheClearedResponse(message=f"Cleared cache for {path}")
     else:
-        await FastAPICache.clear(namespace="export")
+        await FastAPICache.clear(namespace=_CACHE_NAMESPACE)
         return CacheClearedResponse(message="Cleared cache")
 
 
