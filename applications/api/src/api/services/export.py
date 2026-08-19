@@ -3,8 +3,7 @@ import logging
 from enum import Enum
 
 from fastapi import HTTPException, Request
-from jats_exporters import HtmlExporter, JatsExporter
-from jats_exporters.markdown import MarkdownExporter
+from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
 from jats_storage_adapters.interface import GetJATSDocumentOptions
 
@@ -61,3 +60,9 @@ async def md_export(path: str, include_edit_links: bool = False):
     document = await __load_document(path, {"include_edit_links": include_edit_links})
     md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
     return MarkdownDocumentResponse(md=md_content)
+
+
+async def pdf_export(path: str):
+    document = await __load_document(path)
+    pdf_content, filename = await asyncio.to_thread(PdfExporter().export, document)
+    return pdf_content, filename

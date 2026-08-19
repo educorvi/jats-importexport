@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="DGUV Kompendium PDF">
+    <meta name="author" content="Deutsche Gesetzliche Unfallversicherung e. V. (DGUV)">
+    <meta name="dcterms.created" content="{{ metadata.pub_date_ausgabedatum or metadata.pub_date_aktualisierte_fassung or '1970-01-01' }}">
+    <meta name="dcterms.modified" content="{{ metadata.pub_date_aktualisierte_fassung or metadata.pub_date_ausgabedatum or '1970-01-01' }}">
+    <title>{{ metadata.journal_title or "DGUV-Dokument" }}{% if metadata.article_id %} - {{ metadata.article_id }}{% endif %}</title>
+    <style>{{ css_content | safe }}</style>
+  </head>
+  <body>
+    <header class="pdf-cover" aria-labelledby="pdf-title">
+      <div class="pdf-brand" aria-label="Deutsche Gesetzliche Unfallversicherung">
+        <img
+          class="pdf-brand__logo"
+          src="assets/vendor/dguv/logo--tablet.svg"
+          alt="Deutsche Gesetzliche Unfallversicherung">
+      </div>
+
+      <div class="pdf-cover__content">
+        <p class="pdf-eyebrow">{{ metadata.journal_title or "Dokument" }}</p>
+        <p class="pdf-document-type">
+          {{ metadata.article_id or "DGUV-Dokument" }}
+        </p>
+        <h1 id="pdf-title">{{ metadata.article_title }}</h1>
+        {% if metadata.article_subtitle %}<p class="pdf-subtitle">{{ metadata.article_subtitle }}</p>{% endif %}
+
+        <dl class="pdf-facts">
+          <div>
+            <dt>Dokumenttyp</dt>
+            <dd>{{ metadata.journal_title or "–" }}</dd>
+          </div>
+          {% if metadata.article_id %}
+          <div>
+            <dt>Dokumentnummer</dt>
+            <dd>{{ metadata.article_id }}</dd>
+          </div>
+          {% endif %}
+          {% if metadata.pub_date_ausgabedatum_german %}
+          <div>
+            <dt>Ausgabedatum</dt>
+            <dd>{{ metadata.pub_date_ausgabedatum_german }}</dd>
+          </div>
+          {% endif %}
+          {% if metadata.pub_date_aktualisierte_fassung_german %}
+          <div>
+            <dt>Aktualisierte Fassung</dt>
+            <dd>{{ metadata.pub_date_aktualisierte_fassung_german }}</dd>
+          </div>
+          {% endif %}
+          {% if metadata.self_uri %}
+          <div>
+            <dt>Publikation</dt>
+            <dd class="pdf-url">{{ metadata.self_uri }}</dd>
+          </div>
+          {% endif %}
+        </dl>
+      </div>
+
+      <p class="pdf-cover__notice">Build-time-Ausgabe{% if generated_at %} · {{ generated_at }}{% endif %}</p>
+    </header>
+
+    <nav class="pdf-toc" aria-labelledby="pdf-toc-title">
+      <h2 id="pdf-toc-title">Inhalt</h2>
+      {% if tocItems and tocItems.length %}
+        <ol class="pdf-toc__list">
+          {% for item in tocItems %}
+            <li class="pdf-toc__item pdf-toc__item--level-{{ item.level or 1 }}">
+              <a href="#{{ item.id }}">{{ item.title }}</a>
+            </li>
+          {% endfor %}
+        </ol>
+      {% elif tocHtml %}
+        <div class="pdf-toc__imported">{{ tocHtml | safe }}</div>
+      {% else %}
+        <p class="pdf-toc__empty">Die Inhaltsübersicht ist im Quelldokument nicht ausgezeichnet.</p>
+      {% endif %}
+    </nav>
+
+    <main class="pdf-document" aria-labelledby="pdf-title">
+      <div class="article-fragment">{{ html_content | safe }}</div>
+    </main>
+
+    <footer class="pdf-footer">
+      <span>Deutsche Gesetzliche Unfallversicherung e. V. (DGUV)</span>
+      {% if metadata.webcode %}<span>Webcode: {{ metadata.webcode }}</span>{% endif %}
+    </footer>
+  </body>
+</html>

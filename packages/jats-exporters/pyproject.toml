@@ -8,6 +8,9 @@ dependencies = [
     "lxml~=6.1.1",
     "markdownify~=1.2.2",
     "xmlschema~=4.3.1",
+    "jinja2~=3.1.6",
+    "weasyprint~=69.0",
+    "beautifulsoup4~=4.15.0",
     "jats_classes"
 ]
 

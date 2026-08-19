@@ -1,0 +1,1050 @@
+@charset "UTF-8";
+/*
+ * Build-time PDF stylesheet for WeasyPrint.
+ *
+ * The source fragment is an immutable UV-Nexus/JATS export. The cascade is
+ * deliberately layered: DGUV/project tokens first, shared article rules
+ * next, maintained project overrides after that, and finally the
+ * WeasyPrint-specific composition rules below. The web shell is not imported.
+ *
+ * The renderer must use the project `src` directory as the document base URL
+ * so the relative font URLs (`assets/fonts/pdf/*`) resolve inside the
+ * allow-listed local asset root.
+ */
+:root {
+  --dguv-primary: #0063af;
+  --dguv-primary-dark: #004994;
+  --dguv-text: #000;
+  --dguv-text-secondary: #555;
+  --dguv-navbar-grey: #767676;
+  --dguv-border: #d5d5d5;
+  --dguv-table-border: #d9d9d9;
+  --dguv-background: #fff;
+  --dguv-background-light: #ededed;
+  --dguv-background-blue: rgb(0 99 175 / 5%);
+  --dguv-advisory: #62a72b;
+  --dguv-advisory-background: rgb(98 167 43 / 5%);
+  --dguv-font: "Source Sans 3", Arial, sans-serif;
+  --dguv-container: 1320px;
+  --dguv-page-gutter: 24px;
+  --dguv-space-xs: 6px;
+  --dguv-space-sm: 12px;
+  --dguv-space-lg: 24px;
+  --dguv-space-xl: 48px;
+  --dguv-shadow-focus: 0 0 0 3px rgb(0 99 175 / 25%);
+}
+
+@media (max-width: 991.98px) {
+  :root {
+    --dguv-page-gutter: 12px;
+    --dguv-space-lg: 12px;
+    --dguv-space-xl: 24px;
+  }
+}
+/*
+ * DGUV Vorschriften und Regeln – Dokumentinhalt
+ *
+ * Isoliertes Stylesheet für das von UV-Nexus exportierte JATS-HTML.
+ * Erwarteter Umgebungs-Selektor: .article-fragment
+ * Nicht enthalten: Portal-Shell, Header, Footer, Breadcrumb, Artikelkopf,
+ * Aktionen und die separat gerenderte Dokumentmetadaten-Komponente.
+ */
+:root {
+  --dguv-primary: #0063af;
+  --dguv-text: #000;
+  --dguv-border: #d5d5d5;
+  --dguv-table-border: #d9d9d9;
+  --dguv-background-light: #ededed;
+  --dguv-background-blue: rgb(0 99 175 / 5%);
+  --dguv-advisory: #62a72b;
+  --dguv-advisory-background: rgb(98 167 43 / 5%);
+  --dguv-space-xs: 6px;
+  --dguv-space-sm: 12px;
+  --dguv-space-lg: 24px;
+  --dguv-space-xl: 48px;
+}
+
+.article-fragment #article-body,
+.article-fragment #article-back {
+  color: var(--dguv-text);
+  font-family: "Source Sans 3", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.42;
+}
+
+.article-fragment #article-body > .section,
+.article-fragment #article-back > .section {
+  margin-bottom: 48px;
+}
+
+.article-fragment #article-body p {
+  margin-block: 1lh;
+}
+
+.article-fragment h2,
+.article-fragment .section > .title {
+  margin: 48px 0 24px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.article-fragment #article-body h2.title {
+  color: var(--dguv-primary);
+}
+
+.article-fragment h3,
+.article-fragment .section .section > .title {
+  margin: 32px 0 16px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.article-fragment p {
+  margin: 0 0 1em;
+}
+
+.article-fragment img {
+  max-width: 100%;
+  height: auto;
+}
+
+.article-fragment #article-body > .section[data-sec-type=preamble] {
+  padding: var(--dguv-space-lg);
+  background: var(--dguv-background-blue);
+}
+
+.article-fragment #article-body > .section[data-sec-type=preamble] > h2.title {
+  margin-top: 0;
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info],
+.article-fragment #article-back .section[data-sec-type=highlight-info] {
+  margin-block: var(--dguv-space-lg);
+  margin-block-end: var(--dguv-space-xl);
+  padding: var(--dguv-space-lg);
+  border-left: 2px solid var(--dguv-advisory);
+  background: var(--dguv-advisory-background);
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info] > p.first {
+  margin-block-start: 0;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.article-fragment .boxed-text,
+.article-fragment .disp-quote,
+.article-fragment [content-type*=durchf i] {
+  margin-block: 24px;
+  padding: 24px;
+  border-left: 1px solid var(--dguv-advisory);
+  background: var(--dguv-advisory-background);
+}
+
+.article-fragment #article-body .list > :is(ul, ol),
+.article-fragment #article-back .list > :is(ul, ol) {
+  margin-block: 1lh;
+  padding-inline-start: 1.5em;
+  list-style-position: outside;
+}
+
+.article-fragment #article-body .list > ul,
+.article-fragment #article-back .list > ul {
+  list-style-type: disc !important;
+}
+
+.article-fragment #article-body .list > ol,
+.article-fragment #article-back .list > ol {
+  list-style-type: decimal;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li,
+.article-fragment #article-back .list > :is(ul, ol) > li {
+  padding-inline-start: 0.25em;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li + li,
+.article-fragment #article-back .list > :is(ul, ol) > li + li {
+  margin-block-start: 0.1lh;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li > p,
+.article-fragment #article-back .list > :is(ul, ol) > li > p {
+  margin-block: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste {
+  margin-block: 0.1lh;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste > p {
+  display: grid;
+  grid-template-columns: minmax(1.5em, max-content) minmax(0, 1fr);
+  column-gap: var(--dguv-space-sm);
+  margin-block: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste .list-label {
+  grid-column: 1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste .list-item {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-level="2"] > p {
+  margin-inline-start: calc(1.5em + var(--dguv-space-sm));
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list {
+  margin-inline-start: calc(1.5em + var(--dguv-space-sm));
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
+  margin-block-start: 0.5lh;
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
+.article-fragment #article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
+  margin: 0;
+}
+
+.article-fragment .table-wrap {
+  max-width: 100%;
+  margin-block: 32px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.article-fragment table {
+  border-collapse: collapse;
+}
+
+.article-fragment .table-wrap table {
+  min-width: 720px;
+  border-block: 1px solid #000;
+  font-size: 16px;
+}
+
+.article-fragment .table-wrap :is(th, td) {
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid #000;
+  vertical-align: top;
+}
+
+.article-fragment .table-wrap tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.article-fragment .table-wrap th {
+  background: var(--dguv-background-light);
+  font-weight: 700;
+}
+
+.article-fragment #article-body p:last-child,
+.article-fragment #article-body li:last-child p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  :root {
+    --dguv-space-lg: 12px;
+    --dguv-space-xl: 24px;
+  }
+  .article-fragment #article-body,
+  .article-fragment #article-back {
+    font-size: 16px;
+    line-height: 1.48;
+  }
+  .article-fragment h2,
+  .article-fragment .section > .title {
+    margin-top: 36px;
+    font-size: 20px;
+  }
+  .article-fragment h3,
+  .article-fragment .section .section > .title {
+    font-size: 16px;
+  }
+  .article-fragment #article-body > .section[data-sec-type=preamble],
+  .article-fragment #article-body .section[data-sec-type=highlight-info],
+  .article-fragment #article-back .section[data-sec-type=highlight-info] {
+    padding: var(--dguv-space-sm);
+  }
+  .article-fragment .boxed-text,
+  .article-fragment .disp-quote,
+  .article-fragment [content-type*=durchf i] {
+    padding: 12px;
+  }
+}
+.article-fragment #article-body,
+.article-fragment #article-back {
+  font-size: 18px;
+}
+
+.article-fragment #article-body p {
+  margin-block: 1lh;
+}
+
+.article-fragment #article-body h2.title {
+  color: var(--dguv-primary);
+}
+
+.article-fragment #article-body h2.title > .label {
+  display: block;
+  color: #000;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.article-fragment #article-body > .section[data-sec-type=preamble] {
+  padding: var(--dguv-space-lg);
+  background: var(--dguv-background-blue);
+}
+
+.article-fragment #article-body > .section[data-sec-type=preamble] > h2.title {
+  margin-top: 0;
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info],
+.article-fragment #article-back .section[data-sec-type=highlight-info] {
+  margin-block: var(--dguv-space-lg);
+  margin-block-end: var(--dguv-space-xl);
+  padding: var(--dguv-space-lg);
+  border-left: 2px solid var(--dguv-advisory);
+  background: var(--dguv-advisory-background);
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info] > p.first {
+  margin-block-start: 0;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.article-fragment .table-wrap table {
+  border-block: 1px solid #000;
+}
+
+.article-fragment .table-wrap :is(th, td) {
+  border: 0;
+  border-bottom: 1px solid #000;
+}
+
+.article-fragment .table-wrap tr:last-child :is(th, td) {
+  border-bottom: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table {
+  width: 100%;
+  margin-block: 32px;
+  border-block: 1px solid #000;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > .row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  margin: 0;
+  border-bottom: 1px solid #000;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > .row:last-child {
+  border-bottom: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > .row > :is(.col-2, .col) {
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 8px 10px;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > .row > .col-2 {
+  flex: 0 0 16.666667%;
+  width: 16.666667%;
+  max-width: 16.666667%;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > .row > .col:not(.col-2) {
+  flex: 1 1 0;
+  overflow-wrap: anywhere;
+}
+
+.article-fragment :is(#article-body, #article-back) div.table > :not(caption) > * > p {
+  padding: 0;
+  margin: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) :is(table, .table) p {
+  padding: 0;
+  margin: 0;
+}
+
+.article-fragment .fig > :is(.label, .caption, .permissions) {
+  color: var(--dguv-text-secondary);
+  font-size: 16px;
+}
+
+.article-fragment .fig > .caption .title {
+  color: inherit;
+  font-size: inherit;
+}
+
+.article-fragment .fig :is(.caption, .permissions) p {
+  margin-block: 0 !important;
+}
+
+.article-fragment #article-body .list > :is(ul, ol),
+.article-fragment #article-back .list > :is(ul, ol) {
+  margin-block: 1lh;
+  padding-inline-start: 1.5em;
+  list-style-position: outside;
+}
+
+.article-fragment #article-body .list > ul,
+.article-fragment #article-back .list > ul {
+  padding-inline-start: 1.25em;
+  list-style-type: disc !important;
+}
+
+.article-fragment #article-body .list > ul > li,
+.article-fragment #article-back .list > ul > li {
+  padding-inline-start: 0;
+}
+
+.article-fragment #article-body .list > ul > li::marker,
+.article-fragment #article-back .list > ul > li::marker {
+  font-size: 0.75em;
+}
+
+.article-fragment #article-body .list > ol,
+.article-fragment #article-back .list > ol {
+  list-style-type: decimal;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li,
+.article-fragment #article-back .list > :is(ul, ol) > li {
+  padding-inline-start: 0.25em;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li + li,
+.article-fragment #article-back .list > :is(ul, ol) > li + li {
+  margin-block-start: 0.1lh;
+}
+
+.article-fragment #article-body .list > :is(ul, ol) > li > p,
+.article-fragment #article-back .list > :is(ul, ol) > li > p {
+  margin-block: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste {
+  margin-block: 0.1lh;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste > p {
+  display: grid;
+  grid-template-columns: minmax(1.5em, max-content) minmax(0, 1fr);
+  column-gap: var(--dguv-space-sm);
+  margin-block: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste .list-label {
+  grid-column: 1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste .list-item {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-level="2"] > p {
+  margin-inline-start: calc(1.5em + var(--dguv-space-sm));
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list {
+  margin-inline-start: calc(1.5em + var(--dguv-space-sm));
+}
+
+.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
+  margin-block-start: 0.5lh;
+}
+
+.article-fragment #article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
+.article-fragment #article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
+  margin: 0;
+}
+
+.article-fragment .metadata-small table,
+.article-fragment .metadata-small td,
+.article-fragment .metadata-small td a {
+  color: var(--dguv-text);
+}
+
+.article-fragment .metadata-small tr:last-child td a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.article-fragment .metadata-small tr:last-child td a::after {
+  content: "";
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  margin-left: auto;
+  background-color: currentcolor;
+  -webkit-mask: url("/assets/icons/arrow-right.svg") center/contain no-repeat;
+  mask: url("/assets/icons/arrow-right.svg") center/contain no-repeat;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-title,
+.article-fragment .jats-html-export-toc > ul > li > .toc-label,
+.article-fragment .jats-html-export-toc > ul > li > a {
+  color: var(--dguv-primary);
+  font-weight: 700;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 0.25em;
+  align-items: start;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) > .toc-label {
+  grid-column: 1;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) > .toc-title {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] {
+  display: block;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-label {
+  display: block;
+  color: #000;
+  font-weight: 400;
+}
+
+.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-title {
+  display: block;
+}
+
+.article-fragment .jats-html-export-toc > ul > li:not(:last-child) {
+  margin-block-end: var(--dguv-space-sm);
+}
+
+.article-fragment #article-body p:last-child,
+.article-fragment #article-body li:last-child p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .article-fragment #article-body,
+  .article-fragment #article-back {
+    font-size: 16px;
+  }
+  .article-fragment #article-body h2.title > .label {
+    font-size: 16px;
+  }
+  .article-fragment #article-body > .section[data-sec-type=preamble] {
+    padding: var(--dguv-space-sm);
+  }
+  .article-fragment #article-body .section[data-sec-type=highlight-info],
+  .article-fragment #article-back .section[data-sec-type=highlight-info] {
+    padding: var(--dguv-space-sm);
+  }
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("assets/fonts/pdf/SourceSans3-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("assets/fonts/pdf/SourceSans3-Semibold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 600;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("assets/fonts/pdf/SourceSans3-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("assets/fonts/pdf/SourceSans3-Italic.otf") format("opentype");
+  font-style: italic;
+  font-weight: 400;
+}
+:root {
+  --pdf-blue: var(--dguv-primary);
+  --pdf-blue-dark: var(--dguv-primary-dark);
+  --pdf-green: var(--dguv-advisory);
+  --pdf-ink: var(--dguv-text);
+  --pdf-muted: var(--dguv-text-secondary);
+  --pdf-rule: var(--dguv-border);
+  --pdf-panel: var(--dguv-background-blue);
+}
+
+@page {
+  size: A4;
+  margin: 22mm 42mm 19mm 18mm;
+  @top-left {
+    color: var(--pdf-blue);
+    content: string(pdf-document-type);
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+  @top-right {
+    color: var(--pdf-muted);
+    content: string(pdf-document-number);
+    font-size: 8.5pt;
+  }
+  @bottom-left {
+    color: var(--pdf-muted);
+    content: "DGUV Kompendium";
+    font-size: 8pt;
+  }
+  @bottom-right {
+    color: var(--pdf-muted);
+    content: "Seite " counter(page) " von " counter(pages);
+    font-size: 8pt;
+  }
+}
+@page :first {
+  margin: 0;
+  @top-left {
+    content: none;
+  }
+  @top-right {
+    content: none;
+  }
+  @bottom-left {
+    content: none;
+  }
+  @bottom-right {
+    content: none;
+  }
+}
+@page wide-table {
+  size: A4 landscape;
+  margin: 22mm 18mm 19mm 18mm;
+  @top-left {
+    color: var(--pdf-blue);
+    content: string(pdf-document-type);
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+  @top-right {
+    color: var(--pdf-muted);
+    content: string(pdf-document-number);
+    font-size: 8.5pt;
+  }
+  @bottom-left {
+    color: var(--pdf-muted);
+    content: "DGUV Kompendium";
+    font-size: 8pt;
+  }
+  @bottom-right {
+    color: var(--pdf-muted);
+    content: "Seite " counter(page) " von " counter(pages);
+    font-size: 8pt;
+  }
+}
+html {
+  color: var(--pdf-ink);
+  background: #fff;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.42;
+}
+
+body {
+  margin: 0;
+  color: var(--pdf-ink);
+}
+
+a {
+  color: var(--pdf-blue-dark);
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.12em;
+}
+
+.pdf-cover {
+  display: flex;
+  min-height: 297mm;
+  flex-direction: column;
+  padding: 22mm 20mm 18mm;
+  color: var(--pdf-ink);
+  background: var(--dguv-background);
+  break-after: page;
+}
+
+.pdf-brand {
+  display: block;
+  padding-bottom: 9mm;
+}
+
+.pdf-brand__logo {
+  display: block;
+  width: 38mm;
+  max-width: 100%;
+  height: auto;
+}
+
+.pdf-cover__content {
+  width: 150mm;
+  max-width: 150mm;
+  margin: auto 0;
+}
+
+.pdf-eyebrow,
+.pdf-document-type {
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pdf-eyebrow {
+  color: var(--pdf-muted);
+  font-size: 11pt;
+  font-weight: 700;
+}
+
+.pdf-document-type {
+  margin-top: 6mm;
+  color: var(--pdf-blue);
+  font-size: 12pt;
+  font-weight: 600;
+  string-set: pdf-document-type content();
+}
+
+.pdf-document-number {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  string-set: pdf-document-number content();
+}
+
+.pdf-cover h1 {
+  max-width: 150mm;
+  margin: 7mm 0 0;
+  font-size: 31pt;
+  font-weight: 700;
+  line-height: 1.08;
+  color: var(--pdf-ink);
+  string-set: pdf-title content();
+}
+
+.pdf-subtitle {
+  max-width: 150mm;
+  margin: 7mm 0 0;
+  color: var(--pdf-muted);
+  font-size: 15pt;
+  line-height: 1.25;
+}
+
+.pdf-facts {
+  display: grid;
+  max-width: 145mm;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5mm 10mm;
+  margin: 18mm 0 0;
+  padding-top: 7mm;
+  border-top: 1px solid var(--pdf-rule);
+}
+
+.pdf-facts div {
+  min-width: 0;
+}
+
+.pdf-facts dt {
+  color: var(--pdf-muted);
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pdf-facts dd {
+  margin: 1mm 0 0;
+  overflow-wrap: anywhere;
+  font-size: 11pt;
+}
+
+.pdf-url {
+  font-size: 9pt !important;
+}
+
+.pdf-cover__notice {
+  margin: 0;
+  color: var(--pdf-muted);
+  font-size: 8.5pt;
+}
+
+.pdf-toc {
+  break-after: page;
+  color: var(--pdf-ink);
+  font-size: 8pt;
+  line-height: 1.05;
+}
+
+.pdf-toc h2 {
+  margin: 0 0 4mm;
+  padding-bottom: 1mm;
+  color: var(--pdf-blue);
+  font-size: 16pt;
+  line-height: 1.15;
+}
+
+.pdf-toc__list,
+.pdf-toc__imported ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdf-toc__item,
+.pdf-toc__imported li {
+  margin: 0;
+  padding: 0.35mm 0;
+  border: 0;
+  line-height: 1.05;
+}
+
+/* Imported JATS TOCs can contain hundreds of nested entries. Keeping every
+   nested <li> together creates near-empty pages in WeasyPrint; only the
+   generated flat fallback items need atomic breaks. */
+.pdf-toc__item {
+  break-inside: avoid;
+}
+
+.pdf-toc__imported li {
+  break-inside: auto;
+}
+
+.pdf-toc__item--level-2,
+.pdf-toc__imported li li {
+  padding-left: 3mm;
+}
+
+.pdf-toc__item--level-3,
+.pdf-toc__imported li li li {
+  padding-left: 6mm;
+}
+
+.pdf-toc a {
+  display: block;
+  color: var(--pdf-ink);
+  text-decoration: none;
+}
+
+.pdf-toc a::after {
+  content: leader(".") target-counter(attr(href), page);
+  float: right;
+  color: var(--pdf-muted);
+  font-size: 7.5pt;
+}
+
+.pdf-toc__empty {
+  color: var(--pdf-muted);
+}
+
+.pdf-document {
+  display: block;
+}
+
+/* The portal's front column contains duplicate metadata and its own shell.
+   Metadata is represented on the cover; the article body/back remain intact. */
+.pdf-document #article-front,
+.pdf-document .metadata-and-toc,
+.pdf-document .metadata-small,
+.pdf-document .jats-html-export-toc {
+  display: none !important;
+}
+
+.pdf-document #article-all,
+.pdf-document #article-content,
+.pdf-document #article-body,
+.pdf-document #article-back {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0;
+}
+
+.pdf-document #article-body,
+.pdf-document #article-back {
+  font-size: 10.5pt;
+  line-height: 1.42;
+}
+
+.pdf-document #article-body > .section,
+.pdf-document #article-back > .section,
+.pdf-document .back-section {
+  margin-bottom: 10mm;
+}
+
+.pdf-document h2,
+.pdf-document h3,
+.pdf-document .section > .title {
+  break-after: avoid;
+  color: var(--pdf-blue);
+}
+
+.pdf-document h2,
+.pdf-document .section > .title {
+  margin: 10mm 0 4mm;
+  font-size: 17pt;
+  line-height: 1.2;
+}
+
+.pdf-document h3,
+.pdf-document .section .section > .title {
+  margin: 7mm 0 3mm;
+  font-size: 13.5pt;
+  line-height: 1.25;
+}
+
+/* H3s are article subheads, not DGUV section anchors: keep them in the
+   document text colour while H2/section titles retain the DGUV blue. */
+.pdf-document #article-body h3,
+.pdf-document #article-back h3,
+.pdf-document #article-body .section .section > .title,
+.pdf-document #article-back .section .section > .title {
+  color: var(--pdf-ink);
+}
+
+.pdf-document p,
+.pdf-document li {
+  widows: 3;
+  orphans: 3;
+}
+
+.pdf-document img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+.pdf-document .fig,
+.pdf-document .boxed-text,
+.pdf-document .disp-quote,
+.pdf-document [content-type*=durchf i],
+.pdf-document .section[data-sec-type=highlight-info],
+.pdf-document .table-wrap {
+  break-inside: avoid;
+}
+
+.pdf-document .fig {
+  margin: 6mm auto;
+  text-align: center;
+}
+
+.pdf-document .fig .permissions,
+.pdf-document .fig .caption {
+  color: var(--pdf-muted);
+  font-size: 8.5pt;
+  text-align: left;
+}
+
+.pdf-document .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 6mm 0;
+  overflow: visible;
+}
+
+.pdf-document .table-wrap:has(col:nth-child(7)) {
+  page: wide-table;
+}
+
+.pdf-document table,
+.pdf-document .article-fragment .table-wrap table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 7pt;
+}
+
+.pdf-document col[width] {
+  width: attr(width percentage);
+}
+
+.pdf-document th,
+.pdf-document td {
+  min-width: 0;
+  padding: 2.2mm 1.25mm;
+  border: 0.35mm solid var(--pdf-rule);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
+}
+
+.pdf-document th {
+  background: var(--pdf-panel);
+  font-weight: 700;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
+}
+
+.pdf-document tr {
+  break-inside: avoid;
+}
+
+.pdf-document .boxed-text,
+.pdf-document .disp-quote,
+.pdf-document [content-type*=durchf i] {
+  margin: 6mm 0;
+  padding: 5mm;
+  border-left: 1.2mm solid var(--pdf-green);
+  background: #f1f8ed;
+  break-inside: avoid;
+}
+
+.pdf-document #article-body > .section[data-sec-type=preamble] {
+  padding: 5mm;
+  background: var(--pdf-panel);
+  break-inside: auto;
+}
+
+.pdf-document #article-body > .section[data-sec-type=preamble] > h2.title {
+  margin-top: 0;
+}
+
+.pdf-document #article-body .section[data-sec-type=highlight-info],
+.pdf-document #article-back .section[data-sec-type=highlight-info] {
+  margin: 6mm 0;
+  padding: 5mm;
+  border-left: 1.2mm solid var(--pdf-green);
+  background: #f1f8ed;
+}
+
+.pdf-document a[href^="#"] {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pdf-footer {
+  display: none;
+}

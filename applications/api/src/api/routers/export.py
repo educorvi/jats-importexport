@@ -5,6 +5,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi_cache import FastAPICache
+from fastapi_cache.coder import PickleCoder
 from fastapi_cache.decorator import cache
 
 from api.models import (
@@ -16,7 +17,7 @@ from api.models import (
 )
 
 from ..auth import require_permission
-from ..services.export import html_export, jats_export, md_export
+from ..services.export import html_export, jats_export, md_export, pdf_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 _CACHE_NAMESPACE = "export"
 _CACHE_UNKNOWN_FUNCTION = "unknown_function"
-_CACHE_FUNCTIONS = ["export_jats", "export_html", "export_md"] + [_CACHE_UNKNOWN_FUNCTION]
+_CACHE_FUNCTIONS = ["export_jats", "export_html", "export_md", "export_pdf"] + [_CACHE_UNKNOWN_FUNCTION]
 _CACHE_PATH = "path"
 _CACHE_QUERY_PARAM = "include_edit_links"
 
@@ -89,6 +90,17 @@ async def export_html(path: str, include_edit_links: bool = False):
 @cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_md(path: str, include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
+
+
+@router.get("/pdf", operation_id="export_pdf", response_class=Response)
+@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
+async def export_pdf(path: str):
+    pdf_content, filename = await pdf_export(path)
+    return Response(
+        content=pdf_content,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        media_type="application/pdf",
+    )
 
 
 @router.delete(
