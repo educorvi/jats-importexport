@@ -19,7 +19,7 @@ class APIConfig:
         "An API for uploading JATS documents, importing them to different storage backends"
         " (e.g. Plone), and converting them to various formats."
     )
-    API_VERSION: str = "1.0.0a17"
+    API_VERSION: str = "1.0.0a18"
 
 
 class StorageConfig:
