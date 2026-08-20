@@ -63,3 +63,4 @@ class CacheStatusResponse(BaseModel):
 
 class ListArticlesResponse(BaseModel):
     articles: list[str] = Field(description="The list of article URLs")
+    count: int = Field(description="The total number of articles")

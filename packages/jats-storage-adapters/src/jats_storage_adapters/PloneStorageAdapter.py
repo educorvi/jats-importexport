@@ -2,6 +2,7 @@
 
 Connects to a live Plone CMS REST API to manage JATS documents and files.
 """
+
 from http.client import responses
 
 import base64
@@ -75,25 +76,22 @@ class PloneStorageAdapter(StorageAdapter):
 
         super().__init__()
 
-
     def __plone_object_to_path(self, obj: dict) -> str:
         return obj.get("@id", "").replace(self.base_url, "").lstrip("/")
 
-    def list_articles(self) -> list[str]:
+    def list_articles(self, fachbereiche: list[str] | None = None) -> list[str]:
         url = f"{self.base_url}/@querystring-search"
-        query = {
-                "query": [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
-            }
-        response = self.httpx_client.post(
-            url,
-            json=query
-        )
+        query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
+        if fachbereiche:
+            query.append({"i": "fachbereich", "o": "plone.app.querystring.operation.selection.any", "v": fachbereiche})
+        search = {"query": query}
+        response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
         json_res = response.json()
         paths = list(map(self.__plone_object_to_path, json_res.get("items", [])))
         while json_res.get("batching", {}).get("next"):
             next_url = json_res["batching"]["next"]
-            response = self.httpx_client.post(next_url, json=query)
+            response = self.httpx_client.post(next_url, json=search)
             response.raise_for_status()
             json_res = response.json()
             paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
@@ -127,7 +125,7 @@ class PloneStorageAdapter(StorageAdapter):
                     "filename": filename,
                     "content-type": content_type,
                 },
-            }
+            },
         )
         response.raise_for_status()
 
@@ -158,10 +156,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __get_json(self, url: str) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
-        response = self.httpx_client.get(
-            url,
-            params={"fullobjects": 1}
-        )
+        response = self.httpx_client.get(url, params={"fullobjects": 1})
         response.raise_for_status()
         return response.json()
 
@@ -336,7 +331,7 @@ class PloneStorageAdapter(StorageAdapter):
                 "@type": "Front",
                 "title": "Metadaten",
                 "content_raw": front.content_raw,
-            }
+            },
         )
         response.raise_for_status()
         return response.json().get("@id")
@@ -362,7 +357,7 @@ class PloneStorageAdapter(StorageAdapter):
                 "label": section.label,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
-            }
+            },
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -389,10 +384,7 @@ class PloneStorageAdapter(StorageAdapter):
             "content": html_content,
         }
 
-        response = self.httpx_client.post(
-            container_url,
-            json=json_data
-        )
+        response = self.httpx_client.post(container_url, json=json_data)
         response.raise_for_status()
         response_url: str = response.json().get("@id")
         return response_url
@@ -431,7 +423,7 @@ class PloneStorageAdapter(StorageAdapter):
             json={
                 "@type": "Body",
                 "title": "Textkörper",
-            }
+            },
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -463,7 +455,7 @@ class PloneStorageAdapter(StorageAdapter):
                 "label": app_group.label,
                 "label_title_raw": app_group.label_title_raw,
                 "content_raw": app_group.content_raw,
-            }
+            },
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -481,7 +473,7 @@ class PloneStorageAdapter(StorageAdapter):
             json={
                 "@type": "Back",
                 "title": "Anhang",
-            }
+            },
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -498,7 +490,7 @@ class PloneStorageAdapter(StorageAdapter):
             json={
                 "@type": "Article",
                 "title": article.front.get_title() or "Artikel",
-            }
+            },
         )
         response.raise_for_status()
         result_url: str = response.json().get("@id")
@@ -532,10 +524,7 @@ class PloneStorageAdapter(StorageAdapter):
                 response.raise_for_status()
 
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
-            response = self.httpx_client.post(
-                parent_url,
-                json={"@type": "Folder", "title": part, "id": part}
-            )
+            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": part})
             response.raise_for_status()
 
     def __sanitize_html_for_richtext(self, html_content: str) -> str:

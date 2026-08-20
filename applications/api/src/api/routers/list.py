@@ -1,9 +1,12 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Request, Query
 
 from api.models import HTTP500InternalServerError, ListArticlesResponse
 from api.services.list import list_articles
 
 router = APIRouter(tags=["list"], prefix="/list")
+
 
 @router.get(
     "/",
@@ -13,6 +16,6 @@ router = APIRouter(tags=["list"], prefix="/list")
         500: {"model": HTTP500InternalServerError},
     },
 )
-async def list_all_articles():
-    articles = await list_articles()
-    return ListArticlesResponse(articles=articles)
+async def list_all_articles(fachbereiche: Annotated[list[str] | None, Query()] = None):
+    articles = await list_articles(fachbereiche)
+    return ListArticlesResponse(articles=articles, count=len(articles))
