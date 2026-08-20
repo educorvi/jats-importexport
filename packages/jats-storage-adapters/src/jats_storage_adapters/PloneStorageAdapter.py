@@ -80,13 +80,16 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception:
             pass
 
+    def __get_path_from_url(self, url: str) -> str:
+        base_path = urlparse(self.base_url).path.rstrip("/")
+        result_path = urlparse(url).path
+        if result_path.lower().startswith(base_path.lower()):
+            return result_path[len(base_path) :]
+        return result_path
+
     def __plone_object_to_path(self, obj: dict) -> str:
         obj_id = obj.get("@id", "")
-        base_path = urlparse(self.base_url).path.rstrip("/")
-        obj_path = urlparse(obj_id).path
-        if obj_path.lower().startswith(base_path.lower()):
-            return obj_path[len(base_path) :].lstrip("/")
-        return obj_path.lstrip("/")
+        return self.__get_path_from_url(obj_id)
 
     def list_articles(
         self,
@@ -333,11 +336,7 @@ class PloneStorageAdapter(StorageAdapter):
         try:
             self.__create_container(container)
             result_url = self.__create_article(document.article, container, options)
-            base_path = urlparse(self.base_url).path.rstrip("/")
-            result_path = urlparse(result_url).path
-            if result_path.lower().startswith(base_path.lower()):
-                return result_path[len(base_path) :]
-            return result_path
+            return self.__get_path_from_url(result_url)
         except Exception as e:
             logger.error(f"Error saving JATS document: {e}")
             raise
