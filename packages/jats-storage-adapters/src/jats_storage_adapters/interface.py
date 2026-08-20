@@ -73,6 +73,10 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def list_articles(self) -> list[str]:
+        """List all articles in the storage system."""
+        raise NotImplementedError
 
 class AvailableStorageAdapters(enum.StrEnum):
     """Enumeration of available storage adapter implementations."""

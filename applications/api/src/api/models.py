@@ -59,3 +59,7 @@ class CacheClearedResponse(BaseModel):
 class CacheStatusResponse(BaseModel):
     enabled: bool = Field(description="Indicates if FastAPICache is enabled")
     prefix: str = Field(description="The cache prefix used by FastAPICache")
+
+
+class ListArticlesResponse(BaseModel):
+    articles: list[str] = Field(description="The list of article URLs")
