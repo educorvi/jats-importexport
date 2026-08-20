@@ -13,6 +13,8 @@ docs/HTTP500InternalServerError.md
 docs/HTTPValidationError.md
 docs/HtmlDocumentResponse.md
 docs/JatsDocumentResponse.md
+docs/ListApi.md
+docs/ListArticlesResponse.md
 docs/LocationInner.md
 docs/MarkdownDocumentResponse.md
 docs/StatusApi.md
@@ -26,6 +28,7 @@ git_push.sh
 jats_importexport_client/__init__.py
 jats_importexport_client/api/__init__.py
 jats_importexport_client/api/export_api.py
+jats_importexport_client/api/list_api.py
 jats_importexport_client/api/status_api.py
 jats_importexport_client/api/upload_api.py
 jats_importexport_client/api_client.py
@@ -42,6 +45,7 @@ jats_importexport_client/models/http415_unsupported_media_type.py
 jats_importexport_client/models/http500_internal_server_error.py
 jats_importexport_client/models/http_validation_error.py
 jats_importexport_client/models/jats_document_response.py
+jats_importexport_client/models/list_articles_response.py
 jats_importexport_client/models/location_inner.py
 jats_importexport_client/models/markdown_document_response.py
 jats_importexport_client/models/upload_docx_request1.py
@@ -57,4 +61,6 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_list_api.py
+test/test_list_articles_response.py
 tox.ini
