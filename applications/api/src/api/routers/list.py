@@ -3,23 +3,24 @@ from typing import Annotated
 from fastapi import APIRouter, Query
 
 from api.models import HTTP500InternalServerError, ListArticlesResponse
-from api.services.list import list_articles
+from api.services import list as list_service
 
 router = APIRouter(tags=["list"], prefix="/list")
 
 
 @router.get(
     "/",
-    operation_id="list_all_articles",
+    operation_id="list_articles",
     response_model=ListArticlesResponse,
     responses={
         500: {"model": HTTP500InternalServerError},
     },
+    description="List articles in the storage system. Filtering is supported.",
 )
-async def list_all_articles(
+async def list_articles(
     fachbereiche: Annotated[list[str] | None, Query()] = None,
     sachgebiete: Annotated[list[str] | None, Query()] = None,
     organisationseinheiten: Annotated[list[str] | None, Query()] = None,
 ):
-    articles = await list_articles(fachbereiche, sachgebiete, organisationseinheiten)
+    articles = await list_service.list_articles(fachbereiche, sachgebiete, organisationseinheiten)
     return ListArticlesResponse(articles=articles, count=len(articles))
