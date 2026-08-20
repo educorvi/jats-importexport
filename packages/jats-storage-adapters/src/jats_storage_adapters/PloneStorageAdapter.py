@@ -79,11 +79,26 @@ class PloneStorageAdapter(StorageAdapter):
     def __plone_object_to_path(self, obj: dict) -> str:
         return obj.get("@id", "").replace(self.base_url, "").lstrip("/")
 
-    def list_articles(self, fachbereiche: list[str] | None = None) -> list[str]:
+    def list_articles(
+        self,
+        fachbereiche: list[str] | None = None,
+        sachgebiete: list[str] | None = None,
+        organisationseinheiten: list[str] | None = None,
+    ) -> list[str]:
         url = f"{self.base_url}/@querystring-search"
         query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
         if fachbereiche:
             query.append({"i": "fachbereich", "o": "plone.app.querystring.operation.selection.any", "v": fachbereiche})
+        if sachgebiete:
+            query.append({"i": "sachgebiet", "o": "plone.app.querystring.operation.selection.any", "v": sachgebiete})
+        if organisationseinheiten:
+            query.append(
+                {
+                    "i": "organisationseinheit",
+                    "o": "plone.app.querystring.operation.selection.any",
+                    "v": organisationseinheiten,
+                }
+            )
         search = {"query": query}
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()

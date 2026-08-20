@@ -74,7 +74,12 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_articles(self, fachbereiche: list[str] | None = None) -> list[str]:
+    def list_articles(
+        self,
+        fachbereiche: list[str] | None = None,
+        sachgebiete: list[str] | None = None,
+        organisationseinheiten: list[str] | None = None,
+    ) -> list[str]:
         """List all articles in the storage system."""
         raise NotImplementedError
 

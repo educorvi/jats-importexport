@@ -16,6 +16,10 @@ router = APIRouter(tags=["list"], prefix="/list")
         500: {"model": HTTP500InternalServerError},
     },
 )
-async def list_all_articles(fachbereiche: Annotated[list[str] | None, Query()] = None):
-    articles = await list_articles(fachbereiche)
+async def list_all_articles(
+    fachbereiche: Annotated[list[str] | None, Query()] = None,
+    sachgebiete: Annotated[list[str] | None, Query()] = None,
+    organisationseinheiten: Annotated[list[str] | None, Query()] = None,
+):
+    articles = await list_articles(fachbereiche, sachgebiete, organisationseinheiten)
     return ListArticlesResponse(articles=articles, count=len(articles))
