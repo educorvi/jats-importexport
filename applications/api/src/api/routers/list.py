@@ -5,7 +5,7 @@ from fastapi import APIRouter, Query
 from api.models import HTTP500InternalServerError, ListArticlesResponse
 from api.services import list as list_service
 
-router = APIRouter(tags=["list"], prefix="/list")
+router = APIRouter(tags=["List"], prefix="/list")
 
 
 @router.get(
