@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Query
 
 from api.models import HTTP500InternalServerError, ListArticlesResponse
 from api.services.list import list_articles

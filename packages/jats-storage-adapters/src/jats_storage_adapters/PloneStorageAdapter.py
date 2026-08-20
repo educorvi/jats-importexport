@@ -3,8 +3,6 @@
 Connects to a live Plone CMS REST API to manage JATS documents and files.
 """
 
-from http.client import responses
-
 import base64
 import json
 import logging
