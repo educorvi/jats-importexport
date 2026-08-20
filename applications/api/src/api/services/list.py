@@ -1,3 +1,7 @@
+import asyncio
+
+from fastapi import HTTPException
+
 from api.services.common import get_adapter_instance
 
 
@@ -8,7 +12,11 @@ async def list_articles(
 ) -> list[str]:
     try:
         adapter_instance = get_adapter_instance()
-        return adapter_instance.list_articles(fachbereiche, sachgebiete, organisationseinheiten)
+        return await asyncio.to_thread(
+            adapter_instance.list_articles,
+            fachbereiche,
+            sachgebiete,
+            organisationseinheiten,
+        )
     except Exception as e:
-        # Handle or log the exception as needed
-        raise e
+        raise HTTPException(status_code=500, detail=f"Error listing articles: {e}") from e

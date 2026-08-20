@@ -74,8 +74,19 @@ class PloneStorageAdapter(StorageAdapter):
 
         super().__init__()
 
+    def __del__(self) -> None:
+        try:
+            self.httpx_client.close()
+        except Exception:
+            pass
+
     def __plone_object_to_path(self, obj: dict) -> str:
-        return obj.get("@id", "").replace(self.base_url, "").lstrip("/")
+        obj_id = obj.get("@id", "")
+        base_path = urlparse(self.base_url).path.rstrip("/")
+        obj_path = urlparse(obj_id).path
+        if obj_path.lower().startswith(base_path.lower()):
+            return obj_path[len(base_path) :].lstrip("/")
+        return obj_path.lstrip("/")
 
     def list_articles(
         self,
