@@ -220,7 +220,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __fetch_front(self, data: dict) -> Front:
         """Convert Plone front node data into a Front domain model."""
-        return Front(content_raw=data.get("content_raw"))
+        return Front.from_dict(data)
 
     def __fetch_section(self, url: str, options: GetJATSDocumentOptions | None = None) -> Section:
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
@@ -325,12 +325,11 @@ class PloneStorageAdapter(StorageAdapter):
         for item in data.get("items", []):
             pt = item.get("@type")
             item_url = item.get("@id")
-            if pt == "Front":
-                front = self.__fetch_front(item)
-            elif pt == "Body":
+            if pt == "Body":
                 body = self.__fetch_body(item_url, options)
             elif pt == "Back":
                 back = self.__fetch_back(item_url, options)
+        front = self.__fetch_front(data)
         if not all([front, body]):
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
@@ -351,20 +350,6 @@ class PloneStorageAdapter(StorageAdapter):
     def __get_container_url(self, container: str) -> str:
         """Build the complete Plone API URL for a container folder."""
         return f"{self.base_url}/{container.strip('/')}"
-
-    def __create_front(self, front: Front, container_url: str) -> str:
-        """Create a Front object inside a Plone Article container."""
-        logger.debug(f"Creating front node for article: {container_url}")
-        response = self.httpx_client.post(
-            container_url,
-            json={
-                "@type": "Front",
-                "title": "Metadaten",
-                "content_raw": front.content_raw,
-            },
-        )
-        response.raise_for_status()
-        return response.json().get("@id")
 
     def __create_section(self, section: GenericSection, container_url: str) -> str:
         """Recursively create a Section/Appendix node structure in a Plone container."""
@@ -514,17 +499,16 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create an Article root node and Front, Body, Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
+        metadata = article.front.to_dict()
+        if not metadata.get("title"):
+            metadata["title"] = "Artikel"
         debug(f"Creating article node in container: {url}")
         response = self.httpx_client.post(
             url,
-            json={
-                "@type": "Article",
-                "title": article.front.get_title() or "Artikel",
-            },
+            json={"@type": "Article", **metadata},
         )
         response.raise_for_status()
         result_url: str = response.json().get("@id")
-        self.__create_front(article.front, result_url)
         self.__create_body(article.body, result_url, options)
         self.__create_back(article.back, result_url)
         return result_url

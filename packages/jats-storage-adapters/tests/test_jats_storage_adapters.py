@@ -200,14 +200,10 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@id": url,
                     "@type": "Article",
                     "items": [
-                        {
-                            "@type": "Front",
-                            "@id": "http://localhost:8080/Plone/my-doc/front",
-                            "content_raw": "<article-title>Hello</article-title>",
-                        },
                         {"@type": "Body", "@id": "http://localhost:8080/Plone/my-doc/body"},
                         {"@type": "Back", "@id": "http://localhost:8080/Plone/my-doc/back"},
                     ],
+                    "title": "Hello",
                 },
                 url=url,
             )
@@ -310,7 +306,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
 
     # Assert correct domain models structure reconstruction
     assert isinstance(doc, JATSDocument)
-    assert doc.article.front.content_raw == "<article-title>Hello</article-title>"
+    assert doc.article.front.title == "Hello"
     assert len(doc.article.body.sections) == 1
 
     sec = doc.article.body.sections[0]
@@ -344,7 +340,7 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
         json={
             "@id": "http://localhost:8080/Plone/my-doc",
             "@type": "Article",
-            "items": [{"@type": "Front", "@id": "http://localhost/front", "content_raw": "..."}],
+            "items": [],
         },
         url="http://localhost:8080/Plone/my-doc",
     )
@@ -389,9 +385,8 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     mocker.patch.object(adapter.httpx_client, "post", side_effect=mock_post_side_effect)
 
     # Let's create a minimal JATSDocument to save
-    front = Front(
-        content_raw="<article-meta><title-group><article-title>Save Test</article-title></title-group></article-meta>"
-    )
+    front = Front.empty()
+    front.title = "Save Test"
     sub_sec = Section(
         sec_type="sub", label=None, title="Sub", label_title_raw="", content_raw="Subcontent", sections=[]
     )
@@ -413,7 +408,6 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     post_types = [p[1]["@type"] for p in created_posts]
     assert "Folder" in post_types
     assert "Article" in post_types
-    assert "Front" in post_types
     assert "Body" in post_types
     assert "Section" in post_types
 

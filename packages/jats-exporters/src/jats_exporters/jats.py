@@ -44,7 +44,7 @@ def _get_article_jats(article: Article) -> str:
 
 def _get_front_jats(front: Front) -> str:
     """Serialize the Front metadata element to JATS XML."""
-    return f"<front>{front.content_raw or ''}</front>"
+    return front.to_xml()
 
 
 def _get_body_jats(body: Body) -> str:
