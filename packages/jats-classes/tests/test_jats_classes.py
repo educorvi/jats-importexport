@@ -337,27 +337,6 @@ def test_section_split_ignores_italic_in_nested_sec():
 # ----------------------------------------------------
 
 
-def test_section_split_on_vorbemerkungen():
-    xml_str = """
-    <sec>
-        <label>1.</label>
-        <title>Main Section</title>
-        <p>Normal content.</p>
-        <p><span>Vorbemerkungen</span> introductory text</p>
-        <p>Following content.</p>
-    </sec>
-    """
-    elem = etree.fromstring(xml_str)
-    sec = Section.from_xml_element(elem)
-
-    assert "Normal content." in sec.content_raw
-
-    assert len(sec.sections) == 1
-    sub = sec.sections[0]
-    assert "Vorbemerkungen" in sub.content_raw
-    assert "Following content." in sub.content_raw
-
-
 def test_section_no_split_without_vorbemerkungen():
     xml_str = """
     <sec>

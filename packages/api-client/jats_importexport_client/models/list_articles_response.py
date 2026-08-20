@@ -17,18 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class HTTP413PayloadTooLarge(BaseModel):
+class ListArticlesResponse(BaseModel):
     """
-    HTTP413PayloadTooLarge
+    ListArticlesResponse
     """ # noqa: E501
-    detail: Optional[StrictStr] = 'The uploaded file is too large.'
-    __properties: ClassVar[List[str]] = ["detail"]
+    articles: List[StrictStr] = Field(description="The list of article URLs")
+    count: StrictInt = Field(description="The total number of articles")
+    __properties: ClassVar[List[str]] = ["articles", "count"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +49,7 @@ class HTTP413PayloadTooLarge(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HTTP413PayloadTooLarge from a JSON string"""
+        """Create an instance of ListArticlesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +74,7 @@ class HTTP413PayloadTooLarge(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HTTP413PayloadTooLarge from a dict"""
+        """Create an instance of ListArticlesResponse from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +82,8 @@ class HTTP413PayloadTooLarge(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "detail": obj.get("detail") if obj.get("detail") is not None else 'The uploaded file is too large.'
+            "articles": obj.get("articles"),
+            "count": obj.get("count")
         })
         return _obj
 

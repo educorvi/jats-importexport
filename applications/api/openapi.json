@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a18"
+    "version": "1.0.0a19"
   },
   "paths": {
     "/status": {
@@ -729,6 +729,112 @@
           }
         }
       }
+    },
+    "/list/": {
+      "get": {
+        "tags": [
+          "list"
+        ],
+        "summary": "List Articles",
+        "description": "List articles in the storage system. Filtering is supported.",
+        "operationId": "list_articles",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fachbereiche",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fachbereiche"
+            }
+          },
+          {
+            "name": "sachgebiete",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sachgebiete"
+            }
+          },
+          {
+            "name": "organisationseinheiten",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Organisationseinheiten"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListArticlesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -863,6 +969,29 @@
           "jats"
         ],
         "title": "JatsDocumentResponse"
+      },
+      "ListArticlesResponse": {
+        "properties": {
+          "articles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Articles",
+            "description": "The list of article URLs"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count",
+            "description": "The total number of articles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "articles",
+          "count"
+        ],
+        "title": "ListArticlesResponse"
       },
       "MarkdownDocumentResponse": {
         "properties": {

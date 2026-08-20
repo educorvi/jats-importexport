@@ -35,8 +35,6 @@ from .interface import EDIT_PI, GetJATSDocumentOptions, SaveJATSDocumentOptions,
 logger = logging.getLogger(__name__)
 
 
-httpx_client = httpx.Client(timeout=15)
-
 XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
 
 EDIT_PI_PLONE = EDIT_PI.format(url="{url}/edit")
@@ -53,6 +51,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     base_url: str
     auth: tuple[str, str]
+    httpx_client: httpx.Client
 
     def __init__(self):
         """Initialize storage adapter loading credentials from environment."""
@@ -67,11 +66,63 @@ class PloneStorageAdapter(StorageAdapter):
             raise ValueError("PLONE_USERNAME and PLONE_PASSWORD environment variables must be set")
         self.auth = (username, password)
 
+        self.httpx_client = httpx.Client(timeout=15, auth=self.auth, headers={"Accept": "application/json"})
+
         xsl_path = os.path.abspath(XSL_PATH)
         self.xsl_doc = etree.parse(xsl_path)
         self.transform = etree.XSLT(self.xsl_doc)
 
         super().__init__()
+
+    def __del__(self) -> None:
+        try:
+            self.httpx_client.close()
+        except Exception:
+            pass
+
+    def __get_path_from_url(self, url: str) -> str:
+        base_path = urlparse(self.base_url).path.rstrip("/")
+        result_path = urlparse(url).path
+        if result_path.lower().startswith(base_path.lower()):
+            return result_path[len(base_path) :]
+        return result_path
+
+    def __plone_object_to_path(self, obj: dict) -> str:
+        obj_id = obj.get("@id", "")
+        return self.__get_path_from_url(obj_id)
+
+    def list_articles(
+        self,
+        fachbereiche: list[str] | None = None,
+        sachgebiete: list[str] | None = None,
+        organisationseinheiten: list[str] | None = None,
+    ) -> list[str]:
+        url = f"{self.base_url}/@querystring-search"
+        query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
+        if fachbereiche:
+            query.append({"i": "fachbereich", "o": "plone.app.querystring.operation.selection.any", "v": fachbereiche})
+        if sachgebiete:
+            query.append({"i": "sachgebiet", "o": "plone.app.querystring.operation.selection.any", "v": sachgebiete})
+        if organisationseinheiten:
+            query.append(
+                {
+                    "i": "organisationseinheit",
+                    "o": "plone.app.querystring.operation.selection.any",
+                    "v": organisationseinheiten,
+                }
+            )
+        search = {"query": query}
+        response = self.httpx_client.post(url, json=search)
+        response.raise_for_status()
+        json_res = response.json()
+        paths = list(map(self.__plone_object_to_path, json_res.get("items", [])))
+        while json_res.get("batching", {}).get("next"):
+            next_url = json_res["batching"]["next"]
+            response = self.httpx_client.post(next_url, json=search)
+            response.raise_for_status()
+            json_res = response.json()
+            paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
+        return paths
 
     def __upload_file(self, file: BinaryIO, container: str) -> str:
         self.__create_container(container)
@@ -90,7 +141,7 @@ class PloneStorageAdapter(StorageAdapter):
         portal_type = "Image" if is_image else "File"
         field_name = "image" if is_image else "file"
 
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             url,
             json={
                 "@type": portal_type,
@@ -102,8 +153,6 @@ class PloneStorageAdapter(StorageAdapter):
                     "content-type": content_type,
                 },
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
 
@@ -134,12 +183,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __get_json(self, url: str) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
-        response = httpx_client.get(
-            url,
-            params={"fullobjects": 1},
-            auth=self.auth,
-            headers={"Accept": "application/json"},
-        )
+        response = self.httpx_client.get(url, params={"fullobjects": 1})
         response.raise_for_status()
         return response.json()
 
@@ -292,11 +336,7 @@ class PloneStorageAdapter(StorageAdapter):
         try:
             self.__create_container(container)
             result_url = self.__create_article(document.article, container, options)
-            base_path = urlparse(self.base_url).path.rstrip("/")
-            result_path = urlparse(result_url).path
-            if result_path.lower().startswith(base_path.lower()):
-                return result_path[len(base_path) :]
-            return result_path
+            return self.__get_path_from_url(result_url)
         except Exception as e:
             logger.error(f"Error saving JATS document: {e}")
             raise
@@ -308,15 +348,13 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_front(self, front: Front, container_url: str) -> str:
         """Create a Front object inside a Plone Article container."""
         logger.debug(f"Creating front node for article: {container_url}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             container_url,
             json={
                 "@type": "Front",
                 "title": "Metadaten",
                 "content_raw": front.content_raw,
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         return response.json().get("@id")
@@ -333,7 +371,7 @@ class PloneStorageAdapter(StorageAdapter):
 
         logger.debug(f"Creating section node for article: {container_url}")
         logger.debug(f"Section title: {json.dumps(title)}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             container_url,
             json={
                 "@type": portal_type,
@@ -343,8 +381,6 @@ class PloneStorageAdapter(StorageAdapter):
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -371,12 +407,7 @@ class PloneStorageAdapter(StorageAdapter):
             "content": html_content,
         }
 
-        response = httpx_client.post(
-            container_url,
-            json=json_data,
-            auth=self.auth,
-            headers={"Accept": "application/json"},
-        )
+        response = self.httpx_client.post(container_url, json=json_data)
         response.raise_for_status()
         response_url: str = response.json().get("@id")
         return response_url
@@ -410,14 +441,12 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
         logger.debug(f"Creating body node for article: {container_url}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             container_url,
             json={
                 "@type": "Body",
                 "title": "Textkörper",
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -441,7 +470,7 @@ class PloneStorageAdapter(StorageAdapter):
     def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
         """Create an AppendixGroup node inside Plone Back and upload sections."""
         logger.debug(f"Creating appendix group node for article: {container_url}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             container_url,
             json={
                 "@type": "AppendixGroup",
@@ -450,8 +479,6 @@ class PloneStorageAdapter(StorageAdapter):
                 "label_title_raw": app_group.label_title_raw,
                 "content_raw": app_group.content_raw,
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -464,14 +491,12 @@ class PloneStorageAdapter(StorageAdapter):
         if back is None:
             return None
         logger.debug(f"Creating back node for article: {container_url}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             container_url,
             json={
                 "@type": "Back",
                 "title": "Anhang",
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
@@ -483,14 +508,12 @@ class PloneStorageAdapter(StorageAdapter):
         """Create an Article root node and Front, Body, Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
         debug(f"Creating article node in container: {url}")
-        response = httpx_client.post(
+        response = self.httpx_client.post(
             url,
             json={
                 "@type": "Article",
                 "title": article.front.get_title() or "Artikel",
             },
-            auth=self.auth,
-            headers={"Accept": "application/json"},
         )
         response.raise_for_status()
         result_url: str = response.json().get("@id")
@@ -517,19 +540,14 @@ class PloneStorageAdapter(StorageAdapter):
             current_path = f"{current_path}/{part}" if current_path else part
             url = f"{self.base_url}/{current_path}"
 
-            response = httpx_client.get(url, auth=self.auth, headers={"Accept": "application/json"})
+            response = self.httpx_client.get(url)
             if response.status_code == 200:
                 continue
             if response.status_code != 404:
                 response.raise_for_status()
 
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
-            response = httpx_client.post(
-                parent_url,
-                json={"@type": "Folder", "title": part, "id": part},
-                auth=self.auth,
-                headers={"Accept": "application/json"},
-            )
+            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": part})
             response.raise_for_status()
 
     def __sanitize_html_for_richtext(self, html_content: str) -> str:

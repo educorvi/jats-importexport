@@ -46,7 +46,7 @@ class Article:
             raise ValueError("Article element must contain 'front' and 'body' elements")
         front = Front.from_xml_element(front_element)
         body = Body.from_xml_element(body_element)
-        if back_element:
+        if back_element is not None:
             back = Back.from_xml_element(back_element)
         else:
             back = None
