@@ -21,6 +21,7 @@ async def list_articles(
     fachbereiche: Annotated[list[str] | None, Query()] = None,
     sachgebiete: Annotated[list[str] | None, Query()] = None,
     organisationseinheiten: Annotated[list[str] | None, Query()] = None,
+    rubriken: Annotated[list[str] | None, Query()] = None,
 ):
-    articles = await list_service.list_articles(fachbereiche, sachgebiete, organisationseinheiten)
+    articles = await list_service.list_articles(fachbereiche, sachgebiete, organisationseinheiten, rubriken)
     return ListArticlesResponse(articles=articles, count=len(articles))

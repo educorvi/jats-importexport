@@ -79,6 +79,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         fachbereiche: list[str] | None = None,
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
+        rubriken: list[str] | None = None,
     ) -> list[str]:
         """List all articles in the storage system."""
         raise NotImplementedError

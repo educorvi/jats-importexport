@@ -96,6 +96,7 @@ class PloneStorageAdapter(StorageAdapter):
         fachbereiche: list[str] | None = None,
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
+        rubriken: list[str] | None = None,
     ) -> list[str]:
         url = f"{self.base_url}/@querystring-search"
         query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
@@ -111,6 +112,8 @@ class PloneStorageAdapter(StorageAdapter):
                     "v": organisationseinheiten,
                 }
             )
+        if rubriken:
+            query.append({"i": "journal_title", "o": "plone.app.querystring.operation.selection.any", "v": rubriken})
         search = {"query": query}
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
