@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **list_articles**
-> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten)
+> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken)
 
 List Articles
 
@@ -48,10 +48,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     fachbereiche = ['fachbereiche_example'] # List[Optional[str]] |  (optional)
     sachgebiete = ['sachgebiete_example'] # List[str] |  (optional)
     organisationseinheiten = ['organisationseinheiten_example'] # List[str] |  (optional)
+    rubriken = ['rubriken_example'] # List[str] |  (optional)
 
     try:
         # List Articles
-        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten)
+        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken)
         print("The response of ListApi->list_articles:\n")
         pprint(api_response)
     except Exception as e:
@@ -68,6 +69,7 @@ Name | Type | Description  | Notes
  **fachbereiche** | [**List[Optional[str]]**](str.md)|  | [optional] 
  **sachgebiete** | [**List[str]**](str.md)|  | [optional] 
  **organisationseinheiten** | [**List[str]**](str.md)|  | [optional] 
+ **rubriken** | [**List[str]**](str.md)|  | [optional] 
 
 ### Return type
 

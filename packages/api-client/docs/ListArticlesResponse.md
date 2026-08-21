@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**articles** | **List[str]** | The list of article URLs | 
+**articles** | **List[str]** | The list of article paths (relative to the storage base URL) | 
 **count** | **int** | The total number of articles | 
 
 ## Example

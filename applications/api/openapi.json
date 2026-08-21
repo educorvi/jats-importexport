@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a19"
+    "version": "1.0.0a20"
   },
   "paths": {
     "/status": {
@@ -733,7 +733,7 @@
     "/list/": {
       "get": {
         "tags": [
-          "list"
+          "List"
         ],
         "summary": "List Articles",
         "description": "List articles in the storage system. Filtering is supported.",
@@ -799,6 +799,25 @@
                 }
               ],
               "title": "Organisationseinheiten"
+            }
+          },
+          {
+            "name": "rubriken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rubriken"
             }
           }
         ],
@@ -978,7 +997,7 @@
             },
             "type": "array",
             "title": "Articles",
-            "description": "The list of article URLs"
+            "description": "The list of article paths (relative to the storage base URL)"
           },
           "count": {
             "type": "integer",
