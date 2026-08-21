@@ -77,6 +77,13 @@ def _text_list(element: etree._Element | None, xpath: str) -> list[str]:
     return [f.text.strip() for f in found if f.text and f.text.strip()]
 
 
+def _itertext_list(element: etree._Element | None, xpath: str) -> list[str]:
+    """Return the concatenated text of every matching element."""
+    if element is None:
+        return []
+    return [text for found in element.findall(xpath) if (text := "".join(str(t) for t in found.itertext()).strip())]
+
+
 def _dict(element: etree._Element | None, xpath: str, key_xpath: str, value_xpath: str) -> dict[str, str]:
     """Return a dictionary of key-value pairs from matching elements."""
     if element is None:
@@ -150,7 +157,7 @@ class Front:
     # JATS: title-group/article-title
     title: str | None
     # JATS: title-group/subtitle
-    article_subtitle: str | None
+    article_subtitle: list[str]
     # JATS: contrib-group/contrib[@contrib-type='Autor']/name/surname # TODO
     author_surname: str | None
     # JATS: contrib-group/contrib[@contrib-type='Co-Autor']/name/surname # TODO
@@ -251,7 +258,7 @@ class Front:
         # Article Metadata
         article_id = _text(article_meta, "article-id[@pub-id-type='publisher-id']")
         title = _itertext(article_meta, "title-group/article-title")
-        article_subtitle = _itertext(article_meta, "title-group/subtitle")
+        article_subtitle = _itertext_list(article_meta, "title-group/subtitle")
         author_surname = _text(article_meta, "contrib-group/contrib[@contrib-type='Autor']/name/surname")
         co_author_surname = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/name/surname")
         co_author_aff = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/aff")
@@ -369,7 +376,7 @@ class Front:
                 *([etree.fromstring(self.article_categories)] if self.article_categories else []),
                 _create_tag("title-group", children=[
                     _create_tag("article-title", text=self.title),
-                    _create_tag("subtitle", text=self.article_subtitle),
+                    *[_create_tag("subtitle", text=subtitle) for subtitle in self.article_subtitle],
                 ]),
                 _create_tag("contrib-group", children=[
                     _create_tag("contrib", attributes={"contrib-type": "Autor"}, children=[
@@ -482,7 +489,7 @@ class Front:
             publisher_uri=None,
             article_id=None,
             title=None,
-            article_subtitle=None,
+            article_subtitle=[],
             author_surname=None,
             co_author_surname=None,
             co_author_aff=None,
@@ -557,8 +564,12 @@ class Front:
             front.article_id = article_id
         if isinstance((title := data.get("title")), str):
             front.title = title
-        if isinstance((article_subtitle := data.get("article_subtitle")), str):
-            front.article_subtitle = article_subtitle
+        article_subtitle = data.get("article_subtitle")
+        if isinstance(article_subtitle, list):
+            front.article_subtitle = [subtitle for subtitle in article_subtitle if isinstance(subtitle, str)]
+        elif isinstance(article_subtitle, str):
+            # Compatibility with Plone records created before subtitles became a list.
+            front.article_subtitle = [article_subtitle]
         if isinstance((author_surname := data.get("author_surname")), str):
             front.author_surname = author_surname
         if isinstance((co_author_surname := data.get("co_author_surname")), str):

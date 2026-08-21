@@ -25,7 +25,7 @@
           {{ metadata.article_id or "DGUV-Dokument" }}
         </p>
         <h1 id="pdf-title">{{ metadata.title }}</h1>
-        {% if metadata.article_subtitle %}<p class="pdf-subtitle">{{ metadata.article_subtitle }}</p>{% endif %}
+        {% for subtitle in metadata.article_subtitle %}<p class="pdf-subtitle">{{ subtitle }}</p>{% endfor %}
 
         <dl class="pdf-facts">
           <div>

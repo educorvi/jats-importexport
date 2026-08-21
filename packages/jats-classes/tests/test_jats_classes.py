@@ -195,6 +195,32 @@ def test_front_get_title_raw_content_none():
     assert front.title is None
 
 
+def test_front_preserves_multiple_subtitles_as_list():
+    xml = """<front>
+        <journal-meta/>
+        <article-meta>
+            <title-group>
+                <article-title>Title</article-title>
+                <subtitle>First <italic>subtitle</italic></subtitle>
+                <subtitle>Second subtitle</subtitle>
+            </title-group>
+        </article-meta>
+    </front>"""
+
+    front = Front.from_xml_element(etree.fromstring(xml))
+
+    assert front.article_subtitle == ["First subtitle", "Second subtitle"]
+    assert Front.from_dict(front.to_dict()).article_subtitle == ["First subtitle", "Second subtitle"]
+    serialized = etree.fromstring(front.to_xml())
+    assert serialized.xpath("article-meta/title-group/subtitle/text()") == ["First subtitle", "Second subtitle"]
+
+
+def test_front_reads_legacy_single_subtitle_from_dict():
+    front = Front.from_dict({"article_subtitle": "Legacy subtitle"})
+
+    assert front.article_subtitle == ["Legacy subtitle"]
+
+
 # ----------------------------------------------------
 # Tests for Body & Sections
 # ----------------------------------------------------
