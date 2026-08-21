@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a20"
+    "version": "1.0.0a21"
   },
   "paths": {
     "/status": {
@@ -736,7 +736,7 @@
           "List"
         ],
         "summary": "List Articles",
-        "description": "List articles in the storage system. Filtering is supported.",
+        "description": "List articles in the storage system. Filtering and batching are supported.",
         "operationId": "list_articles",
         "security": [
           {
@@ -819,6 +819,33 @@
               ],
               "title": "Rubriken"
             }
+          },
+          {
+            "name": "batch_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Zero-based index of the first article in the batch",
+              "default": 0,
+              "title": "Batch Start"
+            },
+            "description": "Zero-based index of the first article in the batch"
+          },
+          {
+            "name": "batch_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Number of articles to return",
+              "default": 200,
+              "title": "Batch Size"
+            },
+            "description": "Number of articles to return"
           }
         ],
         "responses": {
@@ -1002,15 +1029,72 @@
           "count": {
             "type": "integer",
             "title": "Count",
-            "description": "The total number of articles"
+            "description": "The total number of matching articles across all batches"
+          },
+          "batching": {
+            "$ref": "#/components/schemas/ListBatching",
+            "description": "Links for navigating between batches"
           }
         },
         "type": "object",
         "required": [
           "articles",
-          "count"
+          "count",
+          "batching"
         ],
         "title": "ListArticlesResponse"
+      },
+      "ListBatching": {
+        "properties": {
+          "current": {
+            "type": "string",
+            "title": "Current",
+            "description": "URL of the current batch"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next",
+            "description": "URL of the next batch, if one exists"
+          },
+          "previous": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous",
+            "description": "URL of the previous batch, if one exists"
+          },
+          "first": {
+            "type": "string",
+            "title": "First",
+            "description": "URL of the first batch"
+          },
+          "last": {
+            "type": "string",
+            "title": "Last",
+            "description": "URL of the last batch"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "next",
+          "previous",
+          "first",
+          "last"
+        ],
+        "title": "ListBatching"
       },
       "MarkdownDocumentResponse": {
         "properties": {

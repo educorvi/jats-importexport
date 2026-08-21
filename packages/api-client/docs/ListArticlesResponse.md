@@ -6,7 +6,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **articles** | **List[str]** | The list of article paths (relative to the storage base URL) | 
-**count** | **int** | The total number of articles | 
+**count** | **int** | The total number of matching articles across all batches | 
+**batching** | [**ListBatching**](ListBatching.md) | Links for navigating between batches | 
 
 ## Example
 

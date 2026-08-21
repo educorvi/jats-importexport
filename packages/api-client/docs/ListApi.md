@@ -8,11 +8,11 @@ Method | HTTP request | Description
 
 
 # **list_articles**
-> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken)
+> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size)
 
 List Articles
 
-List articles in the storage system. Filtering is supported.
+List articles in the storage system. Filtering and batching are supported.
 
 ### Example
 
@@ -49,10 +49,12 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     sachgebiete = ['sachgebiete_example'] # List[str] |  (optional)
     organisationseinheiten = ['organisationseinheiten_example'] # List[str] |  (optional)
     rubriken = ['rubriken_example'] # List[str] |  (optional)
+    batch_start = 0 # int | Zero-based index of the first article in the batch (optional) (default to 0)
+    batch_size = 200 # int | Number of articles to return (optional) (default to 200)
 
     try:
         # List Articles
-        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken)
+        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size)
         print("The response of ListApi->list_articles:\n")
         pprint(api_response)
     except Exception as e:
@@ -70,6 +72,8 @@ Name | Type | Description  | Notes
  **sachgebiete** | [**List[str]**](str.md)|  | [optional] 
  **organisationseinheiten** | [**List[str]**](str.md)|  | [optional] 
  **rubriken** | [**List[str]**](str.md)|  | [optional] 
+ **batch_start** | **int**| Zero-based index of the first article in the batch | [optional] [default to 0]
+ **batch_size** | **int**| Number of articles to return | [optional] [default to 200]
 
 ### Return type
 
