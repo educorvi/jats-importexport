@@ -159,6 +159,9 @@ class Front:
     co_author_aff: str | None
     # JATS: self-uri
     self_uri: str | None
+    # JATS: article-categories
+    # Raw xml snippet
+    article_categories: str | None
 
     # --- Publication Dates ---
     # JATS: pub-date@date-type="Ausgabedatum"
@@ -253,6 +256,12 @@ class Front:
         co_author_surname = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/name/surname")
         co_author_aff = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/aff")
         self_uri = _xlink_href(article_meta, "self-uri")
+        _article_categories = article_meta.find("article-categories")
+        article_categories = (
+            etree.tostring(_article_categories, encoding="unicode", with_tail=False)
+            if _article_categories is not None
+            else None
+        )
 
         # Publication Dates
         pub_date_ausgabedatum = _date(article_meta, "pub-date[@date-type='Ausgabedatum']")
@@ -307,6 +316,7 @@ class Front:
             co_author_surname=co_author_surname,
             co_author_aff=co_author_aff,
             self_uri=self_uri,
+            article_categories=article_categories,
             pub_date_ausgabedatum=pub_date_ausgabedatum,
             pub_date_aktualisierte_fassung=pub_date_aktualisierte_fassung,
             history_initial_publication=history_initial_publication,
@@ -356,6 +366,7 @@ class Front:
             ]),
             _create_tag("article-meta", children=[
                 _create_tag("article-id", text=self.article_id, attributes={"pub-id-type": "publisher-id"}),
+                *([etree.fromstring(self.article_categories)] if self.article_categories else []),
                 _create_tag("title-group", children=[
                     _create_tag("article-title", text=self.title),
                     _create_tag("subtitle", text=self.article_subtitle),
@@ -476,6 +487,7 @@ class Front:
             co_author_surname=None,
             co_author_aff=None,
             self_uri=None,
+            article_categories=None,
             pub_date_ausgabedatum=None,
             pub_date_aktualisierte_fassung=None,
             history_initial_publication=None,
@@ -555,6 +567,8 @@ class Front:
             front.co_author_aff = co_author_aff
         if isinstance((self_uri := data.get("self_uri")), str):
             front.self_uri = self_uri
+        if isinstance((article_categories := data.get("article_categories")), str):
+            front.article_categories = article_categories
 
         # Publication Dates
         if isinstance((pub_date_ausgabedatum := data.get("pub_date_ausgabedatum")), datetime.date):
