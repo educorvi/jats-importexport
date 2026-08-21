@@ -20,9 +20,8 @@ from jats_exporters import (
 
 
 def create_mock_document() -> JATSDocument:
-    front = Front(
-        content_raw="<article-meta><title-group><article-title>Exporter Test Article</article-title></title-group></article-meta>"
-    )
+    front = Front.empty()
+    front.title = "Exporter Test Article"
 
     sub_section = Section(
         sec_type="subsection",

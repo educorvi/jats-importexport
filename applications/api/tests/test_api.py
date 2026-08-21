@@ -19,6 +19,10 @@ client = TestClient(app)
 VALID_JATS_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <article>
     <front>
+        <journal-meta>
+            <journal-id/>
+            <issn/>
+        </journal-meta>
         <article-meta>
             <title-group>
                 <article-title>API Test Article</article-title>
@@ -38,6 +42,10 @@ VALID_JATS_XML = """<?xml version="1.0" encoding="UTF-8"?>
 XML_WITH_IMAGE = """<?xml version="1.0" encoding="UTF-8"?>
 <article xmlns:xlink="http://www.w3.org/1999/xlink">
     <front>
+        <journal-meta>
+            <journal-id/>
+            <issn/>
+        </journal-meta>
         <article-meta>
             <title-group>
                 <article-title>Image Reference Article</article-title>
@@ -104,7 +112,7 @@ class MockStorageAdapter(StorageAdapter):
 
     def save_jats_document(self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         self.saved_docs.append((document, container))
-        title = document.article.front.get_title() or "article"
+        title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
 

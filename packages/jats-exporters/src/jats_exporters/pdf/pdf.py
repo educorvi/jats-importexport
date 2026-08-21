@@ -12,8 +12,6 @@ from weasyprint import HTML
 
 from jats_exporters import Exporter, HtmlExporter
 
-from .metadata import get_article_metadata
-
 
 class PdfExporter(Exporter[str]):
     """Exporter that converts a JATSDocument to a PDF using WeasyPrint."""
@@ -38,7 +36,7 @@ class PdfExporter(Exporter[str]):
         html = HTML(string=self._get_html(template_context), base_url=f"{self.ROOT.as_uri()}/")
         pdf_bytes = html.write_pdf()
 
-        title_escaped = "".join(c if c.isalnum() else "_" for c in document.article.front.get_title() or "Dokument")
+        title_escaped = "".join(c if c.isalnum() else "_" for c in document.article.front.title or "Dokument")
         filename = f"{title_escaped}.pdf"
 
         return pdf_bytes, filename
@@ -51,13 +49,11 @@ class PdfExporter(Exporter[str]):
 
     def _get_template_context(self, document: JATSDocument) -> dict[str, Any]:
         """Prepare the context for rendering the PDF template."""
-        article_metadata = get_article_metadata(document.article.front.content_raw)
-        article_metadata["article_title"] = document.article.front.get_title()
-        article_metadata["pub_date_ausgabedatum_german"] = self._to_german_date(
-            article_metadata.get("pub_date_ausgabedatum")
-        )
+        front = document.article.front
+        article_metadata = front.to_dict()
+        article_metadata["pub_date_ausgabedatum_german"] = self._to_german_date(front.pub_date_ausgabedatum)
         article_metadata["pub_date_aktualisierte_fassung_german"] = self._to_german_date(
-            article_metadata.get("pub_date_aktualisierte_fassung")
+            front.pub_date_aktualisierte_fassung
         )
 
         html_content = self.html_exporter.export(document)
