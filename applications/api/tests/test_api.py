@@ -80,8 +80,9 @@ def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: st
 
 class MockStorageAdapter(StorageAdapter):
     def list_articles(self, fachbereiche: list[str] | None = None, sachgebiete: list[str] | None = None,
-                      organisationseinheiten: list[str] | None = None) -> list[str]:
-        return []
+                      organisationseinheiten: list[str] | None = None, rubriken: list[str] | None = None,
+                      batch_start: int = 0, batch_size: int | None = None) -> tuple[list[str], int]:
+        return [], 0
 
     def __init__(self):
         self.uploaded_files = []

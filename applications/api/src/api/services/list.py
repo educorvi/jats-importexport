@@ -10,7 +10,9 @@ async def list_articles(
     sachgebiete: list[str] | None = None,
     organisationseinheiten: list[str] | None = None,
     rubriken: list[str] | None = None,
-) -> list[str]:
+    batch_start: int = 0,
+    batch_size: int | None = None,
+) -> tuple[list[str], int]:
     try:
         adapter_instance = get_adapter_instance()
         return await asyncio.to_thread(
@@ -19,6 +21,8 @@ async def list_articles(
             sachgebiete,
             organisationseinheiten,
             rubriken,
+            batch_start,
+            batch_size,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing articles: {e}") from e

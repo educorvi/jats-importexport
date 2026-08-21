@@ -60,16 +60,17 @@ All settings are read from environment variables.
 
 ### Server
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable | Default   | Description |
+|---|-----------|---|
 | `API_KEY` | *(unset)* | API key required in `X-API-Key` header; auth disabled when unset |
 | `API_KEY_MANAGER_URL` | *(unset)* | Base URL of an external API key manager used to validate keys (requires `API_KEY_MANAGER_API_ID`) |
 | `API_KEY_MANAGER_API_ID` | *(unset)* | API ID sent to the API key manager when validating keys |
 | `API_HOST` | `0.0.0.0` | Bind host |
-| `API_PORT` | `8000` | Bind port |
-| `API_RELOAD` | `false` | Enable auto-reload (development only) |
-| `API_WORKERS` | `1` | Number of worker processes |
-| `API_CORS_ORIGINS` | `*` | Comma-separated list of allowed CORS origins |
+| `API_PORT` | `8000`    | Bind port |
+| `API_RELOAD` | `false`   | Enable auto-reload (development only) |
+| `API_WORKERS` | `1`       | Number of worker processes |
+| `API_CORS_ORIGINS` | `*`       | Comma-separated list of allowed CORS origins |
+| `API_LIST_BATCH_SIZE` | `200`     | Default and maximum number of articles returned by one `/list/` request |
 
 ### Storage
 

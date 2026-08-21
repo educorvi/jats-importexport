@@ -73,6 +73,42 @@ def test_available_storage_adapters_factory(clean_env):
 
 
 # ----------------------------------------------------
+# Tests for PloneStorageAdapter list_articles
+# ----------------------------------------------------
+
+
+def test_plone_storage_adapter_lists_only_requested_range(clean_env, mocker):
+    os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
+    os.environ["PLONE_USERNAME"] = "admin"
+    os.environ["PLONE_PASSWORD"] = "secret"
+    adapter = PloneStorageAdapter()
+    mock_post = mocker.patch.object(
+        adapter.httpx_client,
+        "post",
+        return_value=make_response(
+            json={
+                "items": [
+                    {"@id": "http://localhost:8080/Plone/articles/two"},
+                    {"@id": "http://localhost:8080/Plone/articles/three"},
+                ],
+                "items_total": 12,
+                "batching": {"next": "http://localhost:8080/Plone/@querystring-search?b_start=4"},
+            },
+            method="POST",
+            url="http://localhost:8080/Plone/@querystring-search",
+        ),
+    )
+
+    paths, total = adapter.list_articles(fachbereiche=["law"], batch_start=2, batch_size=2)
+
+    assert paths == ["/articles/two", "/articles/three"]
+    assert total == 12
+    mock_post.assert_called_once()
+    assert mock_post.call_args.kwargs["json"]["b_start"] == 2
+    assert mock_post.call_args.kwargs["json"]["b_size"] == 2
+
+
+# ----------------------------------------------------
 # Tests for PloneStorageAdapter Upload File
 # ----------------------------------------------------
 

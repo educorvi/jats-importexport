@@ -61,6 +61,15 @@ class CacheStatusResponse(BaseModel):
     prefix: str = Field(description="The cache prefix used by FastAPICache")
 
 
+class ListBatching(BaseModel):
+    current: str = Field(description="URL of the current batch")
+    next: str | None = Field(description="URL of the next batch, if one exists")
+    previous: str | None = Field(description="URL of the previous batch, if one exists")
+    first: str = Field(description="URL of the first batch")
+    last: str = Field(description="URL of the last batch")
+
+
 class ListArticlesResponse(BaseModel):
     articles: list[str] = Field(description="The list of article paths (relative to the storage base URL)")
-    count: int = Field(description="The total number of articles")
+    count: int = Field(description="The total number of matching articles across all batches")
+    batching: ListBatching = Field(description="Links for navigating between batches")

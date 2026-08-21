@@ -97,7 +97,9 @@ class PloneStorageAdapter(StorageAdapter):
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
         rubriken: list[str] | None = None,
-    ) -> list[str]:
+        batch_start: int = 0,
+        batch_size: int | None = None,
+    ) -> tuple[list[str], int]:
         url = f"{self.base_url}/@querystring-search"
         query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
         if fachbereiche:
@@ -114,18 +116,20 @@ class PloneStorageAdapter(StorageAdapter):
             )
         if rubriken:
             query.append({"i": "journal_title", "o": "plone.app.querystring.operation.selection.any", "v": rubriken})
-        search = {"query": query}
+        search: dict = {"query": query, "b_start": batch_start}
+        if batch_size is not None:
+            search["b_size"] = batch_size
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
         json_res = response.json()
         paths = list(map(self.__plone_object_to_path, json_res.get("items", [])))
-        while json_res.get("batching", {}).get("next"):
+        while batch_size is None and json_res.get("batching", {}).get("next"):
             next_url = json_res["batching"]["next"]
             response = self.httpx_client.post(next_url, json=search)
             response.raise_for_status()
             json_res = response.json()
             paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
-        return paths
+        return paths, json_res.get("items_total", len(paths))
 
     def __upload_file(self, file: BinaryIO, container: str) -> str:
         self.__create_container(container)

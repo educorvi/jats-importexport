@@ -80,8 +80,14 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
         rubriken: list[str] | None = None,
-    ) -> list[str]:
-        """List all articles in the storage system."""
+        batch_start: int = 0,
+        batch_size: int | None = None,
+    ) -> tuple[list[str], int]:
+        """List a range of articles and return it together with the total match count.
+
+        ``batch_start`` is the zero-based index of the first article. A
+        ``None`` ``batch_size`` requests all remaining articles.
+        """
         raise NotImplementedError
 
 
