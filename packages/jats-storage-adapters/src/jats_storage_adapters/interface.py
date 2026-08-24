@@ -90,6 +90,16 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def list_fachbereiche(self) -> list[str]:
+        """List all available Fachbereiche."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def list_sachgebiete(self) -> list[str]:
+        """List all available Sachgebiete."""
+        raise NotImplementedError
+
 
 class AvailableStorageAdapters(enum.StrEnum):
     """Enumeration of available storage adapter implementations."""

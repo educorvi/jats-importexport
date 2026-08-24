@@ -202,7 +202,8 @@ def test_front_preserves_multiple_subtitles_as_list():
             <title-group>
                 <article-title>Title</article-title>
                 <subtitle>First <italic>subtitle</italic></subtitle>
-                <subtitle>Second subtitle</subtitle>
+                <subtitle>Second
+                    subtitle</subtitle>
             </title-group>
         </article-meta>
     </front>"""

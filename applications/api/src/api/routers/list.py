@@ -3,7 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Request
 
 from api.config import APIConfig
-from api.models import HTTP500InternalServerError, ListArticlesResponse, ListBatching
+from api.models import (
+    HTTP500InternalServerError,
+    ListArticlesResponse,
+    ListBatching,
+    ListFachbereicheResponse,
+    ListSachgebieteResponse,
+)
 from api.services import list as list_service
 
 router = APIRouter(tags=["List"], prefix="/list")
@@ -59,4 +65,38 @@ async def list_articles(
         articles=articles,
         count=count,
         batching=batching,
+    )
+
+
+@router.get(
+    "/fachbereiche",
+    response_model=ListFachbereicheResponse,
+    responses={
+        500: {"model": HTTP500InternalServerError},
+    },
+    description="Returns a list of Fachbereiche",
+)
+async def list_fachbereiche(
+    request: Request,
+):
+    fachbereiche = await list_service.list_fachbereiche()
+    return ListFachbereicheResponse(
+        fachbereiche=fachbereiche,
+    )
+
+
+@router.get(
+    "/sachgebiete",
+    response_model=ListSachgebieteResponse,
+    responses={
+        500: {"model": HTTP500InternalServerError},
+    },
+    description="Returns a list of Sachgebiete",
+)
+async def list_sachgebiete(
+    request: Request,
+):
+    sachgebiete = await list_service.list_sachgebiete()
+    return ListSachgebieteResponse(
+        sachgebiete=sachgebiete,
     )

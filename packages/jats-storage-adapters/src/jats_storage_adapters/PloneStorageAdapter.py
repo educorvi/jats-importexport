@@ -66,7 +66,9 @@ class PloneStorageAdapter(StorageAdapter):
             raise ValueError("PLONE_USERNAME and PLONE_PASSWORD environment variables must be set")
         self.auth = (username, password)
 
-        self.httpx_client = httpx.Client(timeout=15, auth=self.auth, headers={"Accept": "application/json"})
+        self.httpx_client = httpx.Client(
+            timeout=15, auth=self.auth, headers={"Accept": "application/json"}, base_url=self.base_url
+        )
 
         xsl_path = os.path.abspath(XSL_PATH)
         self.xsl_doc = etree.parse(xsl_path)
@@ -90,6 +92,20 @@ class PloneStorageAdapter(StorageAdapter):
     def __plone_object_to_path(self, obj: dict) -> str:
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
+
+    def __list_metadata_contents(self, meta: str) -> list[str]:
+        url = f"/@faceted-search?portal_type=Article&facets={meta}&facets_only=1"
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        facets = response.json().get("facets", {}).get(meta, {}).get("items", [])
+        values = list(map(lambda item: item.get("value", ""), facets))
+        return values
+
+    def list_fachbereiche(self) -> list[str]:
+        return self.__list_metadata_contents("fachbereich")
+
+    def list_sachgebiete(self) -> list[str]:
+        return self.__list_metadata_contents("sachgebiet")
 
     def list_articles(
         self,

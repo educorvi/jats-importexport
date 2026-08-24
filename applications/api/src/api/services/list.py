@@ -5,6 +5,9 @@ from fastapi import HTTPException
 from api.services.common import get_adapter_instance
 
 
+adapter_instance = get_adapter_instance()
+
+
 async def list_articles(
     fachbereiche: list[str] | None = None,
     sachgebiete: list[str] | None = None,
@@ -14,7 +17,6 @@ async def list_articles(
     batch_size: int | None = None,
 ) -> tuple[list[str], int]:
     try:
-        adapter_instance = get_adapter_instance()
         return await asyncio.to_thread(
             adapter_instance.list_articles,
             fachbereiche,
@@ -26,3 +28,17 @@ async def list_articles(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing articles: {e}") from e
+
+
+async def list_fachbereiche():
+    try:
+        return await asyncio.to_thread(adapter_instance.list_fachbereiche)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing Fachbereiche: {e}") from e
+
+
+async def list_sachgebiete():
+    try:
+        return await asyncio.to_thread(adapter_instance.list_sachgebiete)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing Sachgebiete: {e}") from e

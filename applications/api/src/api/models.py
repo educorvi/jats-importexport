@@ -73,3 +73,11 @@ class ListArticlesResponse(BaseModel):
     articles: list[str] = Field(description="The list of article paths (relative to the storage base URL)")
     count: int = Field(description="The total number of matching articles across all batches")
     batching: ListBatching = Field(description="Links for navigating between batches")
+
+
+class ListFachbereicheResponse(BaseModel):
+    fachbereiche: list[str] = Field(description="The list of Fachbereiche")
+
+
+class ListSachgebieteResponse(BaseModel):
+    sachgebiete: list[str] = Field(description="The list of Sachgebiete")

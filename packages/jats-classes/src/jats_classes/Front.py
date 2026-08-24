@@ -78,10 +78,14 @@ def _text_list(element: etree._Element | None, xpath: str) -> list[str]:
 
 
 def _itertext_list(element: etree._Element | None, xpath: str) -> list[str]:
-    """Return the concatenated text of every matching element."""
+    """Return normalized text from every matching element."""
     if element is None:
         return []
-    return [text for found in element.findall(xpath) if (text := "".join(str(t) for t in found.itertext()).strip())]
+    return [
+        text
+        for found in element.findall(xpath)
+        if (text := " ".join("".join(str(t) for t in found.itertext()).split()))
+    ]
 
 
 def _dict(element: etree._Element | None, xpath: str, key_xpath: str, value_xpath: str) -> dict[str, str]:
