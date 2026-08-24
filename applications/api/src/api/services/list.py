@@ -4,7 +4,6 @@ from fastapi import HTTPException
 
 from api.services.common import get_adapter_instance
 
-
 adapter_instance = get_adapter_instance()
 
 

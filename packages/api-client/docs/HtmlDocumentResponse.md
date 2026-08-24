@@ -5,7 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**html** | **str** | The HTML document | 
+**html** | **str** | The HTML document (main content) | 
+**front** | **str** | The HTML of the front matter / metadata section | 
 
 ## Example
 
