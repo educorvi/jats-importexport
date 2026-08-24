@@ -181,18 +181,13 @@ or pipeline) parameterized.
     <!-- Enabling retrieval of cross-references to objects -->
     <xsl:key name="xref-by-rid" match="xref" use="@rid"/>
 
+
     <!-- ============================================================= -->
     <!--  ROOT TEMPLATE - HANDLES HTML FRAMEWORK                       -->
     <!-- ============================================================= -->
 
     <xsl:template match="/">
-        <!--    <html>-->
-        <!-- HTML header -->
-        <!--      <xsl:call-template name="make-html-header"/>-->
-        <!--      <body>-->
         <xsl:apply-templates/>
-        <!--      </body>-->
-        <!--    </html>-->
     </xsl:template>
 
 
@@ -221,23 +216,7 @@ or pipeline) parameterized.
     <!--  TOP LEVEL                                                    -->
     <!-- ============================================================= -->
 
-    <!--
-        content model for article:
-           (front,body?,back?,floats-group?,(sub-article*|response*))
-
-        content model for sub-article:
-           ((front|front-stub),body?,back?,floats-group?,
-            (sub-article*|response*))
-
-        content model for response:
-           ((front|front-stub),body?,back?,floats-group?) -->
-
     <xsl:template match="article">
-        <xsl:call-template name="make-article"/>
-    </xsl:template>
-
-    <xsl:template match="sub-article | response">
-        <!--    <hr class="part-rule"/>-->
         <xsl:call-template name="make-article"/>
     </xsl:template>
 
@@ -247,356 +226,33 @@ or pipeline) parameterized.
     <!-- ============================================================= -->
 
     <xsl:template name="make-article">
-        <!-- Generates a series of (flattened) divs for contents of any
-               article, sub-article or response -->
-
-        <!-- variable to be used in div id's to keep them unique -->
         <xsl:variable name="this-article">
             <xsl:apply-templates select="." mode="id"/>
         </xsl:variable>
-        <div id="{$this-article}-all" class="row">
-            <div id="{$this-article}-front" class="front col-3">
+        <div id="article-all" class="row">
+            <div id="article-front" class="front col-3">
                 <xsl:apply-templates select="front | front-stub"/>
             </div>
-            <div id="{$this-article}-content" class="content col-9">
-                <div>
-
-                </div>
+            <div id="article-content" class="content col-9">
                 <!-- body -->
                 <xsl:for-each select="body">
-                    <div id="{$this-article}-body" class="body">
+                    <div id="article-body" class="body">
                         <xsl:apply-templates/>
                     </div>
                 </xsl:for-each>
                 <!-- appendix-->
                 <xsl:if test="back | $loose-footnotes">
-                    <!-- $loose-footnotes is defined below as any footnotes outside
-                         front matter or fn-group -->
-                    <div id="{$this-article}-back" class="back">
+                    <!-- $loose-footnotes is defined below as any footnotes outside front matter or fn-group -->
+                    <div id="article-back" class="back">
                         <xsl:call-template name="make-back"/>
                     </div>
                 </xsl:if>
             </div>
         </div>
-
-
-        <xsl:for-each select="floats-group | floats-wrap">
-            <!-- floats-wrap is from 2.3 -->
-            <div id="{$this-article}-floats" class="back">
-                <xsl:call-template name="main-title">
-                    <xsl:with-param name="contents">
-                        <span class="generated">Gleitobjekte</span>
-                    </xsl:with-param>
-                </xsl:call-template>
-                <xsl:apply-templates/>
-            </div>
-        </xsl:for-each>
-
-<!--        &lt;!&ndash; more metadata goes in the footer &ndash;&gt;-->
-<!--        <div id="{$this-article}-footer" class="footer">-->
-<!--            <xsl:call-template name="footer-metadata"/>-->
-<!--            <xsl:call-template name="footer-branding"/>-->
-<!--        </div>-->
-
-        <!-- sub-article or response (recursively calls
-                 this template) -->
-        <xsl:apply-templates select="sub-article | response"/>
-
     </xsl:template>
 
     <xsl:template match="front | front-stub">
         <xsl:call-template name="metadata-and-toc"/>
-        <!-- First Table: journal and article metadata -->
-        <!--        <div class="metadata-small">-->
-        <!--            <table class="table table-bordered">-->
-        <!--                <tr>-->
-        <!--                    <td>Vom-->
-        <!--                        <xsl:for-each select="article-meta/pub-date[1]">-->
-        <!--                            <xsl:call-template name="format-date"/>-->
-        <!--                        </xsl:for-each>-->
-        <!--                    </td>-->
-        <!--                </tr>-->
-        <!--                <tr>-->
-        <!--                    <td>In der Fassung vom-->
-        <!--                        <xsl:for-each select="article-meta/pub-date[2]">-->
-        <!--                            <xsl:call-template name="format-date"/>-->
-        <!--                        </xsl:for-each>-->
-        <!--                    </td>-->
-        <!--                </tr>-->
-        <!--            </table>-->
-        <!--        </div>-->
-        <!--        <div class="card m-2">-->
-        <!--            <div class="metadata card-body">-->
-        <!--                <div class="row">-->
-        <!--                    &lt;!&ndash; Cell 1: journal information &ndash;&gt;-->
-        <!--                    <xsl:for-each select="journal-meta">-->
-        <!--                        &lt;!&ndash; (journal-id+, journal-title-group*, (contrib-group | aff | aff-alternatives)*,-->
-        <!--                              issn+, issn-l?, isbn*, publisher?, notes*, self-uri*)         &ndash;&gt;-->
-        <!--                        <div class="col">-->
-        <!--                            <div class="text-uppercase text-muted small fw-semibold border-bottom pb-1 mb-2">-->
-        <!--                                <xsl:text>Zeitschriftinformationen</xsl:text>-->
-        <!--                            </div>-->
-        <!--                            <div class="metadata-group">-->
-        <!--                                <xsl:apply-templates select="journal-id | journal-title-group" mode="metadata"/>-->
-        <!--                                &lt;!&ndash; the following may appear in 2.3 &ndash;&gt;-->
-        <!--                                <xsl:apply-templates mode="metadata"-->
-        <!--                                                     select="journal-title | journal-subtitle | trans-title | trans-subtitle | abbrev-journal-title"/>-->
-        <!--                                &lt;!&ndash; contrib-group, aff, aff-alternatives, author-notes &ndash;&gt;-->
-        <!--                                <xsl:apply-templates mode="metadata"-->
-        <!--                                                     select="contrib-group"/>-->
-        <!--                                <xsl:if test="aff | aff-alternatives | author-notes">-->
-        <!--                                    <div class="metadata-group">-->
-        <!--                                        <xsl:apply-templates mode="metadata"-->
-        <!--                                                             select="aff | aff-alternatives | author-notes"/>-->
-        <!--                                    </div>-->
-        <!--                                </xsl:if>-->
-        <!--                                <xsl:apply-templates select="issn | issn-l | isbn | publisher | notes | self-uri"-->
-        <!--                                                     mode="metadata"/>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </xsl:for-each>-->
-
-        <!--                    &lt;!&ndash; Cell 2: Article information &ndash;&gt;-->
-        <!--                    <xsl:for-each select="article-meta | self::front-stub">-->
-        <!--                        &lt;!&ndash; content model:-->
-        <!--                                  (article-id*, article-categories?, title-group,-->
-        <!--                                   (contrib-group | aff)*,-->
-        <!--                           author-notes?, pub-date+, volume?, volume-id*,-->
-        <!--                           volume-series?, issue?, issue-id*, issue-title*,-->
-        <!--                           issue-sponsor*, issue-part?, isbn*, supplement?,-->
-        <!--                           ((fpage, lpage?, page-range?) | elocation-id)?,-->
-        <!--                           (email | ext-link | uri | product |-->
-        <!--                            supplementary-material)*,-->
-        <!--                           history?, permissions?, self-uri*, related-article*,-->
-        <!--                           abstract*, trans-abstract*,-->
-        <!--                           kwd-group*, funding-group*, conference*, counts?,-->
-        <!--                           custom-meta-group?)-->
-
-        <!--                          These are handled as follows:-->
-
-        <!--                          In the "Article Information" header cell:-->
-        <!--                            article-id-->
-        <!--                            pub-date-->
-        <!--                            volume-->
-        <!--                            volume-id-->
-        <!--                            volume-series-->
-        <!--                            issue-->
-        <!--                            issue-id-->
-        <!--                            issue-title-->
-        <!--                            issue-sponsor-->
-        <!--                            issue-part-->
-        <!--                            isbn-->
-        <!--                            supplement-->
-        <!--                            fpage-->
-        <!--                            lpage-->
-        <!--                            page-range-->
-        <!--                            elocation-id-->
-        <!--                            email-->
-        <!--                            ext-link-->
-        <!--                            uri-->
-        <!--                            product-->
-        <!--                            history-->
-        <!--                            permissions-->
-        <!--                            self-uri-->
-        <!--                            related-article-->
-        <!--                            funding-group-->
-        <!--                            conference-->
-
-        <!--                          In the "Article title" cell:-->
-        <!--                            title-group-->
-        <!--                            contrib-group-->
-        <!--                            aff-->
-        <!--                            author-notes-->
-        <!--                            abstract-->
-        <!--                            trans-abstract-->
-
-        <!--                          In the metadata footer-->
-        <!--                            article-categories-->
-        <!--                            supplementary-material-->
-        <!--                            kwd-group-->
-        <!--                            counts-->
-        <!--                            custom-meta-group-->
-
-        <!--                                &ndash;&gt;-->
-
-        <!--                        <div class="col">-->
-        <!--                            <div class="text-uppercase text-muted small fw-semibold border-bottom pb-1 mb-2">-->
-        <!--                                <xsl:text>Artikelinformationen</xsl:text>-->
-        <!--                            </div>-->
-        <!--                            <div class="metadata-group">-->
-
-        <!--                                <xsl:apply-templates mode="metadata"-->
-        <!--                                                     select="email | ext-link | uri | self-uri"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="product"/>-->
-
-        <!--                                &lt;!&ndash; only in 2.3 &ndash;&gt;-->
-        <!--                                <xsl:apply-templates mode="metadata" select="copyright-statement |-->
-        <!--                copyright-year | license"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="permissions"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="history/date"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="pub-date"/>-->
-
-        <!--                                <xsl:call-template name="volume-info">-->
-        <!--                                    &lt;!&ndash; handles volume?, volume-id*, volume-series? &ndash;&gt;-->
-        <!--                                </xsl:call-template>-->
-
-        <!--                                <xsl:call-template name="issue-info">-->
-        <!--                                    &lt;!&ndash; handles issue?, issue-id*, issue-title*,-->
-        <!--                                         issue-sponsor*, issue-part? &ndash;&gt;-->
-        <!--                                </xsl:call-template>-->
-
-        <!--                                <xsl:call-template name="page-info">-->
-        <!--                                    &lt;!&ndash; handles (fpage, lpage?, page-range?) &ndash;&gt;-->
-        <!--                                </xsl:call-template>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="elocation-id"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="isbn"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata"-->
-        <!--                                                     select="supplement | related-article | conference"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="article-id"/>-->
-
-        <!--                                &lt;!&ndash; only in 2.3 &ndash;&gt;-->
-        <!--                                <xsl:apply-templates mode="metadata" select="contract-num | contract-sponsor |-->
-        <!--                grant-num | grant-sponsor"/>-->
-
-        <!--                                <xsl:apply-templates mode="metadata" select="funding-group/*">-->
-        <!--                                    &lt;!&ndash; includes (award-group*, funding-statement*,-->
-        <!--                                         open-access?) &ndash;&gt;-->
-        <!--                                </xsl:apply-templates>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </xsl:for-each>-->
-        <!--                </div>-->
-        <!--            </div>-->
-        <!--        </div>-->
-
-        <!--    <hr class="part-rule"/>-->
-
-        <!-- change context to front/article-meta (again) -->
-<!--        <xsl:for-each select="article-meta | self::front-stub">-->
-<!--            <div class="metadata centered">-->
-<!--                <xsl:apply-templates mode="metadata" select="title-group"/>-->
-<!--            </div>-->
-<!--            &lt;!&ndash; contrib-group, aff, aff-alternatives, author-notes &ndash;&gt;-->
-<!--            <xsl:apply-templates mode="metadata" select="contrib-group"/>-->
-<!--            &lt;!&ndash; back in article-meta or front-stub context &ndash;&gt;-->
-<!--            <xsl:if test="aff | aff-alternatives | author-notes">-->
-<!--                <div class="metadata">-->
-<!--                    <div class="row">-->
-<!--                        <div class="col"/>-->
-<!--                        <div class="col">-->
-<!--                            <div class="metadata-group">-->
-<!--                                <xsl:apply-templates mode="metadata"-->
-<!--                                                     select="aff | aff-alternatives | author-notes"/>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </xsl:if>-->
-
-<!--            &lt;!&ndash; abstract(s) &ndash;&gt;-->
-<!--            <xsl:if test="abstract[normalize-space(string(*[not(self::title)]))] | trans-abstract[normalize-space(string(*[not(self::title)]))]">-->
-<!--                &lt;!&ndash; rule separates title+authors from abstract(s) &ndash;&gt;-->
-<!--                <hr class="section-rule"/>-->
-
-<!--                <xsl:for-each-->
-<!--                        select="abstract[normalize-space(string(*[not(self::title)]))] | trans-abstract[normalize-space(string(*[not(self::title)]))]">-->
-<!--                    &lt;!&ndash; title in left column, content (paras, secs) in right &ndash;&gt;-->
-<!--                    <div class="metadata">-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-auto text-end">-->
-<!--                                <h4 class="callout-title">-->
-<!--                                    <xsl:apply-templates select="title/node()"/>-->
-<!--                                    <xsl:if test="not(normalize-space(string(title)))">-->
-<!--                                        <span class="generated">-->
-<!--                                            <xsl:if test="self::trans-abstract">Übersetzte</xsl:if>-->
-<!--                                            <xsl:text>Zusammenfassung</xsl:text>-->
-<!--                                        </span>-->
-<!--                                    </xsl:if>-->
-<!--                                </h4>-->
-<!--                            </div>-->
-<!--                            <div class="col">-->
-<!--                                <xsl:apply-templates select="*[not(self::title)]"/>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </xsl:for-each>-->
-<!--                &lt;!&ndash; end of abstract or trans-abstract &ndash;&gt;-->
-<!--            </xsl:if>-->
-<!--            &lt;!&ndash; end of dealing with abstracts &ndash;&gt;-->
-<!--        </xsl:for-each>-->
-<!--        <xsl:for-each select="notes">-->
-<!--            <div class="metadata">-->
-<!--                <xsl:apply-templates mode="metadata" select="."/>-->
-<!--            </div>-->
-<!--        </xsl:for-each>-->
-        <!--        <hr class="part-rule"/>-->
-
-        <!-- end of big front-matter pull -->
-    </xsl:template>
-
-
-    <xsl:template name="footer-metadata">
-        <!-- handles: article-categories, kwd-group, counts,
-               supplementary-material, custom-meta-group
-             Plus also generates a sheet of processing warnings
-             -->
-        <xsl:for-each select="front/article-meta | front-stub">
-            <xsl:if test="article-categories | kwd-group | counts |
-                    supplementary-material | custom-meta-group |
-                    custom-meta-wrap">
-                <!-- custom-meta-wrap is from NLM 2.3 -->
-                <!--       <hr class="part-rule"/>-->
-                <div class="metadata">
-                    <h4 class="generated">
-                        <xsl:text>Artikelinformationen (Fortsetzung)</xsl:text>
-                    </h4>
-                    <div class="metadata-group">
-                        <xsl:apply-templates mode="metadata"
-                                             select="supplementary-material"/>
-
-                        <xsl:apply-templates mode="metadata"
-                                             select="article-categories | kwd-group | counts"/>
-
-                        <xsl:apply-templates mode="metadata"
-                                             select="custom-meta-group | custom-meta-wrap"/>
-                    </div>
-                </div>
-            </xsl:if>
-        </xsl:for-each>
-
-        <xsl:variable name="process-warnings">
-            <xsl:call-template name="process-warnings"/>
-        </xsl:variable>
-
-        <xsl:if test="normalize-space(string($process-warnings))">
-            <!--      <hr class="part-rule"/>-->
-            <div class="metadata">
-                <!--<div class="row">
-                  <div class="cell spanning">
-
-                  </div>
-                </div>-->
-                <div class="row">
-                    <div class="col-12">
-                        <h4 class="generated">
-                            <xsl:text>Verarbeitungshinweise</xsl:text>
-                        </h4>
-                        <p>Folgende Warnungen wurden aufgrund problematischer Auszeichnung ausgegeben:</p>
-                        <div class="metadata-group">
-                            <xsl:copy-of select="$process-warnings"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </xsl:if>
     </xsl:template>
 
 

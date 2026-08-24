@@ -2,6 +2,7 @@ import asyncio
 import logging
 from enum import Enum
 
+from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
@@ -53,7 +54,18 @@ async def jats_export(path: str):
 async def html_export(path: str, include_edit_links: bool = False):
     document = await __load_document(path, {"include_edit_links": include_edit_links})
     html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
-    return HtmlDocumentResponse(html=html_content)
+
+    soup = BeautifulSoup(html_content, "html.parser")
+    content = soup.find(id="article-content")
+    if content is None:
+        raise HTTPException(status_code=500, detail="HTML export failed: 'article-content' not found in the output.")
+    content.attrs["class"] = "content"
+    front = soup.find(id="article-front")
+    if front is None:
+        raise HTTPException(status_code=500, detail="HTML export failed: 'article-front' not found in the output.")
+    front.attrs["class"] = "front"
+
+    return HtmlDocumentResponse(html=str(content), front=str(front))
 
 
 async def md_export(path: str, include_edit_links: bool = False):

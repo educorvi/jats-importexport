@@ -15,6 +15,7 @@ dependencies = [
     "jats-storage-adapters",
     "redis",
     "httpx>=0.28.1, < 1",
+    "beautifulsoup4~=4.15.0",
 ]
 
 [project.scripts]

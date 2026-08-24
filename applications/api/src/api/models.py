@@ -45,7 +45,8 @@ class JatsDocumentResponse(BaseModel):
 
 
 class HtmlDocumentResponse(BaseModel):
-    html: str = Field(description="The HTML document")
+    html: str = Field(description="The HTML document (main content)")
+    front: str = Field(description="The HTML of the front matter / metadata section")
 
 
 class MarkdownDocumentResponse(BaseModel):
