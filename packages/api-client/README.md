@@ -102,6 +102,8 @@ Class | Method | HTTP request | Description
 *ExportApi* | [**export_pdf**](docs/ExportApi.md#export_pdf) | **GET** /export/pdf | Export Pdf
 *ExportApi* | [**get_cache_status**](docs/ExportApi.md#get_cache_status) | **GET** /export/cache | Get Cache Status
 *ListApi* | [**list_articles**](docs/ListApi.md#list_articles) | **GET** /list/ | List Articles
+*ListApi* | [**list_fachbereiche_list_fachbereiche_get**](docs/ListApi.md#list_fachbereiche_list_fachbereiche_get) | **GET** /list/fachbereiche | List Fachbereiche
+*ListApi* | [**list_sachgebiete_list_sachgebiete_get**](docs/ListApi.md#list_sachgebiete_list_sachgebiete_get) | **GET** /list/sachgebiete | List Sachgebiete
 *StatusApi* | [**get_status**](docs/StatusApi.md#get_status) | **GET** /status | Health Status
 *UploadApi* | [**upload_docx**](docs/UploadApi.md#upload_docx) | **POST** /upload/docx | Upload a DOCX file, convert it to JATS XML, and upload to the storage
 *UploadApi* | [**upload_xml**](docs/UploadApi.md#upload_xml) | **POST** /upload/xml | Upload a JATS Document (XML) to the storage
@@ -121,6 +123,8 @@ Class | Method | HTTP request | Description
  - [JatsDocumentResponse](docs/JatsDocumentResponse.md)
  - [ListArticlesResponse](docs/ListArticlesResponse.md)
  - [ListBatching](docs/ListBatching.md)
+ - [ListFachbereicheResponse](docs/ListFachbereicheResponse.md)
+ - [ListSachgebieteResponse](docs/ListSachgebieteResponse.md)
  - [LocationInner](docs/LocationInner.md)
  - [MarkdownDocumentResponse](docs/MarkdownDocumentResponse.md)
  - [UploadDocxRequest1](docs/UploadDocxRequest1.md)

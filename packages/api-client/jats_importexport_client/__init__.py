@@ -42,6 +42,8 @@ __all__ = [
     "JatsDocumentResponse",
     "ListArticlesResponse",
     "ListBatching",
+    "ListFachbereicheResponse",
+    "ListSachgebieteResponse",
     "LocationInner",
     "MarkdownDocumentResponse",
     "UploadDocxRequest1",
@@ -80,6 +82,8 @@ from jats_importexport_client.models.html_document_response import HtmlDocumentR
 from jats_importexport_client.models.jats_document_response import JatsDocumentResponse as JatsDocumentResponse
 from jats_importexport_client.models.list_articles_response import ListArticlesResponse as ListArticlesResponse
 from jats_importexport_client.models.list_batching import ListBatching as ListBatching
+from jats_importexport_client.models.list_fachbereiche_response import ListFachbereicheResponse as ListFachbereicheResponse
+from jats_importexport_client.models.list_sachgebiete_response import ListSachgebieteResponse as ListSachgebieteResponse
 from jats_importexport_client.models.location_inner import LocationInner as LocationInner
 from jats_importexport_client.models.markdown_document_response import MarkdownDocumentResponse as MarkdownDocumentResponse
 from jats_importexport_client.models.upload_docx_request1 import UploadDocxRequest1 as UploadDocxRequest1

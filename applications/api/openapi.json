@@ -881,6 +881,80 @@
           }
         }
       }
+    },
+    "/list/fachbereiche": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List Fachbereiche",
+        "description": "Returns a list of Fachbereiche",
+        "operationId": "list_fachbereiche_list_fachbereiche_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListFachbereicheResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/list/sachgebiete": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List Sachgebiete",
+        "description": "Returns a list of Sachgebiete",
+        "operationId": "list_sachgebiete_list_sachgebiete_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSachgebieteResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1095,6 +1169,40 @@
           "last"
         ],
         "title": "ListBatching"
+      },
+      "ListFachbereicheResponse": {
+        "properties": {
+          "fachbereiche": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Fachbereiche",
+            "description": "The list of Fachbereiche"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fachbereiche"
+        ],
+        "title": "ListFachbereicheResponse"
+      },
+      "ListSachgebieteResponse": {
+        "properties": {
+          "sachgebiete": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sachgebiete",
+            "description": "The list of Sachgebiete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sachgebiete"
+        ],
+        "title": "ListSachgebieteResponse"
       },
       "MarkdownDocumentResponse": {
         "properties": {
