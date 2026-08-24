@@ -329,7 +329,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_pdf**
-> export_pdf(path)
+> bytes export_pdf(path)
 
 Export Pdf
 
@@ -367,7 +367,9 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
     try:
         # Export Pdf
-        api_instance.export_pdf(path)
+        api_response = api_instance.export_pdf(path)
+        print("The response of ExportApi->export_pdf:\n")
+        pprint(api_response)
     except Exception as e:
         print("Exception when calling ExportApi->export_pdf: %s\n" % e)
 ```
@@ -383,7 +385,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-void (empty response body)
+**bytes**
 
 ### Authorization
 
@@ -392,13 +394,13 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
+ - **Accept**: application/pdf, application/json
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Successful Response |  -  |
+**200** | PDF file |  -  |
 **422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
