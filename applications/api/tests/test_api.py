@@ -115,6 +115,15 @@ class MockStorageAdapter(StorageAdapter):
         title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
+    def link_related_articles(self) -> list[str]:
+        raise NotImplementedError("link_related_articles is not implemented in MockStorageAdapter")
+
+    def list_fachbereiche(self) -> list[str]:
+        raise NotImplementedError("list_fachbereiche is not implemented in MockStorageAdapter")
+
+    def list_sachgebiete(self) -> list[str]:
+        raise NotImplementedError("list_sachgebiete is not implemented in MockStorageAdapter")
+
 
 @pytest.fixture
 def mock_adapter(mocker):

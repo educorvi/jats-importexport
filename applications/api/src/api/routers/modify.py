@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Request
 
 from ..models import (
-    UpdateArticlesResponse,
     HTTP400BadRequest,
     HTTP500InternalServerError,
+    UpdateArticlesResponse,
 )
-
 from ..services.modify import link_related_articles_service
 
 router = APIRouter(prefix="/modify", tags=["Modify"])

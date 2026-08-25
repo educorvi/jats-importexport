@@ -150,7 +150,11 @@ class PloneStorageAdapter(StorageAdapter):
     def link_related_articles(self) -> list[str]:
         """Link related articles in Plone (by using plone.relatedItems) based on metadata field 'related_articles'.
 
-        This method links the listed articles from 'related_articles' (listed with the article-id) to the actual articles in Plone (using the @id = url) and saves them into relatedItems (attribute obtained from the plone.relateditems behavior). This is done for every article in the plone instance. All related articles that are found and linked will be deleted from the related_articles field afterwards. The method returns a list of all articles that have been updated.
+        This method links the listed articles from 'related_articles' (listed with the article-id) to the actual
+        articles in Plone (using the @id = url) and saves them into relatedItems (attribute obtained from the
+        plone.relateditems behavior). This is done for every article in the plone instance. All related articles that
+        are found and linked will be deleted from the related_articles field afterwards. The method returns a list of
+        all articles that have been updated.
         """
         articles = self.list_articles()[0]
         updated_articles = []

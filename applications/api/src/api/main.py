@@ -20,7 +20,7 @@ from api.config import StorageConfig
 from .auth import require_permission
 from .config import APIConfig
 from .logging import logger
-from .routers import export, list, status, upload, modify
+from .routers import export, list, modify, status, upload
 
 
 def create_app() -> FastAPI:

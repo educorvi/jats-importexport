@@ -433,7 +433,8 @@ class Front:
                 *[_create_tag("related-article",
                               attributes={"related-article-type": "companion",
                                           "ext-link-type": "publisher-id",
-                                          _XLINK_HREF: related_article} ) for related_article in self.related_articles or []],
+                                          _XLINK_HREF: related_article} )
+                                          for related_article in self.related_articles or []],
                 _create_tag("abstract", attributes={"abstract-type": "short"}, children=[
                     _create_tag("title", text=self.abstract_short_title),
                     _create_tag("p", text=self.abstract_short),
