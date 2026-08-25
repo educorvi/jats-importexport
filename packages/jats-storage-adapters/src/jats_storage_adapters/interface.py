@@ -91,6 +91,11 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def link_related_articles(self) -> list[str]:
+        """Link related articles and return the list of updated article paths."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def list_fachbereiche(self) -> list[str]:
         """List all available Fachbereiche."""
         raise NotImplementedError

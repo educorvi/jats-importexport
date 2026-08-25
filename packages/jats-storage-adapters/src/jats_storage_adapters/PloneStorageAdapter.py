@@ -147,6 +147,47 @@ class PloneStorageAdapter(StorageAdapter):
             paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
         return paths, json_res.get("items_total", len(paths))
 
+    def link_related_articles(self) -> list[str]:
+        """Link related articles in Plone (by using plone.relatedItems) based on metadata field 'related_articles'.
+
+        This method links the listed articles from 'related_articles' (listed with the article-id) to the actual articles in Plone (using the @id = url) and saves them into relatedItems (attribute obtained from the plone.relateditems behavior). This is done for every article in the plone instance. All related articles that are found and linked will be deleted from the related_articles field afterwards. The method returns a list of all articles that have been updated.
+        """
+        articles = self.list_articles()[0]
+        updated_articles = []
+        for article in articles:
+            url = f"{self.base_url}/{article.strip('/')}"
+            response = self.httpx_client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            related_articles_ids = data.get("related_articles", [])
+            if not related_articles_ids:
+                continue
+            related_items = [  # save already linked articles, so they are not overwritten
+                ra if isinstance(ra, str) else ra.get("@id")
+                for ra in data.get("relatedItems", [])
+                if (ra if isinstance(ra, str) else ra.get("@id"))
+            ]
+            for related_id in related_articles_ids:
+                query = [
+                    {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
+                    {"i": "article_id", "o": "plone.app.querystring.operation.string.is", "v": related_id},
+                ]
+                search_response = self.httpx_client.post(f"{self.base_url}/@querystring-search", json={"query": query})
+                search_response.raise_for_status()
+                search_results = search_response.json().get("items", [])
+                if search_results:
+                    related_items.extend([res.get("@id") for res in search_results if res.get("@id")])
+                    related_articles_ids.remove(related_id)
+            if related_items:
+                update_response = self.httpx_client.patch(
+                    url,
+                    json={"relatedItems": related_items, "related_articles": related_articles_ids},
+                    headers={"Content-Type": "application/json"},
+                )
+                update_response.raise_for_status()
+                updated_articles.append(article)
+        return updated_articles
+
     def __upload_file(self, file: BinaryIO, container: str) -> str:
         self.__create_container(container)
 
