@@ -1,3 +1,4 @@
+from jats_classes import JATSDocument
 import asyncio
 import logging
 from enum import Enum
@@ -38,7 +39,7 @@ def get_return_type(request: Request) -> ReturnType:
 
 async def __load_document(
     path: str, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
-):
+) -> JATSDocument:
     try:
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_jats_document, path, options)
@@ -84,3 +85,10 @@ async def pdf_export(path: str):
         PdfExporter(image_downloader=adapter.download_file).export, document
     )
     return pdf_content, filename
+
+
+async def metadata_export(path: str):
+    adapter = get_adapter_instance()
+    document = await __load_document(path, adapter=adapter)
+    front = document.article.front
+    return front

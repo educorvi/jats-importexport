@@ -1,3 +1,4 @@
+from jats_classes import Front
 from pydantic import BaseModel, Field
 
 # HTTP Error Responses
@@ -51,6 +52,10 @@ class HtmlDocumentResponse(BaseModel):
 
 class MarkdownDocumentResponse(BaseModel):
     md: str = Field(description="The Markdown document")
+
+
+class MetadataResponse(BaseModel):
+    metadata: Front = Field(description="The metadata")
 
 
 class CacheClearedResponse(BaseModel):
