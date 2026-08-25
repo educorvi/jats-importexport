@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**export_html**](ExportApi.md#export_html) | **GET** /export/html | Export Html
 [**export_jats**](ExportApi.md#export_jats) | **GET** /export/jats | Export Jats
 [**export_md**](ExportApi.md#export_md) | **GET** /export/md | Export Md
+[**export_metadata**](ExportApi.md#export_metadata) | **GET** /export/metadata | Export Metadata
 [**export_pdf**](ExportApi.md#export_pdf) | **GET** /export/pdf | Export Pdf
 [**get_cache_status**](ExportApi.md#get_cache_status) | **GET** /export/cache | Get Cache Status
 
@@ -309,6 +310,84 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**MarkdownDocumentResponse**](MarkdownDocumentResponse.md)
+
+### Authorization
+
+[APIKeyHeader](../README.md#APIKeyHeader)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **export_metadata**
+> MetadataResponse export_metadata(path)
+
+Export Metadata
+
+### Example
+
+* Api Key Authentication (APIKeyHeader):
+
+```python
+import jats_importexport_client
+from jats_importexport_client.models.metadata_response import MetadataResponse
+from jats_importexport_client.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = jats_importexport_client.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: APIKeyHeader
+configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['APIKeyHeader'] = 'Bearer'
+
+# Enter a context with an instance of the API client
+with jats_importexport_client.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = jats_importexport_client.ExportApi(api_client)
+    path = 'path_example' # str | 
+
+    try:
+        # Export Metadata
+        api_response = api_instance.export_metadata(path)
+        print("The response of ExportApi->export_metadata:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ExportApi->export_metadata: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **path** | **str**|  | 
+
+### Return type
+
+[**MetadataResponse**](MetadataResponse.md)
 
 ### Authorization
 

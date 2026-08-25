@@ -47,7 +47,7 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ListApi(api_client)
-    fachbereiche = ['fachbereiche_example'] # List[Optional[str]] |  (optional)
+    fachbereiche = ['fachbereiche_example'] # List[str] |  (optional)
     sachgebiete = ['sachgebiete_example'] # List[str] |  (optional)
     organisationseinheiten = ['organisationseinheiten_example'] # List[str] |  (optional)
     rubriken = ['rubriken_example'] # List[str] |  (optional)
@@ -70,7 +70,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **fachbereiche** | [**List[Optional[str]]**](str.md)|  | [optional] 
+ **fachbereiche** | [**List[str]**](str.md)|  | [optional] 
  **sachgebiete** | [**List[str]**](str.md)|  | [optional] 
  **organisationseinheiten** | [**List[str]**](str.md)|  | [optional] 
  **rubriken** | [**List[str]**](str.md)|  | [optional] 

@@ -6,6 +6,7 @@ README.md
 docs/CacheClearedResponse.md
 docs/CacheStatusResponse.md
 docs/ExportApi.md
+docs/Front.md
 docs/HTTP400BadRequest.md
 docs/HTTP413PayloadTooLarge.md
 docs/HTTP415UnsupportedMediaType.md
@@ -20,6 +21,7 @@ docs/ListFachbereicheResponse.md
 docs/ListSachgebieteResponse.md
 docs/LocationInner.md
 docs/MarkdownDocumentResponse.md
+docs/MetadataResponse.md
 docs/StatusApi.md
 docs/UploadApi.md
 docs/UploadDocxRequest1.md
@@ -41,6 +43,7 @@ jats_importexport_client/exceptions.py
 jats_importexport_client/models/__init__.py
 jats_importexport_client/models/cache_cleared_response.py
 jats_importexport_client/models/cache_status_response.py
+jats_importexport_client/models/front.py
 jats_importexport_client/models/html_document_response.py
 jats_importexport_client/models/http400_bad_request.py
 jats_importexport_client/models/http413_payload_too_large.py
@@ -54,6 +57,7 @@ jats_importexport_client/models/list_fachbereiche_response.py
 jats_importexport_client/models/list_sachgebiete_response.py
 jats_importexport_client/models/location_inner.py
 jats_importexport_client/models/markdown_document_response.py
+jats_importexport_client/models/metadata_response.py
 jats_importexport_client/models/upload_docx_request1.py
 jats_importexport_client/models/upload_file_response.py
 jats_importexport_client/models/upload_xml_request1.py

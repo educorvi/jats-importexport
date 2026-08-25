@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a23"
+    "version": "1.0.0a24"
   },
   "paths": {
     "/status": {
@@ -660,6 +660,53 @@
         }
       }
     },
+    "/export/metadata": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export Metadata",
+        "operationId": "export_metadata",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/export/cache": {
       "delete": {
         "tags": [
@@ -1001,6 +1048,508 @@
         ],
         "title": "CacheStatusResponse"
       },
+      "Front": {
+        "properties": {
+          "journal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Id"
+          },
+          "journal_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Title"
+          },
+          "journal_subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Subtitle"
+          },
+          "issn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Issn"
+          },
+          "publisher_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Name"
+          },
+          "publisher_institution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Institution"
+          },
+          "publisher_addr_line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Addr Line"
+          },
+          "publisher_postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Postal Code"
+          },
+          "publisher_city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher City"
+          },
+          "publisher_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Phone"
+          },
+          "publisher_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Email"
+          },
+          "publisher_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publisher Uri"
+          },
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "article_subtitle": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Article Subtitle"
+          },
+          "author_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Surname"
+          },
+          "co_author_surname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Co Author Surname"
+          },
+          "co_author_aff": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Co Author Aff"
+          },
+          "self_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Self Uri"
+          },
+          "article_categories": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Categories"
+          },
+          "pub_date_ausgabedatum": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pub Date Ausgabedatum"
+          },
+          "pub_date_aktualisierte_fassung": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pub Date Aktualisierte Fassung"
+          },
+          "history_initial_publication": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Initial Publication"
+          },
+          "history_correction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Correction"
+          },
+          "history_latest_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Latest Version"
+          },
+          "copyright_statement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copyright Statement"
+          },
+          "copyright_holder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Copyright Holder"
+          },
+          "abstract_short_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstract Short Title"
+          },
+          "abstract_short": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstract Short"
+          },
+          "abstract_summary_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstract Summary Title"
+          },
+          "abstract_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstract Summary"
+          },
+          "keywords": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keywords"
+          },
+          "beschreibender_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibender Typ"
+          },
+          "bisherige_bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bisherige Bestellnummer"
+          },
+          "webcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webcode"
+          },
+          "organisationseinheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organisationseinheit"
+          },
+          "fachbereich": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fachbereich"
+          },
+          "sachgebiet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sachgebiet"
+          },
+          "veroeffentlichungsstatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Veroeffentlichungsstatus"
+          },
+          "bildnachweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bildnachweis"
+          },
+          "ueberschriften_mit_nummerierung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ueberschriften Mit Nummerierung"
+          }
+        },
+        "type": "object",
+        "required": [
+          "journal_id",
+          "journal_title",
+          "journal_subtitle",
+          "issn",
+          "publisher_name",
+          "publisher_institution",
+          "publisher_addr_line",
+          "publisher_postal_code",
+          "publisher_city",
+          "publisher_phone",
+          "publisher_email",
+          "publisher_uri",
+          "article_id",
+          "title",
+          "article_subtitle",
+          "author_surname",
+          "co_author_surname",
+          "co_author_aff",
+          "self_uri",
+          "article_categories",
+          "pub_date_ausgabedatum",
+          "pub_date_aktualisierte_fassung",
+          "history_initial_publication",
+          "history_correction",
+          "history_latest_version",
+          "copyright_statement",
+          "copyright_holder",
+          "abstract_short_title",
+          "abstract_short",
+          "abstract_summary_title",
+          "abstract_summary",
+          "keywords",
+          "beschreibender_typ",
+          "bisherige_bestellnummer",
+          "webcode",
+          "organisationseinheit",
+          "fachbereich",
+          "sachgebiet",
+          "veroeffentlichungsstatus",
+          "bildnachweis",
+          "ueberschriften_mit_nummerierung"
+        ],
+        "title": "Front",
+        "description": "Represents a JATS <front> element containing article metadata."
+      },
       "HTTP400BadRequest": {
         "properties": {
           "detail": {
@@ -1231,6 +1780,19 @@
           "md"
         ],
         "title": "MarkdownDocumentResponse"
+      },
+      "MetadataResponse": {
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/Front",
+            "description": "The metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metadata"
+        ],
+        "title": "MetadataResponse"
       },
       "UploadFileResponse": {
         "properties": {
