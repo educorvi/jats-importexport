@@ -45,6 +45,22 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def download_file(self, url: str) -> tuple[bytes, str]:
+        """Download the binary content of a file referenced by a URL (e.g. an image).
+
+        Implementations must reject URLs that do not point into the storage
+        backend they manage, to avoid being used to fetch arbitrary external
+        resources.
+
+        Args:
+            url: The absolute URL of the file, as found e.g. in JATS content.
+
+        Returns:
+            A tuple of (file content bytes, content-type string).
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve a JATSDocument from the storage system.
 
