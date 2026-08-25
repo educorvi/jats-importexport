@@ -115,6 +115,9 @@ class MockStorageAdapter(StorageAdapter):
         title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
+    def download_file(self, url: str) -> tuple[bytes, str]:
+        return b"", "application/octet-stream"
+
 
 @pytest.fixture
 def mock_adapter(mocker):
