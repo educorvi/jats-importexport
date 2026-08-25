@@ -529,7 +529,6 @@ class Front:
         result["pub_date_aktualisierte_fassung"] = (
             self.pub_date_aktualisierte_fassung.isoformat() if self.pub_date_aktualisierte_fassung else None
         )
-        print(result)
         return result
 
     @classmethod

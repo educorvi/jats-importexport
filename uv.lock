@@ -999,7 +999,7 @@ dev = [
 
 [[package]]
 name = "jats-importexport-client"
-version = "1.0.0a23"
+version = "1.0.0a24.dev0"
 source = { editable = "packages/api-client" }
 dependencies = [
     { name = "pydantic" },
