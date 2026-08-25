@@ -53,6 +53,13 @@ class PloneStorageAdapter(StorageAdapter):
     auth: tuple[str, str]
     httpx_client: httpx.Client
 
+    WORKFLOW_MAPPING: dict[str, list[str]] = {
+        "intern veröffentlicht": ["publish_internally"],
+        "veröffentlicht": ["publish_internally"],  # yes, also internally published
+        "zurückgezogen": [],
+        "privat": ["hide"],
+    }
+
     def __init__(self):
         """Initialize storage adapter loading credentials from environment."""
         base_url = os.environ.get("PLONE_BASE_URL")
@@ -569,6 +576,16 @@ class PloneStorageAdapter(StorageAdapter):
             json={"@type": "Article", **metadata},
         )
         response.raise_for_status()
+
+        # set to workflow state derived from veroeffentlichungsstatus
+        state = article.front.veroeffentlichungsstatus
+        workflow_transitions = self.WORKFLOW_MAPPING.get(state, []) if state else []
+        for transition in workflow_transitions:
+            transition_url = f"{response.json().get('@id')}/@workflow/{transition}"
+            debug(f"Applying workflow transition '{transition}' to article: {transition_url}")
+            transition_response = self.httpx_client.post(transition_url)
+            transition_response.raise_for_status()
+
         result_url: str = response.json().get("@id")
         self.__create_body(article.body, result_url, options)
         self.__create_back(article.back, result_url)
