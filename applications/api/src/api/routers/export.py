@@ -18,7 +18,7 @@ from api.models import (
 )
 
 from ..auth import require_permission
-from ..services.export import html_export, jats_export, md_export, pdf_export, metadata_export
+from ..services.export import html_export, jats_export, md_export, metadata_export, pdf_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 

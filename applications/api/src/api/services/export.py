@@ -1,10 +1,10 @@
-from jats_classes import JATSDocument
 import asyncio
 import logging
 from enum import Enum
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
+from jats_classes import JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
