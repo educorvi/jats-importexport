@@ -1707,6 +1707,11 @@ or pipeline) parameterized.
                         <xsl:text> </xsl:text>
                     </xsl:if>
                     <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
                 </h3>
             </xsl:if>
             <xsl:apply-templates mode="drop-title"/>
@@ -2848,6 +2853,11 @@ or pipeline) parameterized.
                         <xsl:text> </xsl:text>
                     </xsl:if>
                     <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
                 </h2>
             </xsl:if>
             <xsl:if test="not(title) and $generated-title">
