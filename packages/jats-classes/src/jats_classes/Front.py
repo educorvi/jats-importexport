@@ -204,7 +204,7 @@ class Front:
     # JATS: abstract@abstract-type="summary"/p
     abstract_summary: str | None
     # JATS: kwd-group@kwd-group-type="author-generated"/kwd
-    subjects: tuple[str, ...] | None  # formerly keywords: list[str] | None
+    subjects: list[str] | None  # formerly keywords: list[str] | None
 
     # --- DGUV Metadata ---
     # JATS: custom-meta-group/custom-meta/meta-name - /meta-value
@@ -298,7 +298,7 @@ class Front:
         abstract_short = _itertext(article_meta, "abstract[@abstract-type='short']/p")
         abstract_summary_title = _text(article_meta, "abstract[@abstract-type='summary']/title")
         abstract_summary = _itertext(article_meta, "abstract[@abstract-type='summary']/p")
-        subjects = tuple(_text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd"))
+        subjects = _text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd")
 
         # DGUV Metadata
         _custom_meta_dict = _dict(article_meta, "custom-meta-group/custom-meta", "meta-name", "meta-value")
@@ -444,7 +444,7 @@ class Front:
                     _create_tag("p", text=self.abstract_summary),
                 ]),
                 _create_tag("kwd-group", attributes={"kwd-group-type": "author-generated"}, children=[
-                    *[_create_tag("kwd", text=kw) for kw in self.subjects or ()],
+                    *[_create_tag("kwd", text=kw) for kw in self.subjects or []],
                 ]),
                 _create_tag("custom-meta-group", children=[
                     _create_tag("custom-meta", children=[
@@ -525,7 +525,7 @@ class Front:
             abstract_short=None,
             abstract_summary_title=None,
             abstract_summary=None,
-            subjects=(),
+            subjects=[],
             beschreibender_typ=None,
             bisherige_bestellnummer=None,
             webcode=None,
@@ -647,7 +647,7 @@ class Front:
         if isinstance((abstract_summary := data.get("abstract_summary")), str):
             front.abstract_summary = abstract_summary
         if isinstance((subjects := data.get("subjects")), list):
-            front.subjects = tuple(kw for kw in subjects if isinstance(kw, str))
+            front.subjects = [kw for kw in subjects if isinstance(kw, str)]
 
         # DGUV Metadata
         if isinstance((beschreibender_typ := data.get("beschreibender_typ")), str):

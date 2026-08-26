@@ -526,12 +526,12 @@ def _extract_textbox_metadata(table_wrap: etree._Element) -> dict:
     Returns a dictionary with:
     - content_type: The box type (e.g., "oct_ext_Blau")
     - title: The title of the textbox
-    - keywords: List of keywords
+    - subjects: List of keywords
     """
     metadata: dict[str, str | list[str] | None] = {
         "content_type": None,
         "title": None,
-        "keywords": [],
+        "subjects": [],
     }
 
     table = table_wrap.find("table")
@@ -598,7 +598,7 @@ def _extract_textbox_metadata(table_wrap: etree._Element) -> dict:
                                     elif key == "Stichwörter":
                                         # Split keywords by comma
                                         keywords = [kw.strip() for kw in value.split(",")]
-                                        metadata["keywords"] = keywords
+                                        metadata["subjects"] = keywords
 
     return metadata
 
@@ -681,10 +681,10 @@ def _convert_textboxes_to_boxed_text_helper(xml_tree: etree._Element) -> None:
                 boxed_text.set("content-type", metadata["content_type"])
 
             # Add sec-meta with keywords
-            if metadata["keywords"]:
+            if metadata["subjects"]:
                 sec_meta = etree.SubElement(boxed_text, "sec-meta")
                 kwd_group = etree.SubElement(sec_meta, "kwd-group")
-                for kwd in metadata["keywords"]:
+                for kwd in metadata["subjects"]:
                     kwd_elem = etree.SubElement(kwd_group, "kwd")
                     kwd_elem.text = kwd
 
