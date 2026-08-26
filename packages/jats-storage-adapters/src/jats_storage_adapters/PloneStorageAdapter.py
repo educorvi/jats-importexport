@@ -60,6 +60,13 @@ class PloneStorageAdapter(StorageAdapter):
         "privat": ["hide"],
     }
 
+    REVIEW_STATE_MAPPING: dict[str, str] = {
+        "internally_published": "intern veröffentlicht",
+        "external": "veröffentlicht",
+        "private": "privat",
+        "internal": "zurückgezogen",
+    }
+
     def __init__(self):
         """Initialize storage adapter loading credentials from environment."""
         base_url = os.environ.get("PLONE_BASE_URL")
@@ -288,7 +295,24 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __fetch_front(self, data: dict) -> Front:
         """Convert Plone front node data into a Front domain model."""
-        return Front.from_dict(data)
+        front = Front.from_dict(data)
+
+        # rebuild related_articles from related_articles and relatedItems
+        related_articles = data.get("related_articles") or []
+        relatedItems = data.get("relatedItems") or []
+        if relatedItems:
+            for item in relatedItems:
+                item_url = item if isinstance(item, str) else item.get("@id")
+                relatedItem = self.httpx_client.get(item_url, params={"fullobjects": 1}).json()
+                if relatedItem.get("article_id"):
+                    related_articles.append(relatedItem.get("article_id"))
+        front.related_articles = related_articles
+
+        # rebuild veroeffentlichungsstatus from plone workflow state
+        review_state = data.get("review_state") or ""
+        front.veroeffentlichungsstatus = self.REVIEW_STATE_MAPPING.get(review_state, review_state)
+
+        return front
 
     def __fetch_section(self, url: str, options: GetJATSDocumentOptions | None = None) -> Section:
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
