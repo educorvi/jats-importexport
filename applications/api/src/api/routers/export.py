@@ -92,7 +92,17 @@ async def export_md(path: str, include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
 
 
-@router.get("/pdf", operation_id="export_pdf", response_class=Response)
+@router.get(
+    "/pdf",
+    operation_id="export_pdf",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/pdf": {"schema": {"type": "string", "format": "binary"}}},
+            "description": "PDF file",
+        }
+    },
+)
 @cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
 async def export_pdf(path: str):
     pdf_content, filename = await pdf_export(path)
