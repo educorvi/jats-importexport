@@ -4,9 +4,10 @@ from enum import Enum
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
+from jats_classes import JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
-from jats_storage_adapters.interface import GetJATSDocumentOptions
+from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance
@@ -36,9 +37,12 @@ def get_return_type(request: Request) -> ReturnType:
             return ReturnType.JSON
 
 
-async def __load_document(path: str, options: GetJATSDocumentOptions | None = None):
+async def __load_document(
+    path: str, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
+) -> JATSDocument:
     try:
-        return await asyncio.to_thread(get_adapter_instance().get_jats_document, path, options)
+        adapter = adapter or get_adapter_instance()
+        return await asyncio.to_thread(adapter.get_jats_document, path, options)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except Exception as e:
@@ -75,6 +79,16 @@ async def md_export(path: str, include_edit_links: bool = False):
 
 
 async def pdf_export(path: str):
-    document = await __load_document(path)
-    pdf_content, filename = await asyncio.to_thread(PdfExporter().export, document)
+    adapter = get_adapter_instance()
+    document = await __load_document(path, adapter=adapter)
+    pdf_content, filename = await asyncio.to_thread(
+        PdfExporter(image_downloader=adapter.download_file).export, document
+    )
     return pdf_content, filename
+
+
+async def metadata_export(path: str):
+    adapter = get_adapter_instance()
+    document = await __load_document(path, adapter=adapter)
+    front = document.article.front
+    return front

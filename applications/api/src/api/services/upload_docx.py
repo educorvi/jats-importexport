@@ -84,7 +84,6 @@ def _get_metadata_dict_from_docx_tree(xml_tree: etree._Element) -> dict[str, str
         if len(cells) != 2:
             continue
         key = " ".join(" ".join(str(t).split()) for t in cells[0].itertext()).strip()
-        # if key.startswith("Autor"): import pdb; pdb.set_trace()
         value = " ".join(" ".join(str(t).split()) for t in cells[1].itertext()).strip()
         if key:
             metadata_dict[key] = value

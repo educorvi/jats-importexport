@@ -999,7 +999,7 @@ dev = [
 
 [[package]]
 name = "jats-importexport-client"
-version = "1.0.0a24.dev0"
+version = "1.0.0a25.dev0"
 source = { editable = "packages/api-client" }
 dependencies = [
     { name = "pydantic" },
@@ -1013,7 +1013,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.11" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
     { name = "typing-extensions", specifier = ">=4.7.1" },
-    { name = "urllib3", specifier = ">=2.6.3,<3.0.0" },
+    { name = "urllib3", specifier = ">=2.7.0,<3.0.0" },
 ]
 
 [[package]]

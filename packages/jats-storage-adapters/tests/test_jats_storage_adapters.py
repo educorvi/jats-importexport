@@ -180,6 +180,50 @@ def test_plone_storage_adapter_upload_file_default_mimetype(clean_env, mocker):
 
 
 # ----------------------------------------------------
+# Tests for PloneStorageAdapter download_file
+# ----------------------------------------------------
+
+
+def test_plone_storage_adapter_download_file_success(clean_env, mocker):
+    os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
+    os.environ["PLONE_USERNAME"] = "admin"
+    os.environ["PLONE_PASSWORD"] = "secret"
+    adapter = PloneStorageAdapter()
+
+    object_url = "http://localhost:8080/Plone/jats-assets/image.png"
+    download_url = "http://localhost:8080/Plone/jats-assets/image.png/@@images/image"
+
+    def mock_get_side_effect(url, *args, **kwargs):
+        if url == object_url:
+            return make_response(
+                status_code=200,
+                json={"@id": object_url, "image": {"download": download_url, "content-type": "image/png"}},
+                url=url,
+            )
+        elif url == download_url:
+            response = make_response(status_code=200, url=url)
+            return httpx.Response(200, content=b"binary-image-data", request=response.request)
+        raise AssertionError(f"Unexpected URL requested: {url}")
+
+    mocker.patch.object(adapter.httpx_client, "get", side_effect=mock_get_side_effect)
+
+    content, content_type = adapter.download_file(object_url)
+
+    assert content == b"binary-image-data"
+    assert content_type == "image/png"
+
+
+def test_plone_storage_adapter_download_file_rejects_external_urls(clean_env):
+    os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
+    os.environ["PLONE_USERNAME"] = "admin"
+    os.environ["PLONE_PASSWORD"] = "secret"
+    adapter = PloneStorageAdapter()
+
+    with pytest.raises(ValueError, match="Refusing to download file"):
+        adapter.download_file("http://evil.example.com/image.png")
+
+
+# ----------------------------------------------------
 # Tests for PloneStorageAdapter get_jats_document (Retrieve)
 # ----------------------------------------------------
 

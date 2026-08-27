@@ -124,6 +124,9 @@ class MockStorageAdapter(StorageAdapter):
     def list_sachgebiete(self) -> list[str]:
         raise NotImplementedError("list_sachgebiete is not implemented in MockStorageAdapter")
 
+    def download_file(self, url: str) -> tuple[bytes, str]:
+        return b"", "application/octet-stream"
+
 
 @pytest.fixture
 def mock_adapter(mocker):

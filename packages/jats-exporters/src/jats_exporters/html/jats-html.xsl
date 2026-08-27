@@ -1707,6 +1707,11 @@ or pipeline) parameterized.
                         <xsl:text> </xsl:text>
                     </xsl:if>
                     <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
                 </h3>
             </xsl:if>
             <xsl:apply-templates mode="drop-title"/>
@@ -2837,7 +2842,7 @@ or pipeline) parameterized.
                 <xsl:apply-templates/>
             </xsl:if>
         </xsl:param>
-        <div class="back-section">
+        <div class="section">
             <xsl:call-template name="named-anchor"/>
             <xsl:if test="$is-app-group and title">
                 <h2 class="title">
@@ -2848,6 +2853,11 @@ or pipeline) parameterized.
                         <xsl:text> </xsl:text>
                     </xsl:if>
                     <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
                 </h2>
             </xsl:if>
             <xsl:if test="not(title) and $generated-title">
@@ -3975,7 +3985,25 @@ or pipeline) parameterized.
         <xsl:param name="front-node" select="."/>
         <div class="metadata-and-toc">
             <div class="metadata-small">
-                <table class="table table-bordered">
+                <table>
+                    <!-- Journal Title -->
+                    <xsl:variable name="journal-title" select="$front-node/journal-meta/journal-title-group/journal-title" />
+                    <xsl:if test="normalize-space(string($journal-title))">
+                        <tr data-meta-field="journal-title">
+                            <td>
+                                <xsl:apply-templates select="$journal-title"/>
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    <!-- Journal Subtitle -->
+                    <xsl:variable name="journal-subtitle" select="$front-node/journal-meta/journal-title-group/journal-subtitle" />
+                    <xsl:if test="normalize-space(string($journal-subtitle))">
+                        <tr data-meta-field="journal-subtitle">
+                            <td>
+                                <xsl:apply-templates select="$journal-subtitle"/>
+                            </td>
+                        </tr>
+                    </xsl:if>
                     <!-- Vom -->
                     <xsl:variable name="issue-date" select="$front-node/article-meta/pub-date[@date-type='Ausgabedatum'][1] | $front-node/article-meta/pub-date[not(@date-type) and not(../pub-date[@date-type='Ausgabedatum'])][1]" />
                     <xsl:if test="$issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">

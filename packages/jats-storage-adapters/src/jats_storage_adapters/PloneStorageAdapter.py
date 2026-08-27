@@ -104,7 +104,10 @@ class PloneStorageAdapter(StorageAdapter):
         self.auth = (username, password)
 
         self.httpx_client = httpx.Client(
-            timeout=15, auth=self.auth, headers={"Accept": "application/json"}, base_url=self.base_url
+            timeout=15,
+            auth=self.auth,
+            headers={"Accept": "application/json", "X-UVNXS-Suppress-Cache-Invalidation": "1"},
+            base_url=self.base_url,
         )
 
         xsl_path = os.path.abspath(XSL_PATH)
@@ -272,6 +275,51 @@ class PloneStorageAdapter(StorageAdapter):
             return self.__upload_file(file, container)
         except Exception:
             raise InternalError(f"Error uploading file to {container}")
+
+    def __is_url_within_base(self, url: str) -> bool:
+        """Check whether a URL points into this adapter's configured Plone instance."""
+        base = urlparse(self.base_url)
+        target = urlparse(url)
+        return (
+            target.scheme in ("http", "https")
+            and target.netloc.lower() == base.netloc.lower()
+            and target.path.lower().startswith(base.path.lower())
+        )
+
+    def download_file(self, url: str) -> tuple[bytes, str]:
+        """Download the binary content of a file/image object hosted in Plone.
+
+        Refuses to download from URLs outside of the configured PLONE_BASE_URL,
+        to avoid this adapter being used to fetch arbitrary external resources.
+        """
+        if not self.__is_url_within_base(url):
+            raise ValueError(f"Refusing to download file from outside the configured Plone instance: {url}")
+        try:
+            response1 = self.httpx_client.get(url, params={"fullobjects": 1})
+            response1.raise_for_status()
+            content_type = response1.headers.get("content-type")
+            if not content_type or not isinstance(content_type, str):
+                raise InternalError(f"Could not determine content-type for {url}")
+            if content_type.startswith("image/"):
+                return response1.content, content_type
+            elif content_type == "application/json":
+                data = response1.json()
+                field = data.get("image") or data.get("file")
+                download_url = field.get("download") if field else None
+                if not download_url:
+                    raise InternalError(f"No downloadable file found for {url}")
+                response = self.httpx_client.get(download_url, params={"fullobjects": 1}, headers={"Accept": "*/*"})
+                response.raise_for_status()
+                content_type = field.get("content-type") or response.headers.get(
+                    "content-type", "application/octet-stream"
+                )
+                return response.content, content_type
+            else:
+                raise InternalError(f"Unsupported content-type for {url}: {content_type}")
+        except InternalError:
+            raise
+        except Exception as e:
+            raise InternalError(f"Error downloading file from {url}") from e
 
     def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""

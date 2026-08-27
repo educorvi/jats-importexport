@@ -12,6 +12,7 @@ from jats_exporters import (
     HtmlExporter,
     HtmlExporterStandalone,
     JatsExporter,
+    PdfExporter,
 )
 
 # ----------------------------------------------------
@@ -148,3 +149,48 @@ def test_html_exporter_caching():
     assert info_export2.misses == 1
     assert info_export2.hits == 1
     assert html1 == html2
+
+
+# ----------------------------------------------------
+# Tests for PdfExporter image embedding
+# ----------------------------------------------------
+
+
+def test_pdf_exporter_embeds_remote_images_as_data_uris():
+    calls = []
+
+    def fake_downloader(url: str) -> tuple[bytes, str]:
+        calls.append(url)
+        return b"fake-bytes", "image/png"
+
+    exporter = PdfExporter(image_downloader=fake_downloader)
+    html_content = '<div><img src="http://plone.example.com/assets/figure.png" alt=""></div>'
+
+    result = exporter._embed_remote_images(html_content)
+
+    assert calls == ["http://plone.example.com/assets/figure.png"]
+    assert "data:image/png;base64," in result
+    assert "http://plone.example.com/assets/figure.png" not in result
+
+
+def test_pdf_exporter_leaves_html_untouched_without_downloader():
+    exporter = PdfExporter()
+    html_content = '<div><img src="http://plone.example.com/assets/figure.png" alt=""></div>'
+
+    result = exporter._embed_remote_images(html_content)
+
+    assert result == html_content
+
+
+def test_pdf_exporter_skips_image_on_download_failure():
+    def failing_downloader(url: str) -> tuple[bytes, str]:
+        raise ValueError("outside of allowed domain")
+
+    exporter = PdfExporter(image_downloader=failing_downloader)
+    html_content = '<div><img src="http://evil.example.com/figure.png" alt=""></div>'
+
+    result = exporter._embed_remote_images(html_content)
+
+    # Left as-is; WeasyPrint will simply fail to load this one image.
+    assert "http://evil.example.com/figure.png" in result
+
