@@ -270,7 +270,7 @@ class PloneStorageAdapter(StorageAdapter):
         """
         try:
             return self.__upload_file(file, container)
-        except Exception as e:
+        except Exception:
             raise InternalError(f"Error uploading file to {container}")
 
     def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
@@ -278,11 +278,11 @@ class PloneStorageAdapter(StorageAdapter):
         url = f"{self.base_url}/{path.strip('/')}"
         try:
             article = self.__fetch_article(url, options)
-        except HTTPStatusError as e:
+        except HTTPStatusError:
             raise PathNotFoundExpection(path)
         except ValueError:
             raise
-        except Exception as e:
+        except Exception:
             raise InternalError(f"Error fetching article at {url}")
         return JATSDocument(article=article)
 

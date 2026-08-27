@@ -1,7 +1,9 @@
+import asyncio
+
+from fastapi import HTTPException
+
 from ..models import UpdateArticlesResponse
 from .common import get_adapter_instance
-import asyncio
-from fastapi import HTTPException
 
 
 async def link_related_articles_service() -> UpdateArticlesResponse:
