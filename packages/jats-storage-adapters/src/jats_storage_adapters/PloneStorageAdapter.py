@@ -67,7 +67,10 @@ class PloneStorageAdapter(StorageAdapter):
         self.auth = (username, password)
 
         self.httpx_client = httpx.Client(
-            timeout=15, auth=self.auth, headers={"Accept": "application/json"}, base_url=self.base_url
+            timeout=15,
+            auth=self.auth,
+            headers={"Accept": "application/json", "X-UVNXS-Suppress-Cache-Invalidation": "1"},
+            base_url=self.base_url,
         )
 
         xsl_path = os.path.abspath(XSL_PATH)
