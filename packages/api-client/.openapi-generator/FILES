@@ -22,7 +22,9 @@ docs/ListSachgebieteResponse.md
 docs/LocationInner.md
 docs/MarkdownDocumentResponse.md
 docs/MetadataResponse.md
+docs/ModifyApi.md
 docs/StatusApi.md
+docs/UpdateArticlesResponse.md
 docs/UploadApi.md
 docs/UploadDocxRequest1.md
 docs/UploadFileResponse.md
@@ -34,6 +36,7 @@ jats_importexport_client/__init__.py
 jats_importexport_client/api/__init__.py
 jats_importexport_client/api/export_api.py
 jats_importexport_client/api/list_api.py
+jats_importexport_client/api/modify_api.py
 jats_importexport_client/api/status_api.py
 jats_importexport_client/api/upload_api.py
 jats_importexport_client/api_client.py
@@ -58,6 +61,7 @@ jats_importexport_client/models/list_sachgebiete_response.py
 jats_importexport_client/models/location_inner.py
 jats_importexport_client/models/markdown_document_response.py
 jats_importexport_client/models/metadata_response.py
+jats_importexport_client/models/update_articles_response.py
 jats_importexport_client/models/upload_docx_request1.py
 jats_importexport_client/models/upload_file_response.py
 jats_importexport_client/models/upload_xml_request1.py
@@ -71,4 +75,6 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_modify_api.py
+test/test_update_articles_response.py
 tox.ini

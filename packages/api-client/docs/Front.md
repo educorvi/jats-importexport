@@ -26,6 +26,7 @@ Name | Type | Description | Notes
 **co_author_aff** | **str** |  | 
 **self_uri** | **str** |  | 
 **article_categories** | **str** |  | 
+**related_articles** | **List[str]** |  | 
 **pub_date_ausgabedatum** | **date** |  | 
 **pub_date_aktualisierte_fassung** | **date** |  | 
 **history_initial_publication** | **str** |  | 
@@ -37,7 +38,7 @@ Name | Type | Description | Notes
 **abstract_short** | **str** |  | 
 **abstract_summary_title** | **str** |  | 
 **abstract_summary** | **str** |  | 
-**keywords** | **List[str]** |  | 
+**subjects** | **List[str]** |  | 
 **beschreibender_typ** | **str** |  | 
 **bisherige_bestellnummer** | **str** |  | 
 **webcode** | **str** |  | 

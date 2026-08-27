@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a24"
+    "version": "1.0.0a27"
   },
   "paths": {
     "/status": {
@@ -449,6 +449,52 @@
             }
           }
         }
+      }
+    },
+    "/modify/link-related-articles": {
+      "post": {
+        "tags": [
+          "Modify"
+        ],
+        "summary": "Link related articles IDs to the real articles in the storage",
+        "operationId": "link_related_articles",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateArticlesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
       }
     },
     "/export/jats": {
@@ -1266,6 +1312,20 @@
             ],
             "title": "Article Categories"
           },
+          "related_articles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Articles"
+          },
           "pub_date_ausgabedatum": {
             "anyOf": [
               {
@@ -1389,7 +1449,7 @@
             ],
             "title": "Abstract Summary"
           },
-          "keywords": {
+          "subjects": {
             "anyOf": [
               {
                 "items": {
@@ -1401,7 +1461,7 @@
                 "type": "null"
               }
             ],
-            "title": "Keywords"
+            "title": "Subjects"
           },
           "beschreibender_typ": {
             "anyOf": [
@@ -1525,6 +1585,7 @@
           "co_author_aff",
           "self_uri",
           "article_categories",
+          "related_articles",
           "pub_date_ausgabedatum",
           "pub_date_aktualisierte_fassung",
           "history_initial_publication",
@@ -1536,7 +1597,7 @@
           "abstract_short",
           "abstract_summary_title",
           "abstract_summary",
-          "keywords",
+          "subjects",
           "beschreibender_typ",
           "bisherige_bestellnummer",
           "webcode",
@@ -1793,6 +1854,29 @@
           "metadata"
         ],
         "title": "MetadataResponse"
+      },
+      "UpdateArticlesResponse": {
+        "properties": {
+          "updated_articles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Updated Articles",
+            "description": "The list of updated article paths (relative to the storage base URL)",
+            "examples": [
+              [
+                "articles/article1.xml",
+                "articles/article2.xml"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "updated_articles"
+        ],
+        "title": "UpdateArticlesResponse"
       },
       "UploadFileResponse": {
         "properties": {

@@ -23,12 +23,12 @@ from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UploadDocxRequest1(BaseModel):
+class UpdateArticlesResponse(BaseModel):
     """
-    UploadDocxRequest1
+    UpdateArticlesResponse
     """ # noqa: E501
-    docx_file: StrictStr = Field(description="Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)")
-    __properties: ClassVar[List[str]] = ["docx_file"]
+    updated_articles: List[StrictStr] = Field(description="The list of updated article paths (relative to the storage base URL)")
+    __properties: ClassVar[List[str]] = ["updated_articles"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +48,7 @@ class UploadDocxRequest1(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UploadDocxRequest1 from a JSON string"""
+        """Create an instance of UpdateArticlesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +73,7 @@ class UploadDocxRequest1(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UploadDocxRequest1 from a dict"""
+        """Create an instance of UpdateArticlesResponse from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +81,7 @@ class UploadDocxRequest1(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "docx_file": obj.get("docx_file")
+            "updated_articles": obj.get("updated_articles")
         })
         return _obj
 
