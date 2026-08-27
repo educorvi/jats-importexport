@@ -53,6 +53,43 @@ class PloneStorageAdapter(StorageAdapter):
     auth: tuple[str, str]
     httpx_client: httpx.Client
 
+    # fallback intranet workflow mapping
+    FALLBACK_WORKFLOW_MAPPING: dict[str, list[str]] = {
+        "intern veröffentlicht": ["publish_internally"],
+        "veröffentlicht": ["publish_internally"],  # yes, also internally published
+        "Entwurf": [],
+        "zurückgezogen": [],
+        "privat": ["hide"],
+    }
+
+    # vur workflow mapping
+    # status in jats -> transition in vur from draft (start state) to status in jats
+    WORKFLOW_MAPPING: dict[str, list[str]] = {
+        "intern veröffentlicht": ["publish_internally"],
+        "veröffentlicht": ["publish_internally"],  # yes, also internally published
+        "Entwurf": [],
+        "privat": ["make_private"],
+    }
+
+    # fallback review state mapping from intranet workflow
+    FALLBACK_REVIEW_STATE_MAPPING: dict[str, str] = {
+        "internally_published": "intern veröffentlicht",
+        "external": "veröffentlicht",
+        "private": "privat",
+        "internal": "zurückgezogen",
+    }
+
+    # review state mapping from vur workflow
+    # status in plone with vur workflow -> status in jats
+    REVIEW_STATE_MAPPING: dict[str, str] = {
+        "internally_published": "veröffentlicht",  # yes, also published
+        "published": "veröffentlicht",
+        "private": "privat",
+        "draft": "Entwurf",
+    }
+
+    DEFAULT_STATE = "Entwurf"
+
     def __init__(self):
         """Initialize storage adapter loading credentials from environment."""
         base_url = os.environ.get("PLONE_BASE_URL")
@@ -150,6 +187,51 @@ class PloneStorageAdapter(StorageAdapter):
             paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
         return paths, json_res.get("items_total", len(paths))
 
+    def link_related_articles(self) -> list[str]:
+        """Link related articles in Plone (by using plone.relatedItems) based on metadata field 'related_articles'.
+
+        This method links the listed articles from 'related_articles' (listed with the article-id) to the actual
+        articles in Plone (using the @id = url) and saves them into relatedItems (attribute obtained from the
+        plone.relateditems behavior). This is done for every article in the plone instance. All related articles that
+        are found and linked will be deleted from the related_articles field afterwards. The method returns a list of
+        all articles that have been updated.
+        """
+        articles = self.list_articles()[0]
+        updated_articles = []
+        for article in articles:
+            url = f"{self.base_url}/{article.strip('/')}"
+            response = self.httpx_client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            related_articles_ids = data.get("related_articles", [])
+            if not related_articles_ids:
+                continue
+            related_items = [  # save already linked articles, so they are not overwritten
+                ra if isinstance(ra, str) else ra.get("@id")
+                for ra in data.get("relatedItems", [])
+                if (ra if isinstance(ra, str) else ra.get("@id"))
+            ]
+            for related_id in list(related_articles_ids):  # iterate over copy to allow removal during iteration
+                query = [
+                    {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
+                    {"i": "article_id", "o": "plone.app.querystring.operation.string.is", "v": related_id},
+                ]
+                search_response = self.httpx_client.post(f"{self.base_url}/@querystring-search", json={"query": query})
+                search_response.raise_for_status()
+                search_results = search_response.json().get("items", [])
+                if search_results:
+                    related_items.extend([res.get("@id") for res in search_results if res.get("@id")])
+                    related_articles_ids.remove(related_id)
+            if related_items:
+                update_response = self.httpx_client.patch(
+                    url,
+                    json={"relatedItems": related_items, "related_articles": related_articles_ids},
+                    headers={"Content-Type": "application/json"},
+                )
+                update_response.raise_for_status()
+                updated_articles.append(article)
+        return updated_articles
+
     def __upload_file(self, file: BinaryIO, container: str) -> str:
         self.__create_container(container)
 
@@ -191,8 +273,8 @@ class PloneStorageAdapter(StorageAdapter):
         """
         try:
             return self.__upload_file(file, container)
-        except Exception as e:
-            raise InternalError(f"Error uploading file to {container}") from e
+        except Exception:
+            raise InternalError(f"Error uploading file to {container}")
 
     def __is_url_within_base(self, url: str) -> bool:
         """Check whether a URL points into this adapter's configured Plone instance."""
@@ -244,12 +326,12 @@ class PloneStorageAdapter(StorageAdapter):
         url = f"{self.base_url}/{path.strip('/')}"
         try:
             article = self.__fetch_article(url, options)
-        except HTTPStatusError as e:
-            raise PathNotFoundExpection(path) from e
+        except HTTPStatusError:
+            raise PathNotFoundExpection(path)
         except ValueError:
             raise
-        except Exception as e:
-            raise InternalError(f"Error fetching article at {url}") from e
+        except Exception:
+            raise InternalError(f"Error fetching article at {url}")
         return JATSDocument(article=article)
 
     def __get_json(self, url: str) -> dict:
@@ -284,7 +366,33 @@ class PloneStorageAdapter(StorageAdapter):
 
     def __fetch_front(self, data: dict) -> Front:
         """Convert Plone front node data into a Front domain model."""
-        return Front.from_dict(data)
+        front = Front.from_dict(data)
+
+        # rebuild related_articles from related_articles and relatedItems
+        related_articles = data.get("related_articles") or []
+        relatedItems = data.get("relatedItems") or []
+        if relatedItems:
+            for item in relatedItems:
+                item_url = item if isinstance(item, str) else item.get("@id")
+                if not item_url:
+                    continue
+                related_item_response = self.httpx_client.get(item_url, params={"fullobjects": 1})
+                related_item_response.raise_for_status()
+                relatedItem = related_item_response.json()
+                if relatedItem.get("article_id"):
+                    related_articles.append(relatedItem.get("article_id"))
+        front.related_articles = related_articles
+
+        # rebuild veroeffentlichungsstatus from plone workflow state
+        review_state = data.get("review_state") or ""
+        if not review_state:
+            front.veroeffentlichungsstatus = self.DEFAULT_STATE
+        elif review_state not in self.REVIEW_STATE_MAPPING:
+            front.veroeffentlichungsstatus = self.FALLBACK_REVIEW_STATE_MAPPING.get(review_state, self.DEFAULT_STATE)
+        else:
+            front.veroeffentlichungsstatus = self.REVIEW_STATE_MAPPING.get(review_state, self.DEFAULT_STATE)
+
+        return front
 
     def __fetch_section(self, url: str, options: GetJATSDocumentOptions | None = None) -> Section:
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
@@ -572,6 +680,22 @@ class PloneStorageAdapter(StorageAdapter):
             json={"@type": "Article", **metadata},
         )
         response.raise_for_status()
+
+        # set to workflow state derived from veroeffentlichungsstatus
+        state = article.front.veroeffentlichungsstatus
+        if not state:
+            state = self.DEFAULT_STATE
+        workflow_transitions = []
+        if state in self.WORKFLOW_MAPPING:
+            workflow_transitions = self.WORKFLOW_MAPPING.get(state, [])
+        else:
+            workflow_transitions = self.FALLBACK_WORKFLOW_MAPPING.get(state, [])
+        for transition in workflow_transitions:
+            transition_url = f"{response.json().get('@id')}/@workflow/{transition}"
+            debug(f"Applying workflow transition '{transition}' to article: {transition_url}")
+            transition_response = self.httpx_client.post(transition_url)
+            transition_response.raise_for_status()
+
         result_url: str = response.json().get("@id")
         self.__create_body(article.body, result_url, options)
         self.__create_back(article.back, result_url)

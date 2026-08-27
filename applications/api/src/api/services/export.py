@@ -44,9 +44,9 @@ async def __load_document(
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_jats_document, path, options)
     except PathNotFoundExpection as e:
-        raise HTTPException(status_code=404, detail=f"Document not found: {e}") from e
+        raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading document: {e}") from e
+        raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
 
 async def jats_export(path: str):

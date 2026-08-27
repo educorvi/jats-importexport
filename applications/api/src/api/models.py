@@ -41,6 +41,13 @@ class UploadFileResponse(BaseModel):
     )
 
 
+class UpdateArticlesResponse(BaseModel):
+    updated_articles: list[str] = Field(
+        description="The list of updated article paths (relative to the storage base URL)",
+        examples=[["articles/article1.xml", "articles/article2.xml"]],
+    )
+
+
 class JatsDocumentResponse(BaseModel):
     jats: str = Field(description="The JATS XML document")
 

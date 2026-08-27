@@ -20,7 +20,7 @@ from api.config import StorageConfig
 from .auth import require_permission
 from .config import APIConfig
 from .logging import logger
-from .routers import export, list, status, upload
+from .routers import export, list, modify, status, upload
 
 
 def create_app() -> FastAPI:
@@ -62,6 +62,7 @@ def create_app() -> FastAPI:
 
     app.include_router(status.router)
     app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
+    app.include_router(modify.router, dependencies=[Depends(require_permission("write"))])
     app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
 

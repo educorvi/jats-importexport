@@ -127,7 +127,7 @@ def _create_tag(
 class Front:
     """Represents a JATS <front> element containing article metadata."""
 
-    # --- Journal Metadata (JATS: journal-meta) ---
+    # -- Journal Metadata (JATS: journal-meta) --
     # JATS: journal-id
     journal_id: str | None
     # JATS: journal-title-group/journal-title
@@ -153,7 +153,7 @@ class Front:
     # JATS: publisher/publisher-loc/uri
     publisher_uri: str | None
 
-    # --- Article Metadata (JATS: article-meta) ---
+    # -- Article Metadata (JATS: article-meta) --
 
     # --- General Article Metadata ---
     # JATS: article-id@pub-id-type="publisher-id"
@@ -168,11 +168,13 @@ class Front:
     co_author_surname: str | None
     # JATS: contrib-group/contrib[@contrib-type='Co-Autor']/aff # TODO
     co_author_aff: str | None
-    # JATS: self-uri
+    # JATS: self-uri[@href]
     self_uri: str | None
     # JATS: article-categories
     # Raw xml snippet
     article_categories: str | None
+    # JATS: related-article[@href]
+    related_articles: list[str] | None
 
     # --- Publication Dates ---
     # JATS: pub-date@date-type="Ausgabedatum"
@@ -202,7 +204,7 @@ class Front:
     # JATS: abstract@abstract-type="summary"/p
     abstract_summary: str | None
     # JATS: kwd-group@kwd-group-type="author-generated"/kwd
-    keywords: list[str] | None
+    subjects: list[str] | None  # formerly keywords: list[str] | None
 
     # --- DGUV Metadata ---
     # JATS: custom-meta-group/custom-meta/meta-name - /meta-value
@@ -273,6 +275,12 @@ class Front:
             if _article_categories is not None
             else None
         )
+        _related_articles = article_meta.findall("related-article")
+        related_articles = []
+        for ra in _related_articles:
+            href = _xlink_href(ra, ".")
+            if href is not None:
+                related_articles.append(href)
 
         # Publication Dates
         pub_date_ausgabedatum = _date(article_meta, "pub-date[@date-type='Ausgabedatum']")
@@ -290,7 +298,7 @@ class Front:
         abstract_short = _itertext(article_meta, "abstract[@abstract-type='short']/p")
         abstract_summary_title = _text(article_meta, "abstract[@abstract-type='summary']/title")
         abstract_summary = _itertext(article_meta, "abstract[@abstract-type='summary']/p")
-        keywords = _text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd")
+        subjects = _text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd")
 
         # DGUV Metadata
         _custom_meta_dict = _dict(article_meta, "custom-meta-group/custom-meta", "meta-name", "meta-value")
@@ -328,6 +336,7 @@ class Front:
             co_author_aff=co_author_aff,
             self_uri=self_uri,
             article_categories=article_categories,
+            related_articles=related_articles,
             pub_date_ausgabedatum=pub_date_ausgabedatum,
             pub_date_aktualisierte_fassung=pub_date_aktualisierte_fassung,
             history_initial_publication=history_initial_publication,
@@ -339,7 +348,7 @@ class Front:
             abstract_short=abstract_short,
             abstract_summary_title=abstract_summary_title,
             abstract_summary=abstract_summary,
-            keywords=keywords,
+            subjects=subjects,
             beschreibender_typ=beschreibender_typ,
             bisherige_bestellnummer=bisherige_bestellnummer,
             webcode=webcode,
@@ -421,6 +430,12 @@ class Front:
                     _create_tag("copyright-holder", text=self.copyright_holder),
                 ]),
                 _create_tag("self-uri", nsmap={"xlink": _XLINK_NS}, attributes={_XLINK_HREF: self.self_uri or ""}),
+                *[_create_tag("related-article",
+                              nsmap={"xlink": _XLINK_NS},
+                              attributes={"related-article-type": "companion",
+                                          "ext-link-type": "publisher-id",
+                                          _XLINK_HREF: related_article} )
+                                          for related_article in self.related_articles or []],
                 _create_tag("abstract", attributes={"abstract-type": "short"}, children=[
                     _create_tag("title", text=self.abstract_short_title),
                     _create_tag("p", text=self.abstract_short),
@@ -430,7 +445,7 @@ class Front:
                     _create_tag("p", text=self.abstract_summary),
                 ]),
                 _create_tag("kwd-group", attributes={"kwd-group-type": "author-generated"}, children=[
-                    *[_create_tag("kwd", text=kw) for kw in self.keywords or []],
+                    *[_create_tag("kwd", text=kw) for kw in self.subjects or []],
                 ]),
                 _create_tag("custom-meta-group", children=[
                     _create_tag("custom-meta", children=[
@@ -499,6 +514,7 @@ class Front:
             co_author_aff=None,
             self_uri=None,
             article_categories=None,
+            related_articles=[],
             pub_date_ausgabedatum=None,
             pub_date_aktualisierte_fassung=None,
             history_initial_publication=None,
@@ -510,7 +526,7 @@ class Front:
             abstract_short=None,
             abstract_summary_title=None,
             abstract_summary=None,
-            keywords=[],
+            subjects=[],
             beschreibender_typ=None,
             bisherige_bestellnummer=None,
             webcode=None,
@@ -583,6 +599,9 @@ class Front:
             front.self_uri = self_uri
         if isinstance((article_categories := data.get("article_categories")), str):
             front.article_categories = article_categories
+        related_articles = data.get("related_articles")
+        if isinstance(related_articles, list):
+            front.related_articles = [ra for ra in related_articles if isinstance(ra, str)]
 
         # Publication Dates
         if isinstance((pub_date_ausgabedatum := data.get("pub_date_ausgabedatum")), datetime.date):
@@ -592,14 +611,20 @@ class Front:
                 front.pub_date_ausgabedatum = datetime.date.fromisoformat(pub_date_ausgabedatum)
             except ValueError:
                 logger.warning(f"Invalid date for pub_date_ausgabedatum: {pub_date_ausgabedatum}")
-        if isinstance((pub_date_aktualisierte_fassung := data.get("pub_date_aktualisierte_fassung")), datetime.date):
+        if isinstance(
+            (pub_date_aktualisierte_fassung := data.get("pub_date_aktualisierte_fassung")),
+            datetime.date,
+        ):
             front.pub_date_aktualisierte_fassung = pub_date_aktualisierte_fassung
         elif isinstance(pub_date_aktualisierte_fassung, str):
             try:
                 front.pub_date_aktualisierte_fassung = datetime.date.fromisoformat(pub_date_aktualisierte_fassung)
             except ValueError:
                 logger.warning(f"Invalid date for pub_date_aktualisierte_fassung: {pub_date_aktualisierte_fassung}")
-        if isinstance((history_initial_publication := data.get("history_initial_publication")), str):
+        if isinstance(
+            (history_initial_publication := data.get("history_initial_publication")),
+            str,
+        ):
             front.history_initial_publication = history_initial_publication
         if isinstance((history_correction := data.get("history_correction")), str):
             front.history_correction = history_correction
@@ -621,8 +646,8 @@ class Front:
             front.abstract_summary_title = abstract_summary_title
         if isinstance((abstract_summary := data.get("abstract_summary")), str):
             front.abstract_summary = abstract_summary
-        if isinstance((keywords := data.get("keywords")), list):
-            front.keywords = [kw for kw in keywords if isinstance(kw, str)]
+        if isinstance((subjects := data.get("subjects")), list):
+            front.subjects = [kw for kw in subjects if isinstance(kw, str)]
 
         # DGUV Metadata
         if isinstance((beschreibender_typ := data.get("beschreibender_typ")), str):
@@ -641,7 +666,10 @@ class Front:
             front.veroeffentlichungsstatus = veroeffentlichungsstatus
         if isinstance((bildnachweis := data.get("bildnachweis")), str):
             front.bildnachweis = bildnachweis
-        if isinstance((ueberschriften_mit_nummerierung := data.get("ueberschriften_mit_nummerierung")), bool):
+        if isinstance(
+            (ueberschriften_mit_nummerierung := data.get("ueberschriften_mit_nummerierung")),
+            bool,
+        ):
             front.ueberschriften_mit_nummerierung = ueberschriften_mit_nummerierung
 
         return front
