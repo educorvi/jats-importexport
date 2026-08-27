@@ -53,19 +53,42 @@ class PloneStorageAdapter(StorageAdapter):
     auth: tuple[str, str]
     httpx_client: httpx.Client
 
-    WORKFLOW_MAPPING: dict[str, list[str]] = {
+    # fallback intranet workflow mapping
+    FALLBACK_WORKFLOW_MAPPING: dict[str, list[str]] = {
         "intern veröffentlicht": ["publish_internally"],
         "veröffentlicht": ["publish_internally"],  # yes, also internally published
+        "Entwurf": [],
         "zurückgezogen": [],
         "privat": ["hide"],
     }
 
-    REVIEW_STATE_MAPPING: dict[str, str] = {
+    # vur workflow mapping
+    # status in jats -> transition in vur from draft (start state) to status in jats
+    WORKFLOW_MAPPING: dict[str, list[str]] = {
+        "intern veröffentlicht": ["publish_internally"],
+        "veröffentlicht": ["publish_internally"],  # yes, also internally published
+        "Entwurf": [],
+        "privat": ["make_private"],
+    }
+
+    # fallback review state mapping from intranet workflow
+    FALLBACK_REVIEW_STATE_MAPPING: dict[str, str] = {
         "internally_published": "intern veröffentlicht",
         "external": "veröffentlicht",
         "private": "privat",
         "internal": "zurückgezogen",
     }
+
+    # review state mapping from vur workflow
+    # status in plone with vur workflow -> status in jats
+    REVIEW_STATE_MAPPING: dict[str, str] = {
+        "internally_published": "veröffentlicht",  # yes, also published
+        "published": "veröffentlicht",
+        "private": "privat",
+        "draft": "Entwurf",
+    }
+
+    DEFAULT_STATE = "Entwurf"
 
     def __init__(self):
         """Initialize storage adapter loading credentials from environment."""
@@ -310,7 +333,12 @@ class PloneStorageAdapter(StorageAdapter):
 
         # rebuild veroeffentlichungsstatus from plone workflow state
         review_state = data.get("review_state") or ""
-        front.veroeffentlichungsstatus = self.REVIEW_STATE_MAPPING.get(review_state, review_state)
+        if not review_state:
+            front.veroeffentlichungsstatus = self.DEFAULT_STATE
+        elif review_state not in self.REVIEW_STATE_MAPPING:
+            front.veroeffentlichungsstatus = self.FALLBACK_REVIEW_STATE_MAPPING.get(review_state, self.DEFAULT_STATE)
+        else:
+            front.veroeffentlichungsstatus = self.REVIEW_STATE_MAPPING.get(review_state, self.DEFAULT_STATE)
 
         return front
 
@@ -603,7 +631,13 @@ class PloneStorageAdapter(StorageAdapter):
 
         # set to workflow state derived from veroeffentlichungsstatus
         state = article.front.veroeffentlichungsstatus
-        workflow_transitions = self.WORKFLOW_MAPPING.get(state, []) if state else []
+        if not state:
+            state = self.DEFAULT_STATE
+        workflow_transitions = []
+        if state in self.WORKFLOW_MAPPING:
+            workflow_transitions = self.WORKFLOW_MAPPING.get(state, [])
+        else:
+            workflow_transitions = self.FALLBACK_WORKFLOW_MAPPING.get(state, [])
         for transition in workflow_transitions:
             transition_url = f"{response.json().get('@id')}/@workflow/{transition}"
             debug(f"Applying workflow transition '{transition}' to article: {transition_url}")
