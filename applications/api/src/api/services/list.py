@@ -26,18 +26,18 @@ async def list_articles(
             batch_size,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error listing articles: {e}") from e
+        raise HTTPException(status_code=500, detail=f"Error listing articles: {e}")
 
 
 async def list_fachbereiche():
     try:
         return await asyncio.to_thread(adapter_instance.list_fachbereiche)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error listing Fachbereiche: {e}") from e
+        raise HTTPException(status_code=500, detail=f"Error listing Fachbereiche: {e}")
 
 
 async def list_sachgebiete():
     try:
         return await asyncio.to_thread(adapter_instance.list_sachgebiete)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error listing Sachgebiete: {e}") from e
+        raise HTTPException(status_code=500, detail=f"Error listing Sachgebiete: {e}")
