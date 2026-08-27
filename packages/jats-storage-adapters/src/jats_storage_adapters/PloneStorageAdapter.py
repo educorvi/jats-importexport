@@ -208,7 +208,7 @@ class PloneStorageAdapter(StorageAdapter):
                 for ra in data.get("relatedItems", [])
                 if (ra if isinstance(ra, str) else ra.get("@id"))
             ]
-            for related_id in related_articles_ids:
+            for related_id in list(related_articles_ids):  # iterate over copy to allow removal during iteration
                 query = [
                     {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
                     {"i": "article_id", "o": "plone.app.querystring.operation.string.is", "v": related_id},
@@ -326,7 +326,11 @@ class PloneStorageAdapter(StorageAdapter):
         if relatedItems:
             for item in relatedItems:
                 item_url = item if isinstance(item, str) else item.get("@id")
-                relatedItem = self.httpx_client.get(item_url, params={"fullobjects": 1}).json()
+                if not item_url:
+                    continue
+                related_item_response = self.httpx_client.get(item_url, params={"fullobjects": 1})
+                related_item_response.raise_for_status()
+                relatedItem = related_item_response.json()
                 if relatedItem.get("article_id"):
                     related_articles.append(relatedItem.get("article_id"))
         front.related_articles = related_articles

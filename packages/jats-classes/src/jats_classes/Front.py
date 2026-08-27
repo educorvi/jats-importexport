@@ -431,6 +431,7 @@ class Front:
                 ]),
                 _create_tag("self-uri", nsmap={"xlink": _XLINK_NS}, attributes={_XLINK_HREF: self.self_uri or ""}),
                 *[_create_tag("related-article",
+                              nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "companion",
                                           "ext-link-type": "publisher-id",
                                           _XLINK_HREF: related_article} )

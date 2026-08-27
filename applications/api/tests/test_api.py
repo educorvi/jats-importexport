@@ -116,7 +116,7 @@ class MockStorageAdapter(StorageAdapter):
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
     def link_related_articles(self) -> list[str]:
-        raise NotImplementedError("link_related_articles is not implemented in MockStorageAdapter")
+        return ["articles/article1.xml", "articles/article2.xml"]
 
     def list_fachbereiche(self) -> list[str]:
         raise NotImplementedError("list_fachbereiche is not implemented in MockStorageAdapter")
@@ -130,6 +130,7 @@ def mock_adapter(mocker):
     adapter = MockStorageAdapter()
     mocker.patch("api.services.upload.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
+    mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
     mocker.patch.object(APIConfig, "API_KEY", None)
     return adapter
 
@@ -391,4 +392,31 @@ def test_auth_upload_requires_key(mocker, mock_adapter):
     assert response.status_code == 401
 
     response = client.post("/upload/xml", files=file_payload, headers={"X-API-Key": "secret"})
+    assert response.status_code == 200
+
+
+# ----------------------------------------------------
+# Tests for Modify Endpoints (hint currently ai generated without review)
+# ----------------------------------------------------
+
+
+def test_link_related_articles_success(mock_adapter):
+    response = client.post("/modify/link-related-articles")
+    assert response.status_code == 200
+    assert response.json()["updated_articles"] == ["articles/article1.xml", "articles/article2.xml"]
+
+
+def test_link_related_articles_error(mock_adapter, mocker):
+    mocker.patch.object(mock_adapter, "link_related_articles", side_effect=Exception("boom"))
+    response = client.post("/modify/link-related-articles")
+    assert response.status_code == 500
+    assert "error linking related articles" in response.json()["detail"].lower()
+
+
+def test_link_related_articles_requires_auth(mocker, mock_adapter):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.post("/modify/link-related-articles")
+    assert response.status_code == 401
+
+    response = client.post("/modify/link-related-articles", headers={"X-API-Key": "secret"})
     assert response.status_code == 200
