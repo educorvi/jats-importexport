@@ -137,7 +137,7 @@ class PloneStorageAdapter(StorageAdapter):
             return result_path[len(base_path) :]
         return result_path
 
-    def __plone_object_to_path(self, obj: dict) -> str:
+    def __get_path_from_plone_object(self, obj: dict) -> str:
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
 
@@ -186,13 +186,13 @@ class PloneStorageAdapter(StorageAdapter):
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
         json_res = response.json()
-        paths = list(map(self.__plone_object_to_path, json_res.get("items", [])))
+        paths = list(map(self.__get_path_from_plone_object, json_res.get("items", [])))
         while batch_size is None and json_res.get("batching", {}).get("next"):
             next_url = json_res["batching"]["next"]
             response = self.httpx_client.post(next_url, json=search)
             response.raise_for_status()
             json_res = response.json()
-            paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
+            paths.extend(map(self.__get_path_from_plone_object, json_res.get("items", [])))
         return paths, json_res.get("items_total", len(paths))
 
     def link_related_articles(self) -> list[str]:
@@ -329,6 +329,9 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error downloading file from {url}") from e
 
+    def _get_article_url(self, path: str) -> str:
+        return f"{self.base_url}/{path.strip('/')}"
+
     @overload
     def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
 
@@ -337,17 +340,20 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
-        url = f"{self.base_url}/{path.strip('/')}"
+        url = self._get_article_url(path)
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         try:
             article = self.__fetch_article(url, plone_options)
-        except HTTPStatusError:
+            relations = self.get_related_articles_with_metadata(path)
+        except HTTPStatusError as e:
+            print(e)
             raise PathNotFoundExpection(path)
         except ValueError:
             raise
-        except Exception:
+        except Exception as e:
+            print(e)
             raise InternalError(f"Error fetching article at {url}")
-        return JATSDocument(article=article)
+        return JATSDocument(article=article, related_articles=relations)
 
     def __get_json(self, url: str, options: PloneGetJATSDocumentOptions | None) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
@@ -539,10 +545,28 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
-        url = f"{self.base_url}/{path.strip('/')}"
+        url = self._get_article_url(path)
         article = self.__get_json(url, None)
         front = self.__fetch_front(article)
         return front
+
+    def get_related_articles(self, path: str) -> list[str]:
+        path_set: set[str] = set()
+
+        url = self.base_url + "/@relations?source=/" + path
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
+            path_set.add(self.__get_path_from_plone_object(item["target"]))
+
+        url = self.base_url + "/@relations?target=/" + path
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
+            path_set.add(self.__get_path_from_plone_object(item["source"]))
+        return list(path_set)
 
     def save_jats_document(
         self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None

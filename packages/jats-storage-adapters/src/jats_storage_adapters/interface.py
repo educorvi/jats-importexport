@@ -85,6 +85,30 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         return self.get_jats_document(path).article.front
 
     @abc.abstractmethod
+    def get_related_articles(self, path: str) -> list[str]:
+        """Retrieve a list of related articles for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+
+        Returns:
+            A list of paths to related articles.
+        """
+        raise NotImplementedError
+
+    def get_related_articles_with_metadata(self, path: str) -> list[tuple[str, Front]]:
+        """Retrieve a list of related articles along with their metadata for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+
+        Returns:
+            A list of tuples containing the path and Front metadata of related articles.
+        """
+        related_articles = self.get_related_articles(path)
+        return [(article_path, self.get_metadata(article_path)) for article_path in related_articles]
+
+    @abc.abstractmethod
     def save_jats_document(
         self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
     ) -> str:

@@ -58,6 +58,7 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
     @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
+        print(document.related_articles)
         return self._transform(self.jats_exporter.export(document))
 
 
