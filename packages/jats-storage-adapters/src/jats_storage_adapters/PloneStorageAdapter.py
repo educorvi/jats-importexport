@@ -9,7 +9,7 @@ import logging
 import mimetypes
 import os
 from logging import debug
-from typing import BinaryIO, cast
+from typing import Any, BinaryIO, NotRequired, cast, overload
 from urllib.parse import urlparse
 
 import httpx
@@ -30,7 +30,14 @@ from lxml import etree, html
 from lxml.html import HtmlElement
 
 from .errors import InternalError, PathNotFoundExpection
-from .interface import EDIT_PI, GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
+from .interface import EDIT_PI, SaveJATSDocumentOptions, StorageAdapter
+from .interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
+
+
+class PloneGetJATSDocumentOptions(BaseGetJATSDocumentOptions):
+    """Retrieval options understood specifically by the Plone adapter."""
+
+    pre_requested_sections: NotRequired[dict[str, dict[str, Any]] | None]
 
 logger = logging.getLogger(__name__)
 
@@ -295,7 +302,7 @@ class PloneStorageAdapter(StorageAdapter):
         if not self.__is_url_within_base(url):
             raise ValueError(f"Refusing to download file from outside the configured Plone instance: {url}")
         try:
-            response1 = self.httpx_client.get(url, params={"fullobjects": 1})
+            response1 = self.httpx_client.get(url)
             response1.raise_for_status()
             content_type = response1.headers.get("content-type")
             if not content_type or not isinstance(content_type, str):
@@ -308,7 +315,7 @@ class PloneStorageAdapter(StorageAdapter):
                 download_url = field.get("download") if field else None
                 if not download_url:
                     raise InternalError(f"No downloadable file found for {url}")
-                response = self.httpx_client.get(download_url, params={"fullobjects": 1}, headers={"Accept": "*/*"})
+                response = self.httpx_client.get(download_url, headers={"Accept": "*/*"})
                 response.raise_for_status()
                 content_type = field.get("content-type") or response.headers.get(
                     "content-type", "application/octet-stream"
@@ -321,11 +328,24 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error downloading file from {url}") from e
 
-    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
+    @overload
+    def get_jats_document(
+        self, path: str, options: PloneGetJATSDocumentOptions
+    ) -> JATSDocument: ...
+
+    @overload
+    def get_jats_document(
+        self, path: str, options: BaseGetJATSDocumentOptions | None = None
+    ) -> JATSDocument: ...
+
+    def get_jats_document(
+        self, path: str, options: BaseGetJATSDocumentOptions | None = None
+    ) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
         url = f"{self.base_url}/{path.strip('/')}"
+        plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         try:
-            article = self.__fetch_article(url, options)
+            article = self.__fetch_article(url, plone_options)
         except HTTPStatusError:
             raise PathNotFoundExpection(path)
         except ValueError:
@@ -334,13 +354,21 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error fetching article at {url}")
         return JATSDocument(article=article)
 
-    def __get_json(self, url: str) -> dict:
+    def __get_json(self, url: str, options: PloneGetJATSDocumentOptions | None) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
-        response = self.httpx_client.get(url, params={"fullobjects": 1})
+        if options and options.get("pre_requested_sections"):
+            pre_requested_sections = options.get("pre_requested_sections")
+            if pre_requested_sections:
+                data = pre_requested_sections.get(url)
+                if data:
+                    return data
+        response = self.httpx_client.get(url)
         response.raise_for_status()
         return response.json()
 
-    def __get_label_title_raw(self, data: dict, url: str, options: GetJATSDocumentOptions | None = None) -> str:
+    def __get_label_title_raw(
+        self, data: dict, url: str, options: PloneGetJATSDocumentOptions | None = None
+    ) -> str:
         """Construct the label_title_raw string for a section, including edit link if requested."""
         section_type = data.get("@type")
         if section_type in ["Section", "AppendixGroup", "Appendix"]:
@@ -376,7 +404,7 @@ class PloneStorageAdapter(StorageAdapter):
                 item_url = item if isinstance(item, str) else item.get("@id")
                 if not item_url:
                     continue
-                related_item_response = self.httpx_client.get(item_url, params={"fullobjects": 1})
+                related_item_response = self.httpx_client.get(item_url)
                 related_item_response.raise_for_status()
                 relatedItem = related_item_response.json()
                 if relatedItem.get("article_id"):
@@ -394,9 +422,9 @@ class PloneStorageAdapter(StorageAdapter):
 
         return front
 
-    def __fetch_section(self, url: str, options: GetJATSDocumentOptions | None = None) -> Section:
+    def __fetch_section(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Section:
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
         sections = [
             self.__fetch_section(item["@id"], options)
             for item in data.get("items", [])
@@ -436,9 +464,9 @@ class PloneStorageAdapter(StorageAdapter):
         else:
             raise ValueError(f"Unsupported section type: {data.get('@type')}")
 
-    def __fetch_appendix(self, url: str, options: GetJATSDocumentOptions | None = None) -> Appendix:
+    def __fetch_appendix(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Appendix:
         """Fetch and reconstruct an Appendix and subsections from Plone."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
         sections = [
             self.__fetch_section(item["@id"], options)
             for item in data.get("items", [])
@@ -453,9 +481,11 @@ class PloneStorageAdapter(StorageAdapter):
             sections=sections,
         )
 
-    def __fetch_appendix_group(self, url: str, options: GetJATSDocumentOptions | None = None) -> AppendixGroup:
+    def __fetch_appendix_group(
+        self, url: str, options: PloneGetJATSDocumentOptions | None = None
+    ) -> AppendixGroup:
         """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
         appendixes = [
             self.__fetch_appendix(item["@id"], options)
             for item in data.get("items", [])
@@ -470,9 +500,9 @@ class PloneStorageAdapter(StorageAdapter):
             appendixes=appendixes,
         )
 
-    def __fetch_body(self, url: str, options: GetJATSDocumentOptions | None = None) -> Body:
+    def __fetch_body(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Body:
         """Fetch and reconstruct the Body node and its sections from Plone."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
         sections = [
             self.__fetch_section(item["@id"], options)
             for item in data.get("items", [])
@@ -480,9 +510,9 @@ class PloneStorageAdapter(StorageAdapter):
         ]
         return Body(sections=sections)
 
-    def __fetch_back(self, url: str, options: GetJATSDocumentOptions | None = None) -> Back:
+    def __fetch_back(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Back:
         """Fetch and reconstruct the Back node and its appendix groups from Plone."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
         appendix_groups = [
             self.__fetch_appendix_group(item["@id"], options)
             for item in data.get("items", [])
@@ -490,9 +520,18 @@ class PloneStorageAdapter(StorageAdapter):
         ]
         return Back(appendix_groups=appendix_groups)
 
-    def __fetch_article(self, url: str, options: GetJATSDocumentOptions | None = None) -> Article:
+    def __fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
-        data = self.__get_json(url)
+        data = self.__get_json(url, options)
+        pre_request = self.httpx_client.get(url+"/@all_descendents")
+        if pre_request.status_code == 200:
+            if options is None:
+                options = PloneGetJATSDocumentOptions(include_edit_links=False, pre_requested_sections=None)
+            data = pre_request.json()
+            pre_request_data = {}
+            for item in data.get("items", []):
+                pre_request_data[item["@id"]] = item
+                options["pre_requested_sections"] = pre_request_data
         front = body = back = None
         for item in data.get("items", []):
             pt = item.get("@type")
