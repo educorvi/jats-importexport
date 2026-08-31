@@ -39,6 +39,7 @@ class PloneGetJATSDocumentOptions(BaseGetJATSDocumentOptions):
 
     pre_requested_sections: NotRequired[dict[str, dict[str, Any]] | None]
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -329,18 +330,12 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error downloading file from {url}") from e
 
     @overload
-    def get_jats_document(
-        self, path: str, options: PloneGetJATSDocumentOptions
-    ) -> JATSDocument: ...
+    def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
 
     @overload
-    def get_jats_document(
-        self, path: str, options: BaseGetJATSDocumentOptions | None = None
-    ) -> JATSDocument: ...
+    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument: ...
 
-    def get_jats_document(
-        self, path: str, options: BaseGetJATSDocumentOptions | None = None
-    ) -> JATSDocument:
+    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
         url = f"{self.base_url}/{path.strip('/')}"
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
@@ -366,9 +361,7 @@ class PloneStorageAdapter(StorageAdapter):
         response.raise_for_status()
         return response.json()
 
-    def __get_label_title_raw(
-        self, data: dict, url: str, options: PloneGetJATSDocumentOptions | None = None
-    ) -> str:
+    def __get_label_title_raw(self, data: dict, url: str, options: PloneGetJATSDocumentOptions | None = None) -> str:
         """Construct the label_title_raw string for a section, including edit link if requested."""
         section_type = data.get("@type")
         if section_type in ["Section", "AppendixGroup", "Appendix"]:
@@ -481,9 +474,7 @@ class PloneStorageAdapter(StorageAdapter):
             sections=sections,
         )
 
-    def __fetch_appendix_group(
-        self, url: str, options: PloneGetJATSDocumentOptions | None = None
-    ) -> AppendixGroup:
+    def __fetch_appendix_group(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> AppendixGroup:
         """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
         data = self.__get_json(url, options)
         appendixes = [
@@ -523,7 +514,7 @@ class PloneStorageAdapter(StorageAdapter):
     def __fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
         data = self.__get_json(url, options)
-        pre_request = self.httpx_client.get(url+"/@all_descendents")
+        pre_request = self.httpx_client.get(url + "/@all_descendents")
         if pre_request.status_code == 200:
             if options is None:
                 options = PloneGetJATSDocumentOptions(include_edit_links=False, pre_requested_sections=None)
@@ -545,7 +536,7 @@ class PloneStorageAdapter(StorageAdapter):
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
         return Article(front=front, body=body, back=back)
-    
+
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
         url = f"{self.base_url}/{path.strip('/')}"

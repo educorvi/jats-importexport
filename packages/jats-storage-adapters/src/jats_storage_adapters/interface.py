@@ -8,7 +8,7 @@ import abc
 import enum
 from typing import BinaryIO, TypedDict
 
-from jats_classes import JATSDocument, Front
+from jats_classes import Front, JATSDocument
 
 EDIT_PI = "<?section-edit-link {url}?>"
 
