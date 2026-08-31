@@ -527,9 +527,9 @@ class PloneStorageAdapter(StorageAdapter):
         if pre_request.status_code == 200:
             if options is None:
                 options = PloneGetJATSDocumentOptions(include_edit_links=False, pre_requested_sections=None)
-            data = pre_request.json()
+            pre_request_res = pre_request.json()
             pre_request_data = {}
-            for item in data.get("items", []):
+            for item in pre_request_res.get("items", []):
                 pre_request_data[item["@id"]] = item
                 options["pre_requested_sections"] = pre_request_data
         front = body = back = None
@@ -545,6 +545,13 @@ class PloneStorageAdapter(StorageAdapter):
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
         return Article(front=front, body=body, back=back)
+    
+    def get_metadata(self, path: str) -> Front:
+        """Fetch the metadata of a JATS document from Plone."""
+        url = f"{self.base_url}/{path.strip('/')}"
+        article = self.__get_json(url, None)
+        front = self.__fetch_front(article)
+        return front
 
     def save_jats_document(
         self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None

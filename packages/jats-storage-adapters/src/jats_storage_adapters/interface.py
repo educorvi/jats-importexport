@@ -8,7 +8,7 @@ import abc
 import enum
 from typing import BinaryIO, TypedDict
 
-from jats_classes import JATSDocument
+from jats_classes import JATSDocument, Front
 
 EDIT_PI = "<?section-edit-link {url}?>"
 
@@ -72,6 +72,17 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             A JATSDocument instance.
         """
         raise NotImplementedError
+
+    def get_metadata(self, path: str) -> Front:
+        """Retrieve metadata for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+
+        Returns:
+            A Front instance containing metadata for the file.
+        """
+        return self.get_jats_document(path).article.front
 
     @abc.abstractmethod
     def save_jats_document(

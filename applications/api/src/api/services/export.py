@@ -4,7 +4,7 @@ from enum import Enum
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
-from jats_classes import JATSDocument
+from jats_classes import JATSDocument, Front
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
@@ -43,6 +43,17 @@ async def __load_document(
     try:
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_jats_document, path, options)
+    except PathNotFoundExpection as e:
+        raise HTTPException(status_code=404, detail=f"Document not found: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
+    
+async def __load_metadata(
+    path: str, adapter: StorageAdapter | None = None
+) -> Front:
+    try:
+        adapter = adapter or get_adapter_instance()
+        return await asyncio.to_thread(adapter.get_metadata, path)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except Exception as e:
@@ -89,6 +100,5 @@ async def pdf_export(path: str):
 
 async def metadata_export(path: str):
     adapter = get_adapter_instance()
-    document = await __load_document(path, adapter=adapter)
-    front = document.article.front
+    front = await __load_metadata(path, adapter=adapter)
     return front
