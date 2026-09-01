@@ -12,6 +12,7 @@ import xmlschema
 from lxml import etree
 
 from .Article import Article
+from .Front import Front
 
 
 class JATSDocument:
@@ -21,10 +22,15 @@ class JATSDocument:
     """
 
     article: Article
+    related_articles: list[tuple[str, str, Front]]
 
-    def __init__(self, article: Article):
+    def __init__(self, article: Article, related_articles: list[tuple[str, str, Front]] | None = None):
         """Initialize the document with an Article instance."""
         self.article = article
+        self.related_articles = related_articles or []
+
+    def set_related_articles(self, related_articles: list[tuple[str, str, Front]]):
+        self.related_articles = related_articles
 
     @classmethod
     def from_xml(cls, xml_content: str, xsd_path: str | None) -> JATSDocument:

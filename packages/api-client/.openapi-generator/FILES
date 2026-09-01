@@ -75,6 +75,4 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_modify_api.py
-test/test_update_articles_response.py
 tox.ini

@@ -137,9 +137,12 @@ class PloneStorageAdapter(StorageAdapter):
             return result_path[len(base_path) :]
         return result_path
 
-    def __plone_object_to_path(self, obj: dict) -> str:
+    def __get_path_from_plone_object(self, obj: dict) -> str:
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
+
+    def get_url_from_path(self, path: str) -> str:
+        return f"{self.base_url}/{path.strip('/')}"
 
     def __list_metadata_contents(self, meta: str) -> list[str]:
         url = f"/@faceted-search?portal_type=Article&facets={meta}&facets_only=1"
@@ -186,13 +189,13 @@ class PloneStorageAdapter(StorageAdapter):
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
         json_res = response.json()
-        paths = list(map(self.__plone_object_to_path, json_res.get("items", [])))
+        paths = list(map(self.__get_path_from_plone_object, json_res.get("items", [])))
         while batch_size is None and json_res.get("batching", {}).get("next"):
             next_url = json_res["batching"]["next"]
             response = self.httpx_client.post(next_url, json=search)
             response.raise_for_status()
             json_res = response.json()
-            paths.extend(map(self.__plone_object_to_path, json_res.get("items", [])))
+            paths.extend(map(self.__get_path_from_plone_object, json_res.get("items", [])))
         return paths, json_res.get("items_total", len(paths))
 
     def link_related_articles(self) -> list[str]:
@@ -207,7 +210,7 @@ class PloneStorageAdapter(StorageAdapter):
         articles = self.list_articles()[0]
         updated_articles = []
         for article in articles:
-            url = f"{self.base_url}/{article.strip('/')}"
+            url = self.get_url_from_path(article)
             response = self.httpx_client.get(url)
             response.raise_for_status()
             data = response.json()
@@ -337,17 +340,25 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
-        url = f"{self.base_url}/{path.strip('/')}"
+        url = self.get_url_from_path(path)
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         try:
             article = self.__fetch_article(url, plone_options)
-        except HTTPStatusError:
-            raise PathNotFoundExpection(path)
+        except HTTPStatusError as e:
+            if e.response.status_code == 404 and str(e.request.url) == url:
+                raise PathNotFoundExpection(path) from e
+            raise InternalError(f"Error fetching article at {url}") from e
         except ValueError:
             raise
-        except Exception:
-            raise InternalError(f"Error fetching article at {url}")
-        return JATSDocument(article=article)
+        except Exception as e:
+            raise InternalError(f"Error fetching article at {url}") from e
+
+        try:
+            relations = self.get_related_articles_with_metadata(path)
+        except Exception as e:
+            raise InternalError(f"Error fetching related articles for {path}") from e
+
+        return JATSDocument(article=article, related_articles=relations)
 
     def __get_json(self, url: str, options: PloneGetJATSDocumentOptions | None) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
@@ -385,23 +396,20 @@ class PloneStorageAdapter(StorageAdapter):
 
         return label_title_raw
 
-    def __fetch_front(self, data: dict) -> Front:
+    def __fetch_front(self, data: dict, resolve_related_items: bool = True) -> Front:
         """Convert Plone front node data into a Front domain model."""
         front = Front.from_dict(data)
 
         # rebuild related_articles from related_articles and relatedItems
         related_articles = data.get("related_articles") or []
-        relatedItems = data.get("relatedItems") or []
-        if relatedItems:
-            for item in relatedItems:
-                item_url = item if isinstance(item, str) else item.get("@id")
-                if not item_url:
-                    continue
-                related_item_response = self.httpx_client.get(item_url)
-                related_item_response.raise_for_status()
-                relatedItem = related_item_response.json()
-                if relatedItem.get("article_id"):
-                    related_articles.append(relatedItem.get("article_id"))
+        if resolve_related_items:
+            related_items = self.get_related_articles(self.__get_path_from_plone_object(data))
+            if related_items:
+                for item in related_items:
+                    metadata = self._get_metadata_internal(item, resolve_related_items=False)
+                    if metadata.article_id:
+                        related_articles.append(metadata.article_id)
+
         front.related_articles = related_articles
 
         # rebuild veroeffentlichungsstatus from plone workflow state
@@ -539,10 +547,32 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
-        url = f"{self.base_url}/{path.strip('/')}"
+        return self._get_metadata_internal(path, resolve_related_items=True)
+
+    def _get_metadata_internal(self, path: str, resolve_related_items: bool = True) -> Front:
+        url = self.get_url_from_path(path)
         article = self.__get_json(url, None)
-        front = self.__fetch_front(article)
+        front = self.__fetch_front(article, resolve_related_items=resolve_related_items)
         return front
+
+    def get_related_articles(self, path: str) -> list[str]:
+        path_set: set[str] = set()
+
+        url = self.base_url + "/@relations?source=/" + path.lstrip("/")
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
+            path_set.add(self.__get_path_from_plone_object(item["target"]))
+
+        url = self.base_url + "/@relations?target=/" + path.lstrip("/")
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
+            path_set.add(self.__get_path_from_plone_object(item["source"]))
+
+        return list(path_set)
 
     def save_jats_document(
         self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
