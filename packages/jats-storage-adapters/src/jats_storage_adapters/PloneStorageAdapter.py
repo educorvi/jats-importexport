@@ -391,23 +391,19 @@ class PloneStorageAdapter(StorageAdapter):
 
         return label_title_raw
 
-    def __fetch_front(self, data: dict) -> Front:
+    def __fetch_front(self, data: dict, resolve_related_items: bool = True) -> Front:
         """Convert Plone front node data into a Front domain model."""
         front = Front.from_dict(data)
 
         # rebuild related_articles from related_articles and relatedItems
         related_articles = data.get("related_articles") or []
-        relatedItems = data.get("relatedItems") or []
-        if relatedItems:
-            for item in relatedItems:
-                item_url = item if isinstance(item, str) else item.get("@id")
-                if not item_url:
-                    continue
-                related_item_response = self.httpx_client.get(item_url)
-                related_item_response.raise_for_status()
-                relatedItem = related_item_response.json()
-                if relatedItem.get("article_id"):
-                    related_articles.append(relatedItem.get("article_id"))
+        if resolve_related_items:
+            related_items = front.related_articles
+            if related_items:
+                for item in related_items:
+                    metadata = self._get_metadata_internal(item, resolve_related_items=False)
+                    related_articles.append(metadata.article_id)
+            
         front.related_articles = related_articles
 
         # rebuild veroeffentlichungsstatus from plone workflow state
@@ -545,20 +541,30 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
+        return self._get_metadata_internal(path, resolve_related_items=True)
+
+    def _get_metadata_internal(self, path: str, resolve_related_items: bool = True) -> Front:
         url = self.get_url_from_path(path)
         article = self.__get_json(url, None)
-        front = self.__fetch_front(article)
+        front = self.__fetch_front(article, resolve_related_items=resolve_related_items)
         return front
 
     def get_related_articles(self, path: str) -> list[str]:
         path_set: set[str] = set()
 
-        url = self.base_url + "/@relations?source=/" + path
+        url = self.base_url + "/@relations?source=/" + path.lstrip('/')
         response = self.httpx_client.get(url)
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
             path_set.add(self.__get_path_from_plone_object(item["target"]))
+
+        url = self.base_url + "/@relations?target=/" + path.lstrip('/')
+        response = self.httpx_client.get(url)
+        response.raise_for_status()
+        data = response.json()
+        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
+            path_set.add(self.__get_path_from_plone_object(item["source"]))
 
         return list(path_set)
 
