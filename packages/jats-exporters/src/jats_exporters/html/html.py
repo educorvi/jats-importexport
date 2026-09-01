@@ -7,6 +7,7 @@ import abc
 import os
 import re
 from functools import lru_cache
+from urllib.parse import unquote
 
 from jats_classes import JATSDocument
 from lxml import etree
@@ -39,11 +40,26 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
         self.jats_exporter = JatsExporter()
         self.transform = etree.XSLT(self.xsl_doc)
 
+
+    def _replace_related_article_links(self, html: str, doc: JATSDocument) -> str:
+        # get all hrefs
+        hrefs = re.findall(r'href="([^"]+)"', html)
+        for href in hrefs:
+            unqouted_href = unquote(href)
+            for related_article in doc.related_articles:
+                if unqouted_href == related_article[2].article_id:
+                    new_href = related_article[1]
+                    html = html.replace(f"href=\"{href}\"", f"href=\"{new_href}\"")
+                    break
+        return html
+
     @lru_cache(maxsize=128)
-    def _transform(self, xml_doc: str) -> str:
+    def _transform(self, xml_doc: str, doc: JATSDocument) -> str:
         """Apply XSLT transformation to the JATS XML string and return the HTML."""
         parsed_xml_doc = etree.fromstring(xml_doc)
-        return str(self.transform(parsed_xml_doc))
+        html = str(self.transform(parsed_xml_doc))
+        html = self._replace_related_article_links(html, doc)
+        return html
 
     @lru_cache(maxsize=128)
     def transform_xml(self, xml_doc: str) -> str:
@@ -59,7 +75,7 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
         print(document.related_articles)
-        return self._transform(self.jats_exporter.export(document))
+        return self._transform(self.jats_exporter.export(document), doc=document)
 
 
 class HtmlExporter(HtmlExporterGeneric):

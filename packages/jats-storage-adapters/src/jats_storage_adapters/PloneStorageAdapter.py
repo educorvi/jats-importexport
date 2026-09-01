@@ -141,6 +141,9 @@ class PloneStorageAdapter(StorageAdapter):
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
 
+    def get_url_from_path(self, path: str) -> str:
+        return f"{self.base_url}/{path.strip('/')}"
+
     def __list_metadata_contents(self, meta: str) -> list[str]:
         url = f"/@faceted-search?portal_type=Article&facets={meta}&facets_only=1"
         response = self.httpx_client.get(url)
@@ -207,7 +210,7 @@ class PloneStorageAdapter(StorageAdapter):
         articles = self.list_articles()[0]
         updated_articles = []
         for article in articles:
-            url = f"{self.base_url}/{article.strip('/')}"
+            url = self.get_url_from_path(article)
             response = self.httpx_client.get(url)
             response.raise_for_status()
             data = response.json()
@@ -329,8 +332,6 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error downloading file from {url}") from e
 
-    def _get_article_url(self, path: str) -> str:
-        return f"{self.base_url}/{path.strip('/')}"
 
     @overload
     def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
@@ -340,7 +341,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
-        url = self._get_article_url(path)
+        url = self.get_url_from_path(path)
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         try:
             article = self.__fetch_article(url, plone_options)
@@ -545,7 +546,7 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
-        url = self._get_article_url(path)
+        url = self.get_url_from_path(path)
         article = self.__get_json(url, None)
         front = self.__fetch_front(article)
         return front
@@ -560,12 +561,6 @@ class PloneStorageAdapter(StorageAdapter):
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
             path_set.add(self.__get_path_from_plone_object(item["target"]))
 
-        url = self.base_url + "/@relations?target=/" + path
-        response = self.httpx_client.get(url)
-        response.raise_for_status()
-        data = response.json()
-        for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
-            path_set.add(self.__get_path_from_plone_object(item["source"]))
         return list(path_set)
 
     def save_jats_document(
