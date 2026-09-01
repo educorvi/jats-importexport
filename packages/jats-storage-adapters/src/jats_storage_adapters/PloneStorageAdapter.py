@@ -332,7 +332,6 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error downloading file from {url}") from e
 
-
     @overload
     def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
 

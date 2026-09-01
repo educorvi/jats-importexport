@@ -40,7 +40,6 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
         self.jats_exporter = JatsExporter()
         self.transform = etree.XSLT(self.xsl_doc)
 
-
     def _replace_related_article_links(self, html: str, doc: JATSDocument) -> str:
         # get all hrefs
         hrefs = re.findall(r'href="([^"]+)"', html)
@@ -49,7 +48,7 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
             for related_article in doc.related_articles:
                 if unqouted_href == related_article[2].article_id:
                     new_href = related_article[1]
-                    html = html.replace(f"href=\"{href}\"", f"href=\"{new_href}\"")
+                    html = html.replace(f'href="{href}"', f'href="{new_href}"')
                     break
         return html
 
@@ -74,7 +73,6 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
     @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
-        print(document.related_articles)
         return self._transform(self.jats_exporter.export(document), doc=document)
 
 

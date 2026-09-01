@@ -24,7 +24,7 @@ class JATSDocument:
     article: Article
     related_articles: list[tuple[str, str, Front]]
 
-    def __init__(self, article: Article, related_articles: list[tuple[str,str, Front]] | None = None):
+    def __init__(self, article: Article, related_articles: list[tuple[str, str, Front]] | None = None):
         """Initialize the document with an Article instance."""
         self.article = article
         self.related_articles = related_articles or []
