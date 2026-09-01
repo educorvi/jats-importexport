@@ -14,6 +14,7 @@ from jats_exporters import (
     JatsExporter,
     PdfExporter,
 )
+from lxml import etree
 
 # ----------------------------------------------------
 # Helpers to build a mock JATSDocument
@@ -151,6 +152,26 @@ def test_html_exporter_caching():
     assert html1 == html2
 
 
+def test_html_exporter_only_renders_non_empty_permissions():
+    exporter = HtmlExporter()
+    xml = etree.fromstring(
+        b"""<article xmlns:xlink="http://www.w3.org/1999/xlink">
+            <body>
+                <fig id="empty"><graphic xlink:href="empty.png"/><permissions/></fig>
+                <fig id="set">
+                    <graphic xlink:href="set.png"/>
+                    <permissions><copyright-holder>Example GmbH</copyright-holder></permissions>
+                </fig>
+            </body>
+        </article>"""
+    )
+
+    html_output = str(exporter.transform(xml))
+
+    assert html_output.count('class="permissions"') == 1
+    assert "Example GmbH" in html_output
+
+
 # ----------------------------------------------------
 # Tests for PdfExporter image embedding
 # ----------------------------------------------------
@@ -193,4 +214,3 @@ def test_pdf_exporter_skips_image_on_download_failure():
 
     # Left as-is; WeasyPrint will simply fail to load this one image.
     assert "http://evil.example.com/figure.png" in result
-

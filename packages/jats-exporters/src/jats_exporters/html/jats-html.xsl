@@ -2115,21 +2115,23 @@ or pipeline) parameterized.
 
 
     <xsl:template match="permissions">
-        <div class="permissions">
-            <xsl:apply-templates select="copyright-statement"/>
-            <xsl:if test="copyright-year | copyright-holder">
-                <p class="copyright">
-                    <span class="generated">Urheberrecht</span>
-                    <xsl:for-each select="copyright-year | copyright-holder">
-                        <xsl:apply-templates/>
-                        <xsl:if test="not(position()=last())">
-                            <span class="generated">,</span>
-                        </xsl:if>
-                    </xsl:for-each>
-                </p>
-            </xsl:if>
-            <xsl:apply-templates select="license"/>
-        </div>
+        <xsl:if test="normalize-space(string(.)) or descendant-or-self::*/@*[normalize-space(.)]">
+            <div class="permissions">
+                <xsl:apply-templates select="copyright-statement"/>
+                <xsl:if test="copyright-year | copyright-holder">
+                    <p class="copyright">
+                        <span class="generated">Urheberrecht</span>
+                        <xsl:for-each select="copyright-year | copyright-holder">
+                            <xsl:apply-templates/>
+                            <xsl:if test="not(position()=last())">
+                                <span class="generated">,</span>
+                            </xsl:if>
+                        </xsl:for-each>
+                    </p>
+                </xsl:if>
+                <xsl:apply-templates select="license"/>
+            </div>
+        </xsl:if>
     </xsl:template>
 
 
