@@ -70,3 +70,6 @@ build-image: check_dependency_docker
 push-image: check_dependency_docker build-image
 	docker push ghcr.io/educorvi/jats-importexport:latest
 	docker push ghcr.io/educorvi/jats-importexport:$(API_VERSION)
+
+sbom: check_dependency_uv
+	uv run cyclonedx-py venv > sbom.json

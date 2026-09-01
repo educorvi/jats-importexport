@@ -15,3 +15,4 @@
 *.log
 packages/api-client
 scripts
+sbom.json
