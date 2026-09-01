@@ -11,6 +11,7 @@ from jats_classes import (
     JATSDocument,
     Section,
 )
+from jats_storage_adapters.errors import InternalError
 from jats_storage_adapters.interface import AvailableStorageAdapters
 from jats_storage_adapters.PloneStorageAdapter import PloneStorageAdapter
 
@@ -340,6 +341,15 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
             return make_response(
                 status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "items": []}, url=url
             )
+        elif url in {
+            "http://localhost:8080/Plone/@relations?source=/my-doc",
+            "http://localhost:8080/Plone/@relations?target=/my-doc",
+        }:
+            return make_response(
+                status_code=200,
+                json={"relations": {"relatedItems": {"items": []}}},
+                url=url,
+            )
         else:
             return make_response(status_code=404, url=url)
 
@@ -370,6 +380,30 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert app.title == "Appendix 1"
     assert len(app.sections) == 1
     assert app.sections[0].title == "App Sec Title"
+
+
+def test_plone_storage_adapter_get_jats_document_relations_failure_is_internal_error(clean_env, mocker):
+    os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
+    os.environ["PLONE_USERNAME"] = "admin"
+    os.environ["PLONE_PASSWORD"] = "secret"
+    adapter = PloneStorageAdapter()
+
+    mocker.patch.object(
+        adapter,
+        "_PloneStorageAdapter__fetch_article",
+        return_value=mocker.sentinel.article,
+    )
+    mocker.patch.object(
+        adapter.httpx_client,
+        "get",
+        return_value=make_response(
+            status_code=404,
+            url="http://localhost:8080/Plone/@relations?source=/my-doc",
+        ),
+    )
+
+    with pytest.raises(InternalError, match="Error fetching related articles for /my-doc"):
+        adapter.get_jats_document("/my-doc")
 
 
 def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker):

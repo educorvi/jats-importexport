@@ -344,15 +344,20 @@ class PloneStorageAdapter(StorageAdapter):
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         try:
             article = self.__fetch_article(url, plone_options)
-            relations = self.get_related_articles_with_metadata(path)
         except HTTPStatusError as e:
-            print(e)
-            raise PathNotFoundExpection(path)
+            if e.response.status_code == 404 and str(e.request.url) == url:
+                raise PathNotFoundExpection(path) from e
+            raise InternalError(f"Error fetching article at {url}") from e
         except ValueError:
             raise
         except Exception as e:
-            print(e)
-            raise InternalError(f"Error fetching article at {url}")
+            raise InternalError(f"Error fetching article at {url}") from e
+
+        try:
+            relations = self.get_related_articles_with_metadata(path)
+        except Exception as e:
+            raise InternalError(f"Error fetching related articles for {path}") from e
+
         return JATSDocument(article=article, related_articles=relations)
 
     def __get_json(self, url: str, options: PloneGetJATSDocumentOptions | None) -> dict:

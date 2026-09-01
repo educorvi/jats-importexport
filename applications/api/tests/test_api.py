@@ -1,4 +1,4 @@
-from jats_storage_adapters.errors import PathNotFoundExpection
+from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 import base64
 import io
 import zipfile
@@ -110,6 +110,12 @@ class MockStorageAdapter(StorageAdapter):
         # Return a valid JATSDocument
         return JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
 
+    def get_related_articles(self, path: str) -> list[str]:
+        return []
+
+    def get_url_from_path(self, path: str) -> str:
+        return f"http://mockstore/{path.lstrip('/')}"
+
     def save_jats_document(self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         self.saved_docs.append((document, container))
         title = document.article.front.title or "article"
@@ -178,6 +184,22 @@ def test_export_md(mock_adapter):
 def test_export_md_nonexistent_path(mock_adapter):
     response = client.get("/export/md?path=nonexistent")
     assert response.status_code == 404
+
+
+def test_export_jats_storage_internal_error_returns_500(mock_adapter, mocker):
+    mocker.patch.object(
+        mock_adapter,
+        "get_jats_document",
+        side_effect=InternalError("Error fetching related articles for relations-error"),
+    )
+
+    response = client.get(
+        "/export/jats?path=relations-error",
+        headers={"Cache-Control": "no-store"},
+    )
+
+    assert response.status_code == 500
+    assert response.json()["detail"] == "Error loading document: Error fetching related articles for relations-error"
 
 
 def test_export_md_requires_auth(mocker, mock_adapter):
