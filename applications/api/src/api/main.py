@@ -1,4 +1,5 @@
 """Entrypoint API application module for jats-importexport."""
+from prometheus_fastapi_instrumentator import Instrumentator
 
 import argparse
 import json
@@ -14,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
+from prometheus_client import start_http_server
 
 from api.config import StorageConfig
 
@@ -70,10 +72,12 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+Instrumentator().instrument(app)
 
 
 def start() -> None:
     """Console script entry point – run with ``uv run start-api``."""
+    server, t = start_http_server(APIConfig.METRICS_PORT)
     uvicorn.run(
         "api.main:app",
         host=APIConfig.HOST,
@@ -81,6 +85,9 @@ def start() -> None:
         reload=APIConfig.RELOAD,
         workers=APIConfig.WORKERS,
     )
+    server.shutdown()
+    server.server_close()
+    t.join()
 
 
 def export_openapi() -> None:

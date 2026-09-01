@@ -8,6 +8,7 @@ load_dotenv()
 class APIConfig:
     HOST: str = os.environ.get("API_HOST", "0.0.0.0")
     PORT: int = int(os.environ.get("API_PORT", 8000))
+    METRICS_PORT: int = int(os.environ.get("API_METRICS_PORT", 8222))
     RELOAD: bool = os.environ.get("API_RELOAD", "false").lower() in ("true", "1", "t")
     WORKERS: int = int(os.environ.get("API_WORKERS", 1))
     CORS_ORIGINS: list[str] = [origin.strip() for origin in os.environ.get("API_CORS_ORIGINS", "*").split(",")]
