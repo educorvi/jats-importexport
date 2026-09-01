@@ -11,8 +11,8 @@ from io import BytesIO
 import xmlschema
 from lxml import etree
 
-from . import Front
 from .Article import Article
+from .Front import Front
 
 
 class JATSDocument:

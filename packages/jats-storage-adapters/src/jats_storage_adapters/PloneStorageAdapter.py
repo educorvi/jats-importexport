@@ -407,7 +407,8 @@ class PloneStorageAdapter(StorageAdapter):
             if related_items:
                 for item in related_items:
                     metadata = self._get_metadata_internal(item, resolve_related_items=False)
-                    related_articles.append(metadata.article_id)
+                    if metadata.article_id:
+                        related_articles.append(metadata.article_id)
 
         front.related_articles = related_articles
 

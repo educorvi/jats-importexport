@@ -115,7 +115,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             path: The path to the file in the storage system.
 
         Returns:
-            A list of tuples containing the path and Front metadata of related articles.
+             A list of tuples containing (path, url, Front metadata) for each related article.
         """
         related_articles = self.get_related_articles(path)
         return [

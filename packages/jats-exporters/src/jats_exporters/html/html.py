@@ -44,9 +44,9 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
         # get all hrefs
         hrefs = re.findall(r'href="([^"]+)"', html)
         for href in hrefs:
-            unqouted_href = unquote(href)
+            unquoted_href = unquote(href)
             for related_article in doc.related_articles:
-                if unqouted_href == related_article[2].article_id:
+                if unquoted_href == related_article[2].article_id:
                     new_href = related_article[1]
                     html = html.replace(f'href="{href}"', f'href="{new_href}"')
                     break
