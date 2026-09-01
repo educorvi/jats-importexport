@@ -403,12 +403,14 @@ class PloneStorageAdapter(StorageAdapter):
         # rebuild related_articles from related_articles and relatedItems
         related_articles = data.get("related_articles") or []
         if resolve_related_items:
-            related_items = front.related_articles
+            related_items = self.get_related_articles(self.__get_path_from_plone_object(data))
             if related_items:
                 for item in related_items:
-                    metadata = self._get_metadata_internal(item, resolve_related_items=False)
+                    metadata = self._get_metadata_internal(
+                        item, resolve_related_items=False
+                    )
                     related_articles.append(metadata.article_id)
-            
+
         front.related_articles = related_articles
 
         # rebuild veroeffentlichungsstatus from plone workflow state
@@ -557,14 +559,14 @@ class PloneStorageAdapter(StorageAdapter):
     def get_related_articles(self, path: str) -> list[str]:
         path_set: set[str] = set()
 
-        url = self.base_url + "/@relations?source=/" + path.lstrip('/')
+        url = self.base_url + "/@relations?source=/" + path.lstrip("/")
         response = self.httpx_client.get(url)
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
             path_set.add(self.__get_path_from_plone_object(item["target"]))
 
-        url = self.base_url + "/@relations?target=/" + path.lstrip('/')
+        url = self.base_url + "/@relations?target=/" + path.lstrip("/")
         response = self.httpx_client.get(url)
         response.raise_for_status()
         data = response.json()
