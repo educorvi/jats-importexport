@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlparse
 
 import pypandoc
 from fastapi import File, HTTPException, UploadFile
-from jats_classes import JATSDocument
+from jats_classes import Front, JATSDocument
 from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
 from lxml import etree
 
@@ -416,6 +416,11 @@ def _upload_files_and_update_references_root(
     xml_directory = xml_file.parent.resolve()
     archive_root = extraction_root.resolve()
 
+    front_element = xml_root.find(".//front")
+    if front_element is None:
+        raise ValueError("JATS article must contain a 'front' element")
+    front = Front.from_xml_element(front_element)
+
     root = xml_root
     for element in root.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
         href_value_raw = element.get(href_attr)
@@ -448,10 +453,12 @@ def _upload_files_and_update_references_root(
 
         if referenced_path not in uploaded_files:
             try:
+                asset_path = asset_container or ASSETS_CONTAINER
+                if front.article_id:
+                    asset_path += "/" + front.article_id
+                print(asset_path)
                 with referenced_path.open("rb") as referenced_file:
-                    uploaded_files[referenced_path] = adapter_instance.upload_file(
-                        referenced_file, asset_container or ASSETS_CONTAINER
-                    )
+                    uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, asset_path)
             except Exception as e:
                 logger.error(f"Failed to upload referenced file '{referenced_path.name}': {e}")
                 raise HTTPException(
