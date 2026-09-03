@@ -1987,13 +1987,13 @@ or pipeline) parameterized.
                         <xsl:attribute name="class">image-size-icon</xsl:attribute>
                     </xsl:when>
                     <xsl:when test="@specific-use='image-size:s'">
-                        <xsl:attribute name="class">image-size-small w-25</xsl:attribute>
+                        <xsl:attribute name="class">image-size-small</xsl:attribute>
                     </xsl:when>
                     <xsl:when test="@specific-use='image-size:m'">
-                        <xsl:attribute name="class">image-size-medium w-50</xsl:attribute>
+                        <xsl:attribute name="class">image-size-medium</xsl:attribute>
                     </xsl:when>
                     <xsl:when test="@specific-use='image-size:l'">
-                        <xsl:attribute name="class">image-size-large w-100</xsl:attribute>
+                        <xsl:attribute name="class">image-size-large</xsl:attribute>
                     </xsl:when>
                 </xsl:choose>
             </xsl:if>
