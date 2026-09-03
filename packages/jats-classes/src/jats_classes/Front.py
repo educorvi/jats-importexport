@@ -127,6 +127,9 @@ def _create_tag(
 class Front:
     """Represents a JATS <front> element containing article metadata."""
 
+    # XML language attribute (xml:lang)
+    xml_lang: str
+
     # -- Journal Metadata (JATS: journal-meta) --
     # JATS: journal-id
     journal_id: str | None
@@ -228,11 +231,12 @@ class Front:
     ueberschriften_mit_nummerierung: bool | None
 
     @classmethod
-    def from_xml_element(cls, element: etree._Element) -> Front:
+    def from_xml_element(cls, element: etree._Element, xml_lang: str = "de") -> Front:
         """Construct a Front instance from an lxml element representing a JATS <front>.
 
         Args:
             element: lxml _Element node representing the <front> tag.
+            xml_lang: The XML language attribute (xml:lang) of the <article> element.
 
         Returns:
             A Front instance.
@@ -316,6 +320,7 @@ class Front:
         )
 
         return cls(
+            xml_lang=xml_lang,
             journal_id=journal_id,
             journal_title=journal_title,
             journal_subtitle=journal_subtitle,
@@ -494,6 +499,7 @@ class Front:
     def empty(cls) -> Front:
         """Return an empty Front instance with all fields set to None or empty."""
         return cls(
+            xml_lang="de",
             journal_id=None,
             journal_title=None,
             journal_subtitle=None,
@@ -551,6 +557,10 @@ class Front:
     def from_dict(cls, data: dict[str, Any]) -> Front:
         """Construct a Front instance from a dictionary of metadata."""
         front = cls.empty()
+
+        # XML language attribute (xml:lang)
+        if isinstance((xml_lang := data.get("xml_lang")), str):
+            front.xml_lang = xml_lang
 
         # Journal Metadata
         if isinstance((journal_id := data.get("journal_id")), str):
