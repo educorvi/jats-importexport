@@ -1,5 +1,3 @@
-from prometheus_client import Summary, Histogram
-from collections import Counter
 import asyncio
 import logging
 from enum import Enum
@@ -10,6 +8,7 @@ from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import PathNotFoundExpection
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
+from prometheus_client import Histogram, Summary
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance

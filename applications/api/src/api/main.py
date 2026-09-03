@@ -1,5 +1,4 @@
 """Entrypoint API application module for jats-importexport."""
-from prometheus_fastapi_instrumentator import Instrumentator
 
 import argparse
 import json
@@ -16,6 +15,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
 from prometheus_client import start_http_server
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from api.config import StorageConfig
 
