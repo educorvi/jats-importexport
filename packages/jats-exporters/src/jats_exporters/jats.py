@@ -21,7 +21,7 @@ from jats_classes import (
 from .interface import Exporter
 
 
-def _wrap_article_jats(jats: str) -> str:
+def _wrap_article_jats(jats: str, xml_lang: str) -> str:
     """Wrap inner content in root <article> tag with DTD and namespaces."""
     doctype = (
         '<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD '
@@ -30,7 +30,7 @@ def _wrap_article_jats(jats: str) -> str:
     )
     article_open = (
         '<article xmlns:mml="http://www.w3.org/1998/Math/MathML" '
-        'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="de" '
+        f'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="{xml_lang}" '
         'article-type="DGUV Vorschrift" dtd-version="0.4">'
     )
     return f"{doctype}\n{article_open}\n\t{jats}\n</article>\n"
@@ -38,8 +38,9 @@ def _wrap_article_jats(jats: str) -> str:
 
 def _get_article_jats(article: Article) -> str:
     """Serialize an entire Article structure to JATS XML."""
+    xml_lang = article.front.xml_lang or "de"
     content = f"{_get_front_jats(article.front)}{_get_body_jats(article.body)}{_get_back_jats(article.back)}"
-    return _wrap_article_jats(content)
+    return _wrap_article_jats(content, xml_lang)
 
 
 def _get_front_jats(front: Front) -> str:
