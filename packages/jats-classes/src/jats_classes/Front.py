@@ -176,6 +176,8 @@ class Front:
     # JATS: article-categories
     # Raw xml snippet
     article_categories: str | None
+    # JATS: related-article[@href, @related-article-type='translation']
+    related_articles_translations: list[str] | None
     # JATS: related-article[@href]
     related_articles: list[str] | None
 
@@ -281,10 +283,15 @@ class Front:
         )
         _related_articles = article_meta.findall("related-article")
         related_articles = []
+        related_articles_translations = []
         for ra in _related_articles:
             href = _xlink_href(ra, ".")
+            related_article_type = ra.get("related-article-type")
             if href is not None:
-                related_articles.append(href)
+                if related_article_type == "translation":
+                    related_articles_translations.append(href)
+                else:
+                    related_articles.append(href)
 
         # Publication Dates
         pub_date_ausgabedatum = _date(article_meta, "pub-date[@date-type='Ausgabedatum']")
@@ -341,6 +348,7 @@ class Front:
             co_author_aff=co_author_aff,
             self_uri=self_uri,
             article_categories=article_categories,
+            related_articles_translations=related_articles_translations,
             related_articles=related_articles,
             pub_date_ausgabedatum=pub_date_ausgabedatum,
             pub_date_aktualisierte_fassung=pub_date_aktualisierte_fassung,
@@ -437,6 +445,12 @@ class Front:
                 _create_tag("self-uri", nsmap={"xlink": _XLINK_NS}, attributes={_XLINK_HREF: self.self_uri or ""}),
                 *[_create_tag("related-article",
                               nsmap={"xlink": _XLINK_NS},
+                              attributes={"related-article-type": "translation",
+                                          "ext-link-type": "publisher-id",
+                                          _XLINK_HREF: related_article} )
+                                          for related_article in self.related_articles_translations or []],
+                *[_create_tag("related-article",
+                              nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "companion",
                                           "ext-link-type": "publisher-id",
                                           _XLINK_HREF: related_article} )
@@ -520,6 +534,7 @@ class Front:
             co_author_aff=None,
             self_uri=None,
             article_categories=None,
+            related_articles_translations=[],
             related_articles=[],
             pub_date_ausgabedatum=None,
             pub_date_aktualisierte_fassung=None,
@@ -612,6 +627,9 @@ class Front:
         related_articles = data.get("related_articles")
         if isinstance(related_articles, list):
             front.related_articles = [ra for ra in related_articles if isinstance(ra, str)]
+        related_articles_translations = data.get("related_articles_translations")
+        if isinstance(related_articles_translations, list):
+            front.related_articles_translations = [rat for rat in related_articles_translations if isinstance(rat, str)]
 
         # Publication Dates
         if isinstance((pub_date_ausgabedatum := data.get("pub_date_ausgabedatum")), datetime.date):
