@@ -53,11 +53,12 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
         return html
 
     @lru_cache(maxsize=128)
-    def _transform(self, xml_doc: str, doc: JATSDocument) -> str:
+    def _transform(self, xml_doc: str, doc: JATSDocument | None = None) -> str:
         """Apply XSLT transformation to the JATS XML string and return the HTML."""
         parsed_xml_doc = etree.fromstring(xml_doc)
         html = str(self.transform(parsed_xml_doc))
-        html = self._replace_related_article_links(html, doc)
+        if doc is not None:
+            html = self._replace_related_article_links(html, doc)
         return html
 
     @lru_cache(maxsize=128)
