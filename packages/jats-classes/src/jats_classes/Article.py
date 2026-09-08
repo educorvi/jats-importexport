@@ -44,7 +44,10 @@ class Article:
         back_element = article.find("back")
         if front_element is None or body_element is None:
             raise ValueError("Article element must contain 'front' and 'body' elements")
-        front = Front.from_xml_element(front_element)
+
+        xml_lang = article.get("{http://www.w3.org/XML/1998/namespace}lang", "de")
+
+        front = Front.from_xml_element(front_element, xml_lang)
         body = Body.from_xml_element(body_element)
         if back_element is not None:
             back = Back.from_xml_element(back_element)

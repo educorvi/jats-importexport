@@ -456,7 +456,6 @@ def _upload_files_and_update_references_root(
                 asset_path = asset_container or ASSETS_CONTAINER
                 if front.article_id:
                     asset_path += "/" + front.article_id
-                print(asset_path)
                 with referenced_path.open("rb") as referenced_file:
                     uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, asset_path)
             except Exception as e:

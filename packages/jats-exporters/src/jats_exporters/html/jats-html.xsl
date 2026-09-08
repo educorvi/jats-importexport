@@ -4043,13 +4043,40 @@ or pipeline) parameterized.
                     </xsl:if>
                     <!-- Related articles -->
                     <xsl:variable name="related-articles"
-                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))]" />
+                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='companion']" />
                     <xsl:if test="$related-articles">
                         <tr data-meta-field="related-articles">
                             <td>
                                 <p class="metadata-title">Verwandte Artikel</p>
                                 <ul>
                                     <xsl:for-each select="$related-articles">
+                                        <li>
+                                            <a>
+                                                <xsl:call-template name="assign-href"/>
+                                                <xsl:choose>
+                                                    <xsl:when test="normalize-space(string(.))">
+                                                        <xsl:apply-templates/>
+                                                    </xsl:when>
+                                                    <xsl:otherwise>
+                                                        <xsl:value-of select="@xlink:href"/>
+                                                    </xsl:otherwise>
+                                                </xsl:choose>
+                                            </a>
+                                        </li>
+                                    </xsl:for-each>
+                                </ul>
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    <!-- Translations -->
+                    <xsl:variable name="related-articles-translations"
+                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='translation']" />
+                    <xsl:if test="$related-articles-translations">
+                        <tr data-meta-field="related-articles">
+                            <td>
+                                <p class="metadata-title">Sprachvarianten</p>
+                                <ul>
+                                    <xsl:for-each select="$related-articles-translations">
                                         <li>
                                             <a>
                                                 <xsl:call-template name="assign-href"/>
