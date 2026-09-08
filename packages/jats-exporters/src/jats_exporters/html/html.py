@@ -45,7 +45,7 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
             new_related_articles = {}
             for old_related_article in old_related_articles.keys():
                 for related_article in doc.related_articles:
-                    if old_related_article == related_article[2].article_id:
+                    if old_related_article == related_article[2].webcode:
                         new_related_articles[related_article[1]] = related_article[2].title or ""
                         break
             doc.article.front.related_articles_map = new_related_articles
@@ -55,7 +55,7 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
             new_related_articles_translations = {}
             for old_related_article_translation in old_related_articles_translations:
                 for related_article in doc.related_articles:
-                    if old_related_article_translation == related_article[2].article_id:
+                    if old_related_article_translation == related_article[2].webcode:
                         new_related_articles_translations[related_article[1]] = related_article[2].title or ""
                         break
             doc.article.front.related_articles_translations_map = new_related_articles_translations

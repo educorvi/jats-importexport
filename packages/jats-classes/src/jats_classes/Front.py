@@ -459,14 +459,14 @@ class Front:
                               text=title,
                               nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "translation",
-                                          "ext-link-type": "publisher-id",
+                                          "ext-link-type": "Webcode",
                                           _XLINK_HREF: href} )
                                           for href, title in (self.related_articles_translations_map or {}).items()],
                 *[_create_tag("related-article",
                               text=title,
                               nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "companion",
-                                          "ext-link-type": "publisher-id",
+                                          "ext-link-type": "Webcode",
                                           _XLINK_HREF: href} )
                                           for href, title in (self.related_articles_map or {}).items()],
                 _create_tag("abstract", attributes={"abstract-type": "short"}, children=[

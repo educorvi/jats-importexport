@@ -87,7 +87,7 @@ class PloneModifyService:
         for related_id in list(related_articles_ids):  # iterate over copy to allow removal during iteration
             query = [
                 {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
-                {"i": "article_id", "o": "plone.app.querystring.operation.string.is", "v": related_id},
+                {"i": "webcode", "o": "plone.app.querystring.operation.string.is", "v": related_id},
             ]
             search_response = self.httpx_client.post(f"{self.base_url}/@querystring-search", json={"query": query})
             search_response.raise_for_status()

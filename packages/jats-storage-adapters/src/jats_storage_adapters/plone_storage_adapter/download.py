@@ -155,13 +155,13 @@ class PloneDownloadService:
             if related_items:
                 for item in related_items:
                     metadata = self.get_metadata(item, resolve_related_items=False)
-                    if metadata.article_id:
-                        related_articles[metadata.article_id] = metadata.title or ""
+                    if metadata.webcode:
+                        related_articles[metadata.webcode] = metadata.title or ""
             if related_items_translations:
                 for item in related_items_translations:
                     metadata = self.get_metadata(item, resolve_related_items=False)
-                    if metadata.article_id:
-                        related_articles_translations[metadata.article_id] = metadata.title or ""
+                    if metadata.webcode:
+                        related_articles_translations[metadata.webcode] = metadata.title or ""
 
         front.related_articles_map = related_articles
         front.related_articles_translations_map = related_articles_translations
