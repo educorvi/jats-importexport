@@ -154,12 +154,14 @@ class PloneDownloadService:
             )
             if related_items:
                 for item in related_items:
-                    metadata = self.get_metadata(item, resolve_related_items=False)
+                    item_url = f"{self.base_url}/{item.strip('/')}"
+                    metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
                         related_articles[metadata.webcode] = metadata.title or ""
             if related_items_translations:
                 for item in related_items_translations:
-                    metadata = self.get_metadata(item, resolve_related_items=False)
+                    item_url = f"{self.base_url}/{item.strip('/')}"
+                    metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
                         related_articles_translations[metadata.webcode] = metadata.title or ""
 
