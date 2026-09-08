@@ -31,6 +31,23 @@ class StorageAdapter(metaclass=abc.ABCMeta):
     Provides a contract for file upload and JATSDocument retrieving/saving.
     """
 
+    # General methods
+
+    @abc.abstractmethod
+    def get_url_from_path(self, path: str) -> str:
+        """Retrieve the URL for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+
+        Returns:
+            The URL for the file.
+        """
+        raise NotImplementedError
+
+
+    # Upload related methods
+
     @abc.abstractmethod
     def upload_file(self, file: BinaryIO, container: str) -> str:
         """Upload a binary file into a target container.
@@ -43,6 +60,25 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             The URL of the uploaded file.
         """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def save_jats_document(
+        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        """Save a JATSDocument structure into a target container.
+
+        Args:
+            document: The JATSDocument to save.
+            container: The path to the target container in the storage system.
+            options: Additional options for saving the JATSDocument.
+
+        Returns:
+            The path of the saved file or main container object.
+        """
+        raise NotImplementedError
+
+
+    # Download / export related methods
 
     @abc.abstractmethod
     def download_file(self, url: str) -> tuple[bytes, str]:
@@ -96,18 +132,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def get_url_from_path(self, path: str) -> str:
-        """Retrieve the URL for a JatsDocument from the storage system.
-
-        Args:
-            path: The path to the file in the storage system.
-
-        Returns:
-            The URL for the file.
-        """
-        raise NotImplementedError
-
     def get_related_articles_with_metadata(self, path: str) -> list[tuple[str, str, Front]]:
         """Retrieve a list of related articles along with their metadata for a JatsDocument from the storage system.
 
@@ -123,21 +147,16 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             for article_path in related_articles
         ]
 
+
+    # Modify / automation related methods
+
     @abc.abstractmethod
-    def save_jats_document(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
-        """Save a JATSDocument structure into a target container.
-
-        Args:
-            document: The JATSDocument to save.
-            container: The path to the target container in the storage system.
-            options: Additional options for saving the JATSDocument.
-
-        Returns:
-            The path of the saved file or main container object.
-        """
+    def link_related_articles(self) -> list[str]:
+        """Link related articles and return the list of updated article paths."""
         raise NotImplementedError
+
+
+    # Listing / querying related methods
 
     @abc.abstractmethod
     def list_articles(
@@ -154,11 +173,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         ``batch_start`` is the zero-based index of the first article. A
         ``None`` ``batch_size`` requests all remaining articles.
         """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def link_related_articles(self) -> list[str]:
-        """Link related articles and return the list of updated article paths."""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -181,7 +195,7 @@ class AvailableStorageAdapters(enum.StrEnum):
         """Factory method to create an instance of the storage adapter."""
         match self:
             case AvailableStorageAdapters.PLONE:
-                from .PloneStorageAdapter import PloneStorageAdapter
+                from . import PloneStorageAdapter
 
                 return PloneStorageAdapter()
             case _:

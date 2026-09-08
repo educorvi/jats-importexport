@@ -2,6 +2,7 @@ import io
 import os
 
 import httpx
+from jats_storage_adapters.plone_storage_adapter.download import PloneDownloadService
 import pytest
 from jats_classes import (
     Article,
@@ -13,7 +14,7 @@ from jats_classes import (
 )
 from jats_storage_adapters.errors import InternalError
 from jats_storage_adapters.interface import AvailableStorageAdapters
-from jats_storage_adapters.PloneStorageAdapter import PloneStorageAdapter
+from jats_storage_adapters import PloneStorageAdapter
 
 # ----------------------------------------------------
 # Setup / Teardown env variables for storage adapters
@@ -389,8 +390,8 @@ def test_plone_storage_adapter_get_jats_document_relations_failure_is_internal_e
     adapter = PloneStorageAdapter()
 
     mocker.patch.object(
-        adapter,
-        "_PloneStorageAdapter__fetch_article",
+        PloneDownloadService,
+        "fetch_article",
         return_value=mocker.sentinel.article,
     )
     mocker.patch.object(

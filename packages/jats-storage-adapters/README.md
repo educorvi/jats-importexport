@@ -17,7 +17,7 @@ Reads and writes JATS documents to a [Plone CMS](https://plone.org/) instance vi
 | `PLONE_PASSWORD` | Plone password |
 
 ```python
-from jats_storage_adapters.PloneStorageAdapter import PloneStorageAdapter
+from jats_storage_adapters import PloneStorageAdapter
 
 adapter = PloneStorageAdapter()
 
