@@ -272,7 +272,6 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@id": url,
                     "@type": "Section",
                     "sec_type": "intro",
-                    "label": "1.",
                     "title": "Intro Title",
                     "label_title_raw": "<label>1.</label><title>Intro Title</title>",
                     "content_raw": "<p>Content</p>",
@@ -288,8 +287,8 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@id": url,
                     "@type": "Section",
                     "sec_type": "subsection",
-                    "label": "1.1",
                     "title": "Sub Title",
+                    "label_title_raw": "<title>Sub Title</title>",
                     "content_raw": "Sub Content",
                     "items": [],
                 },
@@ -314,7 +313,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@id": url,
                     "@type": "AppendixGroup",
                     "title": "App Group",
-                    "label": "G1",
+                    "label_title_raw": "<label>G1</label><title>App Group</title>",
                     "content_raw": "Group Content",
                     "items": [{"@type": "Appendix", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1"}],
                 },
@@ -328,7 +327,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@id": url,
                     "@type": "Appendix",
                     "sec_type": "appendix",
-                    "label": "A1",
+                    "label_title_raw": "<label>A1</label><title>Appendix 1</title>",
                     "title": "Appendix 1",
                     "content_raw": "Appendix Content",
                     "items": [
@@ -340,7 +339,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
         elif url == "http://localhost:8080/Plone/my-doc/back/appg1/app1/appsec1":
             # Section inside Appendix
             return make_response(
-                status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "items": []}, url=url
+                status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "label_title_raw": "<title>App Sec Title</title>", "items": []}, url=url
             )
         elif url in {
             "http://localhost:8080/Plone/@relations?source=/my-doc",
@@ -467,10 +466,10 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     front = Front.empty()
     front.title = "Save Test"
     sub_sec = Section(
-        sec_type="sub", label=None, title="Sub", label_title_raw="", content_raw="Subcontent", sections=[]
+        sec_type="sub", label_title_raw="<title>Sub</title>", content_raw="Subcontent", sections=[]
     )
     body_sec = Section(
-        sec_type="main", label=None, title="Main", label_title_raw="", content_raw="Maincontent", sections=[sub_sec]
+        sec_type="main", label_title_raw="<title>Main</title>", content_raw="Maincontent", sections=[sub_sec]
     )
     body = Body(sections=[body_sec])
     back = Back(appendix_groups=[])
