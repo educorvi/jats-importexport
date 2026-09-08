@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a30"
+    "version": "1.0.0a31"
   },
   "paths": {
     "/status": {
@@ -1096,6 +1096,10 @@
       },
       "Front": {
         "properties": {
+          "xml_lang": {
+            "type": "string",
+            "title": "Xml Lang"
+          },
           "journal_id": {
             "anyOf": [
               {
@@ -1312,19 +1316,33 @@
             ],
             "title": "Article Categories"
           },
-          "related_articles": {
+          "related_articles_translations_map": {
             "anyOf": [
               {
-                "items": {
+                "additionalProperties": {
                   "type": "string"
                 },
-                "type": "array"
+                "type": "object"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Related Articles"
+            "title": "Related Articles Translations Map"
+          },
+          "related_articles_map": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Articles Map"
           },
           "pub_date_ausgabedatum": {
             "anyOf": [
@@ -1565,6 +1583,7 @@
         },
         "type": "object",
         "required": [
+          "xml_lang",
           "journal_id",
           "journal_title",
           "journal_subtitle",
@@ -1585,7 +1604,8 @@
           "co_author_aff",
           "self_uri",
           "article_categories",
-          "related_articles",
+          "related_articles_translations_map",
+          "related_articles_map",
           "pub_date_ausgabedatum",
           "pub_date_aktualisierte_fassung",
           "history_initial_publication",

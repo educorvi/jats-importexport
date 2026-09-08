@@ -6,6 +6,7 @@ Represents a JATS <front> element containing article metadata.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**xml_lang** | **str** |  | 
 **journal_id** | **str** |  | 
 **journal_title** | **str** |  | 
 **journal_subtitle** | **str** |  | 
@@ -26,7 +27,8 @@ Name | Type | Description | Notes
 **co_author_aff** | **str** |  | 
 **self_uri** | **str** |  | 
 **article_categories** | **str** |  | 
-**related_articles** | **List[str]** |  | 
+**related_articles_translations_map** | **Dict[str, str]** |  | 
+**related_articles_map** | **Dict[str, str]** |  | 
 **pub_date_ausgabedatum** | **date** |  | 
 **pub_date_aktualisierte_fassung** | **date** |  | 
 **history_initial_publication** | **str** |  | 
