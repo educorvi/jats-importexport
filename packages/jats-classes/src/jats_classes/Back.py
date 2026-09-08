@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from lxml import etree
 
-from .AppendixGroup import AppendixGroup
+from .section import AppendixGroup
 
 
 class Back:

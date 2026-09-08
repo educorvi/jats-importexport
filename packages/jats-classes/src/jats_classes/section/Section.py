@@ -16,8 +16,6 @@ class Section(GenericSection):
     def __init__(
         self,
         sec_type: str | None,
-        label: str | None,
-        title: str | None,
         label_title_raw: str,
         content_raw: str | None,
         sections: list[Section],
@@ -25,8 +23,6 @@ class Section(GenericSection):
         """Initialize Section with type, title, label, contents, and nested sections."""
         super().__init__(
             sec_type=sec_type,
-            label=label,
-            title=title,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
         )
@@ -119,14 +115,12 @@ class Section(GenericSection):
         cls._split_on_vorbemerkungen(section)
         cls._split_on_inhaltsverzeichnis(section)
         sec_type = section.attrib.get("sec-type")
-        label, title, label_title_raw = cls._get_label_and_title(section)
+        label_title_raw = cls._get_raw_label_title(section)
         content_raw = cls._get_raw_content(section)
         sections = [cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")]
 
         return cls(
             sec_type=sec_type,
-            label=label,
-            title=title,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
             sections=sections,

@@ -27,8 +27,6 @@ def create_mock_document() -> JATSDocument:
 
     sub_section = Section(
         sec_type="subsection",
-        label="1.1",
-        title="Sub-title",
         label_title_raw="<label>1.1</label><title>Sub-title</title>",
         content_raw="<p>Nested section content.</p>",
         sections=[],
@@ -36,8 +34,6 @@ def create_mock_document() -> JATSDocument:
 
     main_section = Section(
         sec_type="intro",
-        label="1.",
-        title="Intro title",
         label_title_raw="<label>1.</label><title>Intro title</title>",
         content_raw="<p>Intro content.</p>",
         sections=[sub_section],
@@ -47,8 +43,6 @@ def create_mock_document() -> JATSDocument:
 
     app_sec = Section(
         sec_type=None,
-        label=None,
-        title="Appendix Subsection",
         label_title_raw="<title>Appendix Subsection</title>",
         content_raw="<p>Appendix sub-content.</p>",
         sections=[],
@@ -56,8 +50,6 @@ def create_mock_document() -> JATSDocument:
 
     appendix = Appendix(
         sec_type="annex",
-        label="A",
-        title="Annex Title",
         label_title_raw="<label>A</label><title>Annex Title</title>",
         content_raw="<p>Appendix raw content.</p>",
         sections=[app_sec],
@@ -65,8 +57,6 @@ def create_mock_document() -> JATSDocument:
 
     app_group = AppendixGroup(
         sec_type="appendices",
-        label="Group Label",
-        title="Group Title",
         label_title_raw="<label>Group Label</label><title>Group Title</title>",
         content_raw="<p>Group content.</p>",
         appendixes=[appendix],

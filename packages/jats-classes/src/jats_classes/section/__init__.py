@@ -4,7 +4,8 @@ Defines core structural components of JATS XML (Section, Appendix, GenericSectio
 """
 
 from .Appendix import Appendix
+from .AppendixGroup import AppendixGroup
 from .GenericSection import GenericSection
 from .Section import Section
 
-__all__ = ["GenericSection", "Section", "Appendix"]
+__all__ = ["GenericSection", "Section", "Appendix", "AppendixGroup"]
