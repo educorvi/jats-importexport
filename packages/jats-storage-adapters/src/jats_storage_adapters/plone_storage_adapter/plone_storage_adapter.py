@@ -5,7 +5,7 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 
 import logging
 import os
-from typing import Any, BinaryIO, NotRequired, cast, overload
+from typing import BinaryIO, cast, overload
 from urllib.parse import urlparse
 
 import httpx
@@ -153,18 +153,18 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error fetching article at {url}") from e
 
         try:
-            relations = self.get_related_articles_with_metadata(path)
+            relations, related_articles_translations = self.get_related_articles_with_metadata(path)
         except Exception as e:
             raise InternalError(f"Error fetching related articles for {path}") from e
 
-        return JATSDocument(article=article, related_articles=relations)
+        return JATSDocument(article=article, related_articles=relations, related_articles_translations=related_articles_translations)
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
         url = self.get_url_from_path(path)
         return PloneDownloadService(self.base_url, self.httpx_client).get_metadata(url)
 
-    def get_related_articles(self, path: str) -> list[str]:
+    def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
 
 

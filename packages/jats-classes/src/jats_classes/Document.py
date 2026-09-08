@@ -23,14 +23,19 @@ class JATSDocument:
 
     article: Article
     related_articles: list[tuple[str, str, Front]]
+    related_articles_translations: list[tuple[str, str, Front]]
 
-    def __init__(self, article: Article, related_articles: list[tuple[str, str, Front]] | None = None):
+    def __init__(self, article: Article, related_articles: list[tuple[str, str, Front]] | None = None, related_articles_translations: list[tuple[str, str, Front]] | None = None):
         """Initialize the document with an Article instance."""
         self.article = article
         self.related_articles = related_articles or []
+        self.related_articles_translations = related_articles_translations or []
 
     def set_related_articles(self, related_articles: list[tuple[str, str, Front]]):
         self.related_articles = related_articles
+
+    def set_related_articles_translations(self, related_articles_translations: list[tuple[str, str, Front]]):
+        self.related_articles_translations = related_articles_translations
 
     @classmethod
     def from_xml(cls, xml_content: str, xsd_path: str | None) -> JATSDocument:

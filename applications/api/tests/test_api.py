@@ -110,8 +110,8 @@ class MockStorageAdapter(StorageAdapter):
         # Return a valid JATSDocument
         return JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
 
-    def get_related_articles(self, path: str) -> list[str]:
-        return []
+    def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
+        return [], []
 
     def get_url_from_path(self, path: str) -> str:
         return f"http://mockstore/{path.lstrip('/')}"

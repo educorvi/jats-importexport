@@ -121,31 +121,40 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         return self.get_jats_document(path).article.front
 
     @abc.abstractmethod
-    def get_related_articles(self, path: str) -> list[str]:
-        """Retrieve a list of related articles for a JatsDocument from the storage system.
+    def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
+        """Retrieve a list of related articles and translated articles for a JatsDocument from the storage system.
 
         Args:
             path: The path to the file in the storage system.
 
         Returns:
-            A list of paths to related articles.
+            A tuple containing two lists: the first list contains paths to related articles,
+            and the second list contains paths to translated articles.
         """
         raise NotImplementedError
 
-    def get_related_articles_with_metadata(self, path: str) -> list[tuple[str, str, Front]]:
+    def get_related_articles_with_metadata(self, path: str) -> tuple[list[tuple[str, str, Front]], list[tuple[str, str, Front]]]:
         """Retrieve a list of related articles along with their metadata for a JatsDocument from the storage system.
 
         Args:
             path: The path to the file in the storage system.
 
         Returns:
-             A list of tuples containing (path, url, Front metadata) for each related article.
+             A tuple containing two lists of tuples:
+             the first list contains (path, url, Front metadata) for each related article,
+             and the second list contains (path, url, Front metadata) for each translated article.
         """
-        related_articles = self.get_related_articles(path)
-        return [
-            (article_path, self.get_url_from_path(article_path), self.get_metadata(article_path))
-            for article_path in related_articles
-        ]
+        related_articles, related_articles_translations = self.get_related_articles(path)
+        return (
+            [
+                (article_path, self.get_url_from_path(article_path), self.get_metadata(article_path))
+                for article_path in related_articles
+            ],
+            [
+                (article_path, self.get_url_from_path(article_path), self.get_metadata(article_path))
+                for article_path in related_articles_translations
+            ],
+        )
 
 
     # Modify / automation related methods

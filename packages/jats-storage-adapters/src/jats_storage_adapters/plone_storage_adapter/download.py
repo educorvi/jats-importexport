@@ -145,16 +145,24 @@ class PloneDownloadService:
         front = Front.from_dict(data)
 
         # rebuild related_articles from related_articles and relatedItems
+        # rebuild related_articles_translations from related_articles_translations and related_items_translations
         related_articles = data.get("related_articles") or []
+        related_articles_translations = data.get("related_articles_translations") or []
         if resolve_related_items:
-            related_items = self.get_related_articles(self.__get_path_from_plone_object(data))
+            related_items, related_items_translations = self.get_related_articles(self.__get_path_from_plone_object(data))
             if related_items:
                 for item in related_items:
                     metadata = self.get_metadata(item, resolve_related_items=False)
                     if metadata.article_id:
                         related_articles.append(metadata.article_id)
+            if related_items_translations:
+                for item in related_items_translations:
+                    metadata = self.get_metadata(item, resolve_related_items=False)
+                    if metadata.article_id:
+                        related_articles_translations.append(metadata.article_id)
 
         front.related_articles = related_articles
+        front.related_articles_translations = related_articles_translations
 
         # rebuild veroeffentlichungsstatus from plone workflow state
         review_state = data.get("review_state")
@@ -299,21 +307,26 @@ class PloneDownloadService:
         front = self.__fetch_front(article, resolve_related_items=resolve_related_items)
         return front
 
-    def get_related_articles(self, path: str) -> list[str]:
-        path_set: set[str] = set()
+    def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
+        path_set_related: set[str] = set()
+        path_set_translations: set[str] = set()
 
         url = self.base_url + "/@relations?source=/" + path.lstrip("/")
         response = self.httpx_client.get(url)
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
-            path_set.add(self.__get_path_from_plone_object(item["target"]))
+            path_set_related.add(self.__get_path_from_plone_object(item["target"]))
+        for item in data.get("relations", {}).get("related_items_translations", {}).get("items", []):
+            path_set_translations.add(self.__get_path_from_plone_object(item["target"]))
 
         url = self.base_url + "/@relations?target=/" + path.lstrip("/")
         response = self.httpx_client.get(url)
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
-            path_set.add(self.__get_path_from_plone_object(item["source"]))
+            path_set_related.add(self.__get_path_from_plone_object(item["source"]))
+        for item in data.get("relations", {}).get("related_items_translations", {}).get("items", []):
+            path_set_translations.add(self.__get_path_from_plone_object(item["source"]))
 
-        return list(path_set)
+        return list(path_set_related), list(path_set_translations)
