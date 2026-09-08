@@ -193,7 +193,6 @@ class PloneUploadService:
             json={
                 "@type": "AppendixGroup",
                 "title": app_group.title or "Anhanggruppe",
-                "label": app_group.label,
                 "label_title_raw": app_group.label_title_raw,
                 "content_raw": app_group.content_raw,
             },
@@ -222,7 +221,6 @@ class PloneUploadService:
                 "@type": portal_type,
                 "title": title,
                 "sec_type": section.sec_type,
-                "label": section.label,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
             },

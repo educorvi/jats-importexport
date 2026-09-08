@@ -17,8 +17,6 @@ class Appendix(GenericSection):
     def __init__(
         self,
         sec_type: str | None,
-        label: str | None,
-        title: str | None,
         label_title_raw: str,
         content_raw: str | None,
         sections: list[Section],
@@ -26,8 +24,6 @@ class Appendix(GenericSection):
         """Initialize Appendix with metadata and nested sections."""
         super().__init__(
             sec_type=sec_type,
-            label=label,
-            title=title,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
         )
@@ -44,13 +40,11 @@ class Appendix(GenericSection):
             An Appendix instance.
         """
         app_type = app.attrib.get("app-type")
-        label, title, label_title_raw = cls._get_label_and_title(app)
+        label_title_raw = cls._get_raw_label_title(app)
         content_raw = cls._get_raw_content(app)
         sections = [Section.from_xml_element(sec_elem) for sec_elem in app.findall("sec")]
         return cls(
             sec_type=app_type,
-            label=label,
-            title=title,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
             sections=sections,

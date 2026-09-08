@@ -14,7 +14,7 @@ from lxml import etree
 
 def clean_string(string: str | None) -> str:
     """Remove leading and trailing whitespace and newlines from a string."""
-    return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ") if string else ""
+    return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ").strip() if string else ""
 
 
 class GenericSection:
@@ -26,48 +26,74 @@ class GenericSection:
 
     sections: Sequence[GenericSection]
     sec_type: str | None
-    label: str | None
-    title: str | None
     label_title_raw: str
     content_raw: str | None
+
+    @property
+    def title(self) -> str | None:
+        return self.get_title()
+
+    @property
+    def label(self) -> str | None:
+        return self.get_label()
 
     def __init__(
         self,
         sec_type: str | None,
-        label: str | None,
-        title: str | None,
         label_title_raw: str,
         content_raw: str | None,
     ):
         """Initialize the GenericSection base properties."""
         self.sec_type = sec_type
-        self.label = label
-        self.title = title
         self.label_title_raw = label_title_raw
         self.content_raw = content_raw
 
     @classmethod
-    def _get_label_and_title(cls, section: etree._Element) -> tuple[str | None, str | None, str]:
-        """Extract label, title, and raw combined label+title XML string."""
+    def _get_raw_label_title(cls, section: etree._Element) -> str:
+        """Extract raw label and title xml."""
         label_element = section.find("label")
         label_string = etree.tostring(label_element, encoding="unicode") if label_element is not None else ""
         title_element = section.find("title")
         title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
-        label_title_raw = label_string + title_string
-        label = clean_string(label_element.text) if label_element is not None and label_element.text else None
-        title = clean_string(cls._get_title(title_element))
-        return label, title, label_title_raw
+        return label_string + title_string
 
-    @classmethod
-    def _get_title(cls, title_or_named_content: etree._Element | None) -> str | None:
-        """Recursively resolve textual title content, bypassing <named-content> tags."""
-        if title_or_named_content is None:
+    def get_title(self) -> str | None:
+        """Recursively resolve textual title content from the raw label+title XML.
+
+        Iterates through <named-content> and <styled-content> tags and ignores all other tags.
+        """
+        try:
+            element = etree.fromstring(f"<root>{self.label_title_raw}</root>")
+            title = element.find("title")
+            if title is None:
+                return None
+        except etree.XMLSyntaxError:
             return None
-        named_content = title_or_named_content.find("named-content")
-        if named_content is not None:
-            return cls._get_title(named_content)
-        else:
-            return title_or_named_content.text.strip() if title_or_named_content.text else None
+
+        def collect_text(element: etree._Element) -> str:
+            parts = []
+            if element.text:
+                parts.append(element.text)
+            for child in element:
+                if child.tag in ["named-content", "styled-content"]:
+                    parts.append(collect_text(child))
+                if child.tail:
+                    parts.append(child.tail)
+            return "".join(parts)
+
+        return clean_string(collect_text(title)) or None
+
+    def get_label(self) -> str | None:
+        """Get the textual label content from the raw label+title XML."""
+        try:
+            element = etree.fromstring(f"<root>{self.label_title_raw}</root>")
+            label = element.find("label")
+            if label is None:
+                return None
+        except etree.XMLSyntaxError:
+            return None
+
+        return clean_string(label.text) if label.text else None
 
     @classmethod
     def _get_raw_content(cls, section: etree._Element) -> str | None:

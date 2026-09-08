@@ -204,8 +204,6 @@ class PloneDownloadService:
         ]
         return AppendixGroup(
             sec_type=data.get("sec_type"),
-            label=data.get("label"),
-            title=data.get("title"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             appendixes=appendixes,
@@ -221,8 +219,6 @@ class PloneDownloadService:
         ]
         return Appendix(
             sec_type=data.get("sec_type"),
-            label=data.get("label"),
-            title=data.get("title"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             sections=sections,
@@ -240,8 +236,6 @@ class PloneDownloadService:
         if data.get("@type") == "Section":
             return Section(
                 sec_type=data.get("sec_type"),
-                label=data.get("label"),
-                title=data.get("title"),
                 label_title_raw=label_title_raw,
                 content_raw=data.get("content_raw"),
                 sections=sections,
@@ -261,8 +255,6 @@ class PloneDownloadService:
             jats_content = str(self.transform(xml_content))
             return Section(
                 sec_type="",
-                label=data.get("label"),
-                title=data.get("title"),
                 label_title_raw=label_title_raw,
                 content_raw=jats_content,
                 sections=sections,
