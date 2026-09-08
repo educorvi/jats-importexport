@@ -26,10 +26,12 @@ from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
 
 logger = logging.getLogger(__name__)
 
+
 class PloneGetJATSDocumentOptions(BaseGetJATSDocumentOptions):
     """Retrieval options understood specifically by the Plone adapter."""
 
     pre_requested_sections: NotRequired[dict[str, dict[str, Any]] | None]
+
 
 XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
 
@@ -48,10 +50,10 @@ DEFAULT_REVIEW_STATE: str = "draft"
 
 class PloneDownloadService:
     """Service class for handling Plone file downloads and article retrieval."""
+
     base_url: str
     httpx_client: httpx.Client
     transform: etree.XSLT
-
 
     def __init__(self, base_url: str, httpx_client: httpx.Client):
         self.base_url = base_url
@@ -97,9 +99,7 @@ class PloneDownloadService:
                 raise InternalError(f"No downloadable file found for {url}")
             response = self.httpx_client.get(download_url, headers={"Accept": "*/*"})
             response.raise_for_status()
-            content_type = field.get("content-type") or response.headers.get(
-                "content-type", "application/octet-stream"
-            )
+            content_type = field.get("content-type") or response.headers.get("content-type", "application/octet-stream")
             return response.content, content_type
         else:
             raise InternalError(f"Unsupported content-type for {url}: {content_type}")
@@ -149,7 +149,9 @@ class PloneDownloadService:
         related_articles = data.get("related_articles") or []
         related_articles_translations = data.get("related_articles_translations") or []
         if resolve_related_items:
-            related_items, related_items_translations = self.get_related_articles(self.__get_path_from_plone_object(data))
+            related_items, related_items_translations = self.get_related_articles(
+                self.__get_path_from_plone_object(data)
+            )
             if related_items:
                 for item in related_items:
                     metadata = self.get_metadata(item, resolve_related_items=False)

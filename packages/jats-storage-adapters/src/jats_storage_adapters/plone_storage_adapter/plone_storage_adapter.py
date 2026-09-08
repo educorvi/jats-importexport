@@ -25,6 +25,7 @@ from .upload import PloneUploadService
 
 logger = logging.getLogger(__name__)
 
+
 class PloneStorageAdapter(StorageAdapter):
     """Storage adapter interacting with a Plone instance over the REST API.
 
@@ -66,7 +67,6 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception:
             pass
 
-
     # Private helper methods
 
     def __get_path_from_url(self, url: str) -> str:
@@ -80,12 +80,10 @@ class PloneStorageAdapter(StorageAdapter):
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
 
-
     # General methods
 
     def get_url_from_path(self, path: str) -> str:
         return f"{self.base_url}/{path.strip('/')}"
-
 
     # Upload related methods
 
@@ -110,7 +108,6 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             logger.error(f"Error saving JATS document: {e}")
             raise
-
 
     # Download / export related methods
 
@@ -157,7 +154,9 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error fetching related articles for {path}") from e
 
-        return JATSDocument(article=article, related_articles=relations, related_articles_translations=related_articles_translations)
+        return JATSDocument(
+            article=article, related_articles=relations, related_articles_translations=related_articles_translations
+        )
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
@@ -166,7 +165,6 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
-
 
     # Modify / automation related methods
 
@@ -187,7 +185,6 @@ class PloneStorageAdapter(StorageAdapter):
             if modify_service.link_related_articles(url):
                 updated_articles.append(article)
         return updated_articles
-
 
     # Listing / querying related methods
 

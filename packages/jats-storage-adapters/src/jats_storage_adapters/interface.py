@@ -45,7 +45,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-
     # Upload related methods
 
     @abc.abstractmethod
@@ -76,7 +75,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             The path of the saved file or main container object.
         """
         raise NotImplementedError
-
 
     # Download / export related methods
 
@@ -133,7 +131,9 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    def get_related_articles_with_metadata(self, path: str) -> tuple[list[tuple[str, str, Front]], list[tuple[str, str, Front]]]:
+    def get_related_articles_with_metadata(
+        self, path: str
+    ) -> tuple[list[tuple[str, str, Front]], list[tuple[str, str, Front]]]:
         """Retrieve a list of related articles along with their metadata for a JatsDocument from the storage system.
 
         Args:
@@ -156,14 +156,12 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             ],
         )
 
-
     # Modify / automation related methods
 
     @abc.abstractmethod
     def link_related_articles(self) -> list[str]:
         """Link related articles and return the list of updated article paths."""
         raise NotImplementedError
-
 
     # Listing / querying related methods
 

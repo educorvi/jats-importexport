@@ -38,11 +38,12 @@ WORKFLOW_MAPPING: dict[str, list[str]] = {
 }
 DEFAULT_STATE: str = "Entwurf"
 
+
 class PloneUploadService:
     """Service class for handling Plone file uploads and article creation."""
+
     base_url: str
     httpx_client: httpx.Client
-
 
     def __init__(self, base_url: str, httpx_client: httpx.Client):
         self.base_url = base_url

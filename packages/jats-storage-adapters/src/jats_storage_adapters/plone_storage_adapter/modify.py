@@ -9,12 +9,12 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+
 class PloneModifyService:
     """Service class for handling modifications to existing files and articles in a Plone CMS instance."""
 
     base_url: str
     httpx_client: httpx.Client
-
 
     def __init__(self, base_url: str, httpx_client: httpx.Client):
         self.base_url = base_url
@@ -46,22 +46,33 @@ class PloneModifyService:
 
         modified_1 = False
         if related_articles_ids:
-            related_articles_ids, related_items, modified_1 = self.__link_related_articles_update_lists(related_articles_ids, related_items)
+            related_articles_ids, related_items, modified_1 = self.__link_related_articles_update_lists(
+                related_articles_ids, related_items
+            )
         modified_2 = False
         if related_articles_translations_ids:
-            related_articles_translations_ids, related_items_translations, modified_2 = self.__link_related_articles_update_lists(related_articles_translations_ids, related_items_translations)
+            related_articles_translations_ids, related_items_translations, modified_2 = (
+                self.__link_related_articles_update_lists(related_articles_translations_ids, related_items_translations)
+            )
 
         if modified_1 or modified_2:
             update_response = self.httpx_client.patch(
                 article_url,
-                json={"relatedItems": related_items, "related_items_translations": related_items_translations, "related_articles": related_articles_ids, "related_articles_translations": related_articles_translations_ids},
+                json={
+                    "relatedItems": related_items,
+                    "related_items_translations": related_items_translations,
+                    "related_articles": related_articles_ids,
+                    "related_articles_translations": related_articles_translations_ids,
+                },
                 headers={"Content-Type": "application/json"},
             )
             update_response.raise_for_status()
             return True
         return False
 
-    def __link_related_articles_update_lists(self, related_articles_ids: list[str], related_articles_items: list[str]) -> tuple[list[str], list[str], bool]:
+    def __link_related_articles_update_lists(
+        self, related_articles_ids: list[str], related_articles_items: list[str]
+    ) -> tuple[list[str], list[str], bool]:
         """Search for related articles and update the lists of related article IDs and items.
 
         Args:
@@ -69,7 +80,8 @@ class PloneModifyService:
             related_articles_items (list[str]): A list of related article items already linked.
 
         Returns:
-            tuple[list[str], list[str], bool]: A tuple containing the updated list of related article IDs, the updated list of related article items, and a boolean indicating if any modifications were made.
+            tuple[list[str], list[str], bool]: A tuple containing the updated list of related article IDs,
+            the updated list of related article items, and a boolean indicating if any modifications were made.
         """
         modified = False
         for related_id in list(related_articles_ids):  # iterate over copy to allow removal during iteration
