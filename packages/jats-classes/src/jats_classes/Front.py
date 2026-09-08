@@ -176,10 +176,21 @@ class Front:
     # JATS: article-categories
     # Raw xml snippet
     article_categories: str | None
+
+    # mapping from related article translation hrefs to their titles
+    related_articles_translations_map: dict[str, str] | None
+    # mapping from related article hrefs to their titles
+    related_articles_map: dict[str, str] | None
+
     # JATS: related-article[@href, @related-article-type='translation']
-    related_articles_translations: list[str] | None
+    @property
+    def related_articles_translations(self) -> list[str] | None:
+        return list(self.related_articles_translations_map.keys()) if self.related_articles_translations_map else None
+
     # JATS: related-article[@href]
-    related_articles: list[str] | None
+    @property
+    def related_articles(self) -> list[str] | None:
+        return list(self.related_articles_map.keys()) if self.related_articles_map else None
 
     # --- Publication Dates ---
     # JATS: pub-date@date-type="Ausgabedatum"
@@ -282,16 +293,17 @@ class Front:
             else None
         )
         _related_articles = article_meta.findall("related-article")
-        related_articles = []
-        related_articles_translations = []
+        related_articles_map = {}
+        related_articles_translations_map = {}
         for ra in _related_articles:
-            href = _xlink_href(ra, ".")
+            _href = _xlink_href(ra, ".")
+            _title = _text(ra, "title")
             related_article_type = ra.get("related-article-type")
-            if href is not None:
+            if _href is not None:
                 if related_article_type == "translation":
-                    related_articles_translations.append(href)
+                    related_articles_translations_map[_href] = _title or ""
                 else:
-                    related_articles.append(href)
+                    related_articles_map[_href] = _title or ""
 
         # Publication Dates
         pub_date_ausgabedatum = _date(article_meta, "pub-date[@date-type='Ausgabedatum']")
@@ -348,8 +360,8 @@ class Front:
             co_author_aff=co_author_aff,
             self_uri=self_uri,
             article_categories=article_categories,
-            related_articles_translations=related_articles_translations,
-            related_articles=related_articles,
+            related_articles_map=related_articles_map,
+            related_articles_translations_map=related_articles_translations_map,
             pub_date_ausgabedatum=pub_date_ausgabedatum,
             pub_date_aktualisierte_fassung=pub_date_aktualisierte_fassung,
             history_initial_publication=history_initial_publication,
@@ -444,17 +456,19 @@ class Front:
                 ]),
                 _create_tag("self-uri", nsmap={"xlink": _XLINK_NS}, attributes={_XLINK_HREF: self.self_uri or ""}),
                 *[_create_tag("related-article",
+                              text=title,
                               nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "translation",
                                           "ext-link-type": "publisher-id",
-                                          _XLINK_HREF: related_article} )
-                                          for related_article in self.related_articles_translations or []],
+                                          _XLINK_HREF: href} )
+                                          for href, title in (self.related_articles_translations_map or {}).items()],
                 *[_create_tag("related-article",
+                              text=title,
                               nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "companion",
                                           "ext-link-type": "publisher-id",
-                                          _XLINK_HREF: related_article} )
-                                          for related_article in self.related_articles or []],
+                                          _XLINK_HREF: href} )
+                                          for href, title in (self.related_articles_map or {}).items()],
                 _create_tag("abstract", attributes={"abstract-type": "short"}, children=[
                     _create_tag("title", text=self.abstract_short_title),
                     _create_tag("p", text=self.abstract_short),
@@ -534,8 +548,8 @@ class Front:
             co_author_aff=None,
             self_uri=None,
             article_categories=None,
-            related_articles_translations=[],
-            related_articles=[],
+            related_articles_translations_map=None,
+            related_articles_map=None,
             pub_date_ausgabedatum=None,
             pub_date_aktualisierte_fassung=None,
             history_initial_publication=None,
@@ -566,6 +580,10 @@ class Front:
         result["pub_date_aktualisierte_fassung"] = (
             self.pub_date_aktualisierte_fassung.isoformat() if self.pub_date_aktualisierte_fassung else None
         )
+        result["related_articles_translations_map"] = None
+        result["related_articles_map"] = None
+        result["related_articles_translations"] = self.related_articles_translations
+        result["related_articles"] = self.related_articles
         return result
 
     @classmethod
@@ -626,10 +644,12 @@ class Front:
             front.article_categories = article_categories
         related_articles = data.get("related_articles")
         if isinstance(related_articles, list):
-            front.related_articles = [ra for ra in related_articles if isinstance(ra, str)]
+            front.related_articles_map = {ra: "" for ra in related_articles if isinstance(ra, str)}
         related_articles_translations = data.get("related_articles_translations")
         if isinstance(related_articles_translations, list):
-            front.related_articles_translations = [rat for rat in related_articles_translations if isinstance(rat, str)]
+            front.related_articles_translations_map = {
+                rat: "" for rat in related_articles_translations if isinstance(rat, str)
+            }
 
         # Publication Dates
         if isinstance((pub_date_ausgabedatum := data.get("pub_date_ausgabedatum")), datetime.date):

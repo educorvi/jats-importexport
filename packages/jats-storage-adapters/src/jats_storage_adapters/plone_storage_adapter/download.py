@@ -146,8 +146,8 @@ class PloneDownloadService:
 
         # rebuild related_articles from related_articles and relatedItems
         # rebuild related_articles_translations from related_articles_translations and related_items_translations
-        related_articles = data.get("related_articles") or []
-        related_articles_translations = data.get("related_articles_translations") or []
+        related_articles = {ra: "" for ra in data.get("related_articles") or []}
+        related_articles_translations = {rat: "" for rat in data.get("related_articles_translations") or []}
         if resolve_related_items:
             related_items, related_items_translations = self.get_related_articles(
                 self.__get_path_from_plone_object(data)
@@ -156,15 +156,15 @@ class PloneDownloadService:
                 for item in related_items:
                     metadata = self.get_metadata(item, resolve_related_items=False)
                     if metadata.article_id:
-                        related_articles.append(metadata.article_id)
+                        related_articles[metadata.article_id] = metadata.title or ""
             if related_items_translations:
                 for item in related_items_translations:
                     metadata = self.get_metadata(item, resolve_related_items=False)
                     if metadata.article_id:
-                        related_articles_translations.append(metadata.article_id)
+                        related_articles_translations[metadata.article_id] = metadata.title or ""
 
-        front.related_articles = related_articles
-        front.related_articles_translations = related_articles_translations
+        front.related_articles_map = related_articles
+        front.related_articles_translations_map = related_articles_translations
 
         # rebuild veroeffentlichungsstatus from plone workflow state
         review_state = data.get("review_state")
