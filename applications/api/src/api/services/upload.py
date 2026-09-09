@@ -99,6 +99,9 @@ async def upload_zip(
 
                     modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
                     urls.append(_save_jats_document(adapter_instance, modified_document, container))
+                    logger.info(
+                        f"File {xml_file.name} uploaded successfully.\n    Journal Title: {modified_document.article.front.journal_title}.\n    URL: {urls[-1]}"  # noqa: E501
+                    )
             return urls
 
         results = await asyncio.to_thread(blocking_zip_processing)
@@ -426,6 +429,7 @@ def _upload_files_and_update_references_root(
         href_value_raw = element.get(href_attr)
         href_value = href_value_raw if isinstance(href_value_raw, str) else ""
         if not href_value:
+            logger.warning(f"Element {etree.tostring(element, encoding='unicode')} has an empty xlink:href attribute.")
             continue
 
         parsed = urlparse(href_value)
@@ -434,6 +438,7 @@ def _upload_files_and_update_references_root(
 
         local_reference = unquote(parsed.path)
         if not local_reference:
+            logger.warning(f"Element {etree.tostring(element, encoding='unicode')} has an empty local reference.")
             continue
 
         if not skip_path_validation:
@@ -444,11 +449,15 @@ def _upload_files_and_update_references_root(
             referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
 
             if not referenced_path or not _is_path_within(archive_root, referenced_path):
+                logger.warning(
+                    f"Referenced file '{local_reference}' is outside the extracted archive directory. Skipping upload."
+                )
                 continue
         else:
             referenced_path = Path(local_reference).resolve()
 
         if not referenced_path.is_file():
+            logger.warning(f"Referenced file '{referenced_path}' does not exist or is not a file. Skipping upload.")
             continue
 
         if referenced_path not in uploaded_files:

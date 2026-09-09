@@ -21,14 +21,16 @@ from api.config import StorageConfig
 
 from .auth import require_permission
 from .config import APIConfig
-from .logging import logger
+from .logging import setup_logging
 from .routers import export, list, modify, status, upload
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
 
-    logging.basicConfig(level=logging.INFO)
+    setup_logging()
 
     if not APIConfig.API_KEY:
         logger.warning(

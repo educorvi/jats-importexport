@@ -1,8 +1,11 @@
+import logging
+
 from fastapi import HTTPException
 from jats_storage_adapters.interface import AvailableStorageAdapters, StorageAdapter
 
 from api.config import StorageConfig
-from api.logging import logger
+
+logger = logging.getLogger(__name__)
 
 STORAGE_ADAPTER = StorageConfig.STORAGE_ADAPTER
 

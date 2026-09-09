@@ -1,14 +1,15 @@
 """API key authentication dependency."""
 
+import logging
 import secrets
 
 import httpx
 from fastapi import HTTPException, Security
 from fastapi.security import APIKeyHeader
 
-from api.logging import logger
-
 from .config import APIConfig
+
+logger = logging.getLogger(__name__)
 
 _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
