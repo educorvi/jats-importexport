@@ -8,7 +8,9 @@ import json
 import logging
 import mimetypes
 import os
+import re
 from typing import BinaryIO, cast
+from urllib.parse import urlparse
 
 import httpx
 from jats_classes import (
@@ -50,6 +52,15 @@ class PloneUploadService:
         self.base_url = base_url
         self.httpx_client = httpx_client
 
+    # Private helper methods
+
+    def __get_path_from_url(self, url: str) -> str:
+        base_path = urlparse(self.base_url).path.rstrip("/")
+        result_path = urlparse(url).path
+        if result_path.lower().startswith(base_path.lower()):
+            return result_path[len(base_path) :]
+        return result_path
+
     @staticmethod
     def __jats_status_to_plone_transitions(jats_status: str | None) -> list[str]:
         if jats_status is None or jats_status not in WORKFLOW_MAPPING:
@@ -70,7 +81,7 @@ class PloneUploadService:
             self._apply_workflow_transition(object_url, transition)
 
     def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
-        self.__create_container(container)
+        new_container = self.__create_container(container)
 
         filename = os.path.basename(getattr(file, "name", "") or "upload")
 
@@ -80,7 +91,7 @@ class PloneUploadService:
 
         encoded = base64.b64encode(file.read()).decode("ascii")
 
-        url = f"{self.base_url}/{container.strip('/')}"
+        url = f"{self.base_url}/{new_container.strip('/')}"
 
         is_image = content_type.startswith("image/")
         portal_type = "Image" if is_image else "File"
@@ -107,8 +118,8 @@ class PloneUploadService:
 
     def create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create an Article root node and Front, Body, Back children in Plone."""
-        self.__create_container(container)
-        url = f"{self.base_url}/{container.strip('/')}"
+        new_container = self.__create_container(container)
+        url = f"{self.base_url}/{new_container.strip('/')}"
         metadata = article.front.to_dict()
         if not metadata.get("title"):
             metadata["title"] = "Artikel"
@@ -128,15 +139,27 @@ class PloneUploadService:
 
         return result_url
 
-    def __create_container(self, container: str) -> None:
-        """Recursively create folder structures ('Folder' type) in Plone if missing."""
+    def __make_path_part_id_safe(self, part: str) -> str:
+        """Make a path safe for use as a Plone object ID"""
+        return re.sub(r"[^a-z0-9]+", "-", part.lower()).strip("-")
+
+    def __create_container(self, container: str) -> str:
+        """Recursively create folder structures ('Folder' type) in Plone if missing.
+        Args:
+            container: The path to the container in the storage system.
+        Returns:
+            The URL of the created or existing container (last folder in the path).
+        """
         logger.debug(f"Creating container: {container}")
         parts = [p for p in container.strip("/").split("/") if p]
         current_path = ""
+        object_url = self.base_url
 
         for part in parts:
-            current_path = f"{current_path}/{part}" if current_path else part
+            new_content_id = self.__make_path_part_id_safe(part)
+            current_path = f"{current_path}/{new_content_id}" if current_path else part
             url = f"{self.base_url}/{current_path}"
+            object_url = url
 
             response = self.httpx_client.get(url)
             if response.status_code == 200:
@@ -145,12 +168,14 @@ class PloneUploadService:
                 response.raise_for_status()
 
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
-            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": part})
+            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": new_content_id})
             response.raise_for_status()
 
             # Set the workflow state of the newly created folder to 'intern veröffentlicht' to make it accessible.
             object_url = response.json().get("@id", url)
             self._apply_workflow_transition(object_url, PUBLISH_FOLDER_TRANSITION, include_children=False)
+
+        return self.__get_path_from_url(object_url)
 
     def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
