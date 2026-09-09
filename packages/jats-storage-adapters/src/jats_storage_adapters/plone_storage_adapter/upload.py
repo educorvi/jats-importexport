@@ -37,6 +37,7 @@ WORKFLOW_MAPPING: dict[str, list[str]] = {
     "privat": ["make_private"],
 }
 DEFAULT_STATE: str = "Entwurf"
+PUBLISH_FOLDER_TRANSITION: str = "publish_internally"
 
 
 class PloneUploadService:
@@ -146,6 +147,10 @@ class PloneUploadService:
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
             response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": part})
             response.raise_for_status()
+
+            # Set the workflow state of the newly created folder to 'intern veröffentlicht' to make it accessible.
+            object_url = response.json().get("@id", url)
+            self._apply_workflow_transition(object_url, PUBLISH_FOLDER_TRANSITION, include_children=False)
 
     def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""

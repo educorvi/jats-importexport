@@ -483,14 +483,14 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     assert path == "/jats-file/save test".lower()
 
     # Check that Folders, Article, Front, Body, Sections were recursively posted
-    post_types = [p[1]["@type"] for p in created_posts]
+    post_types = [p[1].get("@type") for p in created_posts]
     assert "Folder" in post_types
     assert "Article" in post_types
     assert "Body" in post_types
     assert "Section" in post_types
 
     # Verify section nesting posting URL
-    sec_posts = [p for p in created_posts if p[1]["@type"] == "Section"]
+    sec_posts = [p for p in created_posts if p[1].get("@type") == "Section"]
     assert len(sec_posts) == 2
 
     sub_sec_url = sec_posts[1][0]
