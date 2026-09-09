@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import re
 from dataclasses import dataclass, fields
 from typing import Any
 
@@ -18,6 +19,11 @@ _XLINK_NS = "http://www.w3.org/1999/xlink"
 _XLINK_HREF = f"{{{_XLINK_NS}}}href"
 
 
+def _clean_string(string: str | None) -> str | None:
+    """Remove leading and trailing whitespace and newlines from a string."""
+    return re.sub(r"[\s]+", " ", string).strip() if string else None
+
+
 def _text(element: etree._Element | None, xpath: str) -> str | None:
     """Return stripped text of the first matching element, or None."""
     if element is None:
@@ -25,7 +31,7 @@ def _text(element: etree._Element | None, xpath: str) -> str | None:
     found = element.find(xpath)
     if found is None or found.text is None:
         return None
-    return found.text.strip() or None
+    return _clean_string(found.text) or None
 
 
 def _itertext(element: etree._Element | None, xpath: str) -> str | None:
@@ -35,7 +41,7 @@ def _itertext(element: etree._Element | None, xpath: str) -> str | None:
     found = element.find(xpath)
     if found is None:
         return None
-    return "".join(str(t) for t in found.itertext()).strip() or None
+    return _clean_string("".join(str(t) for t in found.itertext())) or None
 
 
 def _date(element: etree._Element | None, xpath: str) -> datetime.date | None:
@@ -66,7 +72,7 @@ def _xlink_href(element: etree._Element | None, xpath: str) -> str | None:
     found = element.find(xpath)
     if found is None:
         return None
-    return found.get(_XLINK_HREF)
+    return _clean_string(found.get(_XLINK_HREF)) or None
 
 
 def _text_list(element: etree._Element | None, xpath: str) -> list[str]:
@@ -74,18 +80,23 @@ def _text_list(element: etree._Element | None, xpath: str) -> list[str]:
     if element is None:
         return []
     found = element.findall(xpath)
-    return [f.text.strip() for f in found if f.text and f.text.strip()]
+    result = []
+    for f in found:
+        if f.text and (cleaned := _clean_string(f.text)):
+            result.append(cleaned)
+    return result
 
 
 def _itertext_list(element: etree._Element | None, xpath: str) -> list[str]:
     """Return normalized text from every matching element."""
     if element is None:
         return []
-    return [
-        text
-        for found in element.findall(xpath)
-        if (text := " ".join("".join(str(t) for t in found.itertext()).split()))
-    ]
+    found = element.findall(xpath)
+    result = []
+    for f in found:
+        if cleaned := _clean_string("".join(str(t) for t in f.itertext())):
+            result.append(cleaned)
+    return result
 
 
 def _dict(element: etree._Element | None, xpath: str, key_xpath: str, value_xpath: str) -> dict[str, str]:
