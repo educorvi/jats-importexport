@@ -55,7 +55,20 @@ class PloneUploadService:
             jats_status = DEFAULT_STATE
         return WORKFLOW_MAPPING.get(jats_status, [])
 
-    def upload_file(self, file: BinaryIO, container: str) -> str:
+    def _apply_workflow_transition(self, object_url: str, transition: str, include_children: bool = True) -> None:
+        """Apply a workflow transition to a Plone object."""
+        transition_url = f"{object_url}/@workflow/{transition}"
+        json_data = {"include_children": "true" if include_children else "false"}
+        logger.debug(f"Applying workflow transition '{transition}' to {object_url}: {transition_url}")
+        response = self.httpx_client.post(transition_url, json=json_data)
+        response.raise_for_status()
+
+    def __change_workflow_status(self, object_url: str, jats_status: str | None) -> None:
+        """Change the workflow status of a Plone object based on the provided JATS status."""
+        for transition in self.__jats_status_to_plone_transitions(jats_status):
+            self._apply_workflow_transition(object_url, transition)
+
+    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
         self.__create_container(container)
 
         filename = os.path.basename(getattr(file, "name", "") or "upload")
@@ -87,7 +100,9 @@ class PloneUploadService:
         )
         response.raise_for_status()
 
-        return response.json().get("@id", url)
+        object_url = response.json().get("@id", url)
+        self.__change_workflow_status(object_url, status)
+        return object_url
 
     def create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create an Article root node and Front, Body, Back children in Plone."""
@@ -108,13 +123,7 @@ class PloneUploadService:
         self.__create_back(article.back, result_url)
 
         # set to workflow state derived from veroeffentlichungsstatus
-        state = article.front.veroeffentlichungsstatus
-        workflow_transitions = self.__jats_status_to_plone_transitions(state)
-        for transition in workflow_transitions:
-            transition_url = f"{response.json().get('@id')}/@workflow/{transition}"
-            logger.debug(f"Applying workflow transition '{transition}' to article: {transition_url}")
-            transition_response = self.httpx_client.post(transition_url, json={"include_children": "true"})
-            transition_response.raise_for_status()
+        self.__change_workflow_status(result_url, article.front.veroeffentlichungsstatus)
 
         return result_url
 

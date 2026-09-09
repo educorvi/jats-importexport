@@ -48,12 +48,15 @@ class StorageAdapter(metaclass=abc.ABCMeta):
     # Upload related methods
 
     @abc.abstractmethod
-    def upload_file(self, file: BinaryIO, container: str) -> str:
+    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
         """Upload a binary file into a target container.
 
         Args:
             file: The binary file stream/object to upload.
             container: The path to the container in the storage system.
+            status: Optional publication status of the article that the file
+                belongs to. Storage backends that support per-object workflow status
+                may use this status to set the initial state of the uploaded object.
 
         Returns:
             The URL of the uploaded file.

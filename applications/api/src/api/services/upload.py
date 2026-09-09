@@ -466,7 +466,9 @@ def _upload_files_and_update_references_root(
                 if front.article_id:
                     asset_path += "/" + front.article_id
                 with referenced_path.open("rb") as referenced_file:
-                    uploaded_files[referenced_path] = adapter_instance.upload_file(referenced_file, asset_path)
+                    uploaded_files[referenced_path] = adapter_instance.upload_file(
+                        referenced_file, asset_path, front.veroeffentlichungsstatus
+                    )
             except Exception as e:
                 logger.error(f"Failed to upload referenced file '{referenced_path.name}': {e}")
                 raise HTTPException(

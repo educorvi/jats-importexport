@@ -96,7 +96,7 @@ class MockStorageAdapter(StorageAdapter):
         self.uploaded_files = []
         self.saved_docs = []
 
-    def upload_file(self, file, container) -> str:
+    def upload_file(self, file, container: str, status: str | None = None) -> str:
         import os
 
         name = os.path.basename(getattr(file, "name", "file") or "file")

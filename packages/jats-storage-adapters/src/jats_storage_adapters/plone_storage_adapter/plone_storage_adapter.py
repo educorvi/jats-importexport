@@ -87,13 +87,15 @@ class PloneStorageAdapter(StorageAdapter):
 
     # Upload related methods
 
-    def upload_file(self, file: BinaryIO, container: str) -> str:
+    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
         """Upload a binary file to Plone.
 
         Converts the stream content into base64 and posts a new 'File' content type.
+        If ``status`` is provided, the uploaded object is given the same initial
+        workflow status derived from the article's publication status.
         """
         try:
-            return PloneUploadService(self.base_url, self.httpx_client).upload_file(file, container)
+            return PloneUploadService(self.base_url, self.httpx_client).upload_file(file, container, status)
         except Exception:
             raise InternalError(f"Error uploading file to {container}")
 
