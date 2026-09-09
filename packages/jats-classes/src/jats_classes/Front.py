@@ -300,7 +300,7 @@ class Front:
             _title = _text(ra, "title")
             related_article_type = ra.get("related-article-type")
             if _href is not None:
-                if related_article_type == "translation":
+                if related_article_type == "translated-article":
                     related_articles_translations_map[_href] = _title or ""
                 else:
                     related_articles_map[_href] = _title or ""
@@ -458,7 +458,7 @@ class Front:
                 *[_create_tag("related-article",
                               text=title,
                               nsmap={"xlink": _XLINK_NS},
-                              attributes={"related-article-type": "translation",
+                              attributes={"related-article-type": "translated-article",
                                           "ext-link-type": "Webcode",
                                           _XLINK_HREF: href} )
                                           for href, title in (self.related_articles_translations_map or {}).items()],
