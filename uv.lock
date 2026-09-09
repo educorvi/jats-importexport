@@ -1113,7 +1113,7 @@ dev = [
 
 [[package]]
 name = "jats-importexport-client"
-version = "1.0.0a33"
+version = "1.0.0a34"
 source = { editable = "packages/api-client" }
 dependencies = [
     { name = "pydantic" },

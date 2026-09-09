@@ -4070,7 +4070,7 @@ or pipeline) parameterized.
                     </xsl:if>
                     <!-- Translations -->
                     <xsl:variable name="related-articles-translations"
-                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='translation']" />
+                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='translated-article']" />
                     <xsl:if test="$related-articles-translations">
                         <tr data-meta-field="related-articles">
                             <td>
