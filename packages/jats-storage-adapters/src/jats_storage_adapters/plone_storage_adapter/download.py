@@ -269,6 +269,9 @@ class PloneDownloadService:
             if pre_requested_sections:
                 data = pre_requested_sections.get(url)
                 if data:
+                    items = data.get("items", [])
+                    children = data.get("children", [])
+                    data["items"] = children or items
                     return data
         response = self.httpx_client.get(url)
         response.raise_for_status()
