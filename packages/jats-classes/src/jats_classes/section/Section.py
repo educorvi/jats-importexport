@@ -71,9 +71,16 @@ class Section(GenericSection):
         section.append(new_sec)
 
     @classmethod
-    def _apply_section_type_based_on_heading(cls, section: etree._Element, heading: str, sec_type: str) -> None:
+    def _apply_section_type_based_on_heading(
+        cls, section: etree._Element, heading: str, sec_type: str, heading_is_id: bool = False
+    ) -> None:
         """Set section type based on heading."""
-        xpath_result = section.xpath(f'.//named-content[text()="{heading}"]')
+        if not heading_is_id:
+            xpath_result = section.xpath(
+                f'.//named-content[text()="{heading}" or .//bold[text()="Inhaltsverzeichnis"]]'
+            )
+        else:
+            xpath_result = section.xpath(f'.//named-content[@id="{heading}"]')
         if not isinstance(xpath_result, list):
             return
         raw_matches: list[etree._Element] = [e for e in xpath_result if isinstance(e, etree._Element)]
@@ -99,7 +106,9 @@ class Section(GenericSection):
     def _split_on_inhaltsverzeichnis(cls, section: etree._Element) -> None:
         """Split section at span 'Inhaltsverzeichnis' or 'Contents' into a new subsection."""
         cls._apply_section_type_based_on_heading(section, "Inhaltsverzeichnis", "toc")
+        cls._apply_section_type_based_on_heading(section, "Inhalt", "toc")
         cls._apply_section_type_based_on_heading(section, "Contents", "toc")
+        cls._apply_section_type_based_on_heading(section, "_Toc_Inhaltsverzeichnis", "toc", heading_is_id=True)
 
     @classmethod
     def from_xml_element(cls, section: etree._Element) -> Section:
