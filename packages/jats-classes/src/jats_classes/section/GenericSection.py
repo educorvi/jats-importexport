@@ -125,3 +125,8 @@ class GenericSection:
         if result.strip() == "":
             return None
         return result
+
+    @classmethod
+    def get_raw_content(cls, element: etree._Element) -> str | None:
+        """Public method to get the raw content of a section like element."""
+        return cls._get_raw_content(element)
