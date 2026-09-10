@@ -4100,7 +4100,7 @@ or pipeline) parameterized.
             <nav class="jats-html-export-toc">
                 <xsl:call-template name="toc-sections">
                     <xsl:with-param name="sections"
-                                    select="//body/sec[title[normalize-space(string(.))]] | //back/app-group[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))]] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
+                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | //back/app-group[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
                     <xsl:with-param name="depth" select="0"/>
                 </xsl:call-template>
             </nav>
@@ -4138,9 +4138,9 @@ or pipeline) parameterized.
                                 <xsl:apply-templates select="title/node()"/>
                             </a>
                         </span>
-                        <xsl:if test="sec[title[normalize-space(string(.))]] or app[title[normalize-space(string(.))]]">
+                        <xsl:if test="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] or app[title[normalize-space(string(.))]]">
                             <xsl:call-template name="toc-sections">
-                                <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))]] | app[title[normalize-space(string(.))]]"/>
+                                <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | app[title[normalize-space(string(.))]]"/>
                                 <xsl:with-param name="depth" select="$depth + 1"/>
                             </xsl:call-template>
                         </xsl:if>
