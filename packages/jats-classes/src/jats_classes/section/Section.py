@@ -109,7 +109,9 @@ class Section(GenericSection):
         cls._apply_section_type_based_on_heading(section, "Inhalt", "toc")
         cls._apply_section_type_based_on_heading(section, "Contents", "toc")
         cls._apply_section_type_based_on_heading(section, "Table of contents", "toc")
+        cls._apply_section_type_based_on_heading(section, "Table of content", "toc")
         cls._apply_section_type_based_on_heading(section, "Table of Contents", "toc")
+        cls._apply_section_type_based_on_heading(section, "Table of Content", "toc")
         cls._apply_section_type_based_on_heading(section, "_Toc_Inhaltsverzeichnis", "toc", heading_is_id=True)
 
     @classmethod
