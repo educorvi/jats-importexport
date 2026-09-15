@@ -29,6 +29,43 @@ ASSETS_CONTAINER = StorageConfig.ASSETS_CONTAINER
 
 logger = logging.getLogger(__name__)
 
+_JATS_DTD_DIRECTORY = Path(__file__).parent / "dtd-files"
+
+
+class _LocalDTDResolver(etree.Resolver):
+    """Resolve the configured JATS DTD without allowing external network access."""
+
+    def __init__(self, dtd_directory: Path):
+        super().__init__()
+        self.dtd_directory = dtd_directory.resolve()
+
+    def resolve(self, url: str, public_id: str, context: Any):
+        requested_path = Path(unquote(urlparse(url).path))
+        if ".." in requested_path.parts:
+            return None
+
+        dtd_path = (self.dtd_directory / requested_path).resolve() if not requested_path.is_absolute() else None
+        if dtd_path is None or not _is_path_within(self.dtd_directory, dtd_path) or not dtd_path.is_file():
+            matches = list(self.dtd_directory.rglob(requested_path.name))
+            if len(matches) != 1:
+                return None
+            dtd_path = matches[0].resolve()
+
+        return self.resolve_filename(str(dtd_path), context)
+
+
+def _create_xml_parser() -> etree.XMLParser:
+    """Create a parser that resolves only local DTDs and their local entities."""
+    dtd_directory = _JATS_DTD_DIRECTORY
+    parser = etree.XMLParser(
+        load_dtd=dtd_directory is not None,
+        resolve_entities=dtd_directory is not None,
+        no_network=True,
+    )
+    if dtd_directory is not None:
+        parser.resolvers.add(_LocalDTDResolver(dtd_directory))
+    return parser
+
 
 async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None):
     try:
@@ -44,7 +81,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
         uploaded_file.file.seek(0)
 
         # Synchronous XML parsing, offload to thread
-        parser = etree.XMLParser(resolve_entities=False, no_network=True)
+        parser = _create_xml_parser()
         xml_tree = await asyncio.to_thread(etree.parse, uploaded_file.file, parser=parser)
 
         document = await asyncio.to_thread(_create_JATSDocument_from_xml_tree, xml_tree)
@@ -88,7 +125,7 @@ async def upload_zip(
 
                 urls = []
                 for xml_file in xml_files:
-                    parser = etree.XMLParser(resolve_entities=False, no_network=True)
+                    parser = _create_xml_parser()
                     xml_tree = etree.parse(str(xml_file), parser=parser)
 
                     _create_JATSDocument_from_xml_tree(xml_tree)
