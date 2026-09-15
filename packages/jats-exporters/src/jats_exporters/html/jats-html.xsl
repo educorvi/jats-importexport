@@ -1677,7 +1677,7 @@ or pipeline) parameterized.
         <div class="section ref-list">
             <xsl:call-template name="named-anchor"/>
             <xsl:apply-templates select="." mode="label"/>
-            <xsl:apply-templates select="*[not(self::ref | self::ref-list)]"/>
+            <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label)]"/>
             <xsl:if test="ref">
                 <div class="ref-list table">
                     <xsl:apply-templates select="ref"/>
