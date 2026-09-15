@@ -39,8 +39,10 @@ class _LocalDTDResolver(etree.Resolver):
         super().__init__()
         self.dtd_directory = dtd_directory.resolve()
 
-    def resolve(self, url: str, public_id: str, context: Any):
-        requested_path = Path(unquote(urlparse(url).path))
+    def resolve(  # ty: ignore[invalid-method-override] # temoprary fix because lxml-stubs doesnt exist in newer version
+        self, system_url: str, public_id: str, context: Any
+    ):
+        requested_path = Path(unquote(urlparse(system_url).path))
         if ".." in requested_path.parts:
             return None
 
@@ -51,7 +53,7 @@ class _LocalDTDResolver(etree.Resolver):
                 return None
             dtd_path = matches[0].resolve()
 
-        return self.resolve_filename(str(dtd_path), context)
+        return self.resolve_filename(str(dtd_path), context)  # ty: ignore[unresolved-attribute] # temoprary fix because lxml-stubs doesnt exist in newer version
 
 
 def _create_xml_parser() -> etree.XMLParser:
