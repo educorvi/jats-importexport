@@ -8,13 +8,11 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import redis.asyncio as aioredis
-import uvicorn
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
-from prometheus_client import start_http_server
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from api.config import StorageConfig
@@ -74,22 +72,11 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-Instrumentator().instrument(app)
-
-
-def start() -> None:
-    """Console script entry point – run with ``uv run start-api``."""
-    server, t = start_http_server(APIConfig.METRICS_PORT)
-    uvicorn.run(
-        "api.main:app",
-        host=APIConfig.HOST,
-        port=APIConfig.PORT,
-        reload=APIConfig.RELOAD,
-        workers=APIConfig.WORKERS,
-    )
-    server.shutdown()
-    server.server_close()
-    t.join()
+Instrumentator().instrument(
+    app,
+    metric_namespace="vur",
+    metric_subsystem="hub",
+)
 
 
 def export_openapi() -> None:
@@ -112,7 +99,3 @@ def export_openapi() -> None:
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(f"{json.dumps(app.openapi(), indent=args.indent)}\n", encoding="utf-8")
-
-
-if __name__ == "__main__":
-    start()
