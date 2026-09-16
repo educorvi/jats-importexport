@@ -107,6 +107,26 @@ curl -X DELETE -H "X-API-Key: <your-key>" http://localhost:8000/export/cache
 curl -X DELETE -H "X-API-Key: <your-key>" "http://localhost:8000/export/cache?path=vol1/article"
 ```
 
+## Prometheus cache metrics
+
+`start-api` exposes metrics at `/metrics` on `API_METRICS_PORT` (default `8222`),
+aggregated across API workers. Configure Prometheus to scrape this port.
+
+`vur_hub_export_cache_requests_total{endpoint="/export/jats",result="hit"}` counts
+completed cached exports, with `hit` and `miss` results for JATS, HTML, Markdown,
+PDF, and metadata. Document paths are not metric labels. Disabled caching,
+`Cache-Control: no-store`, failed exports, and cache management requests are excluded.
+Forced refreshes (`Cache-Control: no-cache`) count as misses.
+
+Cache hit percentage per endpoint over five minutes:
+
+```promql
+100 * sum by (endpoint) (rate(vur_hub_export_cache_requests_total{result="hit"}[5m]))
+  / sum by (endpoint) (rate(vur_hub_export_cache_requests_total[5m]))
+```
+
+Endpoints with no cache traffic in the window have an undefined (`NaN`) ratio.
+
 ## Generating the OpenAPI client
 
 ```sh

@@ -519,7 +519,7 @@ or pipeline) parameterized.
         <xsl:apply-templates select="copyright-statement" mode="metadata"/>
         <xsl:if test="copyright-year | copyright-holder">
             <xsl:call-template name="metadata-labeled-entry">
-                <xsl:with-param name="label">Urheberrecht: </xsl:with-param>
+                <xsl:with-param name="label">Urheberrecht</xsl:with-param>
                 <xsl:with-param name="contents">
                     <xsl:for-each select="copyright-year | copyright-holder">
                         <xsl:apply-templates/>
@@ -541,7 +541,7 @@ or pipeline) parameterized.
 
     <xsl:template match="copyright-year" mode="metadata">
         <xsl:call-template name="metadata-labeled-entry">
-            <xsl:with-param name="label">Urheberrecht: </xsl:with-param>
+            <xsl:with-param name="label">Urheberrecht</xsl:with-param>
         </xsl:call-template>
     </xsl:template>
 

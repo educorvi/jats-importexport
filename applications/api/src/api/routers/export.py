@@ -6,8 +6,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.coder import PickleCoder
-from fastapi_cache.decorator import cache
 
+from api.cache_metrics import export_cache
 from api.models import (
     CacheClearedResponse,
     CacheStatusResponse,
@@ -103,7 +103,7 @@ async def _get_path(path: str | None, webcode: str | None) -> str:
         409: {"model": HTTP409Conflict},
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_jats(path: str | None = None, webcode: str | None = None):
     return await jats_export(await _get_path(path, webcode))
 
@@ -118,7 +118,7 @@ async def export_jats(path: str | None = None, webcode: str | None = None):
         409: {"model": HTTP409Conflict},
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_html(path: str | None = None, webcode: str | None = None, include_edit_links: bool = False):
     return await html_export(await _get_path(path, webcode), include_edit_links)
 
@@ -133,7 +133,7 @@ async def export_html(path: str | None = None, webcode: str | None = None, inclu
         409: {"model": HTTP409Conflict},
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_md(path: str | None = None, webcode: str | None = None, include_edit_links: bool = False):
     return await md_export(await _get_path(path, webcode), include_edit_links)
 
@@ -152,7 +152,7 @@ async def export_md(path: str | None = None, webcode: str | None = None, include
         409: {"model": HTTP409Conflict},
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
 async def export_pdf(path: str | None = None, webcode: str | None = None):
     pdf_content, filename = await pdf_export(await _get_path(path, webcode))
     return Response(
@@ -172,7 +172,7 @@ async def export_pdf(path: str | None = None, webcode: str | None = None):
         409: {"model": HTTP409Conflict},
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_metadata(path: str | None = None, webcode: str | None = None):
     front = await metadata_export(await _get_path(path, webcode))
     return MetadataResponse(metadata=front)
@@ -197,5 +197,4 @@ async def clear_export_cache(path: str | None = None):
 
 @router.get("/cache", operation_id="get_cache_status", response_model=CacheStatusResponse)
 async def get_cache_status():
-
     return CacheStatusResponse(enabled=FastAPICache.get_enable(), prefix=FastAPICache.get_prefix())
