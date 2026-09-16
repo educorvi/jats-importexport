@@ -45,7 +45,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
     def get_path_from_url(self, url: str) -> str:
         """Retrieve the storage path from an absolute storage URL."""
         raise NotImplementedError
