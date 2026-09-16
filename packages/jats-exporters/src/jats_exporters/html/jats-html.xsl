@@ -1464,67 +1464,21 @@ or pipeline) parameterized.
     </xsl:template>
 
 
-    <xsl:template match="kwd-group" mode="metadata">
-        <xsl:call-template name="metadata-area">
-            <xsl:with-param name="label">
-                <xsl:apply-templates select="title|label" mode="metadata-inline"/>
-                <xsl:if test="not(title|label)">Schlagwörter</xsl:if>
-            </xsl:with-param>
-            <xsl:with-param name="contents">
-                <xsl:apply-templates mode="metadata"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
+    <xsl:template match="kwd-group" mode="metadata"/>
 
     <xsl:template match="title" mode="metadata">
         <xsl:apply-templates select="."/>
     </xsl:template>
 
+    <xsl:template match="kwd" mode="metadata"/>
 
-    <xsl:template match="kwd" mode="metadata">
-        <xsl:call-template name="metadata-labeled-entry">
-            <xsl:with-param name="label">Schlagwort</xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
+    <xsl:template match="nested-kwd" mode="metadata"/>
 
-    <xsl:template match="nested-kwd" mode="metadata">
-        <ul class="nested-kwd">
-            <xsl:apply-templates mode="metadata"/>
-        </ul>
-    </xsl:template>
+    <xsl:template match="nested-kwd/kwd" mode="metadata"/>
 
-    <xsl:template match="nested-kwd/kwd" mode="metadata">
-        <li class="kwd">
-            <xsl:apply-templates/>
-        </li>
-    </xsl:template>
+    <xsl:template match="compound-kwd" mode="metadata"/>
 
-
-    <xsl:template match="compound-kwd" mode="metadata">
-        <xsl:call-template name="metadata-area">
-            <xsl:with-param name="label">Zusammengesetztes Schlagwort</xsl:with-param>
-            <xsl:with-param name="contents">
-                <xsl:apply-templates mode="metadata"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="compound-kwd-part" mode="metadata">
-        <xsl:call-template name="metadata-labeled-entry">
-            <xsl:with-param name="label">
-                <xsl:text>Schlagwortteil</xsl:text>
-                <xsl:for-each select="@content-type">
-                    <xsl:text> (</xsl:text>
-                    <span class="data">
-                        <xsl:value-of select="."/>
-                    </span>
-                    <xsl:text>)</xsl:text>
-                </xsl:for-each>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
+    <xsl:template match="compound-kwd-part" mode="metadata"/>
 
 
     <xsl:template match="counts" mode="metadata">
@@ -1723,7 +1677,7 @@ or pipeline) parameterized.
         <div class="section ref-list">
             <xsl:call-template name="named-anchor"/>
             <xsl:apply-templates select="." mode="label"/>
-            <xsl:apply-templates select="*[not(self::ref | self::ref-list)]"/>
+            <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label)]"/>
             <xsl:if test="ref">
                 <div class="ref-list table">
                     <xsl:apply-templates select="ref"/>
@@ -2120,7 +2074,7 @@ or pipeline) parameterized.
                 <xsl:apply-templates select="copyright-statement"/>
                 <xsl:if test="copyright-year | copyright-holder">
                     <p class="copyright">
-                        <span class="generated">Urheberrecht</span>
+                        <span class="generated">Urheberrecht: </span>
                         <xsl:for-each select="copyright-year | copyright-holder">
                             <xsl:apply-templates/>
                             <xsl:if test="not(position()=last())">
@@ -4135,7 +4089,7 @@ or pipeline) parameterized.
                                 <xsl:text> </xsl:text>
                             </xsl:if>
                             <a href="#{$anchor-id}" class="toc-title">
-                                <xsl:apply-templates select="title/node()"/>
+                                <xsl:value-of select="title"/>
                             </a>
                         </span>
                         <xsl:if test="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] or app[title[normalize-space(string(.))]]">
