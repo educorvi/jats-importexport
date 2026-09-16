@@ -6,8 +6,8 @@ from typing import Any
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.coder import PickleCoder
-from fastapi_cache.decorator import cache
 
+from api.cache_metrics import export_cache
 from api.models import (
     CacheClearedResponse,
     CacheStatusResponse,
@@ -78,19 +78,19 @@ def export_cache_key_builder(
     operation_id="export_jats",
     response_model=JatsDocumentResponse,
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_jats(path: str):
     return await jats_export(path)
 
 
 @router.get("/html", operation_id="export_html", response_model=HtmlDocumentResponse)
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_html(path: str, include_edit_links: bool = False):
     return await html_export(path, include_edit_links)
 
 
 @router.get("/md", operation_id="export_md", response_model=MarkdownDocumentResponse)
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_md(path: str, include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
 
@@ -106,7 +106,7 @@ async def export_md(path: str, include_edit_links: bool = False):
         }
     },
 )
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
 async def export_pdf(path: str):
     pdf_content, filename = await pdf_export(path)
     return Response(
@@ -117,7 +117,7 @@ async def export_pdf(path: str):
 
 
 @router.get("/metadata", operation_id="export_metadata", response_model=MetadataResponse)
-@cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
+@export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
 async def export_metadata(path: str):
     front = await metadata_export(path)
     return MetadataResponse(metadata=front)
@@ -142,5 +142,4 @@ async def clear_export_cache(path: str | None = None):
 
 @router.get("/cache", operation_id="get_cache_status", response_model=CacheStatusResponse)
 async def get_cache_status():
-
     return CacheStatusResponse(enabled=FastAPICache.get_enable(), prefix=FastAPICache.get_prefix())
