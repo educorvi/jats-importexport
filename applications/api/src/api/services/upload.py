@@ -44,7 +44,7 @@ class _LocalDTDResolver(etree.Resolver):
     ):
         requested_path = Path(unquote(urlparse(system_url).path))
         if ".." in requested_path.parts:
-            return self.resolve_string("", context)  # ty: ignore[unresolved-attribute] # temporary fix because lxml-stubs doesn't exist in newer version
+            return self.resolve_string("", context)  # ty: ignore[missing-argument] # temporary fix because lxml-stubs doesn't exist in newer version
 
         dtd_path = (self.dtd_directory / requested_path).resolve() if not requested_path.is_absolute() else None
         if dtd_path is None or not _is_path_within(self.dtd_directory, dtd_path) or not dtd_path.is_file():
