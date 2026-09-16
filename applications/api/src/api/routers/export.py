@@ -58,7 +58,7 @@ def _get_clear_keys(path: str) -> list[str]:
     return keys
 
 
-async def export_cache_key_builder(
+def export_cache_key_builder(
     func: Callable[..., Any],
     namespace: str = "",
     *,
@@ -67,9 +67,8 @@ async def export_cache_key_builder(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> str:
-    # The endpoint parameters (like 'path') are explicitly inside the 'kwargs' dictionary
-    path = await _get_path(kwargs.get(_CACHE_PATH, ""), kwargs.get("webcode", ""))
-    path = _get_cache_key_path(path)
+    # 'path' is already resolved from either 'path' or 'webcode' by the _resolve_path dependency
+    path = _get_cache_key_path(kwargs.get(_CACHE_PATH, ""))
     param = _get_cache_query_param(kwargs)
     func_name = getattr(func, "__name__", _CACHE_UNKNOWN_FUNCTION)
 
@@ -77,7 +76,7 @@ async def export_cache_key_builder(
     return f"{namespace}:{func_name}:{path}:{param}"
 
 
-async def _get_path(path: str | None, webcode: str | None) -> str:
+async def _resolve_path(path: str | None = None, webcode: str | None = None) -> str:
     def exists(param: str | None) -> bool:
         if param is not None and param != "":
             return True
@@ -104,8 +103,8 @@ async def _get_path(path: str | None, webcode: str | None) -> str:
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_jats(path: str | None = None, webcode: str | None = None):
-    return await jats_export(await _get_path(path, webcode))
+async def export_jats(path: str = Depends(_resolve_path)):
+    return await jats_export(path)
 
 
 @router.get(
@@ -119,8 +118,8 @@ async def export_jats(path: str | None = None, webcode: str | None = None):
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_html(path: str | None = None, webcode: str | None = None, include_edit_links: bool = False):
-    return await html_export(await _get_path(path, webcode), include_edit_links)
+async def export_html(path: str = Depends(_resolve_path), include_edit_links: bool = False):
+    return await html_export(path, include_edit_links)
 
 
 @router.get(
@@ -134,8 +133,8 @@ async def export_html(path: str | None = None, webcode: str | None = None, inclu
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_md(path: str | None = None, webcode: str | None = None, include_edit_links: bool = False):
-    return await md_export(await _get_path(path, webcode), include_edit_links)
+async def export_md(path: str = Depends(_resolve_path), include_edit_links: bool = False):
+    return await md_export(path, include_edit_links)
 
 
 @router.get(
@@ -153,8 +152,8 @@ async def export_md(path: str | None = None, webcode: str | None = None, include
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
-async def export_pdf(path: str | None = None, webcode: str | None = None):
-    pdf_content, filename = await pdf_export(await _get_path(path, webcode))
+async def export_pdf(path: str = Depends(_resolve_path)):
+    pdf_content, filename = await pdf_export(path)
     return Response(
         content=pdf_content,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
@@ -173,8 +172,8 @@ async def export_pdf(path: str | None = None, webcode: str | None = None):
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_metadata(path: str | None = None, webcode: str | None = None):
-    front = await metadata_export(await _get_path(path, webcode))
+async def export_metadata(path: str = Depends(_resolve_path)):
+    front = await metadata_export(path)
     return MetadataResponse(metadata=front)
 
 
