@@ -21,7 +21,7 @@ from api.models import (
 )
 
 from ..auth import require_permission
-from ..services.export import get_path_from_webcode, html_export, jats_export, md_export, metadata_export, pdf_export
+from ..services.export import html_export, jats_export, md_export, metadata_export, pdf_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -67,7 +67,6 @@ def export_cache_key_builder(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> str:
-    # 'path' is already resolved from either 'path' or 'webcode' by the _resolve_path dependency
     path = _get_cache_key_path(kwargs.get(_CACHE_PATH, ""))
     param = _get_cache_query_param(kwargs)
     func_name = getattr(func, "__name__", _CACHE_UNKNOWN_FUNCTION)
@@ -87,8 +86,7 @@ async def _resolve_path(path: str | None = None, webcode: str | None = None) -> 
     if path:
         return path
     if webcode:
-        path = await get_path_from_webcode(webcode)
-        return path
+        return webcode
     return ""  # unreachable code, but to ensure type checker knows a string is returned
 
 
@@ -183,12 +181,23 @@ async def export_metadata(path: str = Depends(_resolve_path)):
     response_model=CacheClearedResponse,
     dependencies=[Depends(require_permission("manage"))],
 )
-async def clear_export_cache(path: str | None = None):
-    if path is not None:
-        key_list = _get_clear_keys(path)
+async def clear_export_cache(path: str | None = None, webcode: str | None = None):
+    """
+    Clear the export cache for a given path and / or webcode
+    """
+    if path is not None or webcode is not None:
+        key_list = []
+        message = "Cleared cache for "
+        if path is not None:
+            key_list.extend(_get_clear_keys(path))
+            message += f"path={path} "
+        if webcode is not None:
+            key_list.extend(_get_clear_keys(webcode))
+            message += f"webcode={webcode}"
+
         for key in key_list:
             await FastAPICache.clear(key=key)
-        return CacheClearedResponse(message=f"Cleared cache for {path}")
+        return CacheClearedResponse(message=message.strip())
     else:
         await FastAPICache.clear(namespace=_CACHE_NAMESPACE)
         return CacheClearedResponse(message="Cleared cache")
