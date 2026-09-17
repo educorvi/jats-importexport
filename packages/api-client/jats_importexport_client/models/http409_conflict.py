@@ -19,21 +19,16 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from jats_importexport_client.models.location_inner import LocationInner
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class ValidationError(BaseModel):
+class HTTP409Conflict(BaseModel):
     """
-    ValidationError
+    HTTP409Conflict
     """ # noqa: E501
-    loc: List[LocationInner]
-    msg: StrictStr
-    type: StrictStr
-    input: Optional[Any] = None
-    ctx: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["loc", "msg", "type", "input", "ctx"]
+    detail: Optional[StrictStr] = 'Conflict.'
+    __properties: ClassVar[List[str]] = ["detail"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -53,7 +48,7 @@ class ValidationError(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ValidationError from a JSON string"""
+        """Create an instance of HTTP409Conflict from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,22 +69,11 @@ class ValidationError(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in loc (list)
-        _items = []
-        if self.loc:
-            for _item_loc in self.loc:
-                _items.append(_item_loc.to_dict() if _item_loc is not None else None)
-            _dict['loc'] = _items
-        # set to None if input (nullable) is None
-        # and model_fields_set contains the field
-        if self.input is None and "input" in self.model_fields_set:
-            _dict['input'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ValidationError from a dict"""
+        """Create an instance of HTTP409Conflict from a dict"""
         if obj is None:
             return None
 
@@ -97,11 +81,7 @@ class ValidationError(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "loc": [LocationInner.from_dict(_item) for _item in obj["loc"]] if obj.get("loc") is not None else None,
-            "msg": obj.get("msg"),
-            "type": obj.get("type"),
-            "input": obj.get("input"),
-            "ctx": obj.get("ctx")
+            "detail": obj.get("detail") if obj.get("detail") is not None else 'Conflict.'
         })
         return _obj
 

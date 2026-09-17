@@ -85,6 +85,9 @@ class PloneStorageAdapter(StorageAdapter):
     def get_url_from_path(self, path: str) -> str:
         return f"{self.base_url}/{path.strip('/')}"
 
+    def get_path_from_url(self, url: str) -> str:
+        return self.__get_path_from_url(url)
+
     # Upload related methods
 
     def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
@@ -167,6 +170,9 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
+
+    def get_article_by_webcode(self, webcode: str) -> dict:
+        return PloneDownloadService(self.base_url, self.httpx_client).get_article_by_webcode(webcode)
 
     # Modify / automation related methods
 

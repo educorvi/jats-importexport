@@ -14,9 +14,11 @@ Method | HTTP request | Description
 
 
 # **clear_export_cache**
-> CacheClearedResponse clear_export_cache(path=path)
+> CacheClearedResponse clear_export_cache(path=path, webcode=webcode)
 
 Clear Export Cache
+
+Clear the export cache for a given path and / or webcode
 
 ### Example
 
@@ -50,10 +52,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
     path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Clear Export Cache
-        api_response = api_instance.clear_export_cache(path=path)
+        api_response = api_instance.clear_export_cache(path=path, webcode=webcode)
         print("The response of ExportApi->clear_export_cache:\n")
         pprint(api_response)
     except Exception as e:
@@ -68,6 +71,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -92,7 +96,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_html**
-> HtmlDocumentResponse export_html(path, include_edit_links=include_edit_links)
+> HtmlDocumentResponse export_html(include_edit_links=include_edit_links, path=path, webcode=webcode)
 
 Export Html
 
@@ -127,12 +131,13 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
     include_edit_links = False # bool |  (optional) (default to False)
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Html
-        api_response = api_instance.export_html(path, include_edit_links=include_edit_links)
+        api_response = api_instance.export_html(include_edit_links=include_edit_links, path=path, webcode=webcode)
         print("The response of ExportApi->export_html:\n")
         pprint(api_response)
     except Exception as e:
@@ -146,8 +151,9 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path** | **str**|  | 
  **include_edit_links** | **bool**|  | [optional] [default to False]
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -167,12 +173,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
-**422** | Validation Error |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_jats**
-> JatsDocumentResponse export_jats(path)
+> JatsDocumentResponse export_jats(path=path, webcode=webcode)
 
 Export Jats
 
@@ -207,11 +215,12 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Jats
-        api_response = api_instance.export_jats(path)
+        api_response = api_instance.export_jats(path=path, webcode=webcode)
         print("The response of ExportApi->export_jats:\n")
         pprint(api_response)
     except Exception as e:
@@ -225,7 +234,8 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path** | **str**|  | 
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -245,12 +255,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
-**422** | Validation Error |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_md**
-> MarkdownDocumentResponse export_md(path, include_edit_links=include_edit_links)
+> MarkdownDocumentResponse export_md(include_edit_links=include_edit_links, path=path, webcode=webcode)
 
 Export Md
 
@@ -285,12 +297,13 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
     include_edit_links = False # bool |  (optional) (default to False)
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Md
-        api_response = api_instance.export_md(path, include_edit_links=include_edit_links)
+        api_response = api_instance.export_md(include_edit_links=include_edit_links, path=path, webcode=webcode)
         print("The response of ExportApi->export_md:\n")
         pprint(api_response)
     except Exception as e:
@@ -304,8 +317,9 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path** | **str**|  | 
  **include_edit_links** | **bool**|  | [optional] [default to False]
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -325,12 +339,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
-**422** | Validation Error |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_metadata**
-> MetadataResponse export_metadata(path)
+> MetadataResponse export_metadata(path=path, webcode=webcode)
 
 Export Metadata
 
@@ -365,11 +381,12 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Metadata
-        api_response = api_instance.export_metadata(path)
+        api_response = api_instance.export_metadata(path=path, webcode=webcode)
         print("The response of ExportApi->export_metadata:\n")
         pprint(api_response)
     except Exception as e:
@@ -383,7 +400,8 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path** | **str**|  | 
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -403,12 +421,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
-**422** | Validation Error |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_pdf**
-> bytes export_pdf(path)
+> bytes export_pdf(path=path, webcode=webcode)
 
 Export Pdf
 
@@ -442,11 +462,12 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportApi(api_client)
-    path = 'path_example' # str | 
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Pdf
-        api_response = api_instance.export_pdf(path)
+        api_response = api_instance.export_pdf(path=path, webcode=webcode)
         print("The response of ExportApi->export_pdf:\n")
         pprint(api_response)
     except Exception as e:
@@ -460,7 +481,8 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **path** | **str**|  | 
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
 
 ### Return type
 
@@ -480,7 +502,9 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | PDF file |  -  |
-**422** | Validation Error |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

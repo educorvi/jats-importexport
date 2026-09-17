@@ -16,6 +16,10 @@ class HTTP404NotFound(BaseModel):
     )
 
 
+class HTTP409Conflict(BaseModel):
+    detail: str = Field(default="Conflict.", examples=["Conflict occurred."])
+
+
 # 413 Payload Too Large
 class HTTP413PayloadTooLarge(BaseModel):
     detail: str = Field(default="The uploaded file is too large.", examples=["The uploaded file is too large."])
@@ -24,6 +28,11 @@ class HTTP413PayloadTooLarge(BaseModel):
 # 415 Unsupported Media Type
 class HTTP415UnsupportedMediaType(BaseModel):
     detail: str = Field(default="Unsupported media type.", examples=["Unsupported media type."])
+
+
+# 422 Unprocessable Entity
+class HTTP422UnprocessableEntity(BaseModel):
+    detail: str = Field(default="Unprocessable entity.", examples=["Unprocessable content."])
 
 
 # 500 Internal Server Error

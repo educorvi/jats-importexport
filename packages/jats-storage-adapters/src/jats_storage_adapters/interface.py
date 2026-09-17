@@ -45,6 +45,10 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    def get_path_from_url(self, url: str) -> str:
+        """Retrieve the storage path from an absolute storage URL."""
+        raise NotImplementedError
+
     # Upload related methods
 
     @abc.abstractmethod
@@ -158,6 +162,17 @@ class StorageAdapter(metaclass=abc.ABCMeta):
                 for article_path in related_articles_translations
             ],
         )
+
+    def get_article_by_webcode(self, webcode: str) -> dict:
+        """Retrieve an article by its webcode from the storage system.
+
+        Args:
+            webcode: The webcode of the article.
+
+        Returns:
+            A dictionary containing the article data.
+        """
+        raise NotImplementedError
 
     # Modify / automation related methods
 

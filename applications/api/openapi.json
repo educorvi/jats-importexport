@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a38"
+    "version": "1.0.0a39"
   },
   "paths": {
     "/status": {
@@ -513,10 +513,33 @@
           {
             "name": "path",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -531,15 +554,35 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/HTTP404NotFound"
                 }
               }
-            }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -558,15 +601,6 @@
         ],
         "parameters": [
           {
-            "name": "path",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          },
-          {
             "name": "include_edit_links",
             "in": "query",
             "required": false,
@@ -574,6 +608,38 @@
               "type": "boolean",
               "default": false,
               "title": "Include Edit Links"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -588,15 +654,35 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/HTTP404NotFound"
                 }
               }
-            }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -615,15 +701,6 @@
         ],
         "parameters": [
           {
-            "name": "path",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          },
-          {
             "name": "include_edit_links",
             "in": "query",
             "required": false,
@@ -631,6 +708,38 @@
               "type": "boolean",
               "default": false,
               "title": "Include Edit Links"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -645,15 +754,35 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/HTTP404NotFound"
                 }
               }
-            }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -674,10 +803,33 @@
           {
             "name": "path",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -693,15 +845,35 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/HTTP404NotFound"
                 }
               }
-            }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -722,10 +894,33 @@
           {
             "name": "path",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -740,15 +935,35 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/HTTP404NotFound"
                 }
               }
-            }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -759,6 +974,7 @@
           "Export"
         ],
         "summary": "Clear Export Cache",
+        "description": "Clear the export cache for a given path and / or webcode",
         "operationId": "clear_export_cache",
         "security": [
           {
@@ -780,6 +996,22 @@
                 }
               ],
               "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -1645,6 +1877,34 @@
         "type": "object",
         "title": "HTTP400BadRequest"
       },
+      "HTTP404NotFound": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "The requested resource was not found.",
+            "examples": [
+              "The requested resource was not found."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP404NotFound"
+      },
+      "HTTP409Conflict": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Conflict.",
+            "examples": [
+              "Conflict occurred."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP409Conflict"
+      },
       "HTTP413PayloadTooLarge": {
         "properties": {
           "detail": {
@@ -1672,6 +1932,20 @@
         },
         "type": "object",
         "title": "HTTP415UnsupportedMediaType"
+      },
+      "HTTP422UnprocessableEntity": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Unprocessable entity.",
+            "examples": [
+              "Unprocessable content."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP422UnprocessableEntity"
       },
       "HTTP500InternalServerError": {
         "properties": {

@@ -3,7 +3,7 @@ import urllib.parse
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.coder import PickleCoder
 
@@ -12,6 +12,9 @@ from api.models import (
     CacheClearedResponse,
     CacheStatusResponse,
     HtmlDocumentResponse,
+    HTTP404NotFound,
+    HTTP409Conflict,
+    HTTP422UnprocessableEntity,
     JatsDocumentResponse,
     MarkdownDocumentResponse,
     MetadataResponse,
@@ -64,7 +67,6 @@ def export_cache_key_builder(
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
 ) -> str:
-    # The endpoint parameters (like 'path') are explicitly inside the 'kwargs' dictionary
     path = _get_cache_key_path(kwargs.get(_CACHE_PATH, ""))
     param = _get_cache_query_param(kwargs)
     func_name = getattr(func, "__name__", _CACHE_UNKNOWN_FUNCTION)
@@ -73,25 +75,63 @@ def export_cache_key_builder(
     return f"{namespace}:{func_name}:{path}:{param}"
 
 
+async def _resolve_path(path: str | None = None, webcode: str | None = None) -> str:
+    def exists(param: str | None) -> bool:
+        if param is not None and param != "":
+            return True
+        return False
+
+    if exists(path) == exists(webcode):
+        raise HTTPException(status_code=422, detail="Exactly one of 'path' or 'webcode' must be provided.")
+    if path:
+        return path
+    if webcode:
+        return webcode
+    return ""  # unreachable code, but to ensure type checker knows a string is returned
+
+
 @router.get(
     "/jats",
     operation_id="export_jats",
     response_model=JatsDocumentResponse,
+    responses={
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_jats(path: str):
+async def export_jats(path: str = Depends(_resolve_path)):
     return await jats_export(path)
 
 
-@router.get("/html", operation_id="export_html", response_model=HtmlDocumentResponse)
+@router.get(
+    "/html",
+    operation_id="export_html",
+    response_model=HtmlDocumentResponse,
+    responses={
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
+)
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_html(path: str, include_edit_links: bool = False):
+async def export_html(path: str = Depends(_resolve_path), include_edit_links: bool = False):
     return await html_export(path, include_edit_links)
 
 
-@router.get("/md", operation_id="export_md", response_model=MarkdownDocumentResponse)
+@router.get(
+    "/md",
+    operation_id="export_md",
+    response_model=MarkdownDocumentResponse,
+    responses={
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
+)
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_md(path: str, include_edit_links: bool = False):
+async def export_md(path: str = Depends(_resolve_path), include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
 
 
@@ -103,11 +143,14 @@ async def export_md(path: str, include_edit_links: bool = False):
         200: {
             "content": {"application/pdf": {"schema": {"type": "string", "format": "binary"}}},
             "description": "PDF file",
-        }
+        },
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
-async def export_pdf(path: str):
+async def export_pdf(path: str = Depends(_resolve_path)):
     pdf_content, filename = await pdf_export(path)
     return Response(
         content=pdf_content,
@@ -116,9 +159,18 @@ async def export_pdf(path: str):
     )
 
 
-@router.get("/metadata", operation_id="export_metadata", response_model=MetadataResponse)
+@router.get(
+    "/metadata",
+    operation_id="export_metadata",
+    response_model=MetadataResponse,
+    responses={
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
+)
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_metadata(path: str):
+async def export_metadata(path: str = Depends(_resolve_path)):
     front = await metadata_export(path)
     return MetadataResponse(metadata=front)
 
@@ -129,12 +181,23 @@ async def export_metadata(path: str):
     response_model=CacheClearedResponse,
     dependencies=[Depends(require_permission("manage"))],
 )
-async def clear_export_cache(path: str | None = None):
-    if path is not None:
-        key_list = _get_clear_keys(path)
+async def clear_export_cache(path: str | None = None, webcode: str | None = None):
+    """
+    Clear the export cache for a given path and / or webcode
+    """
+    if path is not None or webcode is not None:
+        key_list = []
+        message = "Cleared cache for "
+        if path is not None:
+            key_list.extend(_get_clear_keys(path))
+            message += f"path={path} "
+        if webcode is not None:
+            key_list.extend(_get_clear_keys(webcode))
+            message += f"webcode={webcode}"
+
         for key in key_list:
             await FastAPICache.clear(key=key)
-        return CacheClearedResponse(message=f"Cleared cache for {path}")
+        return CacheClearedResponse(message=message.strip())
     else:
         await FastAPICache.clear(namespace=_CACHE_NAMESPACE)
         return CacheClearedResponse(message="Cleared cache")

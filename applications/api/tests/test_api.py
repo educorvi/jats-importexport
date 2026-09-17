@@ -116,10 +116,16 @@ class MockStorageAdapter(StorageAdapter):
     def get_url_from_path(self, path: str) -> str:
         return f"http://mockstore/{path.lstrip('/')}"
 
+    def get_path_from_url(self, url: str) -> str:
+        return url.replace("http://mockstore", "")
+
     def save_jats_document(self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
         self.saved_docs.append((document, container))
         title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
+
+    def get_article_by_webcode(self, webcode: str) -> dict:
+        return {"@id": f"http://mockstore/articles/{webcode}.xml"}
 
     def link_related_articles(self) -> list[str]:
         return ["articles/article1.xml", "articles/article2.xml"]
