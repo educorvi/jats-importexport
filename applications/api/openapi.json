@@ -1860,6 +1860,20 @@
         "type": "object",
         "title": "HTTP400BadRequest"
       },
+      "HTTP409Conflict": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Conflict occurred.",
+            "examples": [
+              "Conflict occurred."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP409Conflict"
+      },
       "HTTP413PayloadTooLarge": {
         "properties": {
           "detail": {
@@ -1887,6 +1901,20 @@
         },
         "type": "object",
         "title": "HTTP415UnsupportedMediaType"
+      },
+      "HTTP422UnprocessableEntity": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Unprocessable entity.",
+            "examples": [
+              "Unprocessable entity."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP422UnprocessableEntity"
       },
       "HTTP500InternalServerError": {
         "properties": {
