@@ -95,9 +95,9 @@ async def _resolve_path(path: str | None = None, webcode: str | None = None) -> 
     operation_id="export_jats",
     response_model=JatsDocumentResponse,
     responses={
-        422: {"model": HTTP422UnprocessableEntity},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
@@ -110,9 +110,9 @@ async def export_jats(path: str = Depends(_resolve_path)):
     operation_id="export_html",
     response_model=HtmlDocumentResponse,
     responses={
-        422: {"model": HTTP422UnprocessableEntity},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
@@ -125,9 +125,9 @@ async def export_html(path: str = Depends(_resolve_path), include_edit_links: bo
     operation_id="export_md",
     response_model=MarkdownDocumentResponse,
     responses={
-        422: {"model": HTTP422UnprocessableEntity},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
@@ -144,9 +144,9 @@ async def export_md(path: str = Depends(_resolve_path), include_edit_links: bool
             "content": {"application/pdf": {"schema": {"type": "string", "format": "binary"}}},
             "description": "PDF file",
         },
-        422: {"model": HTTP422UnprocessableEntity},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
@@ -164,9 +164,9 @@ async def export_pdf(path: str = Depends(_resolve_path)):
     operation_id="export_metadata",
     response_model=MetadataResponse,
     responses={
-        422: {"model": HTTP422UnprocessableEntity},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)

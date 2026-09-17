@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a37"
+    "version": "1.0.0a39"
   },
   "paths": {
     "/status": {
@@ -575,14 +575,14 @@
             "description": "Conflict"
           },
           "422": {
-            "description": "Unprocessable Content",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -675,14 +675,14 @@
             "description": "Conflict"
           },
           "422": {
-            "description": "Unprocessable Content",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -775,14 +775,14 @@
             "description": "Conflict"
           },
           "422": {
-            "description": "Unprocessable Content",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -866,14 +866,14 @@
             "description": "Conflict"
           },
           "422": {
-            "description": "Unprocessable Content",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -956,14 +956,14 @@
             "description": "Conflict"
           },
           "422": {
-            "description": "Unprocessable Content",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
                 }
               }
-            }
+            },
+            "description": "Unprocessable Content"
           }
         }
       }
@@ -974,6 +974,7 @@
           "Export"
         ],
         "summary": "Clear Export Cache",
+        "description": "Clear the export cache for a given path and / or webcode",
         "operationId": "clear_export_cache",
         "security": [
           {
@@ -995,6 +996,22 @@
                 }
               ],
               "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
             }
           }
         ],
@@ -1860,12 +1877,26 @@
         "type": "object",
         "title": "HTTP400BadRequest"
       },
+      "HTTP404NotFound": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "The requested resource was not found.",
+            "examples": [
+              "The requested resource was not found."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HTTP404NotFound"
+      },
       "HTTP409Conflict": {
         "properties": {
           "detail": {
             "type": "string",
             "title": "Detail",
-            "default": "Conflict occurred.",
+            "default": "Conflict.",
             "examples": [
               "Conflict occurred."
             ]
@@ -1909,7 +1940,7 @@
             "title": "Detail",
             "default": "Unprocessable entity.",
             "examples": [
-              "Unprocessable entity."
+              "Unprocessable content."
             ]
           }
         },

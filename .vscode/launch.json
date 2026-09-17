@@ -13,6 +13,7 @@
         "PYTHONPATH": "${workspaceFolder}/applications/api/src",
         "API_RELOAD": "true"
       },
+      "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal"
     }
   ]

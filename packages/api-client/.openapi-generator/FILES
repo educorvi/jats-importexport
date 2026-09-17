@@ -8,8 +8,11 @@ docs/CacheStatusResponse.md
 docs/ExportApi.md
 docs/Front.md
 docs/HTTP400BadRequest.md
+docs/HTTP404NotFound.md
+docs/HTTP409Conflict.md
 docs/HTTP413PayloadTooLarge.md
 docs/HTTP415UnsupportedMediaType.md
+docs/HTTP422UnprocessableEntity.md
 docs/HTTP500InternalServerError.md
 docs/HTTPValidationError.md
 docs/HtmlDocumentResponse.md
@@ -49,8 +52,11 @@ jats_importexport_client/models/cache_status_response.py
 jats_importexport_client/models/front.py
 jats_importexport_client/models/html_document_response.py
 jats_importexport_client/models/http400_bad_request.py
+jats_importexport_client/models/http404_not_found.py
+jats_importexport_client/models/http409_conflict.py
 jats_importexport_client/models/http413_payload_too_large.py
 jats_importexport_client/models/http415_unsupported_media_type.py
+jats_importexport_client/models/http422_unprocessable_entity.py
 jats_importexport_client/models/http500_internal_server_error.py
 jats_importexport_client/models/http_validation_error.py
 jats_importexport_client/models/jats_document_response.py
