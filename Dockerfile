@@ -61,5 +61,6 @@ COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 USER appuser
 
 EXPOSE 8000
+EXPOSE 8222
 
 CMD ["start-api"]
