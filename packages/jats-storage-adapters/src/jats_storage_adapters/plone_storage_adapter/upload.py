@@ -113,7 +113,11 @@ class PloneUploadService:
         response.raise_for_status()
 
         object_url = response.json().get("@id", url)
-        self.__change_workflow_status(object_url, status)
+        # TODO Once clear whether workflow will be enabled for images, this might need to be changed
+        try:
+            self.__change_workflow_status(object_url, status)
+        except Exception:
+            logger.warning(f"Failed to change workflow status for {object_url}")
         return object_url
 
     def create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
