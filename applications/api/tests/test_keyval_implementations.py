@@ -5,7 +5,7 @@ from api.services.keyval_implementations import ExportTypes, InMemoryCache
 
 @pytest.fixture
 async def cache():
-    cache = InMemoryCache("keyval-test")
+    cache = InMemoryCache(0)
     await cache.init()
     return cache
 

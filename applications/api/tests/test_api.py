@@ -184,7 +184,7 @@ def test_export_html(mock_adapter):
 def test_export_html_async_returns_accepted_when_export_is_started(mock_adapter, mocker):
     mocker.patch("api.routers.export_async.html_export_async", return_value=None)
 
-    response = client.get("/export-async/html?path=doc1")
+    response = client.get("/export/async/html?path=doc1")
 
     assert response.status_code == 202
     assert response.json() == {"status": "Accepted"}
@@ -196,7 +196,7 @@ def test_export_html_async_returns_document_when_export_is_ready(mock_adapter, m
         return_value={"html": "<p>Content.</p>", "front": "<header>Title</header>"},
     )
 
-    response = client.get("/export-async/html?path=doc1")
+    response = client.get("/export/async/html?path=doc1")
 
     assert response.status_code == 200
     assert response.json() == {"html": "<p>Content.</p>", "front": "<header>Title</header>"}
