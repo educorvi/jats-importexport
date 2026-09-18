@@ -4,6 +4,8 @@ from enum import Enum
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
+
+from api.services.keyval_implementations import EXPORT_CACHE, ExportTypes
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import (
@@ -98,13 +100,20 @@ exp_document_metric = Summary(
 
 
 async def jats_export(path: str):
+    cached = await EXPORT_CACHE.get(path, ExportTypes.JATS)
+    if cached:
+        return JatsDocumentResponse(jats=cached)
     with exp_metric.labels("jats").time(), exp_document_metric.labels("jats", path).time():
         document = await __load_document(path)
         jats = await asyncio.to_thread(JATS_EXPORTER.export, document)
+        await EXPORT_CACHE.set(path, ExportTypes.JATS, jats)
         return JatsDocumentResponse(jats=jats)
 
 
 async def html_export(path: str, include_edit_links: bool = False):
+    cached = await EXPORT_CACHE.get_html(path, include_edit_links)
+    if cached:
+        return HtmlDocumentResponse(**cached)
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
@@ -120,14 +129,18 @@ async def html_export(path: str, include_edit_links: bool = False):
         if front is None:
             raise HTTPException(status_code=500, detail="HTML export failed: 'article-front' not found in the output.")
         front.attrs["class"] = "front"
-
+        await EXPORT_CACHE.set_html(path, include_edit_links, str(content), str(front))
         return HtmlDocumentResponse(html=str(content), front=str(front))
 
 
 async def md_export(path: str, include_edit_links: bool = False):
+    cached = await EXPORT_CACHE.get(path, ExportTypes.MD)
+    if cached:
+        return MarkdownDocumentResponse(md=cached)
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
+        await EXPORT_CACHE.set(path, ExportTypes.MD, md_content)
         return MarkdownDocumentResponse(md=md_content)
 
 

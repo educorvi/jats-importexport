@@ -1,7 +1,6 @@
 """Entrypoint API application module for jats-importexport."""
-import api.routers.export_async
-
 import argparse
+import asyncio
 import json
 import logging
 from collections.abc import AsyncIterator
@@ -11,20 +10,18 @@ from pathlib import Path
 import valkey.asyncio as aiovalkey
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
 from prometheus_fastapi_instrumentator import Instrumentator
 
+import api.routers.export_async
 from api.config import StorageConfig
+from api.services.keyval_implementations import ALL_CACHES, EXPORT_CACHE
 
 from .auth import require_permission
-from .backends.valkey import ValkeyBackend
 from .config import APIConfig
 from .logging import setup_logging
-from .routers import export, list, modify, status, upload, export_async
+from .routers import export, export_async, list, modify, status, upload, cache_management
 
 logger = logging.getLogger(__name__)
-
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""
@@ -39,15 +36,9 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        valkey = aiovalkey.Valkey(host=StorageConfig.VALKEY_HOST, encoding="utf8", decode_responses=False)
-        try:
-            await valkey.ping()
-            FastAPICache.init(ValkeyBackend(valkey), prefix=StorageConfig.CACHE_PREFIX)
-        except Exception as e:
-            logger.error(f"Failed to connect to Valkey, falling back to In-Memory cache: {str(e)}")
-            FastAPICache.init(InMemoryBackend(), prefix=StorageConfig.CACHE_PREFIX)
+        await asyncio.gather(*[cache.init() for cache in ALL_CACHES])
         yield
-        await valkey.aclose()
+        await asyncio.gather(*[cache.close() for cache in ALL_CACHES])
 
     app = FastAPI(
         title=APIConfig.API_TITLE,
@@ -69,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export_async.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
+    app.include_router(cache_management.router, dependencies=[Depends(require_permission("read"))])
     return app
 
 
