@@ -1,8 +1,6 @@
 import os
 
 import pytest
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
 
 # The list service creates its adapter while api.main is imported during test
 # collection. Supply inert credentials so collection does not depend on a local
@@ -13,7 +11,14 @@ os.environ.setdefault("PLONE_PASSWORD", "test")
 
 
 @pytest.fixture(autouse=True)
-def init_cache():
-    FastAPICache.init(InMemoryBackend(), prefix="test-cache")
-    yield
-    FastAPICache.reset()
+async def init_cache():
+    from api.services.keyval_implementations import ALL_CACHES
+
+    for cache in ALL_CACHES:
+        await cache.init()
+    try:
+        yield
+    finally:
+        for cache in ALL_CACHES:
+            await cache.delete_all()
+            await cache.close()

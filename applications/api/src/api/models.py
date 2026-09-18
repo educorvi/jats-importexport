@@ -79,8 +79,8 @@ class CacheClearedResponse(BaseModel):
 
 
 class CacheStatusResponse(BaseModel):
-    enabled: bool = Field(description="Indicates if FastAPICache is enabled")
-    prefix: str = Field(description="The cache prefix used by FastAPICache")
+    implementation: str = Field(description="The cache implementation")
+    items_in_cache: int = Field(description="The number of items currently in the cache")
 
 
 class ListBatching(BaseModel):
@@ -103,3 +103,7 @@ class ListFachbereicheResponse(BaseModel):
 
 class ListSachgebieteResponse(BaseModel):
     sachgebiete: list[str] = Field(description="The list of Sachgebiete")
+
+
+class AsyncExportAccepted(BaseModel):
+    status: str = Field(description="The status of the export")

@@ -11,8 +11,8 @@ FastAPI REST service for uploading, storing, and exporting [JATS XML](https://ja
 | `POST` | `/upload/zip` | Upload a JATS document as a ZIP archive |
 | `GET` | `/export/jats` | Retrieve and export a stored document as JATS XML |
 | `GET` | `/export/html` | Retrieve and export a stored document as HTML |
-| `GET` | `/export/cache` | Get Redis cache status (enabled flag and prefix) |
-| `DELETE` | `/export/cache` | Clear the export cache (optionally for a specific `path`) |
+| `GET` | `/cache/` | Get cache status (`implementation` and `items_in_cache`) |
+| `DELETE` | `/cache/` | Clear the export cache (optionally for a specific `path` or `webcode`; requires `manage` permission) |
 
 Upload endpoints accept either a `multipart/form-data` upload or a JSON body with a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
 
@@ -67,6 +67,7 @@ All settings are read from environment variables.
 | `API_KEY_MANAGER_API_ID` | *(unset)* | API ID sent to the API key manager when validating keys |
 | `API_HOST` | `0.0.0.0` | Bind host |
 | `API_PORT` | `8000`    | Bind port |
+| `API_METRICS_PORT` | `8222` | Port serving Prometheus metrics at `/metrics` |
 | `API_RELOAD` | `false`   | Enable auto-reload (development only) |
 | `API_WORKERS` | `1`       | Number of worker processes |
 | `API_CORS_ORIGINS` | `*`       | Comma-separated list of allowed CORS origins |
@@ -81,51 +82,65 @@ All settings are read from environment variables.
 | `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Default container path for referenced asset files |
 | `MAX_ZIP_FILE_COUNT` | `10000` | Maximum number of files allowed in an uploaded ZIP |
 | `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912` | Maximum uncompressed ZIP size in bytes (512 MB) |
-| `REDIS_HOST` | `localhost` | Hostname of the Redis instance used for caching |
-| `CACHE_PREFIX` | `jats-importexport-cache` | Key prefix used by the Redis cache |
+| `CACHE_IMPLEMENTATION` | `inmemory` | Cache backend: `inmemory` or `valkey` |
+| `VALKEY_HOST` | `localhost` | Valkey hostname; falls back to deprecated `REDIS_HOST` when unset or empty |
+| `VALKEY_DB_EXPORT` | `0` | Integer database index used by the shared export cache and as its cache ID |
 
 Plone-specific environment variables are documented in [`jats-storage-adapters`](../../packages/jats-storage-adapters).
 
 ## Caching
 
-Export responses are cached in Redis via [FastAPI Cache 2](https://github.com/long2ice/fastapi-cache).
+JATS, HTML, and Markdown exports use the cache backend selected by `CACHE_IMPLEMENTATION`.
+The default `inmemory` backend stores entries within each API worker; entries are lost on restart
+and are not shared between workers. Set `CACHE_IMPLEMENTATION=valkey` to use Valkey.
+Synchronous and asynchronous exports share the cache configured by `VALKEY_DB_EXPORT`.
+This setting is parsed as an integer and defaults to database `0`.
 
-Cache keys encode the export function name and the (URL-encoded) document path, e.g. `jats-importexport-cache:export:export_jats:vol1%2Farticle`.
+Cache entries are identified by document path (with leading and trailing slashes removed)
+and export type. HTML with edit links uses a separate entry. Valkey keys look like
+`vol1/article:ExportTypes.JATS`; `CACHE_PREFIX` is no longer used.
 
-When a document is **uploaded or overwritten**, the cache entries for that document path are automatically invalidated.
+Entries have no automatic expiry, and uploads do not currently invalidate them.
+Use the cache management endpoint to clear stale entries. With `inmemory`, management requests
+affect only the worker handling the request. Valkey cache status currently reports
+`items_in_cache` as `0` regardless of the actual number of entries.
 
 You can also manage the cache manually:
 
 ```sh
 # Check cache status
-curl -H "X-API-Key: <your-key>" http://localhost:8000/export/cache
+curl -H "X-API-Key: <your-key>" http://localhost:8000/cache/
 
 # Clear the entire export cache
-curl -X DELETE -H "X-API-Key: <your-key>" http://localhost:8000/export/cache
+curl -X DELETE -H "X-API-Key: <your-key>" http://localhost:8000/cache/
 
 # Clear cache for a specific document
-curl -X DELETE -H "X-API-Key: <your-key>" "http://localhost:8000/export/cache?path=vol1/article"
+curl -X DELETE -H "X-API-Key: <your-key>" "http://localhost:8000/cache/?path=vol1/article"
 ```
+
+**Valkey:** clearing the entire cache currently calls `FLUSHALL`, deleting all keys in all
+databases on the configured instance.
 
 ## Prometheus cache metrics
 
 `start-api` exposes metrics at `/metrics` on `API_METRICS_PORT` (default `8222`),
 aggregated across API workers. Configure Prometheus to scrape this port.
 
-`vur_hub_export_cache_requests_total{endpoint="/export/jats",result="hit"}` counts
-completed cached exports, with `hit` and `miss` results for JATS, HTML, Markdown,
-PDF, and metadata. Document paths are not metric labels. Disabled caching,
-`Cache-Control: no-store`, failed exports, and cache management requests are excluded.
-Forced refreshes (`Cache-Control: no-cache`) count as misses.
+`vur_hub_export_cache_requests_total{type="jats",result="hit",cache_id="0"}` counts
+completed cache lookups through `CacheImplementation.get`, with `hit` and `miss` results.
+Currently, JATS (`jats`) and Markdown (`md`) exports use this instrumented method;
+HTML lookups bypass it, and PDF and metadata exports do not use the cache.
+Document paths are not metric labels. Misses are counted even if the subsequent export fails.
+`Cache-Control` headers do not currently bypass or refresh the cache.
 
-Cache hit percentage per endpoint over five minutes:
+Cache hit percentage per export type and cache over five minutes:
 
 ```promql
-100 * sum by (endpoint) (rate(vur_hub_export_cache_requests_total{result="hit"}[5m]))
-  / sum by (endpoint) (rate(vur_hub_export_cache_requests_total[5m]))
+100 * sum by (type, cache_id) (rate(vur_hub_export_cache_requests_total{result="hit"}[5m]))
+  / sum by (type, cache_id) (rate(vur_hub_export_cache_requests_total[5m]))
 ```
 
-Endpoints with no cache traffic in the window have an undefined (`NaN`) ratio.
+Series with zero cache traffic in the window have an undefined (`NaN`) ratio.
 
 ## Generating the OpenAPI client
 
