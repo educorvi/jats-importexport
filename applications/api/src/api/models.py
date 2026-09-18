@@ -104,5 +104,6 @@ class ListFachbereicheResponse(BaseModel):
 class ListSachgebieteResponse(BaseModel):
     sachgebiete: list[str] = Field(description="The list of Sachgebiete")
 
+
 class AsyncExportAccepted(BaseModel):
     status: str = Field(description="The status of the export")

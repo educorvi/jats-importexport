@@ -1,11 +1,5 @@
 """Prometheus instrumentation for cached export responses."""
 
-from collections.abc import Awaitable, Callable
-from functools import wraps
-from typing import Any, Protocol
-
-from prometheus_client import Counter
-
 
 
 

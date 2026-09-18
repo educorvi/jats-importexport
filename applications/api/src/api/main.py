@@ -1,4 +1,5 @@
 """Entrypoint API application module for jats-importexport."""
+
 import argparse
 import asyncio
 import json
@@ -7,21 +8,19 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import valkey.asyncio as aiovalkey
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
-import api.routers.export_async
-from api.config import StorageConfig
-from api.services.keyval_implementations import ALL_CACHES, EXPORT_CACHE
+from api.services.keyval_implementations import ALL_CACHES
 
 from .auth import require_permission
 from .config import APIConfig
 from .logging import setup_logging
-from .routers import export, export_async, list, modify, status, upload, cache_management
+from .routers import cache_management, export, export_async, list, modify, status, upload
 
 logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application instance."""

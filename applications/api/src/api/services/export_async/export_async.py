@@ -1,13 +1,13 @@
-import json
 import logging
 
 from fastapi import BackgroundTasks
 
 from api.models import HtmlDocumentResponse
 from api.services.export import html_export
-from api.services.keyval_implementations import EXPORT_CACHE, ExportTypes
+from api.services.keyval_implementations import EXPORT_CACHE
 
 logger = logging.getLogger(__name__)
+
 
 async def _export_and_write_html(path: str):
     try:

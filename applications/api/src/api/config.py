@@ -7,6 +7,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class APIConfig:
     HOST: str = os.environ.get("API_HOST", "0.0.0.0")
     PORT: int = int(os.environ.get("API_PORT", 8000))
@@ -28,6 +29,7 @@ class APIConfig:
 
 if os.environ.get("REDIS_HOST") is not None:
     logger.warning("Env var 'REDIS_HOST' is deprecated. Please use 'VALKEY_HOST' instead.")
+
 
 class StorageConfig:
     STORAGE_ADAPTER: str = os.environ.get("STORAGE_ADAPTER", "plone")

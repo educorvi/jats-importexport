@@ -1,4 +1,3 @@
-from api.services.export import get_path_from_webcode
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -12,6 +11,7 @@ from api.models import (
     MarkdownDocumentResponse,
     MetadataResponse,
 )
+from api.services.export import get_path_from_webcode
 
 from ..services.export import html_export, jats_export, md_export, metadata_export, pdf_export
 
@@ -113,4 +113,3 @@ async def export_pdf(path: str = Depends(_resolve_path)):
 async def export_metadata(path: str = Depends(_resolve_path)):
     front = await metadata_export(path)
     return MetadataResponse(metadata=front)
-

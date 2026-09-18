@@ -1,21 +1,21 @@
-from pydantic import BaseModel
-from sys import implementation
-from typing import TypedDict
 import abc
 import json
 import logging
 from enum import Enum
+from typing import TypedDict
 
+from jats_classes import Front
 from prometheus_client import Counter
+from pydantic import BaseModel
 
 from api.config import StorageConfig
-from jats_classes import Front
 
 EXPORT_CACHE_REQUESTS = Counter(
     "vur_hub_export_cache_requests_total",
     "Completed export cache requests by endpoint and cache result.",
     ["type", "result", "cache_id"],
 )
+
 
 class ExportTypes(Enum):
     HTML = "html"
@@ -25,13 +25,16 @@ class ExportTypes(Enum):
     PDF = "pdf"
     METADATA = "metadata"
 
+
 class HtmlData(TypedDict):
     html: str
     front: str
 
+
 class CacheStatus(BaseModel):
     implementation: str
     items_in_cache: int
+
 
 class KeyValImplementation(abc.ABC):
     cache_id: str
@@ -96,6 +99,7 @@ class KeyValImplementation(abc.ABC):
         if cache_string:
             return json.loads(cache_string)
         return None
+
     async def set_html(self, path: str, edit_links: bool, html: str, front: str) -> None:
         export_type = ExportTypes.HTML_EDIT_LINKS if edit_links else ExportTypes.HTML
         await self._set(self.__clean_path(path), export_type, json.dumps({"html": html, "front": front}))

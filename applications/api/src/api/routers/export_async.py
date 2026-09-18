@@ -7,6 +7,7 @@ from api.services.export_async.export_async import html_export_async
 
 router = APIRouter(prefix="/export-async", tags=["Export Async"])
 
+
 @router.get(
     "/html",
     operation_id="export_html_async",

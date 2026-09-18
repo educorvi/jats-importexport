@@ -4,8 +4,6 @@ from enum import Enum
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
-
-from api.services.keyval_implementations import EXPORT_CACHE, ExportTypes
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import (
@@ -18,6 +16,7 @@ from prometheus_client import Histogram, Summary
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance
+from api.services.keyval_implementations import EXPORT_CACHE, ExportTypes
 
 JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()

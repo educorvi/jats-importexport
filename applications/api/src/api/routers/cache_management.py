@@ -10,6 +10,7 @@ from api.services.keyval_implementations import EXPORT_CACHE
 router = APIRouter(prefix="/cache", tags=["Cache Management"])
 logger = logging.getLogger(__name__)
 
+
 @router.delete(
     "/",
     operation_id="clear_export_cache",
@@ -27,6 +28,7 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
             path = await get_path_from_webcode(webcode or "")
         await EXPORT_CACHE.delete(path, None)
     return CacheClearedResponse(message="Cache cleared")
+
 
 @router.get("/", operation_id="get_cache_status", response_model=CacheStatusResponse)
 async def get_cache_status():
