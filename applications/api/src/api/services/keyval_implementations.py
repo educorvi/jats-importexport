@@ -1,3 +1,4 @@
+from valkey import Valkey
 import abc
 import json
 import logging
@@ -36,7 +37,7 @@ class CacheStatus(BaseModel):
     items_in_cache: int
 
 
-class KeyValImplementation(abc.ABC):
+class CacheImplementation(abc.ABC):
     cache_id: str
 
     @property
@@ -44,7 +45,6 @@ class KeyValImplementation(abc.ABC):
     def implementation_name(self) -> str:
         raise NotImplementedError
 
-    @abc.abstractmethod
     def __init__(self, cache_id: str):
         self.cache_id = cache_id
 
@@ -117,15 +117,12 @@ class KeyValImplementation(abc.ABC):
 logger = logging.getLogger(__name__)
 
 
-class InMemoryKeyValImplementation(KeyValImplementation):
+class InMemoryCache(CacheImplementation):
     @property
     def implementation_name(self) -> str:
         return "InMemory"
 
     _data: dict[tuple[str, ExportTypes], str]
-
-    def __init__(self, cache_id: str):
-        super().__init__(cache_id)
 
     async def init(self) -> None:
         self._data = {}
@@ -144,8 +141,6 @@ class InMemoryKeyValImplementation(KeyValImplementation):
         else:
             if (path, export_type) in self._data:
                 del self._data[(path, export_type)]
-        logger.info(f"Deleted key-value pair for path: {path}, export type: {export_type}")
-        print(self._data)
 
     async def _delete_all(self) -> None:
         self._data.clear()
@@ -154,9 +149,82 @@ class InMemoryKeyValImplementation(KeyValImplementation):
         return CacheStatus(implementation=self.implementation_name, items_in_cache=len(self._data))
 
 
-def __create_cache(cache_id: str) -> KeyValImplementation:
-    return InMemoryKeyValImplementation(cache_id)
+class ValKeyCache(CacheImplementation):
+    client: Valkey
 
+    async def init(self) -> None:
+        self.client = Valkey(host=StorageConfig.VALKEY_HOST, db=self.cache_id)
+        await self.client.ping()
+
+    async def close(self) -> None:
+        self.client.close()
+
+    @staticmethod
+    def __build_key(path: str, export_type: ExportTypes) -> str:
+        return f"{path}:{export_type}"
+
+    def __check_client(self):
+        if not self.client:
+            raise SystemError("Valkey client is not initialized")
+
+
+    async def _get(self, path: str, export_type: ExportTypes) -> str | None:
+        self.__check_client()
+        key = self.__build_key(path, export_type)
+        return await self.client.get(key)
+
+    async def _set(self, path: str, export_type: ExportTypes, value: str) -> None:
+        self.__check_client()
+        key = self.__build_key(path, export_type)
+        await self.client.set(key, value)
+
+    async def _delete(self, path: str, export_type: ExportTypes | None) -> None:
+        self.__check_client()
+        if export_type is None:
+            for key in self.client.scan_iter(f"{path}:*"):
+                await self.client.delete(key)
+        else:
+            key = self.__build_key(path, export_type)
+            await self.client.delete(key)
+
+    async def _delete_all(self) -> None:
+        self.__check_client()
+        await self.client.flushall()
+
+    async def get_cache_status(self) -> CacheStatus:
+        return CacheStatus(implementation=self.implementation_name, items_in_cache=0)
+
+    @property
+    def implementation_name(self) -> str:
+        return "ValKey"
+
+def __create_cache(cache_id: str) -> CacheImplementation:
+    match StorageConfig.CACHE_IMPLEMENTATION:
+        case "valkey":
+            logger.info(f"Using ValKey cache implementation for cache {cache_id}")
+            return ValKeyCache(cache_id)
+        case "inmemory":
+            logger.info(f"Using InMemory cache implementation for cache {cache_id}")
+            return InMemoryCache(cache_id)
+        case _:
+            raise ValueError("Invalid cache implementation. Supported options: inmemory, valkey")
+
+async def init_caches():
+    for cache in ALL_CACHES:
+        try:
+            await cache.init()
+        except Exception as e:  # noqa: E722
+            logger.fatal("Cache client init failed:")
+            logger.exception(e)
+            exit(1)
+
+async def close_caches():
+    for cache in ALL_CACHES:
+        try:
+            await cache.close()
+        except Exception as e:  # noqa: E722
+            logger.warning("Cache client close failed:")
+            logger.exception(e)
 
 EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_ASYNC_EXPORT)
 ALL_CACHES = [EXPORT_CACHE]

@@ -12,7 +12,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from api.services.keyval_implementations import ALL_CACHES
+from api.services.keyval_implementations import ALL_CACHES, init_caches, close_caches
 
 from .auth import require_permission
 from .config import APIConfig
@@ -35,9 +35,9 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        await asyncio.gather(*[cache.init() for cache in ALL_CACHES])
+        await init_caches()
         yield
-        await asyncio.gather(*[cache.close() for cache in ALL_CACHES])
+        await close_caches()
 
     app = FastAPI(
         title=APIConfig.API_TITLE,
