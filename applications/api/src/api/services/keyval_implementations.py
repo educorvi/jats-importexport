@@ -1,4 +1,3 @@
-from valkey import Valkey
 import abc
 import json
 import logging
@@ -8,6 +7,7 @@ from typing import TypedDict
 from jats_classes import Front
 from prometheus_client import Counter
 from pydantic import BaseModel
+from valkey import Valkey
 
 from api.config import StorageConfig
 
@@ -167,7 +167,6 @@ class ValKeyCache(CacheImplementation):
         if not self.client:
             raise SystemError("Valkey client is not initialized")
 
-
     async def _get(self, path: str, export_type: ExportTypes) -> str | None:
         self.__check_client()
         key = self.__build_key(path, export_type)
@@ -198,6 +197,7 @@ class ValKeyCache(CacheImplementation):
     def implementation_name(self) -> str:
         return "ValKey"
 
+
 def __create_cache(cache_id: str) -> CacheImplementation:
     match StorageConfig.CACHE_IMPLEMENTATION:
         case "valkey":
@@ -209,6 +209,7 @@ def __create_cache(cache_id: str) -> CacheImplementation:
         case _:
             raise ValueError("Invalid cache implementation. Supported options: inmemory, valkey")
 
+
 async def init_caches():
     for cache in ALL_CACHES:
         try:
@@ -218,6 +219,7 @@ async def init_caches():
             logger.exception(e)
             exit(1)
 
+
 async def close_caches():
     for cache in ALL_CACHES:
         try:
@@ -225,6 +227,7 @@ async def close_caches():
         except Exception as e:  # noqa: E722
             logger.warning("Cache client close failed:")
             logger.exception(e)
+
 
 EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_ASYNC_EXPORT)
 ALL_CACHES = [EXPORT_CACHE]

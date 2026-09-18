@@ -1,8 +1,6 @@
 """Prometheus instrumentation for cached export responses."""
 
 
-
-
 # class _ExportFunction(Protocol):
 #     __name__: str
 #

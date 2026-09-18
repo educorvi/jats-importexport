@@ -1,7 +1,6 @@
 """Entrypoint API application module for jats-importexport."""
 
 import argparse
-import asyncio
 import json
 import logging
 from collections.abc import AsyncIterator
@@ -12,7 +11,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from api.services.keyval_implementations import ALL_CACHES, init_caches, close_caches
+from api.services.keyval_implementations import close_caches, init_caches
 
 from .auth import require_permission
 from .config import APIConfig
