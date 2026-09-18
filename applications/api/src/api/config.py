@@ -42,5 +42,4 @@ class StorageConfig:
     # Options: inmemory, valkey
     CACHE_IMPLEMENTATION: str = os.environ.get("CACHE_IMPLEMENTATION", "inmemory")
     VALKEY_HOST: str = os.environ.get("VALKEY_HOST") or os.environ.get("REDIS_HOST", "localhost")
-    VALKEY_DB_EXPORT: str = os.environ.get("VALKEY_DB_EXPORT", "export")
-    VALKEY_DB_ASYNC_EXPORT: str = os.environ.get("VALKEY_DB_ASYNC_EXPORT", "async_export")
+    VALKEY_DB_EXPORT: int = int(os.environ.get("VALKEY_DB_EXPORT", 0))

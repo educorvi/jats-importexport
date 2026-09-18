@@ -38,14 +38,14 @@ class CacheStatus(BaseModel):
 
 
 class CacheImplementation(abc.ABC):
-    cache_id: str
+    cache_id: int
 
     @property
     @abc.abstractmethod
     def implementation_name(self) -> str:
         raise NotImplementedError
 
-    def __init__(self, cache_id: str):
+    def __init__(self, cache_id: int):
         self.cache_id = cache_id
 
     @staticmethod
@@ -198,7 +198,7 @@ class ValKeyCache(CacheImplementation):
         return "ValKey"
 
 
-def __create_cache(cache_id: str) -> CacheImplementation:
+def __create_cache(cache_id: int) -> CacheImplementation:
     match StorageConfig.CACHE_IMPLEMENTATION:
         case "valkey":
             logger.info(f"Using ValKey cache implementation for cache {cache_id}")
@@ -229,5 +229,5 @@ async def close_caches():
             logger.exception(e)
 
 
-EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_ASYNC_EXPORT)
+EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT)
 ALL_CACHES = [EXPORT_CACHE]
