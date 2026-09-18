@@ -1,3 +1,5 @@
+from api.services.export import get_path_from_webcode
+from api.services.export_async.keyval_implementations import KeyValImplementation, ASYNC_EXPORT_CACHE
 import logging
 import urllib.parse
 from collections.abc import Callable
@@ -197,6 +199,12 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
 
         for key in key_list:
             await FastAPICache.clear(key=key)
+        
+        if not path and webcode is not None:
+            path = await get_path_from_webcode(webcode)
+        if path:
+            ASYNC_EXPORT_CACHE.delete(path, None)
+
         return CacheClearedResponse(message=message.strip())
     else:
         await FastAPICache.clear(namespace=_CACHE_NAMESPACE)

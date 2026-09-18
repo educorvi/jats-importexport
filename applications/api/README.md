@@ -81,14 +81,14 @@ All settings are read from environment variables.
 | `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Default container path for referenced asset files |
 | `MAX_ZIP_FILE_COUNT` | `10000` | Maximum number of files allowed in an uploaded ZIP |
 | `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912` | Maximum uncompressed ZIP size in bytes (512 MB) |
-| `REDIS_HOST` | `localhost` | Hostname of the Redis instance used for caching |
-| `CACHE_PREFIX` | `jats-importexport-cache` | Key prefix used by the Redis cache |
+| `VALKEY_HOST` | `localhost` | Hostname of the Valkey instance used for caching |
+| `CACHE_PREFIX` | `jats-importexport-cache` | Key prefix used by the Valkey cache |
 
 Plone-specific environment variables are documented in [`jats-storage-adapters`](../../packages/jats-storage-adapters).
 
 ## Caching
 
-Export responses are cached in Redis via [FastAPI Cache 2](https://github.com/long2ice/fastapi-cache).
+Export responses are cached in Valkey via [FastAPI Cache 2](https://github.com/long2ice/fastapi-cache).
 
 Cache keys encode the export function name and the (URL-encoded) document path, e.g. `jats-importexport-cache:export:export_jats:vol1%2Farticle`.
 
