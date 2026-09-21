@@ -1676,8 +1676,18 @@ or pipeline) parameterized.
     <xsl:template match="ref-list" name="ref-list">
         <div class="section ref-list">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="." mode="label"/>
-            <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label)]"/>
+            <xsl:if test="label or title">
+                <h3 class="title">
+                    <xsl:if test="label">
+                        <span class="label">
+                            <xsl:apply-templates select="label/node()"/>
+                        </span>
+                        <xsl:text> </xsl:text>
+                    </xsl:if>
+                    <xsl:apply-templates select="title/node()"/>
+                </h3>
+            </xsl:if>
+            <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label | self::title)]"/>
             <xsl:if test="ref">
                 <div class="ref-list table">
                     <xsl:apply-templates select="ref"/>
