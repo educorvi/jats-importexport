@@ -49,14 +49,16 @@ class CacheStatus(BaseModel):
 
 class CacheImplementation(abc.ABC):
     cache_id: int
+    cache_name: str
 
     @property
     @abc.abstractmethod
     def implementation_name(self) -> str:
         raise NotImplementedError
 
-    def __init__(self, cache_id: int):
+    def __init__(self, cache_id: int, cache_name: str):
         self.cache_id = cache_id
+        self.cache_name = cache_name
 
     @staticmethod
     def __clean_path(path: str):
@@ -213,14 +215,14 @@ class ValKeyCache(CacheImplementation):
         return "ValKey"
 
 
-def __create_cache(cache_id: int) -> CacheImplementation:
+def __create_cache(cache_id: int, cache_name: str) -> CacheImplementation:
     match StorageConfig.CACHE_IMPLEMENTATION:
         case "valkey":
             logger.info(f"Using ValKey cache implementation for cache {cache_id}")
-            return ValKeyCache(cache_id)
+            return ValKeyCache(cache_id, cache_name)
         case "inmemory":
             logger.info(f"Using InMemory cache implementation for cache {cache_id}")
-            return InMemoryCache(cache_id)
+            return InMemoryCache(cache_id, cache_name)
         case _:
             raise ValueError("Invalid cache implementation. Supported options: inmemory, valkey")
 
@@ -244,6 +246,6 @@ async def close_caches():
             logger.exception(e)
 
 
-EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT)
-EXPORT_STATE_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT_STATE)
+EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT, "EXPORT_CACHE")
+EXPORT_STATE_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT_STATE, "EXPORT_STATE_CACHE")
 ALL_CACHES = [EXPORT_CACHE, EXPORT_STATE_CACHE]

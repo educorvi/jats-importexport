@@ -4,12 +4,28 @@ from fastapi import APIRouter, Depends
 from fastapi.exceptions import RequestValidationError
 
 from api.auth import require_permission
-from api.models import CacheClearedResponse, CacheStatusResponse
+from api.models import CacheClearedResponse, CacheStatus, CacheStatusResponse
 from api.services.export import get_path_from_webcode
-from api.services.keyval_implementations import EXPORT_CACHE
+from api.services.keyval_implementations import EXPORT_CACHE, EXPORT_STATE_CACHE
 
 router = APIRouter(prefix="/cache", tags=["Cache Management"])
 logger = logging.getLogger(__name__)
+
+
+@router.get("/", operation_id="get_cache_status", response_model=CacheStatusResponse)
+async def get_cache_status():
+    export_data = await EXPORT_CACHE.get_cache_status()
+    export_state_data = await EXPORT_STATE_CACHE.get_cache_status()
+    return CacheStatusResponse.model_validate(
+        {
+            EXPORT_CACHE.cache_name: CacheStatus(
+                implementation=export_data.implementation, items_in_cache=export_data.items_in_cache
+            ),
+            EXPORT_STATE_CACHE.cache_name: CacheStatus(
+                implementation=export_state_data.implementation, items_in_cache=export_state_data.items_in_cache
+            ),
+        }
+    )
 
 
 @router.delete(
@@ -32,9 +48,3 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
             path = await get_path_from_webcode(webcode or "")
         await EXPORT_CACHE.delete(path, None)
     return CacheClearedResponse(message="Cache cleared")
-
-
-@router.get("/", operation_id="get_cache_status", response_model=CacheStatusResponse)
-async def get_cache_status():
-    data = await EXPORT_CACHE.get_cache_status()
-    return CacheStatusResponse(implementation=data.implementation, items_in_cache=data.items_in_cache)

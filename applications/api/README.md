@@ -76,16 +76,17 @@ All settings are read from environment variables.
 
 ### Storage
 
-| Variable                    | Default       | Description                                                                |
-|-----------------------------|---------------|----------------------------------------------------------------------------|
-| `STORAGE_ADAPTER`           | `plone`       | Storage backend to use (`plone`)                                           |
-| `STORAGE_CONTAINER`         | `jats-file`   | Default container path for JATS XML files                                  |
-| `ASSETS_STORAGE_CONTAINER`  | `jats-assets` | Default container path for referenced asset files                          |
-| `MAX_ZIP_FILE_COUNT`        | `10000`       | Maximum number of files allowed in an uploaded ZIP                         |
-| `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912`   | Maximum uncompressed ZIP size in bytes (512 MB)                            |
-| `CACHE_IMPLEMENTATION`      | `inmemory`    | Cache backend: `inmemory` or `valkey`                                      |
-| `VALKEY_HOST`               | `localhost`   | Valkey hostname; falls back to deprecated `REDIS_HOST` when unset or empty |
-| `VALKEY_DB_EXPORT`          | `0`           | Integer database index used by the shared export cache and as its cache ID |
+| Variable                    | Default       | Description                                                                      |
+|-----------------------------|---------------|----------------------------------------------------------------------------------|
+| `STORAGE_ADAPTER`           | `plone`       | Storage backend to use (`plone`)                                                 |
+| `STORAGE_CONTAINER`         | `jats-file`   | Default container path for JATS XML files                                        |
+| `ASSETS_STORAGE_CONTAINER`  | `jats-assets` | Default container path for referenced asset files                                |
+| `MAX_ZIP_FILE_COUNT`        | `10000`       | Maximum number of files allowed in an uploaded ZIP                               |
+| `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912`   | Maximum uncompressed ZIP size in bytes (512 MB)                                  |
+| `CACHE_IMPLEMENTATION`      | `inmemory`    | Cache backend: `inmemory` or `valkey`                                            |
+| `VALKEY_HOST`               | `localhost`   | Valkey hostname; falls back to deprecated `REDIS_HOST` when unset or empty       |
+| `VALKEY_DB_EXPORT`          | `0`           | Integer database index used by the shared export cache and as its cache ID       |
+| `VALKEY_DB_EXPORT_STATE`    | `1`           | Integer database index used by the shared export state cache and as its cache ID |
 
 Plone-specific environment variables are documented in [`jats-storage-adapters`](../../packages/jats-storage-adapters).
 

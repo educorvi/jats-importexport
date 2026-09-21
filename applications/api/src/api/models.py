@@ -1,5 +1,5 @@
 from jats_classes import Front
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 # HTTP Error Responses
 
@@ -78,9 +78,13 @@ class CacheClearedResponse(BaseModel):
     message: str = Field(description="Confirmation message for cache clearance")
 
 
-class CacheStatusResponse(BaseModel):
+class CacheStatus(BaseModel):
     implementation: str = Field(description="The cache implementation")
     items_in_cache: int = Field(description="The number of items currently in the cache")
+
+
+class CacheStatusResponse(RootModel[dict[str, CacheStatus]]):
+    pass
 
 
 class ListBatching(BaseModel):
