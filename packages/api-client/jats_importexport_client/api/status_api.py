@@ -293,7 +293,7 @@ class StatusApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
-        """(Deprecated) Health Status
+        """(Deprecated) Health Status Old
 
 
         :param _request_timeout: timeout setting for this request. If one
@@ -356,7 +356,7 @@ class StatusApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
-        """(Deprecated) Health Status
+        """(Deprecated) Health Status Old
 
 
         :param _request_timeout: timeout setting for this request. If one
@@ -419,7 +419,7 @@ class StatusApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """(Deprecated) Health Status
+        """(Deprecated) Health Status Old
 
 
         :param _request_timeout: timeout setting for this request. If one

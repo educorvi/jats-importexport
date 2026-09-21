@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_status**](StatusApi.md#get_status) | **GET** / | Health Status
-[**get_status_old**](StatusApi.md#get_status_old) | **GET** /status | Health Status
+[**get_status_old**](StatusApi.md#get_status_old) | **GET** /status | Health Status Old
 
 
 # **get_status**
@@ -72,7 +72,7 @@ No authorization required
 # **get_status_old**
 > object get_status_old()
 
-Health Status
+Health Status Old
 
 ### Example
 
@@ -95,7 +95,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     api_instance = jats_importexport_client.StatusApi(api_client)
 
     try:
-        # Health Status
+        # Health Status Old
         api_response = api_instance.get_status_old()
         print("The response of StatusApi->get_status_old:\n")
         pprint(api_response)

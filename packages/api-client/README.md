@@ -104,12 +104,13 @@ Class | Method | HTTP request | Description
 *ExportApi* | [**export_metadata**](docs/ExportApi.md#export_metadata) | **GET** /export/metadata | Export Metadata
 *ExportApi* | [**export_pdf**](docs/ExportApi.md#export_pdf) | **GET** /export/pdf | Export Pdf
 *ExportAsyncApi* | [**export_html_async**](docs/ExportAsyncApi.md#export_html_async) | **GET** /export/async/html | Export Html
+*ExportAsyncApi* | [**export_pdf_async**](docs/ExportAsyncApi.md#export_pdf_async) | **GET** /export/async/pdf | Export Pdf
 *ListApi* | [**list_articles**](docs/ListApi.md#list_articles) | **GET** /list/ | List Articles
 *ListApi* | [**list_fachbereiche_list_fachbereiche_get**](docs/ListApi.md#list_fachbereiche_list_fachbereiche_get) | **GET** /list/fachbereiche | List Fachbereiche
 *ListApi* | [**list_sachgebiete_list_sachgebiete_get**](docs/ListApi.md#list_sachgebiete_list_sachgebiete_get) | **GET** /list/sachgebiete | List Sachgebiete
 *ModifyApi* | [**link_related_articles**](docs/ModifyApi.md#link_related_articles) | **POST** /modify/link-related-articles | Link related articles IDs to the real articles in the storage
 *StatusApi* | [**get_status**](docs/StatusApi.md#get_status) | **GET** / | Health Status
-*StatusApi* | [**get_status_old**](docs/StatusApi.md#get_status_old) | **GET** /status | Health Status
+*StatusApi* | [**get_status_old**](docs/StatusApi.md#get_status_old) | **GET** /status | Health Status Old
 *UploadApi* | [**upload_docx**](docs/UploadApi.md#upload_docx) | **POST** /upload/docx | Upload a DOCX file, convert it to JATS XML, and upload to the storage
 *UploadApi* | [**upload_xml**](docs/UploadApi.md#upload_xml) | **POST** /upload/xml | Upload a JATS Document (XML) to the storage
 *UploadApi* | [**upload_zip**](docs/UploadApi.md#upload_zip) | **POST** /upload/zip | Upload a JATS Document (ZIP-file) to the storage

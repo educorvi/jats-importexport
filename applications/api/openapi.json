@@ -30,7 +30,7 @@
         "tags": [
           "Status"
         ],
-        "summary": "Health Status",
+        "summary": "Health Status Old",
         "operationId": "get_status_old",
         "responses": {
           "200": {
@@ -795,6 +795,87 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HtmlDocumentResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/async/pdf": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Pdf",
+        "operationId": "export_pdf_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF file",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -2380,7 +2461,7 @@
     },
     {
       "name": "Export Async",
-      "description": "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`. If the export type is already cached, the endpoint returns `200 OK` and the exported document and front matter. Otherwise, it starts a background export and returns `202 Accepted`.\n\nPoll the same endpoint with the same query parameters until it returns `200 OK`. Requests made while the export is running return `202 Accepted`. If a background export fails, a subsequent request starts another attempt."
+      "description": "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`. If the export type is already cached, the endpoint returns `200 OK` and the exported document (HTML and front matter, or a PDF download). Otherwise, it starts a background export and returns `202 Accepted`.\n\nPoll the same endpoint with the same query parameters until it returns `200 OK`. Requests made while the export is running return `202 Accepted`. If a background export fails, a subsequent request starts another attempt."
     },
     {
       "name": "Upload",
