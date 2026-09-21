@@ -4089,7 +4089,7 @@ or pipeline) parameterized.
                                 <xsl:text> </xsl:text>
                             </xsl:if>
                             <a href="#{$anchor-id}" class="toc-title">
-                                <xsl:value-of select="title"/>
+                                <xsl:apply-templates select="title/node()"/>
                             </a>
                         </span>
                         <xsl:if test="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] or app[title[normalize-space(string(.))]]">
