@@ -63,4 +63,7 @@ USER appuser
 EXPOSE 8000
 EXPOSE 8222
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["python", "-c", "import urllib.request; from api.config import APIConfig; response = urllib.request.build_opener(urllib.request.ProxyHandler({})).open(f'http://127.0.0.1:{APIConfig.PORT}/', timeout=3); raise SystemExit(0 if response.status == 200 else 1)"]
+
 CMD ["start-api"]
