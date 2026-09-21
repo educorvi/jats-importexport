@@ -1,9 +1,10 @@
-from api.services.keyval_implementations import EXPORT_CACHE
 from io import BytesIO
 from typing import Any, cast
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from starlette.datastructures import UploadFile as StarletteUploadFile
+
+from api.services.keyval_implementations import EXPORT_CACHE
 
 from ..models import (
     HTTP400BadRequest,
@@ -138,7 +139,7 @@ async def upload_xml(request: Request, container: str | None = None):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
         xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
-    articles =  await upload_xml_service(cast(UploadFile, xml_file), container)
+    articles = await upload_xml_service(cast(UploadFile, xml_file), container)
     for url in articles.urls:
         await EXPORT_CACHE.delete(url, None)
     return articles
