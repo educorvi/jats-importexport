@@ -53,11 +53,11 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(status.router)
-    app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
-    app.include_router(modify.router, dependencies=[Depends(require_permission("write"))])
+    app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export_async.router, dependencies=[Depends(require_permission("read"))])
-    app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
+    app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
+    app.include_router(modify.router, dependencies=[Depends(require_permission("write"))])
     app.include_router(cache_management.router, dependencies=[Depends(require_permission("read"))])
     return app
 
