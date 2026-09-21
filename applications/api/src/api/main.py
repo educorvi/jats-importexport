@@ -41,6 +41,44 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=APIConfig.API_TITLE,
         description=APIConfig.API_DESCRIPTION,
+        openapi_tags=[
+            {
+                "name": "Status",
+                "description": "Check API health and version.",
+            },
+            {
+                "name": "List",
+                "description": "Browse stored articles and available subject classifications.",
+            },
+            {
+                "name": "Export",
+                "description": "Export articles as JATS, HTML, Markdown, or PDF, or retrieve their metadata.",
+            },
+            {
+                "name": "Export Async",
+                "description": (
+                    "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`."
+                    " If the export type is already cached, the endpoint returns `200 OK` and the exported"
+                    " document and front matter. Otherwise, it starts a background export and"
+                    " returns `202 Accepted`."
+                    "\n\nPoll the same endpoint with the same query parameters until it returns"
+                    " `200 OK`. Requests made while the export is running return `202 Accepted`."
+                    " If a background export fails, a subsequent request starts another attempt."
+                ),
+            },
+            {
+                "name": "Upload",
+                "description": "Import JATS XML, ZIP archives, or DOCX documents into storage.",
+            },
+            {
+                "name": "Modify",
+                "description": "Postprocessing of imported articles.",
+            },
+            {
+                "name": "Cache Management",
+                "description": "Inspect cache status and clear cached exports.",
+            },
+        ],
         version=APIConfig.API_VERSION,
         lifespan=lifespan,
     )

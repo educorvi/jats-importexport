@@ -15,7 +15,7 @@
 # import models into model package
 from jats_importexport_client.models.async_export_accepted import AsyncExportAccepted
 from jats_importexport_client.models.cache_cleared_response import CacheClearedResponse
-from jats_importexport_client.models.cache_status_response import CacheStatusResponse
+from jats_importexport_client.models.cache_status import CacheStatus
 from jats_importexport_client.models.front import Front
 from jats_importexport_client.models.http400_bad_request import HTTP400BadRequest
 from jats_importexport_client.models.http404_not_found import HTTP404NotFound

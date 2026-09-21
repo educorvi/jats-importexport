@@ -36,7 +36,7 @@ __all__ = [
     "ApiException",
     "AsyncExportAccepted",
     "CacheClearedResponse",
-    "CacheStatusResponse",
+    "CacheStatus",
     "Front",
     "HTTP400BadRequest",
     "HTTP404NotFound",
@@ -86,7 +86,7 @@ from jats_importexport_client.exceptions import ApiException as ApiException
 # import models into sdk package
 from jats_importexport_client.models.async_export_accepted import AsyncExportAccepted as AsyncExportAccepted
 from jats_importexport_client.models.cache_cleared_response import CacheClearedResponse as CacheClearedResponse
-from jats_importexport_client.models.cache_status_response import CacheStatusResponse as CacheStatusResponse
+from jats_importexport_client.models.cache_status import CacheStatus as CacheStatus
 from jats_importexport_client.models.front import Front as Front
 from jats_importexport_client.models.http400_bad_request import HTTP400BadRequest as HTTP400BadRequest
 from jats_importexport_client.models.http404_not_found import HTTP404NotFound as HTTP404NotFound

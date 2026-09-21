@@ -16,9 +16,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import StrictStr
-from typing import Optional
+from typing import Dict, Optional
 from jats_importexport_client.models.cache_cleared_response import CacheClearedResponse
-from jats_importexport_client.models.cache_status_response import CacheStatusResponse
+from jats_importexport_client.models.cache_status import CacheStatus
 
 from jats_importexport_client.api_client import ApiClient, RequestSerialized
 from jats_importexport_client.api_response import ApiResponse
@@ -336,7 +336,7 @@ class CacheManagementApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> CacheStatusResponse:
+    ) -> Dict[str, CacheStatus]:
         """Get Cache Status
 
 
@@ -370,7 +370,7 @@ class CacheManagementApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CacheStatusResponse",
+            '200': "Dict[str, CacheStatus]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -398,7 +398,7 @@ class CacheManagementApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[CacheStatusResponse]:
+    ) -> ApiResponse[Dict[str, CacheStatus]]:
         """Get Cache Status
 
 
@@ -432,7 +432,7 @@ class CacheManagementApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CacheStatusResponse",
+            '200': "Dict[str, CacheStatus]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -494,7 +494,7 @@ class CacheManagementApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CacheStatusResponse",
+            '200': "Dict[str, CacheStatus]",
         }
         response_data = self.api_client.call_api(
             *_param,

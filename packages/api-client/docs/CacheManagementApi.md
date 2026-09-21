@@ -91,7 +91,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_cache_status**
-> CacheStatusResponse get_cache_status()
+> Dict[str, CacheStatus] get_cache_status()
 
 Get Cache Status
 
@@ -101,7 +101,7 @@ Get Cache Status
 
 ```python
 import jats_importexport_client
-from jats_importexport_client.models.cache_status_response import CacheStatusResponse
+from jats_importexport_client.models.cache_status import CacheStatus
 from jats_importexport_client.rest import ApiException
 from pprint import pprint
 
@@ -144,7 +144,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**CacheStatusResponse**](CacheStatusResponse.md)
+[**Dict[str, CacheStatus]**](CacheStatus.md)
 
 ### Authorization
 
