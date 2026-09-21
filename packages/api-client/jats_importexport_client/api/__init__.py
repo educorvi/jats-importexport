@@ -1,7 +1,9 @@
 # flake8: noqa
 
 # import apis into api package
+from jats_importexport_client.api.cache_management_api import CacheManagementApi
 from jats_importexport_client.api.export_api import ExportApi
+from jats_importexport_client.api.export_async_api import ExportAsyncApi
 from jats_importexport_client.api.list_api import ListApi
 from jats_importexport_client.api.modify_api import ModifyApi
 from jats_importexport_client.api.status_api import StatusApi

@@ -3,9 +3,12 @@
 .gitlab-ci.yml
 .travis.yml
 README.md
+docs/AsyncExportAccepted.md
 docs/CacheClearedResponse.md
+docs/CacheManagementApi.md
 docs/CacheStatusResponse.md
 docs/ExportApi.md
+docs/ExportAsyncApi.md
 docs/Front.md
 docs/HTTP400BadRequest.md
 docs/HTTP404NotFound.md
@@ -37,7 +40,9 @@ docs/ValidationError.md
 git_push.sh
 jats_importexport_client/__init__.py
 jats_importexport_client/api/__init__.py
+jats_importexport_client/api/cache_management_api.py
 jats_importexport_client/api/export_api.py
+jats_importexport_client/api/export_async_api.py
 jats_importexport_client/api/list_api.py
 jats_importexport_client/api/modify_api.py
 jats_importexport_client/api/status_api.py
@@ -47,6 +52,7 @@ jats_importexport_client/api_response.py
 jats_importexport_client/configuration.py
 jats_importexport_client/exceptions.py
 jats_importexport_client/models/__init__.py
+jats_importexport_client/models/async_export_accepted.py
 jats_importexport_client/models/cache_cleared_response.py
 jats_importexport_client/models/cache_status_response.py
 jats_importexport_client/models/front.py
@@ -81,4 +87,7 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_async_export_accepted.py
+test/test_cache_management_api.py
+test/test_export_async_api.py
 tox.ini

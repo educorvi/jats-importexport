@@ -23,12 +23,12 @@ from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class UpdateArticlesResponse(BaseModel):
+class AsyncExportAccepted(BaseModel):
     """
-    UpdateArticlesResponse
+    AsyncExportAccepted
     """ # noqa: E501
-    updated_articles: List[StrictStr] = Field(description="The list of updated article paths (relative to the storage base URL)")
-    __properties: ClassVar[List[str]] = ["updated_articles"]
+    status: StrictStr = Field(description="The status of the export")
+    __properties: ClassVar[List[str]] = ["status"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +48,7 @@ class UpdateArticlesResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateArticlesResponse from a JSON string"""
+        """Create an instance of AsyncExportAccepted from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +73,7 @@ class UpdateArticlesResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateArticlesResponse from a dict"""
+        """Create an instance of AsyncExportAccepted from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +81,7 @@ class UpdateArticlesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "updated_articles": obj.get("updated_articles")
+            "status": obj.get("status")
         })
         return _obj
 
