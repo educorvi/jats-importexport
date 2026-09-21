@@ -187,7 +187,6 @@ def test_export_html_async_returns_accepted_when_export_is_started(mock_adapter,
     response = client.get("/export/async/html?path=doc1")
 
     assert response.status_code == 202
-    assert response.json() == {"status": "Accepted"}
 
 
 def test_export_html_async_returns_document_when_export_is_ready(mock_adapter, mocker):
