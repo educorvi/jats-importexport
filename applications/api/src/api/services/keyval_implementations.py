@@ -6,8 +6,8 @@ from typing import TypedDict
 
 from jats_classes import Front
 from prometheus_client import Counter
-from pydantic import BaseModel
-from valkey import Valkey
+from pydantic import BaseModel, TypeAdapter
+from valkey.asyncio import Valkey
 
 from api.config import StorageConfig
 
@@ -16,6 +16,9 @@ EXPORT_CACHE_REQUESTS = Counter(
     "Completed export cache requests by endpoint and cache result.",
     ["type", "result", "cache_id"],
 )
+
+
+_FRONT_ADAPTER = TypeAdapter(Front)
 
 
 class ExportTypes(Enum):
@@ -105,13 +108,14 @@ class CacheImplementation(abc.ABC):
         await self._set(self.__clean_path(path), export_type, json.dumps({"html": html, "front": front}))
 
     async def set_metadata(self, path: str, metadata: Front) -> None:
-        await self._set(self.__clean_path(path), ExportTypes.METADATA, json.dumps(metadata))
+        value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
+        await self.set(path, ExportTypes.METADATA, value)
 
     async def get_metadata(self, path: str) -> Front | None:
-        cache_string = await self._get(self.__clean_path(path), ExportTypes.METADATA)
-        if cache_string:
-            return json.loads(cache_string)
-        return None
+        value = await self.get(path, ExportTypes.METADATA)
+        if value is None:
+            return None
+        return _FRONT_ADAPTER.validate_json(value)
 
 
 logger = logging.getLogger(__name__)
@@ -157,7 +161,7 @@ class ValKeyCache(CacheImplementation):
         await self.client.ping()
 
     async def close(self) -> None:
-        self.client.close()
+        await self.client.close()
 
     @staticmethod
     def __build_key(path: str, export_type: ExportTypes) -> str:
@@ -180,15 +184,15 @@ class ValKeyCache(CacheImplementation):
     async def _delete(self, path: str, export_type: ExportTypes | None) -> None:
         self.__check_client()
         if export_type is None:
-            for key in self.client.scan_iter(f"{path}:*"):
-                await self.client.delete(key)
+            for export_type in ExportTypes:
+                await self.client.delete(self.__build_key(path, export_type))
         else:
             key = self.__build_key(path, export_type)
             await self.client.delete(key)
 
     async def _delete_all(self) -> None:
         self.__check_client()
-        await self.client.flushall()
+        await self.client.flushdb(True)
 
     async def get_cache_status(self) -> CacheStatus:
         return CacheStatus(implementation=self.implementation_name, items_in_cache=0)

@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a39"
+    "version": "1.0.0a41"
   },
   "paths": {
     "/status": {
@@ -968,14 +968,13 @@
         }
       }
     },
-    "/export/cache": {
-      "delete": {
+    "/export/async/html": {
+      "get": {
         "tags": [
-          "Export"
+          "Export Async"
         ],
-        "summary": "Clear Export Cache",
-        "description": "Clear the export cache for a given path and / or webcode",
-        "operationId": "clear_export_cache",
+        "summary": "Export Html",
+        "operationId": "export_html_async",
         "security": [
           {
             "APIKeyHeader": []
@@ -1021,7 +1020,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CacheClearedResponse"
+                  "$ref": "#/components/schemas/HtmlDocumentResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
                 }
               }
             }
@@ -1032,30 +1041,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Export"
-        ],
-        "summary": "Get Cache Status",
-        "operationId": "get_cache_status",
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CacheStatusResponse"
                 }
               }
             }
@@ -1288,10 +1273,119 @@
           }
         ]
       }
+    },
+    "/cache/": {
+      "delete": {
+        "tags": [
+          "Cache Management"
+        ],
+        "summary": "Clear Export Cache",
+        "description": "Clear the export cache for a given path or webcode",
+        "operationId": "clear_export_cache",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheClearedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Cache Management"
+        ],
+        "summary": "Get Cache Status",
+        "operationId": "get_cache_status",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AsyncExportAccepted": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "The status of the export"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "AsyncExportAccepted"
+      },
       "CacheClearedResponse": {
         "properties": {
           "message": {
@@ -1308,21 +1402,21 @@
       },
       "CacheStatusResponse": {
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled",
-            "description": "Indicates if FastAPICache is enabled"
-          },
-          "prefix": {
+          "implementation": {
             "type": "string",
-            "title": "Prefix",
-            "description": "The cache prefix used by FastAPICache"
+            "title": "Implementation",
+            "description": "The cache implementation"
+          },
+          "items_in_cache": {
+            "type": "integer",
+            "title": "Items In Cache",
+            "description": "The number of items currently in the cache"
           }
         },
         "type": "object",
         "required": [
-          "enabled",
-          "prefix"
+          "implementation",
+          "items_in_cache"
         ],
         "title": "CacheStatusResponse"
       },

@@ -107,3 +107,4 @@ class ListSachgebieteResponse(BaseModel):
 
 class AsyncExportAccepted(BaseModel):
     status: str = Field(description="The status of the export")
+

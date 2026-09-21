@@ -1,3 +1,4 @@
+from api.services.keyval_implementations import EXPORT_CACHE
 from io import BytesIO
 from typing import Any, cast
 
@@ -92,7 +93,10 @@ async def upload_zip(request: Request, container: str | None = None, assets_cont
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' field in JSON body.")
         zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
-    return await upload_zip_service(cast(UploadFile, zip_file), container, assets_container)
+    articles = await upload_zip_service(cast(UploadFile, zip_file), container, assets_container)
+    for url in articles.urls:
+        await EXPORT_CACHE.delete(url, None)
+    return articles
 
 
 @router.post(
@@ -134,7 +138,10 @@ async def upload_xml(request: Request, container: str | None = None):
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'xml_file' field in JSON body.")
         xml_file = _upload_file_from_data_uri(data_uri, "upload.xml")
-    return await upload_xml_service(cast(UploadFile, xml_file), container)
+    articles =  await upload_xml_service(cast(UploadFile, xml_file), container)
+    for url in articles.urls:
+        await EXPORT_CACHE.delete(url, None)
+    return articles
 
 
 @router.post(
@@ -178,4 +185,7 @@ async def upload_docx(
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'docx_file' field in JSON body.")
         docx_file = _upload_file_from_data_uri(data_uri, "upload.docx")
-    return await upload_docx_service(cast(UploadFile, docx_file), container, assets_container, use_html_sections)
+    articles = await upload_docx_service(cast(UploadFile, docx_file), container, assets_container, use_html_sections)
+    for url in articles.urls:
+        await EXPORT_CACHE.delete(url, None)
+    return articles
