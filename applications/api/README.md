@@ -4,17 +4,18 @@ FastAPI REST service for uploading, storing, and exporting [JATS XML](https://ja
 
 ## Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/status` | Health check |
-| `POST` | `/upload/xml` | Upload a JATS document as an XML file |
-| `POST` | `/upload/zip` | Upload a JATS document as a ZIP archive |
-| `GET` | `/export/jats` | Retrieve and export a stored document as JATS XML |
-| `GET` | `/export/html` | Retrieve and export a stored document as HTML |
-| `GET` | `/cache/` | Get cache status (`implementation` and `items_in_cache`) |
-| `DELETE` | `/cache/` | Clear the export cache (optionally for a specific `path` or `webcode`; requires `manage` permission) |
+| Method   | Path           | Description                                                                                          |
+|----------|----------------|------------------------------------------------------------------------------------------------------|
+| `GET`    | `/status`      | Health check                                                                                         |
+| `POST`   | `/upload/xml`  | Upload a JATS document as an XML file                                                                |
+| `POST`   | `/upload/zip`  | Upload a JATS document as a ZIP archive                                                              |
+| `GET`    | `/export/jats` | Retrieve and export a stored document as JATS XML                                                    |
+| `GET`    | `/export/html` | Retrieve and export a stored document as HTML                                                        |
+| `GET`    | `/cache/`      | Get cache status (`implementation` and `items_in_cache`)                                             |
+| `DELETE` | `/cache/`      | Clear the export cache (optionally for a specific `path` or `webcode`; requires `manage` permission) |
 
-Upload endpoints accept either a `multipart/form-data` upload or a JSON body with a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`).
+Upload endpoints accept either a `multipart/form-data` upload or a JSON body with a base64-encoded data URI (e.g.
+`data:application/xml;base64,<data>`).
 
 Export endpoints always return JSON.
 
@@ -60,31 +61,31 @@ All settings are read from environment variables.
 
 ### Server
 
-| Variable | Default   | Description |
-|---|-----------|---|
-| `API_KEY` | *(unset)* | API key required in `X-API-Key` header; auth disabled when unset |
-| `API_KEY_MANAGER_URL` | *(unset)* | Base URL of an external API key manager used to validate keys (requires `API_KEY_MANAGER_API_ID`) |
-| `API_KEY_MANAGER_API_ID` | *(unset)* | API ID sent to the API key manager when validating keys |
-| `API_HOST` | `0.0.0.0` | Bind host |
-| `API_PORT` | `8000`    | Bind port |
-| `API_METRICS_PORT` | `8222` | Port serving Prometheus metrics at `/metrics` |
-| `API_RELOAD` | `false`   | Enable auto-reload (development only) |
-| `API_WORKERS` | `1`       | Number of worker processes |
-| `API_CORS_ORIGINS` | `*`       | Comma-separated list of allowed CORS origins |
-| `API_LIST_BATCH_SIZE` | `200`     | Default and maximum number of articles returned by one `/list/` request |
+| Variable                 | Default   | Description                                                                                       |
+|--------------------------|-----------|---------------------------------------------------------------------------------------------------|
+| `API_KEY`                | *(unset)* | API key required in `X-API-Key` header; auth disabled when unset                                  |
+| `API_KEY_MANAGER_URL`    | *(unset)* | Base URL of an external API key manager used to validate keys (requires `API_KEY_MANAGER_API_ID`) |
+| `API_KEY_MANAGER_API_ID` | *(unset)* | API ID sent to the API key manager when validating keys                                           |
+| `API_HOST`               | `0.0.0.0` | Bind host                                                                                         |
+| `API_PORT`               | `8000`    | Bind port                                                                                         |
+| `API_METRICS_PORT`       | `8222`    | Port serving Prometheus metrics at `/metrics`                                                     |
+| `API_RELOAD`             | `false`   | Enable auto-reload (development only)                                                             |
+| `API_WORKERS`            | `1`       | Number of worker processes                                                                        |
+| `API_CORS_ORIGINS`       | `*`       | Comma-separated list of allowed CORS origins                                                      |
+| `API_LIST_BATCH_SIZE`    | `200`     | Default and maximum number of articles returned by one `/list/` request                           |
 
 ### Storage
 
-| Variable | Default | Description |
-|---|---|---|
-| `STORAGE_ADAPTER` | `plone` | Storage backend to use (`plone`) |
-| `STORAGE_CONTAINER` | `jats-file` | Default container path for JATS XML files |
-| `ASSETS_STORAGE_CONTAINER` | `jats-assets` | Default container path for referenced asset files |
-| `MAX_ZIP_FILE_COUNT` | `10000` | Maximum number of files allowed in an uploaded ZIP |
-| `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912` | Maximum uncompressed ZIP size in bytes (512 MB) |
-| `CACHE_IMPLEMENTATION` | `inmemory` | Cache backend: `inmemory` or `valkey` |
-| `VALKEY_HOST` | `localhost` | Valkey hostname; falls back to deprecated `REDIS_HOST` when unset or empty |
-| `VALKEY_DB_EXPORT` | `0` | Integer database index used by the shared export cache and as its cache ID |
+| Variable                    | Default       | Description                                                                |
+|-----------------------------|---------------|----------------------------------------------------------------------------|
+| `STORAGE_ADAPTER`           | `plone`       | Storage backend to use (`plone`)                                           |
+| `STORAGE_CONTAINER`         | `jats-file`   | Default container path for JATS XML files                                  |
+| `ASSETS_STORAGE_CONTAINER`  | `jats-assets` | Default container path for referenced asset files                          |
+| `MAX_ZIP_FILE_COUNT`        | `10000`       | Maximum number of files allowed in an uploaded ZIP                         |
+| `MAX_ZIP_UNCOMPRESSED_SIZE` | `536870912`   | Maximum uncompressed ZIP size in bytes (512 MB)                            |
+| `CACHE_IMPLEMENTATION`      | `inmemory`    | Cache backend: `inmemory` or `valkey`                                      |
+| `VALKEY_HOST`               | `localhost`   | Valkey hostname; falls back to deprecated `REDIS_HOST` when unset or empty |
+| `VALKEY_DB_EXPORT`          | `0`           | Integer database index used by the shared export cache and as its cache ID |
 
 Plone-specific environment variables are documented in [`jats-storage-adapters`](../../packages/jats-storage-adapters).
 
@@ -100,7 +101,7 @@ Cache entries are identified by document path (with leading and trailing slashes
 and export type. HTML with edit links uses a separate entry. Valkey keys look like
 `vol1/article:ExportTypes.JATS`; `CACHE_PREFIX` is no longer used.
 
-Entries have no automatic expiry, and uploads do not currently invalidate them.
+The XML, ZIP, and DOCX upload endpoints invalidate cache entries for each successfully saved article path.
 Use the cache management endpoint to clear stale entries. With `inmemory`, management requests
 affect only the worker handling the request. Valkey cache status currently reports
 `items_in_cache` as `0` regardless of the actual number of entries.
@@ -118,8 +119,7 @@ curl -X DELETE -H "X-API-Key: <your-key>" http://localhost:8000/cache/
 curl -X DELETE -H "X-API-Key: <your-key>" "http://localhost:8000/cache/?path=vol1/article"
 ```
 
-**Valkey:** clearing the entire cache currently calls `FLUSHALL`, deleting all keys in all
-databases on the configured instance.
+**Valkey:** clearing the entire cache calls asynchronous `FLUSHDB`, deleting all keys in the configured database.
 
 ## Prometheus cache metrics
 

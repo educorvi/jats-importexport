@@ -133,13 +133,19 @@ async def html_export(path: str, include_edit_links: bool = False):
 
 
 async def md_export(path: str, include_edit_links: bool = False):
-    cached = await EXPORT_CACHE.get(path, ExportTypes.MD)
+    if include_edit_links:
+        cached = await EXPORT_CACHE.get(path, ExportTypes.MD_EDIT_LINKS)
+    else:
+        cached = await EXPORT_CACHE.get(path, ExportTypes.MD)
     if cached:
         return MarkdownDocumentResponse(md=cached)
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
-        await EXPORT_CACHE.set(path, ExportTypes.MD, md_content)
+        if include_edit_links:
+            await EXPORT_CACHE.set(path, ExportTypes.MD_EDIT_LINKS, md_content)
+        else:
+            await EXPORT_CACHE.set(path, ExportTypes.MD, md_content)
         return MarkdownDocumentResponse(md=md_content)
 
 

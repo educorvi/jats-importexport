@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends
+from fastapi.exceptions import RequestValidationError
 
 from api.auth import require_permission
 from api.models import CacheClearedResponse, CacheStatusResponse
@@ -23,7 +24,7 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
     Clear the export cache for a given path or webcode
     """
     if path is not None and webcode is not None:
-        raise ValueError("Provide either path or webcode, not both")
+        raise RequestValidationError("Provide either path or webcode, not both")
     if path is None and webcode is None:
         await EXPORT_CACHE.delete_all()
     else:

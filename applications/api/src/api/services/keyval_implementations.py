@@ -21,10 +21,17 @@ EXPORT_CACHE_REQUESTS = Counter(
 _FRONT_ADAPTER = TypeAdapter(Front)
 
 
+class ExportState(Enum):
+    RUNNING = "running"
+    COMPLETE = "complete"
+    FAILED = "failed"
+
+
 class ExportTypes(Enum):
     HTML = "html"
     HTML_EDIT_LINKS = "html_edit_links"
     MD = "md"
+    MD_EDIT_LINKS = "md_edit_links"
     JATS = "jats"
     PDF = "pdf"
     METADATA = "metadata"
@@ -157,7 +164,7 @@ class ValKeyCache(CacheImplementation):
     client: Valkey
 
     async def init(self) -> None:
-        self.client = Valkey(host=StorageConfig.VALKEY_HOST, db=self.cache_id)
+        self.client = Valkey(host=StorageConfig.VALKEY_HOST, db=self.cache_id, decode_responses=True)
         await self.client.ping()
 
     async def close(self) -> None:
@@ -195,7 +202,11 @@ class ValKeyCache(CacheImplementation):
         await self.client.flushdb(True)
 
     async def get_cache_status(self) -> CacheStatus:
-        return CacheStatus(implementation=self.implementation_name, items_in_cache=0)
+        self.__check_client()
+        return CacheStatus(
+            implementation=self.implementation_name,
+            items_in_cache=await self.client.dbsize(),
+        )
 
     @property
     def implementation_name(self) -> str:
@@ -234,4 +245,5 @@ async def close_caches():
 
 
 EXPORT_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT)
-ALL_CACHES = [EXPORT_CACHE]
+EXPORT_STATE_CACHE = __create_cache(StorageConfig.VALKEY_DB_EXPORT_STATE)
+ALL_CACHES = [EXPORT_CACHE, EXPORT_STATE_CACHE]
