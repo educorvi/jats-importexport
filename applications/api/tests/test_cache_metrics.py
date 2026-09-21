@@ -10,7 +10,7 @@ from api.services.keyval_implementations import (
 @pytest.mark.parametrize("export_type", list(ExportTypes))
 @pytest.mark.parametrize("value", ["cached export", ""])
 async def test_export_cache_metrics(export_type, value):
-    cache = InMemoryCache(1)
+    cache = InMemoryCache(1, cache_name="TEST_EXPORT_CACHE")
     await cache.init()
 
     def count(result):

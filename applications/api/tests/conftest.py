@@ -9,6 +9,10 @@ os.environ.setdefault("PLONE_BASE_URL", "http://localhost:8080")
 os.environ.setdefault("PLONE_USERNAME", "test")
 os.environ.setdefault("PLONE_PASSWORD", "test")
 
+# Unit tests must not use or clear a cache configured by the local environment.
+# In-memory caches also work across the fixture and TestClient event loops.
+os.environ["CACHE_IMPLEMENTATION"] = "inmemory"
+
 
 @pytest.fixture(autouse=True)
 async def init_cache():

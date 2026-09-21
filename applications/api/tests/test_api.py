@@ -147,6 +147,7 @@ def mock_adapter(mocker):
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
     mocker.patch.object(APIConfig, "API_KEY", None)
+    mocker.patch.object(APIConfig, "API_KEY_MANAGER_URL", None)
     return adapter
 
 
