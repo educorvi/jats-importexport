@@ -1,4 +1,5 @@
 import abc
+import base64
 import json
 import logging
 from enum import Enum
@@ -119,6 +120,17 @@ class CacheImplementation(abc.ABC):
     async def set_metadata(self, path: str, metadata: Front) -> None:
         value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
         await self.set(path, ExportTypes.METADATA, value)
+
+    async def set_pdf(self, path: str, content: bytes, filename: str) -> None:
+        value = json.dumps({"content": base64.b64encode(content).decode("ascii"), "filename": filename})
+        await self.set(path, ExportTypes.PDF, value)
+
+    async def get_pdf(self, path: str) -> tuple[bytes, str] | None:
+        value = await self.get(path, ExportTypes.PDF)
+        if value is None:
+            return None
+        data = json.loads(value)
+        return base64.b64decode(data["content"]), data["filename"]
 
     async def get_metadata(self, path: str) -> Front | None:
         value = await self.get(path, ExportTypes.METADATA)

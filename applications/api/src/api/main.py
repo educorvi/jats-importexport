@@ -59,7 +59,7 @@ def create_app() -> FastAPI:
                 "description": (
                     "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`."
                     " If the export type is already cached, the endpoint returns `200 OK` and the exported"
-                    " document and front matter. Otherwise, it starts a background export and"
+                    " document (HTML and front matter, or a PDF download). Otherwise, it starts a background export and"
                     " returns `202 Accepted`."
                     "\n\nPoll the same endpoint with the same query parameters until it returns"
                     " `200 OK`. Requests made while the export is running return `202 Accepted`."
