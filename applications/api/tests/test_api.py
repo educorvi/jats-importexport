@@ -104,7 +104,7 @@ class MockStorageAdapter(StorageAdapter):
         self.uploaded_files.append((name, container, url))
         return url
 
-    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
+    def get_jats_document(self, path: str, is_path: bool = True, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         if path == "nonexistent":
             raise PathNotFoundExpection(path)
         # Return a valid JATSDocument

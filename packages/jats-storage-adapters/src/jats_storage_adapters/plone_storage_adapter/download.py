@@ -20,7 +20,7 @@ from jats_classes import (
 )
 from lxml import etree
 
-from ..errors import DuplicateWebcodeException, InternalError, WebcodeNotFoundException
+from ..errors import DuplicateException, InternalError, PathNotFoundExpection
 from ..interface import EDIT_PI
 from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
 
@@ -330,7 +330,7 @@ class PloneDownloadService:
 
         return list(path_set_related), list(path_set_translations)
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
+    def get_path_from_webcode(self, webcode: str) -> str:
         url = f"{self.base_url}/@querystring-search"
         query = [
             {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
@@ -340,7 +340,10 @@ class PloneDownloadService:
         search_response.raise_for_status()
         search_results = search_response.json().get("items", [])
         if not search_results:
-            raise WebcodeNotFoundException(webcode)
+            raise PathNotFoundExpection(webcode)
         if len(search_results) > 1:
-            raise DuplicateWebcodeException(webcode)
-        return search_results[0]
+            raise DuplicateException(webcode)
+
+        result = search_results[0]
+        path = self.__get_path_from_plone_object(result)
+        return path

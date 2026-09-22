@@ -133,16 +133,25 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error downloading file from {url}") from e
 
     @overload
-    def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
+    def get_jats_document(self, path: str, is_path: bool, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
 
     @overload
-    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument: ...
+    def get_jats_document(
+        self, path: str, is_path: bool = True, options: BaseGetJATSDocumentOptions | None = None
+    ) -> JATSDocument: ...
 
-    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
+    def get_jats_document(
+        self, path: str, is_path: bool = True, options: BaseGetJATSDocumentOptions | None = None
+    ) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
-        url = self.get_url_from_path(path)
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
+
+        if not is_path:
+            path = download_service.get_path_from_webcode(path)
+
+        url = self.get_url_from_path(path)
+
         try:
             article = download_service.fetch_article(url, plone_options)
         except HTTPStatusError as e:
@@ -163,16 +172,16 @@ class PloneStorageAdapter(StorageAdapter):
             article=article, related_articles=relations, related_articles_translations=related_articles_translations
         )
 
-    def get_metadata(self, path: str) -> Front:
+    def get_metadata(self, path: str, is_path: bool = True) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
+        if not is_path:
+            path = download_service.get_path_from_webcode(path)
         url = self.get_url_from_path(path)
-        return PloneDownloadService(self.base_url, self.httpx_client).get_metadata(url)
+        return download_service.get_metadata(url)
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
-
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        return PloneDownloadService(self.base_url, self.httpx_client).get_article_by_webcode(webcode)
 
     # Modify / automation related methods
 

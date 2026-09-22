@@ -7,9 +7,8 @@ from fastapi import HTTPException, Request
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import (
-    DuplicateWebcodeException,
+    DuplicateException,
     PathNotFoundExpection,
-    WebcodeNotFoundException,
 )
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 from prometheus_client import Histogram, Summary
@@ -43,42 +42,27 @@ def get_return_type(request: Request) -> ReturnType:
 
 
 async def __load_document(
-    path: str, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
+    path: str, is_path: bool, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
 ) -> JATSDocument:
     try:
         adapter = adapter or get_adapter_instance()
-        return await asyncio.to_thread(adapter.get_jats_document, path, options)
+        return await asyncio.to_thread(adapter.get_jats_document, path, is_path, options)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
+    except DuplicateException as e:
+        raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
 
-async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> Front:
+async def __load_metadata(path: str, is_path: bool, adapter: StorageAdapter | None = None) -> Front:
     try:
         adapter = adapter or get_adapter_instance()
-        return await asyncio.to_thread(adapter.get_metadata, path)
+        return await asyncio.to_thread(adapter.get_metadata, path, is_path)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
-
-
-async def get_path_from_webcode(webcode: str, adapter: StorageAdapter | None = None) -> str:
-    try:
-        adapter = adapter or get_adapter_instance()
-        article = await asyncio.to_thread(adapter.get_article_by_webcode, webcode)
-        full_url = article.get("@id", "")
-        path = adapter.get_path_from_url(full_url)
-        if not path:
-            raise HTTPException(status_code=404, detail=f"Document not found for webcode: {webcode}")
-        return path
-    except HTTPException:
-        raise
-    except WebcodeNotFoundException:
-        raise HTTPException(status_code=404, detail=f"Document not found for webcode: {webcode}")
-    except DuplicateWebcodeException:
-        raise HTTPException(status_code=409, detail=f"Multiple documents found for webcode: {webcode}")
+    except DuplicateException as e:
+        raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
@@ -97,16 +81,16 @@ exp_document_metric = Summary(
 )
 
 
-async def jats_export(path: str):
+async def jats_export(path: str, is_path: bool):
     with exp_metric.labels("jats").time(), exp_document_metric.labels("jats", path).time():
-        document = await __load_document(path)
+        document = await __load_document(path, is_path)
         jats = await asyncio.to_thread(JATS_EXPORTER.export, document)
         return JatsDocumentResponse(jats=jats)
 
 
-async def html_export(path: str, include_edit_links: bool = False):
+async def html_export(path: str, is_path: bool, include_edit_links: bool = False):
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
-        document = await __load_document(path, {"include_edit_links": include_edit_links})
+        document = await __load_document(path, is_path, {"include_edit_links": include_edit_links})
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
 
         soup = BeautifulSoup(html_content, "html.parser")
@@ -124,25 +108,25 @@ async def html_export(path: str, include_edit_links: bool = False):
         return HtmlDocumentResponse(html=str(content), front=str(front))
 
 
-async def md_export(path: str, include_edit_links: bool = False):
+async def md_export(path: str, is_path: bool, include_edit_links: bool = False):
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
-        document = await __load_document(path, {"include_edit_links": include_edit_links})
+        document = await __load_document(path, is_path, {"include_edit_links": include_edit_links})
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
         return MarkdownDocumentResponse(md=md_content)
 
 
-async def pdf_export(path: str):
+async def pdf_export(path: str, is_path: bool):
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
-        document = await __load_document(path, adapter=adapter)
+        document = await __load_document(path, is_path, adapter=adapter)
         pdf_content, filename = await asyncio.to_thread(
             PdfExporter(image_downloader=adapter.download_file).export, document
         )
         return pdf_content, filename
 
 
-async def metadata_export(path: str):
+async def metadata_export(path: str, is_path: bool):
     with exp_metric.labels("metadata").time(), exp_document_metric.labels("metadata", path).time():
         adapter = get_adapter_instance()
-        front = await __load_metadata(path, adapter=adapter)
+        front = await __load_metadata(path, is_path, adapter=adapter)
         return front

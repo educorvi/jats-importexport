@@ -102,7 +102,9 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
+    def get_jats_document(
+        self, path: str, is_path: bool = True, options: GetJATSDocumentOptions | None = None
+    ) -> JATSDocument:
         """Retrieve a JATSDocument from the storage system.
 
         Args:
@@ -114,7 +116,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    def get_metadata(self, path: str) -> Front:
+    def get_metadata(self, path: str, is_path: bool = True) -> Front:
         """Retrieve metadata for a JatsDocument from the storage system.
 
         Args:
@@ -123,7 +125,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         Returns:
             A Front instance containing metadata for the file.
         """
-        return self.get_jats_document(path).article.front
+        return self.get_jats_document(path, is_path=is_path).article.front
 
     @abc.abstractmethod
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
