@@ -185,15 +185,15 @@ def test_export_html(mock_adapter):
     assert "html" in response.json()
 
 
+def test_export_md_nonexistent_path(mock_adapter):
+    response = client.get("/export/md?path=nonexistent")
+    assert response.status_code == 404
+
+
 def test_export_md(mock_adapter):
     response = client.get("/export/md?path=doc1")
     assert response.status_code == 200
     assert "md" in response.json()
-
-
-def test_export_md_nonexistent_path(mock_adapter):
-    response = client.get("/export/md?path=nonexistent")
-    assert response.status_code == 404
 
 
 def test_export_jats_storage_internal_error_returns_500(mock_adapter, mocker):
