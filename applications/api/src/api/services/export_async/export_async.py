@@ -14,29 +14,33 @@ FAILED_ASYNC_EXPORTS = prometheus_client.Counter(
 )
 
 
-async def _export_and_write_html(path: str):
+async def _export_and_write_html(path: str, include_edit_links: bool = False):
+    export_type = ExportType.HTML_EDIT_LINKS if include_edit_links else ExportType.HTML
     try:
-        html: HtmlDocumentResponse = await html_export(path)
-        await EXPORT_CACHE.set_html(path, False, html.html, html.front)
-        await EXPORT_STATE_CACHE.set(path, ExportType.HTML, ExportState.COMPLETE.value)
+        html: HtmlDocumentResponse = await html_export(path, include_edit_links)
+        await EXPORT_CACHE.set_html(path, include_edit_links, html.html, html.front)
+        await EXPORT_STATE_CACHE.set(path, export_type, ExportState.COMPLETE.value)
         logger.info(f"HTML exported and written to {path}")
     except Exception as e:
-        await EXPORT_STATE_CACHE.set(path, ExportType.HTML, ExportState.FAILED.value)
-        FAILED_ASYNC_EXPORTS.labels(export_type=ExportType.HTML.value).inc()
+        await EXPORT_STATE_CACHE.set(path, export_type, ExportState.FAILED.value)
+        FAILED_ASYNC_EXPORTS.labels(export_type=export_type.value).inc()
         logger.error(f"An error occurred while exporting HTML: {e}")
         return
 
 
-async def html_export_async(path: str, bt: BackgroundTasks) -> HtmlDocumentResponse | None:
-    cached_html = await EXPORT_CACHE.get_html(path, False)
+async def html_export_async(
+    path: str, bt: BackgroundTasks, include_edit_links: bool = False
+) -> HtmlDocumentResponse | None:
+    export_type = ExportType.HTML_EDIT_LINKS if include_edit_links else ExportType.HTML
+    cached_html = await EXPORT_CACHE.get_html(path, include_edit_links)
     if cached_html:
         return HtmlDocumentResponse(**cached_html)
-    state = await EXPORT_STATE_CACHE.get(path, ExportType.HTML)
+    state = await EXPORT_STATE_CACHE.get(path, export_type)
     if state == ExportState.RUNNING.value:
         return None
     else:
-        await EXPORT_STATE_CACHE.set(path, ExportType.HTML, ExportState.RUNNING.value)
-        bt.add_task(_export_and_write_html, path)
+        await EXPORT_STATE_CACHE.set(path, export_type, ExportState.RUNNING.value)
+        bt.add_task(_export_and_write_html, path, include_edit_links)
         return None
 
 

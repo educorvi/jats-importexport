@@ -44,9 +44,10 @@ async def export_status(export_type: ExportType, path: str = Depends(_resolve_pa
     response_model=HtmlDocumentResponse,
     responses={202: {"model": AsyncExportAccepted, "description": "In Progress"}},
 )
-async def export_html(background_tasks: BackgroundTasks, path: str = Depends(_resolve_path)):
-    # TODO Add support for edit links
-    result = await html_export_async(path, background_tasks)
+async def export_html(
+    background_tasks: BackgroundTasks, path: str = Depends(_resolve_path), include_edit_links: bool = False
+):
+    result = await html_export_async(path, background_tasks, include_edit_links)
     if result:
         return result
     return JSONResponse(
