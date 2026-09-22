@@ -17,7 +17,7 @@ router = APIRouter(prefix="/export/async", tags=["Export Async"])
         202: {"model": AsyncExportAccepted, "description": "In Progress"},
         500: {"description": "Failed"},
         404: {"description": "No export was started yet"},
-    }
+    },
 )
 async def export_status(export_type: ExportType, path: str = Depends(_resolve_path)):
     state = await async_export_status(path, export_type)
