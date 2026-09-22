@@ -840,6 +840,16 @@
         ],
         "parameters": [
           {
+            "name": "include_edit_links",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Edit Links"
+            }
+          },
+          {
             "name": "path",
             "in": "query",
             "required": false,

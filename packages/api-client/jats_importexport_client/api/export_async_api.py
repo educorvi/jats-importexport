@@ -15,7 +15,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictBytes, StrictStr
+from pydantic import StrictBool, StrictBytes, StrictStr
 from typing import Optional, Tuple, Union
 from jats_importexport_client.models.async_export_accepted import AsyncExportAccepted
 from jats_importexport_client.models.export_type import ExportType
@@ -42,6 +42,7 @@ class ExportAsyncApi:
     @validate_call
     def export_html_async(
         self,
+        include_edit_links: Optional[StrictBool] = None,
         path: Optional[StrictStr] = None,
         webcode: Optional[StrictStr] = None,
         _request_timeout: Union[
@@ -60,6 +61,8 @@ class ExportAsyncApi:
         """Export Html
 
 
+        :param include_edit_links:
+        :type include_edit_links: bool
         :param path:
         :type path: str
         :param webcode:
@@ -87,6 +90,7 @@ class ExportAsyncApi:
         """ # noqa: E501
 
         _param = self._export_html_async_serialize(
+            include_edit_links=include_edit_links,
             path=path,
             webcode=webcode,
             _request_auth=_request_auth,
@@ -114,6 +118,7 @@ class ExportAsyncApi:
     @validate_call
     def export_html_async_with_http_info(
         self,
+        include_edit_links: Optional[StrictBool] = None,
         path: Optional[StrictStr] = None,
         webcode: Optional[StrictStr] = None,
         _request_timeout: Union[
@@ -132,6 +137,8 @@ class ExportAsyncApi:
         """Export Html
 
 
+        :param include_edit_links:
+        :type include_edit_links: bool
         :param path:
         :type path: str
         :param webcode:
@@ -159,6 +166,7 @@ class ExportAsyncApi:
         """ # noqa: E501
 
         _param = self._export_html_async_serialize(
+            include_edit_links=include_edit_links,
             path=path,
             webcode=webcode,
             _request_auth=_request_auth,
@@ -186,6 +194,7 @@ class ExportAsyncApi:
     @validate_call
     def export_html_async_without_preload_content(
         self,
+        include_edit_links: Optional[StrictBool] = None,
         path: Optional[StrictStr] = None,
         webcode: Optional[StrictStr] = None,
         _request_timeout: Union[
@@ -204,6 +213,8 @@ class ExportAsyncApi:
         """Export Html
 
 
+        :param include_edit_links:
+        :type include_edit_links: bool
         :param path:
         :type path: str
         :param webcode:
@@ -231,6 +242,7 @@ class ExportAsyncApi:
         """ # noqa: E501
 
         _param = self._export_html_async_serialize(
+            include_edit_links=include_edit_links,
             path=path,
             webcode=webcode,
             _request_auth=_request_auth,
@@ -253,6 +265,7 @@ class ExportAsyncApi:
 
     def _export_html_async_serialize(
         self,
+        include_edit_links,
         path,
         webcode,
         _request_auth,
@@ -277,6 +290,10 @@ class ExportAsyncApi:
 
         # process the path parameters
         # process the query parameters
+        if include_edit_links is not None:
+            
+            _query_params.append(('include_edit_links', include_edit_links))
+            
         if path is not None:
             
             _query_params.append(('path', path))

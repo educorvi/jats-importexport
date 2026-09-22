@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **export_html_async**
-> HtmlDocumentResponse export_html_async(path=path, webcode=webcode)
+> HtmlDocumentResponse export_html_async(include_edit_links=include_edit_links, path=path, webcode=webcode)
 
 Export Html
 
@@ -45,12 +45,13 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ExportAsyncApi(api_client)
+    include_edit_links = False # bool |  (optional) (default to False)
     path = 'path_example' # str |  (optional)
     webcode = 'webcode_example' # str |  (optional)
 
     try:
         # Export Html
-        api_response = api_instance.export_html_async(path=path, webcode=webcode)
+        api_response = api_instance.export_html_async(include_edit_links=include_edit_links, path=path, webcode=webcode)
         print("The response of ExportAsyncApi->export_html_async:\n")
         pprint(api_response)
     except Exception as e:
@@ -64,6 +65,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **include_edit_links** | **bool**|  | [optional] [default to False]
  **path** | **str**|  | [optional] 
  **webcode** | **str**|  | [optional] 
 
