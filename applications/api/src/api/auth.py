@@ -37,10 +37,11 @@ def require_permission(permission: str = "write"):
             return
         if APIConfig.API_KEY_MANAGER_URL and APIConfig.API_KEY_MANAGER_API_ID:
             try:
-                request = httpx.post(
-                    APIConfig.API_KEY_MANAGER_URL.rstrip("/") + "/api/key/check",
-                    json={"api_id": APIConfig.API_KEY_MANAGER_API_ID, "api_key": api_key, "permission": permission},
-                )
+                async with httpx.AsyncClient() as client:
+                    request = await client.post(
+                        APIConfig.API_KEY_MANAGER_URL.rstrip("/") + "/api/key/check",
+                        json={"api_id": APIConfig.API_KEY_MANAGER_API_ID, "api_key": api_key, "permission": permission},
+                    )
                 if request.status_code >= 400:
                     logger.error("API key check failed: %s", request.json())
                     raise HTTPException(status_code=500, detail="Internal error while checking API key")

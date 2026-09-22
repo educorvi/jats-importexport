@@ -147,6 +147,7 @@ def mock_adapter(mocker):
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
     mocker.patch.object(APIConfig, "API_KEY", None)
+    mocker.patch.object(APIConfig, "API_KEY_MANAGER_URL", None)
     return adapter
 
 
@@ -181,10 +182,62 @@ def test_export_html(mock_adapter):
     assert "html" in response.json()
 
 
+def test_export_html_async_returns_accepted_when_export_is_started(mock_adapter, mocker):
+    mocker.patch("api.routers.export_async.html_export_async", return_value=None)
+
+    response = client.get("/export/async/html?path=doc1")
+
+    assert response.status_code == 202
+
+
+def test_export_html_async_returns_document_when_export_is_ready(mock_adapter, mocker):
+    mocker.patch(
+        "api.routers.export_async.html_export_async",
+        return_value={"html": "<p>Content.</p>", "front": "<header>Title</header>"},
+    )
+
+    response = client.get("/export/async/html?path=doc1")
+
+    assert response.status_code == 200
+    assert response.json() == {"html": "<p>Content.</p>", "front": "<header>Title</header>"}
+
+
 def test_export_md(mock_adapter):
     response = client.get("/export/md?path=doc1")
     assert response.status_code == 200
     assert "md" in response.json()
+
+
+@pytest.mark.parametrize("params", [{"path": "doc1"}, {"webcode": "123"}])
+def test_export_pdf_async_generates_then_returns_cached_download(mock_adapter, mocker, params):
+    content = b"%PDF-1.7\n\x00\xff\x80"
+    exporter = mocker.patch(
+        "api.services.export_async.export_async.pdf_export",
+        return_value=(content, "article.pdf"),
+    )
+
+    response = client.get("/export/async/pdf", params=params)
+    assert response.status_code == 202
+    assert response.json() == {"status": "In Progress"}
+
+    response = client.get("/export/async/pdf", params=params)
+    assert response.status_code == 200
+    assert response.content == content
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["content-disposition"] == 'attachment; filename="article.pdf"'
+    exporter.assert_awaited_once_with("doc1" if "path" in params else "/articles/123.xml")
+
+
+@pytest.mark.parametrize("params", [{}, {"path": "doc1", "webcode": "123"}])
+def test_export_pdf_async_requires_exactly_one_identifier(mock_adapter, params):
+    response = client.get("/export/async/pdf", params=params)
+    assert response.status_code == 422
+
+
+def test_export_pdf_async_requires_auth(mock_adapter, mocker):
+    mocker.patch.object(APIConfig, "API_KEY", "secret")
+    response = client.get("/export/async/pdf?path=doc1")
+    assert response.status_code == 401
 
 
 def test_export_md_nonexistent_path(mock_adapter):

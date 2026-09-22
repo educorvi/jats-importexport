@@ -7,20 +7,16 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import redis.asyncio as aioredis
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
-from fastapi_cache.backends.redis import RedisBackend
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from api.config import StorageConfig
+from api.services.keyval_implementations import close_caches, init_caches
 
 from .auth import require_permission
 from .config import APIConfig
 from .logging import setup_logging
-from .routers import export, list, modify, status, upload
+from .routers import cache_management, export, export_async, list, modify, status, upload
 
 logger = logging.getLogger(__name__)
 
@@ -38,19 +34,51 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        redis = aioredis.from_url(f"redis://{StorageConfig.REDIS_HOST}", encoding="utf8", decode_responses=False)
-        try:
-            await redis.ping()
-            FastAPICache.init(RedisBackend(redis), prefix=StorageConfig.CACHE_PREFIX)
-        except Exception as e:
-            logger.error(f"Failed to connect to Redis, falling back to In-Memory cache: {str(e)}")
-            FastAPICache.init(InMemoryBackend(), prefix=StorageConfig.CACHE_PREFIX)
+        await init_caches()
         yield
-        await redis.close()
+        await close_caches()
 
     app = FastAPI(
         title=APIConfig.API_TITLE,
         description=APIConfig.API_DESCRIPTION,
+        openapi_tags=[
+            {
+                "name": "Status",
+                "description": "Check API health and version.",
+            },
+            {
+                "name": "List",
+                "description": "Browse stored articles and available subject classifications.",
+            },
+            {
+                "name": "Export",
+                "description": "Export articles as JATS, HTML, Markdown, or PDF, or retrieve their metadata.",
+            },
+            {
+                "name": "Export Async",
+                "description": (
+                    "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`."
+                    " If the export type is already cached, the endpoint returns `200 OK` and the exported"
+                    " document (HTML and front matter, or a PDF download). Otherwise, it starts a background export and"
+                    " returns `202 Accepted`."
+                    "\n\nPoll the same endpoint with the same query parameters until it returns"
+                    " `200 OK`. Requests made while the export is running return `202 Accepted`."
+                    " If a background export fails, a subsequent request starts another attempt."
+                ),
+            },
+            {
+                "name": "Upload",
+                "description": "Import JATS XML, ZIP archives, or DOCX documents into storage.",
+            },
+            {
+                "name": "Modify",
+                "description": "Postprocessing of imported articles.",
+            },
+            {
+                "name": "Cache Management",
+                "description": "Inspect cache status and clear cached exports.",
+            },
+        ],
         version=APIConfig.API_VERSION,
         lifespan=lifespan,
     )
@@ -63,11 +91,12 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(status.router)
+    app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
+    app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
+    app.include_router(export_async.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
     app.include_router(modify.router, dependencies=[Depends(require_permission("write"))])
-    app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
-    app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
-
+    app.include_router(cache_management.router, dependencies=[Depends(require_permission("read"))])
     return app
 
 

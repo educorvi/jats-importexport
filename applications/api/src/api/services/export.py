@@ -16,6 +16,7 @@ from prometheus_client import Histogram, Summary
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
 from api.services.common import get_adapter_instance
+from api.services.keyval_implementations import EXPORT_CACHE, ExportType
 
 JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()
@@ -98,13 +99,20 @@ exp_document_metric = Summary(
 
 
 async def jats_export(path: str):
+    cached = await EXPORT_CACHE.get(path, ExportType.JATS)
+    if cached:
+        return JatsDocumentResponse(jats=cached)
     with exp_metric.labels("jats").time(), exp_document_metric.labels("jats", path).time():
         document = await __load_document(path)
         jats = await asyncio.to_thread(JATS_EXPORTER.export, document)
+        await EXPORT_CACHE.set(path, ExportType.JATS, jats)
         return JatsDocumentResponse(jats=jats)
 
 
 async def html_export(path: str, include_edit_links: bool = False):
+    cached = await EXPORT_CACHE.get_html(path, include_edit_links)
+    if cached:
+        return HtmlDocumentResponse(**cached)
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
@@ -120,14 +128,24 @@ async def html_export(path: str, include_edit_links: bool = False):
         if front is None:
             raise HTTPException(status_code=500, detail="HTML export failed: 'article-front' not found in the output.")
         front.attrs["class"] = "front"
-
+        await EXPORT_CACHE.set_html(path, include_edit_links, str(content), str(front))
         return HtmlDocumentResponse(html=str(content), front=str(front))
 
 
 async def md_export(path: str, include_edit_links: bool = False):
+    if include_edit_links:
+        cached = await EXPORT_CACHE.get(path, ExportType.MD_EDIT_LINKS)
+    else:
+        cached = await EXPORT_CACHE.get(path, ExportType.MD)
+    if cached:
+        return MarkdownDocumentResponse(md=cached)
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
+        if include_edit_links:
+            await EXPORT_CACHE.set(path, ExportType.MD_EDIT_LINKS, md_content)
+        else:
+            await EXPORT_CACHE.set(path, ExportType.MD, md_content)
         return MarkdownDocumentResponse(md=md_content)
 
 
