@@ -756,7 +756,7 @@
         ],
         "parameters": [
           {
-            "name": "exportType",
+            "name": "export_type",
             "in": "query",
             "required": true,
             "schema": {

@@ -862,7 +862,7 @@ class ExportAsyncApi:
         # process the query parameters
         if export_type is not None:
             
-            _query_params.append(('exportType', export_type.value))
+            _query_params.append(('export_type', export_type.value))
             
         if path is not None:
             
