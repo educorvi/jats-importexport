@@ -28,7 +28,7 @@ class ExportState(Enum):
     FAILED = "failed"
 
 
-class ExportTypes(Enum):
+class ExportType(Enum):
     HTML = "html"
     HTML_EDIT_LINKS = "html_edit_links"
     MD = "md"
@@ -65,28 +65,28 @@ class CacheImplementation(abc.ABC):
     def __clean_path(path: str):
         return path.strip("/")
 
-    async def get(self, path: str, export_type: ExportTypes) -> str | None:
+    async def get(self, path: str, export_type: ExportType) -> str | None:
         data = await self._get(self.__clean_path(path), export_type)
         result = "hit" if data is not None else "miss"
         EXPORT_CACHE_REQUESTS.labels(type=export_type.value, result=result, cache_id=self.cache_id).inc()
         return data
 
     @abc.abstractmethod
-    async def _get(self, path: str, export_type: ExportTypes) -> str | None:
+    async def _get(self, path: str, export_type: ExportType) -> str | None:
         raise NotImplementedError
 
-    async def set(self, path: str, export_type: ExportTypes, value: str) -> None:
+    async def set(self, path: str, export_type: ExportType, value: str) -> None:
         await self._set(self.__clean_path(path), export_type, value)
 
     @abc.abstractmethod
-    async def _set(self, path: str, export_type: ExportTypes, value: str) -> None:
+    async def _set(self, path: str, export_type: ExportType, value: str) -> None:
         raise NotImplementedError
 
-    async def delete(self, path: str, export_type: ExportTypes | None) -> None:
+    async def delete(self, path: str, export_type: ExportType | None) -> None:
         await self._delete(self.__clean_path(path), export_type)
 
     @abc.abstractmethod
-    async def _delete(self, path: str, export_type: ExportTypes | None) -> None:
+    async def _delete(self, path: str, export_type: ExportType | None) -> None:
         raise NotImplementedError
 
     async def delete_all(self) -> None:
@@ -107,33 +107,33 @@ class CacheImplementation(abc.ABC):
         pass
 
     async def get_html(self, path: str, edit_links: bool) -> HtmlData | None:
-        export_type = ExportTypes.HTML_EDIT_LINKS if edit_links else ExportTypes.HTML
+        export_type = ExportType.HTML_EDIT_LINKS if edit_links else ExportType.HTML
         cache_string = await self._get(self.__clean_path(path), export_type)
         if cache_string:
             return json.loads(cache_string)
         return None
 
     async def set_html(self, path: str, edit_links: bool, html: str, front: str) -> None:
-        export_type = ExportTypes.HTML_EDIT_LINKS if edit_links else ExportTypes.HTML
+        export_type = ExportType.HTML_EDIT_LINKS if edit_links else ExportType.HTML
         await self._set(self.__clean_path(path), export_type, json.dumps({"html": html, "front": front}))
 
     async def set_metadata(self, path: str, metadata: Front) -> None:
         value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
-        await self.set(path, ExportTypes.METADATA, value)
+        await self.set(path, ExportType.METADATA, value)
 
     async def set_pdf(self, path: str, content: bytes, filename: str) -> None:
         value = json.dumps({"content": base64.b64encode(content).decode("ascii"), "filename": filename})
-        await self.set(path, ExportTypes.PDF, value)
+        await self.set(path, ExportType.PDF, value)
 
     async def get_pdf(self, path: str) -> tuple[bytes, str] | None:
-        value = await self.get(path, ExportTypes.PDF)
+        value = await self.get(path, ExportType.PDF)
         if value is None:
             return None
         data = json.loads(value)
         return base64.b64decode(data["content"]), data["filename"]
 
     async def get_metadata(self, path: str) -> Front | None:
-        value = await self.get(path, ExportTypes.METADATA)
+        value = await self.get(path, ExportType.METADATA)
         if value is None:
             return None
         return _FRONT_ADAPTER.validate_json(value)
@@ -147,18 +147,18 @@ class InMemoryCache(CacheImplementation):
     def implementation_name(self) -> str:
         return "InMemory"
 
-    _data: dict[tuple[str, ExportTypes], str]
+    _data: dict[tuple[str, ExportType], str]
 
     async def init(self) -> None:
         self._data = {}
 
-    async def _get(self, path: str, export_type: ExportTypes) -> str | None:
+    async def _get(self, path: str, export_type: ExportType) -> str | None:
         return self._data.get((path, export_type))
 
-    async def _set(self, path: str, export_type: ExportTypes, value: str):
+    async def _set(self, path: str, export_type: ExportType, value: str):
         self._data[(path, export_type)] = value
 
-    async def _delete(self, path: str, export_type: ExportTypes | None):
+    async def _delete(self, path: str, export_type: ExportType | None):
         if export_type is None:
             keys_to_delete = [key for key in self._data if key[0] == path]
             for key in keys_to_delete:
@@ -185,27 +185,27 @@ class ValKeyCache(CacheImplementation):
         await self.client.close()
 
     @staticmethod
-    def __build_key(path: str, export_type: ExportTypes) -> str:
+    def __build_key(path: str, export_type: ExportType) -> str:
         return f"{path}:{export_type}"
 
     def __check_client(self):
         if not self.client:
             raise SystemError("Valkey client is not initialized")
 
-    async def _get(self, path: str, export_type: ExportTypes) -> str | None:
+    async def _get(self, path: str, export_type: ExportType) -> str | None:
         self.__check_client()
         key = self.__build_key(path, export_type)
         return await self.client.get(key)
 
-    async def _set(self, path: str, export_type: ExportTypes, value: str) -> None:
+    async def _set(self, path: str, export_type: ExportType, value: str) -> None:
         self.__check_client()
         key = self.__build_key(path, export_type)
         await self.client.set(key, value)
 
-    async def _delete(self, path: str, export_type: ExportTypes | None) -> None:
+    async def _delete(self, path: str, export_type: ExportType | None) -> None:
         self.__check_client()
         if export_type is None:
-            for export_type in ExportTypes:
+            for export_type in ExportType:
                 await self.client.delete(self.__build_key(path, export_type))
         else:
             key = self.__build_key(path, export_type)

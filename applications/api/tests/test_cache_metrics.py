@@ -2,12 +2,12 @@ import pytest
 
 from api.services.keyval_implementations import (
     EXPORT_CACHE_REQUESTS,
-    ExportTypes,
+    ExportType,
     InMemoryCache,
 )
 
 
-@pytest.mark.parametrize("export_type", list(ExportTypes))
+@pytest.mark.parametrize("export_type", list(ExportType))
 @pytest.mark.parametrize("value", ["cached export", ""])
 async def test_export_cache_metrics(export_type, value):
     cache = InMemoryCache(1, cache_name="TEST_EXPORT_CACHE")
