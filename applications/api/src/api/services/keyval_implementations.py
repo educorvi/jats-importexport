@@ -180,6 +180,7 @@ class ValKeyCache(CacheImplementation):
     async def init(self) -> None:
         self.client = Valkey(host=StorageConfig.VALKEY_HOST, db=self.cache_id, decode_responses=True)
         await self.client.ping()
+        await self.client.config_set("maxmemory-policy", "allkeys-lru")
 
     async def close(self) -> None:
         await self.client.close()
