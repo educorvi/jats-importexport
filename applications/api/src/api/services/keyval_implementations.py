@@ -14,7 +14,7 @@ from api.config import StorageConfig
 
 EXPORT_CACHE_REQUESTS = Counter(
     "vur_hub_export_cache_requests_total",
-    "Completed export cache requests by endpoint and cache result.",
+    "Completed export cache requests by export type, cache result, and cache ID.",
     ["type", "result", "cache_id"],
 )
 

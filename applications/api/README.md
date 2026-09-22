@@ -104,8 +104,8 @@ and export type. HTML with edit links uses a separate entry. Valkey keys look li
 
 The XML, ZIP, and DOCX upload endpoints invalidate cache entries for each successfully saved article path.
 Use the cache management endpoint to clear stale entries. With `inmemory`, management requests
-affect only the worker handling the request. Valkey cache status currently reports
-`items_in_cache` as `0` regardless of the actual number of entries.
+affect only the worker handling the request. Valkey cache status reports the current number of keys
+in each configured database.
 
 You can also manage the cache manually:
 
