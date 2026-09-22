@@ -6,6 +6,7 @@ and store JATS documents and arbitrary files in a repository backend.
 
 import abc
 import enum
+from datetime import datetime
 from typing import BinaryIO, TypedDict
 
 from jats_classes import Front, JATSDocument
@@ -199,11 +200,13 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         rubriken: list[str] | None = None,
         batch_start: int = 0,
         batch_size: int | None = None,
+        modified_since: datetime | None = None,
     ) -> tuple[list[str], int]:
         """List a range of articles and return it together with the total match count.
 
         ``batch_start`` is the zero-based index of the first article. A
         ``None`` ``batch_size`` requests all remaining articles.
+        ``modified_since`` limits results to articles modified after the given timestamp.
         """
         raise NotImplementedError
 

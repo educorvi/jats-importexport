@@ -1,7 +1,9 @@
-from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 import base64
 import io
 import zipfile
+from datetime import datetime
+
+from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 
 from jats_storage_adapters.interface import GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
 import pytest
@@ -89,7 +91,8 @@ def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: st
 class MockStorageAdapter(StorageAdapter):
     def list_articles(self, fachbereiche: list[str] | None = None, sachgebiete: list[str] | None = None,
                       organisationseinheiten: list[str] | None = None, rubriken: list[str] | None = None,
-                      batch_start: int = 0, batch_size: int | None = None) -> tuple[list[str], int]:
+                      batch_start: int = 0, batch_size: int | None = None,
+                      modified_since: datetime | None = None) -> tuple[list[str], int]:
         return [], 0
 
     def __init__(self):

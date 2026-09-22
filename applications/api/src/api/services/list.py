@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from fastapi import HTTPException
 
@@ -14,6 +15,7 @@ async def list_articles(
     rubriken: list[str] | None = None,
     batch_start: int = 0,
     batch_size: int | None = None,
+    modified_since: datetime | None = None,
 ) -> tuple[list[str], int]:
     try:
         return await asyncio.to_thread(
@@ -24,6 +26,7 @@ async def list_articles(
             rubriken,
             batch_start,
             batch_size,
+            modified_since,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing articles: {e}")

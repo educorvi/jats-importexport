@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Request
@@ -39,6 +40,26 @@ async def list_articles(
             description="Number of articles to return",
         ),
     ] = APIConfig.LIST_BATCH_SIZE,
+    modified_since: Annotated[
+        datetime | None,
+        Query(
+            description="Only include articles modified since this date",
+            openapi_examples={
+                "none": {"summary": "No filter", "value": None},
+                "date": {"summary": "Date only", "description": "Assumes time 00:00:00 (UTC)", "value": "2026-01-01"},
+                "datetime": {
+                    "summary": "Date and time",
+                    "description": "Specify date and time in UTC",
+                    "value": "2026-01-01T12:30:00",
+                },
+                "timezone": {
+                    "summary": "Date and time with timezone",
+                    "description": "Specify date and time with timezone offset",
+                    "value": "2026-01-01T12:30:00+02:00",
+                },
+            },
+        ),
+    ] = None,
 ):
     articles, count = await list_service.list_articles(
         fachbereiche,
@@ -47,6 +68,7 @@ async def list_articles(
         rubriken,
         batch_start,
         batch_size,
+        modified_since,
     )
     last_batch_start = ((count - 1) // batch_size) * batch_size if count else 0
 

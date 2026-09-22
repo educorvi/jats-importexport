@@ -5,6 +5,7 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 
 import logging
 import os
+from datetime import datetime
 from typing import BinaryIO, cast, overload
 from urllib.parse import urlparse
 
@@ -236,6 +237,7 @@ class PloneStorageAdapter(StorageAdapter):
         rubriken: list[str] | None = None,
         batch_start: int = 0,
         batch_size: int | None = None,
+        modified_since: datetime | None = None,
     ) -> tuple[list[str], int]:
         items = PloneListingService(self.base_url, self.httpx_client).list_article_items(
             fachbereiche=fachbereiche,
@@ -244,6 +246,7 @@ class PloneStorageAdapter(StorageAdapter):
             rubriken=rubriken,
             batch_start=batch_start,
             batch_size=batch_size,
+            modified_since=modified_since,
         )
         paths = list(map(self.__get_path_from_plone_object, items[0]))
         return paths, items[1]
