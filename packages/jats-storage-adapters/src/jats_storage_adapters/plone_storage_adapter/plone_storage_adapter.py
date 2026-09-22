@@ -203,6 +203,29 @@ class PloneStorageAdapter(StorageAdapter):
                 updated_articles.append(article)
         return updated_articles
 
+    def delete_article(self, path: str, is_path: bool) -> list[str]:
+        """Delete an article from Plone."""
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
+
+        if not is_path:
+            path = download_service.get_path_from_webcode(path)
+
+        url = self.get_url_from_path(path)
+
+        try:
+            article = download_service.fetch_article(url)
+        except HTTPStatusError as e:
+            if e.response.status_code == 404 and str(e.request.url) == url:
+                raise PathNotFoundExpection(path) from e
+            raise InternalError(f"Error fetching article at {url}") from e
+        except ValueError:
+            raise
+        except Exception as e:
+            raise InternalError(f"Error fetching article at {url}") from e
+
+        modify_service = PloneModifyService(self.base_url, self.httpx_client)
+        return modify_service.delete_article(url, article)
+
     # Listing / querying related methods
 
     def list_articles(

@@ -3,7 +3,7 @@ import urllib.parse
 from collections.abc import Callable
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.coder import PickleCoder
 
@@ -22,6 +22,7 @@ from api.models import (
 
 from ..auth import require_permission
 from ..services.export import html_export, jats_export, md_export, metadata_export, pdf_export
+from .common import resolve_path
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -75,26 +76,6 @@ def export_cache_key_builder(
     return f"{namespace}:{func_name}:{path}:{param}"
 
 
-async def _resolve_path(path: str | None = None, webcode: str | None = None) -> tuple[str, bool]:
-    """
-    returns a tuple containing the resolved path and a boolean indicating whether the first value is a direct path
-    (True) or a webcode (False).
-    """
-
-    def exists(param: str | None) -> bool:
-        if param is not None and param != "":
-            return True
-        return False
-
-    if exists(path) == exists(webcode):
-        raise HTTPException(status_code=422, detail="Exactly one of 'path' or 'webcode' must be provided.")
-    if path:
-        return path, True
-    if webcode:
-        return webcode, False
-    return "", False  # unreachable code, but to ensure type checker knows a string is returned
-
-
 @router.get(
     "/jats",
     operation_id="export_jats",
@@ -106,7 +87,7 @@ async def _resolve_path(path: str | None = None, webcode: str | None = None) -> 
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_jats(path_tuple: tuple[str, bool] = Depends(_resolve_path)):
+async def export_jats(path_tuple: tuple[str, bool] = Depends(resolve_path)):
     path, is_path = path_tuple
     return await jats_export(path, is_path)
 
@@ -122,7 +103,7 @@ async def export_jats(path_tuple: tuple[str, bool] = Depends(_resolve_path)):
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_html(path_tuple: tuple[str, bool] = Depends(_resolve_path), include_edit_links: bool = False):
+async def export_html(path_tuple: tuple[str, bool] = Depends(resolve_path), include_edit_links: bool = False):
     path, is_path = path_tuple
     return await html_export(path, is_path, include_edit_links)
 
@@ -138,7 +119,7 @@ async def export_html(path_tuple: tuple[str, bool] = Depends(_resolve_path), inc
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_md(path_tuple: tuple[str, bool] = Depends(_resolve_path), include_edit_links: bool = False):
+async def export_md(path_tuple: tuple[str, bool] = Depends(resolve_path), include_edit_links: bool = False):
     path, is_path = path_tuple
     return await md_export(path, is_path, include_edit_links)
 
@@ -158,7 +139,7 @@ async def export_md(path_tuple: tuple[str, bool] = Depends(_resolve_path), inclu
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder, coder=PickleCoder)
-async def export_pdf(path_tuple: tuple[str, bool] = Depends(_resolve_path)):
+async def export_pdf(path_tuple: tuple[str, bool] = Depends(resolve_path)):
     path, is_path = path_tuple
     pdf_content, filename = await pdf_export(path, is_path)
     return Response(
@@ -179,7 +160,7 @@ async def export_pdf(path_tuple: tuple[str, bool] = Depends(_resolve_path)):
     },
 )
 @export_cache(namespace=_CACHE_NAMESPACE, key_builder=export_cache_key_builder)
-async def export_metadata(path_tuple: tuple[str, bool] = Depends(_resolve_path)):
+async def export_metadata(path_tuple: tuple[str, bool] = Depends(resolve_path)):
     path, is_path = path_tuple
     front = await metadata_export(path, is_path)
     return MetadataResponse(metadata=front)

@@ -130,6 +130,10 @@ class MockStorageAdapter(StorageAdapter):
     def link_related_articles(self) -> list[str]:
         return ["articles/article1.xml", "articles/article2.xml"]
 
+    def delete_article(self, path: str, is_path: bool) -> list[str]:
+        # Simulate deletion by returning an empty list of errors
+        return []
+
     def list_fachbereiche(self) -> list[str]:
         raise NotImplementedError("list_fachbereiche is not implemented in MockStorageAdapter")
 

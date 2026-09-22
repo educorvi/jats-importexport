@@ -183,6 +183,11 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """Link related articles and return the list of updated article paths."""
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def delete_article(self, path: str, is_path: bool) -> list[str]:
+        """Delete an article from the storage system and return a list of any errors encountered."""
+        raise NotImplementedError
+
     # Listing / querying related methods
 
     @abc.abstractmethod
