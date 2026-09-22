@@ -15,7 +15,7 @@ from api.config import StorageConfig
 EXPORT_CACHE_REQUESTS = Counter(
     "vur_hub_export_cache_requests_total",
     "Completed export cache requests by export type, cache result, and cache ID.",
-    ["type", "result", "cache_id"],
+    ["type", "result", "cache"],
 )
 
 
@@ -68,7 +68,7 @@ class CacheImplementation(abc.ABC):
     async def get(self, path: str, export_type: ExportType) -> str | None:
         data = await self._get(self.__clean_path(path), export_type)
         result = "hit" if data is not None else "miss"
-        EXPORT_CACHE_REQUESTS.labels(type=export_type.value, result=result, cache_id=self.cache_id).inc()
+        EXPORT_CACHE_REQUESTS.labels(type=export_type.value, result=result, cache=self.cache_name).inc()
         return data
 
     @abc.abstractmethod

@@ -15,7 +15,7 @@ async def test_export_cache_metrics(export_type, value):
 
     def count(result):
         return EXPORT_CACHE_REQUESTS.labels(
-            type=export_type.value, result=result, cache_id=cache.cache_id
+            type=export_type.value, result=result, cache=cache.cache_name
         )._value.get()
 
     hits, misses = count("hit"), count("miss")
