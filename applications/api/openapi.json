@@ -742,6 +742,90 @@
         }
       }
     },
+    "/export/async/status": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Status",
+        "operationId": "export_status_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "exportType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ExportType"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed"
+          },
+          "404": {
+            "description": "No export was started yet"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/export/async/html": {
       "get": {
         "tags": [
@@ -1527,6 +1611,19 @@
         },
         "type": "object",
         "title": "CacheStatusResponse"
+      },
+      "ExportType": {
+        "type": "string",
+        "enum": [
+          "html",
+          "html_edit_links",
+          "md",
+          "md_edit_links",
+          "jats",
+          "pdf",
+          "metadata"
+        ],
+        "title": "ExportType"
       },
       "Front": {
         "properties": {

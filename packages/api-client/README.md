@@ -105,6 +105,7 @@ Class | Method | HTTP request | Description
 *ExportApi* | [**export_pdf**](docs/ExportApi.md#export_pdf) | **GET** /export/pdf | Export Pdf
 *ExportAsyncApi* | [**export_html_async**](docs/ExportAsyncApi.md#export_html_async) | **GET** /export/async/html | Export Html
 *ExportAsyncApi* | [**export_pdf_async**](docs/ExportAsyncApi.md#export_pdf_async) | **GET** /export/async/pdf | Export Pdf
+*ExportAsyncApi* | [**export_status_async**](docs/ExportAsyncApi.md#export_status_async) | **GET** /export/async/status | Export Status
 *ListApi* | [**list_articles**](docs/ListApi.md#list_articles) | **GET** /list/ | List Articles
 *ListApi* | [**list_fachbereiche_list_fachbereiche_get**](docs/ListApi.md#list_fachbereiche_list_fachbereiche_get) | **GET** /list/fachbereiche | List Fachbereiche
 *ListApi* | [**list_sachgebiete_list_sachgebiete_get**](docs/ListApi.md#list_sachgebiete_list_sachgebiete_get) | **GET** /list/sachgebiete | List Sachgebiete
@@ -121,6 +122,7 @@ Class | Method | HTTP request | Description
  - [AsyncExportAccepted](docs/AsyncExportAccepted.md)
  - [CacheClearedResponse](docs/CacheClearedResponse.md)
  - [CacheStatus](docs/CacheStatus.md)
+ - [ExportType](docs/ExportType.md)
  - [Front](docs/Front.md)
  - [HTTP400BadRequest](docs/HTTP400BadRequest.md)
  - [HTTP404NotFound](docs/HTTP404NotFound.md)
