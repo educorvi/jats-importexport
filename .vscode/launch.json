@@ -33,23 +33,6 @@
       "console": "integratedTerminal",
       "justMyCode": true,
       "args": ["${file}", "-x", "-s"]
-    },
-    {
-      "name": "Pytest (arguments)",
-      "type": "debugpy",
-      "request": "launch",
-      "module": "pytest",
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "justMyCode": true,
-      "args": ["${input:pyArgs}"]
-    }
-  ],
-  "inputs": [
-    {
-      "id": "pyArgs",
-      "type": "promptString",
-      "description": "Pytest arguments (e.g. 'applications/api/tests/test_api.py::test_upload_zip_success -x -s')"
     }
   ]
 }

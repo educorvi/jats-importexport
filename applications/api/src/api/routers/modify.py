@@ -39,6 +39,7 @@ async def link_related_articles(request: Request):
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},
         422: {"model": HTTP422UnprocessableEntity},
+        500: {"model": HTTP500InternalServerError},
     },
     summary="Delete an article from the storage",
     description=("Deletes an article and all its associated data from the storage"),

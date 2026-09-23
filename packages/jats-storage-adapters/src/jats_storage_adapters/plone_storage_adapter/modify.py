@@ -124,6 +124,9 @@ class PloneModifyService:
         """
         assets = self._find_assets_paths(article)
         containers = self._get_assets_container_urls(assets)
+
+        self._delete_resource(article_url, raise_on_error=True)
+
         errors = []
         for asset_url in assets:
             error = self._delete_resource(asset_url)
@@ -135,7 +138,6 @@ class PloneModifyService:
             error = self._delete_resource(container_url)
             if error:
                 errors.append(error)
-        self._delete_resource(article_url, raise_on_error=True)
         return errors
 
     def _find_assets_paths(self, container: Article | Body | Back | AppendixGroup | Appendix | Section) -> list[str]:
@@ -179,8 +181,13 @@ class PloneModifyService:
 
                     parsed = urlsplit(href_value)
                     if parsed.scheme or parsed.netloc:
-                        base_netloc = urlsplit(self.base_url).netloc
-                        if parsed.scheme in ("http", "https") and parsed.netloc == base_netloc:
+                        base = urlsplit(self.base_url)
+                        base_path = base.path.rstrip("/") + "/"
+                        if (
+                            parsed.scheme in ("http", "https")
+                            and parsed.netloc.lower() == base.netloc.lower()
+                            and parsed.path.startswith(base_path)
+                        ):
                             asset_paths.add(self._strip_image_alias(href_value))
 
         return list(asset_paths)
@@ -250,11 +257,11 @@ class PloneModifyService:
         Returns:
             str | None: None on success, the error message on failure.
         """
-        response = self.httpx_client.delete(url)
         try:
+            response = self.httpx_client.delete(url)
             response.raise_for_status()
             return None
-        except httpx.HTTPStatusError as e:
+        except Exception as e:
             if raise_on_error:
                 raise
             return str(e)

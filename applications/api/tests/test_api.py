@@ -2,6 +2,7 @@ import base64
 import io
 import zipfile
 from datetime import datetime
+from unittest.mock import AsyncMock
 
 from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 
@@ -492,10 +493,26 @@ def test_auth_upload_requires_key(mocker, mock_adapter):
 # ----------------------------------------------------
 
 
-def test_link_related_articles_success(mock_adapter):
+def test_link_related_articles_success(mock_adapter, mocker):
+    cache_delete = mocker.patch("api.services.modify.EXPORT_CACHE.delete", new_callable=AsyncMock)
     response = client.post("/modify/link-related-articles")
     assert response.status_code == 200
     assert response.json()["updated_articles"] == ["articles/article1.xml", "articles/article2.xml"]
+    assert [call.args for call in cache_delete.await_args_list] == [
+        ("articles/article1.xml", None),
+        ("articles/article2.xml", None),
+    ]
+
+
+def test_delete_article_invalidates_cache_after_partial_asset_errors(mock_adapter, mocker):
+    mocker.patch.object(mock_adapter, "delete_article", return_value=["asset deletion failed"])
+    cache_delete = mocker.patch("api.services.modify.EXPORT_CACHE.delete", new_callable=AsyncMock)
+
+    response = client.delete("/modify/article", params={"path": "articles/article1.xml"})
+
+    assert response.status_code == 200
+    assert response.json()["errors"] == ["asset deletion failed"]
+    cache_delete.assert_awaited_once_with("articles/article1.xml", None)
 
 
 def test_link_related_articles_error(mock_adapter, mocker):
