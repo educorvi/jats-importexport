@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **list_articles**
-> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size)
+> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size, modified_since=modified_since)
 
 List Articles
 
@@ -53,10 +53,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     rubriken = ['rubriken_example'] # List[str] |  (optional)
     batch_start = 0 # int | Zero-based index of the first article in the batch (optional) (default to 0)
     batch_size = 200 # int | Number of articles to return (optional) (default to 200)
+    modified_since = '2013-10-20T19:20:30+01:00' # datetime | Only include articles modified since this date (optional)
 
     try:
         # List Articles
-        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size)
+        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size, modified_since=modified_since)
         print("The response of ListApi->list_articles:\n")
         pprint(api_response)
     except Exception as e:
@@ -76,6 +77,7 @@ Name | Type | Description  | Notes
  **rubriken** | [**List[str]**](str.md)|  | [optional] 
  **batch_start** | **int**| Zero-based index of the first article in the batch | [optional] [default to 0]
  **batch_size** | **int**| Number of articles to return | [optional] [default to 200]
+ **modified_since** | **datetime**| Only include articles modified since this date | [optional] 
 
 ### Return type
 

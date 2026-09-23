@@ -7,6 +7,7 @@ docs/AsyncExportAccepted.md
 docs/CacheClearedResponse.md
 docs/CacheManagementApi.md
 docs/CacheStatus.md
+docs/DeleteArticleResponse.md
 docs/ExportApi.md
 docs/ExportAsyncApi.md
 docs/ExportType.md
@@ -56,6 +57,7 @@ jats_importexport_client/models/__init__.py
 jats_importexport_client/models/async_export_accepted.py
 jats_importexport_client/models/cache_cleared_response.py
 jats_importexport_client/models/cache_status.py
+jats_importexport_client/models/delete_article_response.py
 jats_importexport_client/models/export_type.py
 jats_importexport_client/models/front.py
 jats_importexport_client/models/html_document_response.py
@@ -89,4 +91,5 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_delete_article_response.py
 tox.ini

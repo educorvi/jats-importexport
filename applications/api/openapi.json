@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a41"
+    "version": "1.0.0a43"
   },
   "paths": {
     "/": {
@@ -161,6 +161,45 @@
               "title": "Batch Size"
             },
             "description": "Number of articles to return"
+          },
+          {
+            "name": "modified_since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only include articles modified since this date",
+              "title": "Modified Since"
+            },
+            "description": "Only include articles modified since this date",
+            "examples": {
+              "none": {
+                "summary": "No filter"
+              },
+              "date": {
+                "summary": "Date only",
+                "description": "Assumes time 00:00:00 (UTC)",
+                "value": "2026-01-01"
+              },
+              "datetime": {
+                "summary": "Date and time",
+                "description": "Specify date and time in UTC",
+                "value": "2026-01-01T12:30:00"
+              },
+              "timezone": {
+                "summary": "Date and time with timezone",
+                "description": "Specify date and time with timezone offset",
+                "value": "2026-01-01T12:30:00+02:00"
+              }
+            }
           }
         ],
         "responses": {
@@ -799,6 +838,16 @@
         "responses": {
           "200": {
             "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
             "content": {
               "application/json": {
                 "schema": {
@@ -1469,6 +1518,110 @@
         ]
       }
     },
+    "/modify/article": {
+      "delete": {
+        "tags": [
+          "Modify"
+        ],
+        "summary": "Delete an article from the storage",
+        "description": "Deletes an article and all its associated data from the storage",
+        "operationId": "delete_article",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteArticleResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP404NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/cache/": {
       "get": {
         "tags": [
@@ -1621,6 +1774,37 @@
         },
         "type": "object",
         "title": "CacheStatusResponse"
+      },
+      "DeleteArticleResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": "Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details.",
+            "examples": [
+              "Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details."
+            ]
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "A list of errors encountered during the deletion process",
+            "examples": [
+              [
+                "Error deleting image1.png",
+                "Error deleting image2.png"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "errors"
+        ],
+        "title": "DeleteArticleResponse"
       },
       "ExportType": {
         "type": "string",

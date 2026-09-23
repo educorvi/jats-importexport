@@ -251,6 +251,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
+**202** | In Progress |  -  |
 **500** | Failed |  -  |
 **404** | No export was started yet |  -  |
 **422** | Validation Error |  -  |

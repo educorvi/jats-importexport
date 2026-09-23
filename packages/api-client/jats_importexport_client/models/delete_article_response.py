@@ -17,19 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class CacheStatus(BaseModel):
+class DeleteArticleResponse(BaseModel):
     """
-    CacheStatus
+    DeleteArticleResponse
     """ # noqa: E501
-    implementation: StrictStr = Field(description="The cache implementation")
-    items_in_cache: StrictInt = Field(description="The number of items currently in the cache")
-    __properties: ClassVar[List[str]] = ["implementation", "items_in_cache"]
+    detail: Optional[StrictStr] = 'Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details.'
+    errors: List[StrictStr] = Field(description="A list of errors encountered during the deletion process")
+    __properties: ClassVar[List[str]] = ["detail", "errors"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -49,7 +49,7 @@ class CacheStatus(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CacheStatus from a JSON string"""
+        """Create an instance of DeleteArticleResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,7 +74,7 @@ class CacheStatus(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CacheStatus from a dict"""
+        """Create an instance of DeleteArticleResponse from a dict"""
         if obj is None:
             return None
 
@@ -82,8 +82,8 @@ class CacheStatus(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "implementation": obj.get("implementation"),
-            "items_in_cache": obj.get("items_in_cache")
+            "detail": obj.get("detail") if obj.get("detail") is not None else 'Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details.',
+            "errors": obj.get("errors")
         })
         return _obj
 

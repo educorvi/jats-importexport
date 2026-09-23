@@ -4,8 +4,95 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**delete_article**](ModifyApi.md#delete_article) | **DELETE** /modify/article | Delete an article from the storage
 [**link_related_articles**](ModifyApi.md#link_related_articles) | **POST** /modify/link-related-articles | Link related articles IDs to the real articles in the storage
 
+
+# **delete_article**
+> DeleteArticleResponse delete_article(path=path, webcode=webcode)
+
+Delete an article from the storage
+
+Deletes an article and all its associated data from the storage
+
+### Example
+
+* Api Key Authentication (APIKeyHeader):
+
+```python
+import jats_importexport_client
+from jats_importexport_client.models.delete_article_response import DeleteArticleResponse
+from jats_importexport_client.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = jats_importexport_client.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: APIKeyHeader
+configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['APIKeyHeader'] = 'Bearer'
+
+# Enter a context with an instance of the API client
+with jats_importexport_client.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = jats_importexport_client.ModifyApi(api_client)
+    path = 'path_example' # str |  (optional)
+    webcode = 'webcode_example' # str |  (optional)
+
+    try:
+        # Delete an article from the storage
+        api_response = api_instance.delete_article(path=path, webcode=webcode)
+        print("The response of ModifyApi->delete_article:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ModifyApi->delete_article: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **path** | **str**|  | [optional] 
+ **webcode** | **str**|  | [optional] 
+
+### Return type
+
+[**DeleteArticleResponse**](DeleteArticleResponse.md)
+
+### Authorization
+
+[APIKeyHeader](../README.md#APIKeyHeader)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**204** | No Content |  -  |
+**404** | Not Found |  -  |
+**409** | Conflict |  -  |
+**422** | Unprocessable Content |  -  |
+**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **link_related_articles**
 > UpdateArticlesResponse link_related_articles()
