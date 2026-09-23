@@ -7,9 +7,8 @@ from fastapi import HTTPException, Request
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
 from jats_storage_adapters.errors import (
-    DuplicateWebcodeException,
+    DuplicateException,
     PathNotFoundExpection,
-    WebcodeNotFoundException,
 )
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 from prometheus_client import Histogram, Summary
@@ -51,6 +50,8 @@ async def __load_document(
         return await asyncio.to_thread(adapter.get_jats_document, path, options)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
+    except DuplicateException as e:
+        raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
@@ -61,25 +62,8 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
         return await asyncio.to_thread(adapter.get_metadata, path)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
-
-
-async def get_path_from_webcode(webcode: str, adapter: StorageAdapter | None = None) -> str:
-    try:
-        adapter = adapter or get_adapter_instance()
-        article = await asyncio.to_thread(adapter.get_article_by_webcode, webcode)
-        full_url = article.get("@id", "")
-        path = adapter.get_path_from_url(full_url)
-        if not path:
-            raise HTTPException(status_code=404, detail=f"Document not found for webcode: {webcode}")
-        return path
-    except HTTPException:
-        raise
-    except WebcodeNotFoundException:
-        raise HTTPException(status_code=404, detail=f"Document not found for webcode: {webcode}")
-    except DuplicateWebcodeException:
-        raise HTTPException(status_code=409, detail=f"Multiple documents found for webcode: {webcode}")
+    except DuplicateException as e:
+        raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 

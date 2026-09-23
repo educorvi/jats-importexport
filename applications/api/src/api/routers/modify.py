@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
-from ..models import (
+from api.models import (
+    DeleteArticleResponse,
     HTTP400BadRequest,
+    HTTP404NotFound,
+    HTTP409Conflict,
+    HTTP422UnprocessableEntity,
     HTTP500InternalServerError,
     UpdateArticlesResponse,
 )
-from ..services.modify import link_related_articles_service
+from api.services.common import resolve_path
+from api.services.modify import delete_article_service, link_related_articles_service
 
 router = APIRouter(prefix="/modify", tags=["Modify"])
 
@@ -23,3 +28,21 @@ router = APIRouter(prefix="/modify", tags=["Modify"])
 )
 async def link_related_articles(request: Request):
     return await link_related_articles_service()
+
+
+@router.delete(
+    "/article",
+    operation_id="delete_article",
+    responses={
+        200: {"model": DeleteArticleResponse},
+        204: {},
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+        500: {"model": HTTP500InternalServerError},
+    },
+    summary="Delete an article from the storage",
+    description=("Deletes an article and all its associated data from the storage"),
+)
+async def delete_article(path: str = Depends(resolve_path)):
+    return await delete_article_service(path)

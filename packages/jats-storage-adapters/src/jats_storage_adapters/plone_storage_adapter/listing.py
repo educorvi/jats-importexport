@@ -4,6 +4,7 @@ Provides functionality to list articles and metadata from a Plone CMS instance.
 """
 
 import logging
+from datetime import datetime
 
 import httpx
 
@@ -36,6 +37,7 @@ class PloneListingService:
         rubriken: list[str] | None = None,
         batch_start: int = 0,
         batch_size: int | None = None,
+        modified_since: datetime | None = None,
     ) -> tuple[list[dict], int]:
         url = f"{self.base_url}/@querystring-search"
         query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
@@ -53,6 +55,14 @@ class PloneListingService:
             )
         if rubriken:
             query.append({"i": "journal_title", "o": "plone.app.querystring.operation.selection.any", "v": rubriken})
+        if modified_since is not None:
+            query.append(
+                {
+                    "i": "modified",
+                    "o": "plone.app.querystring.operation.date.largerThan",
+                    "v": modified_since.isoformat(),
+                }
+            )
         search: dict = {"query": query, "b_start": batch_start}
         if batch_size is not None:
             search["b_size"] = batch_size

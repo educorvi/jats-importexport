@@ -57,6 +57,27 @@ class UpdateArticlesResponse(BaseModel):
     )
 
 
+class DeleteArticleResponse(BaseModel):
+    detail: str = Field(
+        default=(
+            "Errors occurred during the deletion of the referenced assets."
+            " The article was successfully deleted but some associated files could not be removed."
+            " Check the errors list for details."
+        ),
+        examples=[
+            (
+                "Errors occurred during the deletion of the referenced assets."
+                " The article was successfully deleted but some associated files could not be removed."
+                " Check the errors list for details."
+            )
+        ],
+    )
+    errors: list[str] = Field(
+        description="A list of errors encountered during the deletion process",
+        examples=[["Error deleting image1.png", "Error deleting image2.png"]],
+    )
+
+
 class JatsDocumentResponse(BaseModel):
     jats: str = Field(description="The JATS XML document")
 

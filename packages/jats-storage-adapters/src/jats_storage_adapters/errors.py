@@ -2,11 +2,7 @@ class PathNotFoundExpection(Exception):
     pass
 
 
-class WebcodeNotFoundException(Exception):
-    pass
-
-
-class DuplicateWebcodeException(Exception):
+class DuplicateException(Exception):
     pass
 
 

@@ -5,6 +5,7 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 
 import logging
 import os
+from datetime import datetime
 from typing import BinaryIO, cast, overload
 from urllib.parse import urlparse
 
@@ -140,9 +141,11 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
-        url = self.get_url_from_path(path)
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
+
+        url = self.get_url_from_path(path)
+
         try:
             article = download_service.fetch_article(url, plone_options)
         except HTTPStatusError as e:
@@ -165,14 +168,15 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
         url = self.get_url_from_path(path)
-        return PloneDownloadService(self.base_url, self.httpx_client).get_metadata(url)
+        return download_service.get_metadata(url)
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        return PloneDownloadService(self.base_url, self.httpx_client).get_article_by_webcode(webcode)
+    def get_path_from_webcode(self, webcode: str) -> str:
+        return PloneDownloadService(self.base_url, self.httpx_client).get_path_from_webcode(webcode)
 
     # Modify / automation related methods
 
@@ -194,6 +198,26 @@ class PloneStorageAdapter(StorageAdapter):
                 updated_articles.append(article)
         return updated_articles
 
+    def delete_article(self, path: str) -> list[str]:
+        """Delete an article from Plone."""
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
+
+        url = self.get_url_from_path(path)
+
+        try:
+            article = download_service.fetch_article(url)
+        except HTTPStatusError as e:
+            if e.response.status_code == 404 and str(e.request.url) == url:
+                raise PathNotFoundExpection(path) from e
+            raise InternalError(f"Error fetching article at {url}") from e
+        except ValueError:
+            raise
+        except Exception as e:
+            raise InternalError(f"Error fetching article at {url}") from e
+
+        modify_service = PloneModifyService(self.base_url, self.httpx_client)
+        return modify_service.delete_article(url, article)
+
     # Listing / querying related methods
 
     def list_articles(
@@ -204,6 +228,7 @@ class PloneStorageAdapter(StorageAdapter):
         rubriken: list[str] | None = None,
         batch_start: int = 0,
         batch_size: int | None = None,
+        modified_since: datetime | None = None,
     ) -> tuple[list[str], int]:
         items = PloneListingService(self.base_url, self.httpx_client).list_article_items(
             fachbereiche=fachbereiche,
@@ -212,6 +237,7 @@ class PloneStorageAdapter(StorageAdapter):
             rubriken=rubriken,
             batch_start=batch_start,
             batch_size=batch_size,
+            modified_since=modified_since,
         )
         paths = list(map(self.__get_path_from_plone_object, items[0]))
         return paths, items[1]

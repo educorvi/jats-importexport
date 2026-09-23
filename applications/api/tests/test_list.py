@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from api.config import APIConfig
 from api.main import app
 from api.routers.list import list_articles
@@ -20,9 +22,10 @@ async def test_list_articles_returns_requested_batch(mocker):
             "headers": [],
         }
     )
-    response = await list_articles(request, ["law", "tax"], None, None, None, batch_start=2, batch_size=3)
+    modified_since = datetime(2026, 1, 1, tzinfo=UTC)
+    response = await list_articles(request, ["law", "tax"], None, None, None, batch_start=2, batch_size=3, modified_since=modified_since)
 
-    list_articles_mock.assert_awaited_once_with(["law", "tax"], None, None, None, 2, 3)
+    list_articles_mock.assert_awaited_once_with(["law", "tax"], None, None, None, 2, 3, modified_since)
     assert response.articles == ["/articles/2", "/articles/3", "/articles/4"]
     assert response.count == 7
     assert response.batching.model_dump() == {

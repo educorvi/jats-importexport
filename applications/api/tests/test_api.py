@@ -1,7 +1,10 @@
-from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 import base64
 import io
 import zipfile
+from datetime import datetime
+from unittest.mock import AsyncMock
+
+from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 
 from jats_storage_adapters.interface import GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
 import pytest
@@ -89,7 +92,8 @@ def make_zip_bytes(files_dict: dict, add_symlink: bool = False, symlink_name: st
 class MockStorageAdapter(StorageAdapter):
     def list_articles(self, fachbereiche: list[str] | None = None, sachgebiete: list[str] | None = None,
                       organisationseinheiten: list[str] | None = None, rubriken: list[str] | None = None,
-                      batch_start: int = 0, batch_size: int | None = None) -> tuple[list[str], int]:
+                      batch_start: int = 0, batch_size: int | None = None,
+                      modified_since: datetime | None = None) -> tuple[list[str], int]:
         return [], 0
 
     def __init__(self):
@@ -124,11 +128,15 @@ class MockStorageAdapter(StorageAdapter):
         title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        return {"@id": f"http://mockstore/articles/{webcode}.xml"}
+    def get_path_from_webcode(self, webcode: str) -> str:
+        return f"/articles/{webcode}.xml"
 
     def link_related_articles(self) -> list[str]:
         return ["articles/article1.xml", "articles/article2.xml"]
+
+    def delete_article(self, path: str) -> list[str]:
+        # Simulate deletion by returning an empty list of errors
+        return []
 
     def list_fachbereiche(self) -> list[str]:
         raise NotImplementedError("list_fachbereiche is not implemented in MockStorageAdapter")
@@ -146,6 +154,7 @@ def mock_adapter(mocker):
     mocker.patch("api.services.upload.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
+    mocker.patch("api.services.common.get_adapter_instance", return_value=adapter)
     mocker.patch.object(APIConfig, "API_KEY", None)
     mocker.patch.object(APIConfig, "API_KEY_MANAGER_URL", None)
     return adapter
@@ -202,6 +211,11 @@ def test_export_html_async_returns_document_when_export_is_ready(mock_adapter, m
     assert response.json() == {"html": "<p>Content.</p>", "front": "<header>Title</header>"}
 
 
+def test_export_md_nonexistent_path(mock_adapter):
+    response = client.get("/export/md?path=nonexistent")
+    assert response.status_code == 404
+
+
 def test_export_md(mock_adapter):
     response = client.get("/export/md?path=doc1")
     assert response.status_code == 200
@@ -238,11 +252,6 @@ def test_export_pdf_async_requires_auth(mock_adapter, mocker):
     mocker.patch.object(APIConfig, "API_KEY", "secret")
     response = client.get("/export/async/pdf?path=doc1")
     assert response.status_code == 401
-
-
-def test_export_md_nonexistent_path(mock_adapter):
-    response = client.get("/export/md?path=nonexistent")
-    assert response.status_code == 404
 
 
 def test_export_jats_storage_internal_error_returns_500(mock_adapter, mocker):
@@ -484,10 +493,26 @@ def test_auth_upload_requires_key(mocker, mock_adapter):
 # ----------------------------------------------------
 
 
-def test_link_related_articles_success(mock_adapter):
+def test_link_related_articles_success(mock_adapter, mocker):
+    cache_delete = mocker.patch("api.services.modify.EXPORT_CACHE.delete", new_callable=AsyncMock)
     response = client.post("/modify/link-related-articles")
     assert response.status_code == 200
     assert response.json()["updated_articles"] == ["articles/article1.xml", "articles/article2.xml"]
+    assert [call.args for call in cache_delete.await_args_list] == [
+        ("articles/article1.xml", None),
+        ("articles/article2.xml", None),
+    ]
+
+
+def test_delete_article_invalidates_cache_after_partial_asset_errors(mock_adapter, mocker):
+    mocker.patch.object(mock_adapter, "delete_article", return_value=["asset deletion failed"])
+    cache_delete = mocker.patch("api.services.modify.EXPORT_CACHE.delete", new_callable=AsyncMock)
+
+    response = client.delete("/modify/article", params={"path": "articles/article1.xml"})
+
+    assert response.status_code == 200
+    assert response.json()["errors"] == ["asset deletion failed"]
+    cache_delete.assert_awaited_once_with("articles/article1.xml", None)
 
 
 def test_link_related_articles_error(mock_adapter, mocker):

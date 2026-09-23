@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Response
 
 from api.models import (
     HtmlDocumentResponse,
@@ -11,28 +11,12 @@ from api.models import (
     MarkdownDocumentResponse,
     MetadataResponse,
 )
-from api.services.export import get_path_from_webcode
-
-from ..services.export import html_export, jats_export, md_export, metadata_export, pdf_export
+from api.services.common import resolve_path
+from api.services.export import html_export, jats_export, md_export, metadata_export, pdf_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
 logger = logging.getLogger(__name__)
-
-
-async def _resolve_path(path: str | None = None, webcode: str | None = None) -> str:
-    def exists(param: str | None) -> bool:
-        if param is not None and param != "":
-            return True
-        return False
-
-    if exists(path) == exists(webcode):
-        raise HTTPException(status_code=422, detail="Exactly one of 'path' or 'webcode' must be provided.")
-    if path:
-        return path
-    if webcode:
-        return await get_path_from_webcode(webcode)
-    return ""  # unreachable code, but to ensure type checker knows a string is returned
 
 
 @router.get(
@@ -45,7 +29,7 @@ async def _resolve_path(path: str | None = None, webcode: str | None = None) -> 
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_jats(path: str = Depends(_resolve_path)):
+async def export_jats(path: str = Depends(resolve_path)):
     return await jats_export(path)
 
 
@@ -59,7 +43,7 @@ async def export_jats(path: str = Depends(_resolve_path)):
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_html(path: str = Depends(_resolve_path), include_edit_links: bool = False):
+async def export_html(path: str = Depends(resolve_path), include_edit_links: bool = False):
     return await html_export(path, include_edit_links)
 
 
@@ -73,7 +57,7 @@ async def export_html(path: str = Depends(_resolve_path), include_edit_links: bo
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_md(path: str = Depends(_resolve_path), include_edit_links: bool = False):
+async def export_md(path: str = Depends(resolve_path), include_edit_links: bool = False):
     return await md_export(path, include_edit_links)
 
 
@@ -91,7 +75,7 @@ async def export_md(path: str = Depends(_resolve_path), include_edit_links: bool
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_pdf(path: str = Depends(_resolve_path)):
+async def export_pdf(path: str = Depends(resolve_path)):
     pdf_content, filename = await pdf_export(path)
     return Response(
         content=pdf_content,
@@ -110,6 +94,6 @@ async def export_pdf(path: str = Depends(_resolve_path)):
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_metadata(path: str = Depends(_resolve_path)):
+async def export_metadata(path: str = Depends(resolve_path)):
     front = await metadata_export(path)
     return MetadataResponse(metadata=front)

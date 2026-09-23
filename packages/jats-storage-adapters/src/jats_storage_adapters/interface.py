@@ -6,6 +6,7 @@ and store JATS documents and arbitrary files in a repository backend.
 
 import abc
 import enum
+from datetime import datetime
 from typing import BinaryIO, TypedDict
 
 from jats_classes import Front, JATSDocument
@@ -163,14 +164,14 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             ],
         )
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        """Retrieve an article by its webcode from the storage system.
-
+    @abc.abstractmethod
+    def get_path_from_webcode(self, webcode: str) -> str:
+        """Retrieve a path to an article by its webcode from the storage system.
         Args:
             webcode: The webcode of the article.
 
         Returns:
-            A dictionary containing the article data.
+            The path to the article corresponding to the given webcode.
         """
         raise NotImplementedError
 
@@ -179,6 +180,11 @@ class StorageAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def link_related_articles(self) -> list[str]:
         """Link related articles and return the list of updated article paths."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete_article(self, path: str) -> list[str]:
+        """Delete an article from the storage system and return a list of any errors encountered."""
         raise NotImplementedError
 
     # Listing / querying related methods
@@ -192,11 +198,13 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         rubriken: list[str] | None = None,
         batch_start: int = 0,
         batch_size: int | None = None,
+        modified_since: datetime | None = None,
     ) -> tuple[list[str], int]:
         """List a range of articles and return it together with the total match count.
 
         ``batch_start`` is the zero-based index of the first article. A
         ``None`` ``batch_size`` requests all remaining articles.
+        ``modified_since`` limits results to articles modified after the given timestamp.
         """
         raise NotImplementedError
 

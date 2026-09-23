@@ -1,9 +1,8 @@
 import io
 import os
+from datetime import UTC, datetime
 
 import httpx
-from jats_storage_adapters.plone_storage_adapter.download import PloneDownloadService
-import pytest
 from jats_classes import (
     Article,
     Back,
@@ -12,8 +11,10 @@ from jats_classes import (
     JATSDocument,
     Section,
 )
+import pytest
 from jats_storage_adapters.errors import InternalError
 from jats_storage_adapters.interface import AvailableStorageAdapters
+from jats_storage_adapters.plone_storage_adapter.download import PloneDownloadService
 from jats_storage_adapters import PloneStorageAdapter
 
 # ----------------------------------------------------
@@ -101,13 +102,19 @@ def test_plone_storage_adapter_lists_only_requested_range(clean_env, mocker):
         ),
     )
 
-    paths, total = adapter.list_articles(fachbereiche=["law"], batch_start=2, batch_size=2)
+    modified_since = datetime(2026, 1, 1, tzinfo=UTC)
+    paths, total = adapter.list_articles(fachbereiche=["law"], batch_start=2, batch_size=2, modified_since=modified_since)
 
     assert paths == ["/articles/two", "/articles/three"]
     assert total == 12
     mock_post.assert_called_once()
     assert mock_post.call_args.kwargs["json"]["b_start"] == 2
     assert mock_post.call_args.kwargs["json"]["b_size"] == 2
+    assert mock_post.call_args.kwargs["json"]["query"][-1] == {
+        "i": "modified",
+        "o": "plone.app.querystring.operation.date.largerThan",
+        "v": "2026-01-01T00:00:00+00:00",
+    }
 
 
 # ----------------------------------------------------

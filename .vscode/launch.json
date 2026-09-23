@@ -14,6 +14,25 @@
         "API_RELOAD": "true"
       },
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Pytest (all)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Pytest (selection)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": ["${file}", "-x", "-s"]
     }
   ]
 }
