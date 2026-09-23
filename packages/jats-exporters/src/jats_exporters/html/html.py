@@ -62,13 +62,11 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
                         break
             doc.article.front.related_articles_translations_map = new_related_articles_translations
 
-    @lru_cache(maxsize=128)
     def _transform(self, xml_doc: str) -> str:
         """Apply XSLT transformation to the JATS XML string and return the HTML."""
         parsed_xml_doc = etree.fromstring(xml_doc)
         return str(self.transform(parsed_xml_doc))
 
-    @lru_cache(maxsize=128)
     def transform_xml(self, xml_doc: str) -> str:
         """Apply XSLT transformation to the JATS XML string.
         The XML string does not need to have a single root element.

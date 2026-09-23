@@ -5,7 +5,6 @@ import datetime
 import logging
 import pathlib
 from collections.abc import Callable
-from functools import lru_cache
 from typing import Any
 
 from bs4 import BeautifulSoup
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 ImageDownloader = Callable[[str], tuple[bytes, str]]
 
 
-class PdfExporter(Exporter[str]):
+class PdfExporter(Exporter[tuple[bytes, str]]):
     """Exporter that converts a JATSDocument to a PDF using WeasyPrint."""
 
     ROOT = pathlib.Path(__file__).parent.resolve()
@@ -42,7 +41,6 @@ class PdfExporter(Exporter[str]):
         self.html_exporter = HtmlExporter()
         self.image_downloader = image_downloader
 
-    @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> tuple[bytes, str]:
         """Export the JATSDocument to a PDF file using WeasyPrint.
         Returns:
