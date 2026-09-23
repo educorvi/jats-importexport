@@ -128,7 +128,6 @@ def test_html_exporter_caching():
 
     # Clear lru_cache on both export and internal _transform
     exporter.export.cache_clear()
-    exporter._transform.cache_clear()
 
     html1 = exporter.export(doc)
     info_export = exporter.export.cache_info()
