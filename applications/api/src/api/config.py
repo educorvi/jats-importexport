@@ -1,8 +1,11 @@
+import logging
 import os
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class APIConfig:
@@ -21,7 +24,11 @@ class APIConfig:
         "An API for uploading JATS documents, importing them to different storage backends"
         " (e.g. Plone), and converting them to various formats."
     )
-    API_VERSION: str = "1.0.0a41"
+    API_VERSION: str = "1.0.0a42"
+
+
+if os.environ.get("REDIS_HOST") is not None:
+    logger.warning("Env var 'REDIS_HOST' is deprecated. Please use 'VALKEY_HOST' instead.")
 
 
 class StorageConfig:
@@ -32,5 +39,8 @@ class StorageConfig:
     MAX_ZIP_FILE_COUNT: int = int(os.environ.get("MAX_ZIP_FILE_COUNT", 10000))
     # Maximum total uncompressed size of the uploaded ZIP archive (default: 512 MB)
     MAX_ZIP_UNCOMPRESSED_SIZE: int = int(os.environ.get("MAX_ZIP_UNCOMPRESSED_SIZE", 512 * 1024 * 1024))
-    CACHE_PREFIX: str = os.environ.get("CACHE_PREFIX", "jats-importexport-cache")
-    REDIS_HOST: str = os.environ.get("REDIS_HOST", "localhost")
+    # Options: inmemory, valkey
+    CACHE_IMPLEMENTATION: str = os.environ.get("CACHE_IMPLEMENTATION", "inmemory")
+    VALKEY_HOST: str = os.environ.get("VALKEY_HOST") or os.environ.get("REDIS_HOST", "localhost")
+    VALKEY_DB_EXPORT: int = int(os.environ.get("VALKEY_DB_EXPORT", 0))
+    VALKEY_DB_EXPORT_STATE: int = int(os.environ.get("VALKEY_DB_EXPORT_STATE", 1))

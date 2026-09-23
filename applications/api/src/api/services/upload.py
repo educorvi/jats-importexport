@@ -69,7 +69,7 @@ def _create_xml_parser() -> etree.XMLParser:
     return parser
 
 
-async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None):
+async def upload_xml(uploaded_file: UploadFile = File(...), container: str | None = None) -> UploadFileResponse:
     try:
         adapter_instance = get_adapter_instance()
 
@@ -105,7 +105,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
 
 async def upload_zip(
     uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
-):
+) -> UploadFileResponse:
     adapter_instance = get_adapter_instance()
 
     try:
@@ -163,7 +163,7 @@ async def upload_docx(
     container: str | None = None,
     asset_container: str | None = None,
     use_html_sections: bool = False,
-):
+) -> UploadFileResponse:
     adapter_instance = get_adapter_instance()
 
     try:

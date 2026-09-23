@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**enabled** | **bool** | Indicates if FastAPICache is enabled | 
-**prefix** | **str** | The cache prefix used by FastAPICache | 
+**implementation** | **str** | The cache implementation | 
+**items_in_cache** | **int** | The number of items currently in the cache | 
 
 ## Example
 

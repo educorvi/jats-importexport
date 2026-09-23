@@ -3,10 +3,10 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a39"
+    "version": "1.0.0a41"
   },
   "paths": {
-    "/status": {
+    "/": {
       "get": {
         "tags": [
           "Status"
@@ -25,14 +25,34 @@
         }
       }
     },
-    "/upload/zip": {
-      "post": {
+    "/status": {
+      "get": {
         "tags": [
-          "Upload"
+          "Status"
         ],
-        "summary": "Upload a JATS Document (ZIP-file) to the storage",
-        "description": "This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced asset files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.",
-        "operationId": "upload_zip",
+        "summary": "Health Status Old",
+        "operationId": "get_status_old",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/list/": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List Articles",
+        "description": "List articles in the storage system. Filtering and batching are supported.",
+        "operationId": "list_articles",
         "security": [
           {
             "APIKeyHeader": []
@@ -40,36 +60,107 @@
         ],
         "parameters": [
           {
-            "name": "container",
+            "name": "fachbereiche",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 {
                   "type": "null"
                 }
               ],
-              "title": "Container"
+              "title": "Fachbereiche"
             }
           },
           {
-            "name": "assets_container",
+            "name": "sachgebiete",
             "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 {
                   "type": "null"
                 }
               ],
-              "title": "Assets Container"
+              "title": "Sachgebiete"
             }
+          },
+          {
+            "name": "organisationseinheiten",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Organisationseinheiten"
+            }
+          },
+          {
+            "name": "rubriken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rubriken"
+            }
+          },
+          {
+            "name": "batch_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Zero-based index of the first article in the batch",
+              "default": 0,
+              "title": "Batch Start"
+            },
+            "description": "Zero-based index of the first article in the batch"
+          },
+          {
+            "name": "batch_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Number of articles to return",
+              "default": 200,
+              "title": "Batch Size"
+            },
+            "description": "Number of articles to return"
           }
         ],
         "responses": {
@@ -78,40 +169,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UploadFileResponse"
+                  "$ref": "#/components/schemas/ListArticlesResponse"
                 }
               }
             }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP400BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "413": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
-                }
-              }
-            },
-            "description": "Content Too Large"
-          },
-          "415": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
-                }
-              }
-            },
-            "description": "Unsupported Media Type"
           },
           "500": {
             "content": {
@@ -133,348 +194,61 @@
               }
             }
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "zip_file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": [
-                  "zip_file"
-                ]
-              }
-            },
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "zip_file": {
-                    "type": "string",
-                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
-                  }
-                },
-                "required": [
-                  "zip_file"
-                ]
-              }
-            }
-          }
         }
       }
     },
-    "/upload/xml": {
-      "post": {
+    "/list/fachbereiche": {
+      "get": {
         "tags": [
-          "Upload"
+          "List"
         ],
-        "summary": "Upload a JATS Document (XML) to the storage",
-        "description": "This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`). The target container for the uploaded file can be specified using the `container` query parameter. If not specified, the default container will be used.",
-        "operationId": "upload_xml",
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "container",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Container"
-            }
-          }
-        ],
+        "summary": "List Fachbereiche",
+        "description": "Returns a list of Fachbereiche",
+        "operationId": "list_fachbereiche_list_fachbereiche_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UploadFileResponse"
+                  "$ref": "#/components/schemas/ListFachbereicheResponse"
                 }
               }
             }
           },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP400BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "413": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
-                }
-              }
-            },
-            "description": "Content Too Large"
-          },
-          "415": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
-                }
-              }
-            },
-            "description": "Unsupported Media Type"
-          },
           "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTP500InternalServerError"
                 }
               }
-            },
-            "description": "Internal Server Error"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
             }
           }
         },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "xml_file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": [
-                  "xml_file"
-                ]
-              }
-            },
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "xml_file": {
-                    "type": "string",
-                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
-                  }
-                },
-                "required": [
-                  "xml_file"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/upload/docx": {
-      "post": {
-        "tags": [
-          "Upload"
-        ],
-        "summary": "Upload a DOCX file, convert it to JATS XML, and upload to the storage",
-        "description": "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used. The `use_html_sections` query parameter can be set to `true` to transform sections into EasySection. This only works when using storage adapters that support EasySection, like PloneStorageAdapter.",
-        "operationId": "upload_docx",
         "security": [
           {
             "APIKeyHeader": []
           }
-        ],
-        "parameters": [
-          {
-            "name": "container",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Container"
-            }
-          },
-          {
-            "name": "assets_container",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Assets Container"
-            }
-          },
-          {
-            "name": "use_html_sections",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Use Html Sections"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadFileResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP400BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "413": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
-                }
-              }
-            },
-            "description": "Content Too Large"
-          },
-          "415": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
-                }
-              }
-            },
-            "description": "Unsupported Media Type"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP500InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "docx_file": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                },
-                "required": [
-                  "docx_file"
-                ]
-              }
-            },
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "docx_file": {
-                    "type": "string",
-                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
-                  }
-                },
-                "required": [
-                  "docx_file"
-                ]
-              }
-            }
-          }
-        }
+        ]
       }
     },
-    "/modify/link-related-articles": {
-      "post": {
+    "/list/sachgebiete": {
+      "get": {
         "tags": [
-          "Modify"
+          "List"
         ],
-        "summary": "Link related articles IDs to the real articles in the storage",
-        "operationId": "link_related_articles",
+        "summary": "List Sachgebiete",
+        "description": "Returns a list of Sachgebiete",
+        "operationId": "list_sachgebiete_list_sachgebiete_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateArticlesResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                  "$ref": "#/components/schemas/ListSachgebieteResponse"
                 }
               }
             }
@@ -968,13 +742,764 @@
         }
       }
     },
-    "/export/cache": {
+    "/export/async/status": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Status",
+        "operationId": "export_status_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "export_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ExportType"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed"
+          },
+          "404": {
+            "description": "No export was started yet"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/async/html": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Html",
+        "operationId": "export_html_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_edit_links",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Edit Links"
+            }
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HtmlDocumentResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/async/pdf": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Pdf",
+        "operationId": "export_pdf_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF file",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/zip": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a JATS Document (ZIP-file) to the storage",
+        "description": "This endpoint accepts a ZIP file containing a JATS document (XML file) and optional referenced asset files and uploads it to the storage backend. The file can be provided either as a multipart form upload (`zip_file` field) or as a JSON body with the `zip_file` field set to a base64-encoded data URI (e.g. `data:application/zip;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used.",
+        "operationId": "upload_zip",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Container"
+            }
+          },
+          {
+            "name": "assets_container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assets Container"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "zip_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "zip_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "zip_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "required": [
+                  "zip_file"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/xml": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a JATS Document (XML) to the storage",
+        "description": "This endpoint accepts a JATS document as an XML file upload and uploads it to the storage backend. Note that this endpoint does not support uploading referenced files, so it should only be used for simple JATS documents without external file references. The file can be provided either as a multipart form upload (`xml_file` field) or as a JSON body with the `xml_file` field set to a base64-encoded data URI (e.g. `data:application/xml;base64,<data>`). The target container for the uploaded file can be specified using the `container` query parameter. If not specified, the default container will be used.",
+        "operationId": "upload_xml",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Container"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xml_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "xml_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xml_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "required": [
+                  "xml_file"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/docx": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload a DOCX file, convert it to JATS XML, and upload to the storage",
+        "description": "This endpoint accepts a DOCX file upload, converts it to JATS XML, and uploads it to the storage backend. The file can be provided either as a multipart form upload (`docx_file` field) or as a JSON body with the `docx_file` field set to a base64-encoded data URI (e.g. `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,<data>`). The target containers for the uploaded files and assets can be specified using the `container` and `assets_container` query parameters. If not specified, the default containers will be used. The `use_html_sections` query parameter can be set to `true` to transform sections into EasySection. This only works when using storage adapters that support EasySection, like PloneStorageAdapter.",
+        "operationId": "upload_docx",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Container"
+            }
+          },
+          {
+            "name": "assets_container",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assets Container"
+            }
+          },
+          {
+            "name": "use_html_sections",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Use Html Sections"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP413PayloadTooLarge"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP415UnsupportedMediaType"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docx_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "docx_file"
+                ]
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "docx_file": {
+                    "type": "string",
+                    "description": "Base64-encoded data URI of the file (e.g. `data:<mime>;base64,<data>`)"
+                  }
+                },
+                "required": [
+                  "docx_file"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/modify/link-related-articles": {
+      "post": {
+        "tags": [
+          "Modify"
+        ],
+        "summary": "Link related articles IDs to the real articles in the storage",
+        "operationId": "link_related_articles",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateArticlesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP400BadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/cache/": {
+      "get": {
+        "tags": [
+          "Cache Management"
+        ],
+        "summary": "Get Cache Status",
+        "operationId": "get_cache_status",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CacheStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
-          "Export"
+          "Cache Management"
         ],
         "summary": "Clear Export Cache",
-        "description": "Clear the export cache for a given path and / or webcode",
+        "description": "Clear the export cache for a given path or webcode",
         "operationId": "clear_export_cache",
         "security": [
           {
@@ -1037,261 +1562,25 @@
             }
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Export"
-        ],
-        "summary": "Get Cache Status",
-        "operationId": "get_cache_status",
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CacheStatusResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/list/": {
-      "get": {
-        "tags": [
-          "List"
-        ],
-        "summary": "List Articles",
-        "description": "List articles in the storage system. Filtering and batching are supported.",
-        "operationId": "list_articles",
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "fachbereiche",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Fachbereiche"
-            }
-          },
-          {
-            "name": "sachgebiete",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Sachgebiete"
-            }
-          },
-          {
-            "name": "organisationseinheiten",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Organisationseinheiten"
-            }
-          },
-          {
-            "name": "rubriken",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Rubriken"
-            }
-          },
-          {
-            "name": "batch_start",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Zero-based index of the first article in the batch",
-              "default": 0,
-              "title": "Batch Start"
-            },
-            "description": "Zero-based index of the first article in the batch"
-          },
-          {
-            "name": "batch_size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 200,
-              "minimum": 1,
-              "description": "Number of articles to return",
-              "default": 200,
-              "title": "Batch Size"
-            },
-            "description": "Number of articles to return"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListArticlesResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP500InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/list/fachbereiche": {
-      "get": {
-        "tags": [
-          "List"
-        ],
-        "summary": "List Fachbereiche",
-        "description": "Returns a list of Fachbereiche",
-        "operationId": "list_fachbereiche_list_fachbereiche_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListFachbereicheResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP500InternalServerError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
-      }
-    },
-    "/list/sachgebiete": {
-      "get": {
-        "tags": [
-          "List"
-        ],
-        "summary": "List Sachgebiete",
-        "description": "Returns a list of Sachgebiete",
-        "operationId": "list_sachgebiete_list_sachgebiete_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListSachgebieteResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTP500InternalServerError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "APIKeyHeader": []
-          }
-        ]
       }
     }
   },
   "components": {
     "schemas": {
+      "AsyncExportAccepted": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "The status of the export"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "AsyncExportAccepted"
+      },
       "CacheClearedResponse": {
         "properties": {
           "message": {
@@ -1306,25 +1595,45 @@
         ],
         "title": "CacheClearedResponse"
       },
-      "CacheStatusResponse": {
+      "CacheStatus": {
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled",
-            "description": "Indicates if FastAPICache is enabled"
-          },
-          "prefix": {
+          "implementation": {
             "type": "string",
-            "title": "Prefix",
-            "description": "The cache prefix used by FastAPICache"
+            "title": "Implementation",
+            "description": "The cache implementation"
+          },
+          "items_in_cache": {
+            "type": "integer",
+            "title": "Items In Cache",
+            "description": "The number of items currently in the cache"
           }
         },
         "type": "object",
         "required": [
-          "enabled",
-          "prefix"
+          "implementation",
+          "items_in_cache"
         ],
+        "title": "CacheStatus"
+      },
+      "CacheStatusResponse": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/CacheStatus"
+        },
+        "type": "object",
         "title": "CacheStatusResponse"
+      },
+      "ExportType": {
+        "type": "string",
+        "enum": [
+          "html",
+          "html_edit_links",
+          "md",
+          "md_edit_links",
+          "jats",
+          "pdf",
+          "metadata"
+        ],
+        "title": "ExportType"
       },
       "Front": {
         "properties": {
@@ -2243,5 +2552,35 @@
         "name": "X-API-Key"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Status",
+      "description": "Check API health and version."
+    },
+    {
+      "name": "List",
+      "description": "Browse stored articles and available subject classifications."
+    },
+    {
+      "name": "Export",
+      "description": "Export articles as JATS, HTML, Markdown, or PDF, or retrieve their metadata."
+    },
+    {
+      "name": "Export Async",
+      "description": "Use `GET /export/async/{type}` with exactly one query parameter: `path` or `webcode`. If the export type is already cached, the endpoint returns `200 OK` and the exported document (HTML and front matter, or a PDF download). Otherwise, it starts a background export and returns `202 Accepted`.\n\nPoll the same endpoint with the same query parameters until it returns `200 OK`. Requests made while the export is running return `202 Accepted`. If a background export fails, a subsequent request starts another attempt."
+    },
+    {
+      "name": "Upload",
+      "description": "Import JATS XML, ZIP archives, or DOCX documents into storage."
+    },
+    {
+      "name": "Modify",
+      "description": "Postprocessing of imported articles."
+    },
+    {
+      "name": "Cache Management",
+      "description": "Inspect cache status and clear cached exports."
+    }
+  ]
 }

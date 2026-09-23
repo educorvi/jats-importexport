@@ -63,13 +63,15 @@ clean:
 get-api-version:
 	@echo $(API_VERSION)
 
-build-image: check_dependency_docker
-	docker buildx build --platform linux/amd64 . -t ghcr.io/educorvi/jats-importexport:latest
-	docker buildx build --platform linux/amd64 . -t ghcr.io/educorvi/jats-importexport:$(API_VERSION)
+build-image-%: check_dependency_docker
+	docker buildx build --platform linux/amd64 . -t ghcr.io/educorvi/jats-importexport:$*
 
-push-image: check_dependency_docker build-image
-	docker push ghcr.io/educorvi/jats-importexport:latest
-	docker push ghcr.io/educorvi/jats-importexport:$(API_VERSION)
+build-image: build-image-latest build-image-$(API_VERSION)
+
+push-image-%: check_dependency_docker build-image-%
+	docker push ghcr.io/educorvi/jats-importexport:$*
+
+push-image: push-image-latest push-image-$(API_VERSION)
 
 sbom: check_dependency_uv
 	uv run cyclonedx-py venv > sbom.json
