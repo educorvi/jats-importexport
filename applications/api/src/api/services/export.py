@@ -43,11 +43,11 @@ def get_return_type(request: Request) -> ReturnType:
 
 
 async def __load_document(
-    path: str, is_path: bool, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
+    path: str, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
 ) -> JATSDocument:
     try:
         adapter = adapter or get_adapter_instance()
-        return await asyncio.to_thread(adapter.get_jats_document, path, is_path, options)
+        return await asyncio.to_thread(adapter.get_jats_document, path, options)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except DuplicateException as e:
@@ -56,10 +56,10 @@ async def __load_document(
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
 
-async def __load_metadata(path: str, is_path: bool, adapter: StorageAdapter | None = None) -> Front:
+async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> Front:
     try:
         adapter = adapter or get_adapter_instance()
-        return await asyncio.to_thread(adapter.get_metadata, path, is_path)
+        return await asyncio.to_thread(adapter.get_metadata, path)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except DuplicateException as e:
@@ -82,13 +82,12 @@ exp_document_metric = Summary(
 )
 
 
-
 async def jats_export(path: str):
     cached = await EXPORT_CACHE.get(path, ExportType.JATS)
     if cached:
         return JatsDocumentResponse(jats=cached)
     with exp_metric.labels("jats").time(), exp_document_metric.labels("jats", path).time():
-        document = await __load_document(path, is_path)
+        document = await __load_document(path)
         jats = await asyncio.to_thread(JATS_EXPORTER.export, document)
         await EXPORT_CACHE.set(path, ExportType.JATS, jats)
         return JatsDocumentResponse(jats=jats)
@@ -99,7 +98,7 @@ async def html_export(path: str, include_edit_links: bool = False):
     if cached:
         return HtmlDocumentResponse(**cached)
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
-        document = await __load_document(path, is_path, {"include_edit_links": include_edit_links})
+        document = await __load_document(path, {"include_edit_links": include_edit_links})
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
 
         soup = BeautifulSoup(html_content, "html.parser")
@@ -125,7 +124,7 @@ async def md_export(path: str, include_edit_links: bool = False):
     if cached:
         return MarkdownDocumentResponse(md=cached)
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
-        document = await __load_document(path, is_path, {"include_edit_links": include_edit_links})
+        document = await __load_document(path, {"include_edit_links": include_edit_links})
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
         if include_edit_links:
             await EXPORT_CACHE.set(path, ExportType.MD_EDIT_LINKS, md_content)
@@ -134,18 +133,18 @@ async def md_export(path: str, include_edit_links: bool = False):
         return MarkdownDocumentResponse(md=md_content)
 
 
-async def pdf_export(path: str, is_path: bool):
+async def pdf_export(path: str):
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
-        document = await __load_document(path, is_path, adapter=adapter)
+        document = await __load_document(path, adapter=adapter)
         pdf_content, filename = await asyncio.to_thread(
             PdfExporter(image_downloader=adapter.download_file).export, document
         )
         return pdf_content, filename
 
 
-async def metadata_export(path: str, is_path: bool):
+async def metadata_export(path: str):
     with exp_metric.labels("metadata").time(), exp_document_metric.labels("metadata", path).time():
         adapter = get_adapter_instance()
-        front = await __load_metadata(path, is_path, adapter=adapter)
+        front = await __load_metadata(path, adapter=adapter)
         return front

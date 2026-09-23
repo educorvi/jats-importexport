@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 
 from api.auth import require_permission
 from api.models import CacheClearedResponse, CacheStatus, CacheStatusResponse
-from api.services.export import get_path_from_webcode
+from api.services.common import get_path_from_webcode
 from api.services.keyval_implementations import EXPORT_CACHE, EXPORT_STATE_CACHE
 
 router = APIRouter(prefix="/cache", tags=["Cache Management"])

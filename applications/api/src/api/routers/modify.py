@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from ..models import (
+from api.models import (
     DeleteArticleResponse,
     HTTP400BadRequest,
     HTTP404NotFound,
@@ -9,8 +9,8 @@ from ..models import (
     HTTP500InternalServerError,
     UpdateArticlesResponse,
 )
-from ..services.modify import delete_article_service, link_related_articles_service
-from .common import resolve_path
+from api.services.common import resolve_path
+from api.services.modify import delete_article_service, link_related_articles_service
 
 router = APIRouter(prefix="/modify", tags=["Modify"])
 
@@ -43,6 +43,5 @@ async def link_related_articles(request: Request):
     summary="Delete an article from the storage",
     description=("Deletes an article and all its associated data from the storage"),
 )
-async def delete_article(path_tuple: tuple[str, bool] = Depends(resolve_path)):
-    path, is_path = path_tuple
-    return await delete_article_service(path, is_path)
+async def delete_article(path: str = Depends(resolve_path)):
+    return await delete_article_service(path)

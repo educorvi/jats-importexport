@@ -103,9 +103,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_jats_document(
-        self, path: str, is_path: bool = True, options: GetJATSDocumentOptions | None = None
-    ) -> JATSDocument:
+    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve a JATSDocument from the storage system.
 
         Args:
@@ -117,7 +115,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    def get_metadata(self, path: str, is_path: bool = True) -> Front:
+    def get_metadata(self, path: str) -> Front:
         """Retrieve metadata for a JatsDocument from the storage system.
 
         Args:
@@ -126,7 +124,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         Returns:
             A Front instance containing metadata for the file.
         """
-        return self.get_jats_document(path, is_path=is_path).article.front
+        return self.get_jats_document(path).article.front
 
     @abc.abstractmethod
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
@@ -166,14 +164,14 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             ],
         )
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        """Retrieve an article by its webcode from the storage system.
-
+    @abc.abstractmethod
+    def get_path_from_webcode(self, webcode: str) -> str:
+        """Retrieve a path to an article by its webcode from the storage system.
         Args:
             webcode: The webcode of the article.
 
         Returns:
-            A dictionary containing the article data.
+            The path to the article corresponding to the given webcode.
         """
         raise NotImplementedError
 
@@ -185,7 +183,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete_article(self, path: str, is_path: bool) -> list[str]:
+    def delete_article(self, path: str) -> list[str]:
         """Delete an article from the storage system and return a list of any errors encountered."""
         raise NotImplementedError
 

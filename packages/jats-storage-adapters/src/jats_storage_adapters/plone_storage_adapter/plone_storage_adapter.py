@@ -134,22 +134,15 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error downloading file from {url}") from e
 
     @overload
-    def get_jats_document(self, path: str, is_path: bool, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
+    def get_jats_document(self, path: str, options: PloneGetJATSDocumentOptions) -> JATSDocument: ...
 
     @overload
-    def get_jats_document(
-        self, path: str, is_path: bool = True, options: BaseGetJATSDocumentOptions | None = None
-    ) -> JATSDocument: ...
+    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument: ...
 
-    def get_jats_document(
-        self, path: str, is_path: bool = True, options: BaseGetJATSDocumentOptions | None = None
-    ) -> JATSDocument:
+    def get_jats_document(self, path: str, options: BaseGetJATSDocumentOptions | None = None) -> JATSDocument:
         """Retrieve and reconstruct a JATSDocument from Plone content nodes."""
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
-
-        if not is_path:
-            path = download_service.get_path_from_webcode(path)
 
         url = self.get_url_from_path(path)
 
@@ -173,16 +166,17 @@ class PloneStorageAdapter(StorageAdapter):
             article=article, related_articles=relations, related_articles_translations=related_articles_translations
         )
 
-    def get_metadata(self, path: str, is_path: bool = True) -> Front:
+    def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
-        if not is_path:
-            path = download_service.get_path_from_webcode(path)
         url = self.get_url_from_path(path)
         return download_service.get_metadata(url)
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
+
+    def get_path_from_webcode(self, webcode: str) -> str:
+        return PloneDownloadService(self.base_url, self.httpx_client).get_path_from_webcode(webcode)
 
     # Modify / automation related methods
 
@@ -204,12 +198,9 @@ class PloneStorageAdapter(StorageAdapter):
                 updated_articles.append(article)
         return updated_articles
 
-    def delete_article(self, path: str, is_path: bool) -> list[str]:
+    def delete_article(self, path: str) -> list[str]:
         """Delete an article from Plone."""
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
-
-        if not is_path:
-            path = download_service.get_path_from_webcode(path)
 
         url = self.get_url_from_path(path)
 

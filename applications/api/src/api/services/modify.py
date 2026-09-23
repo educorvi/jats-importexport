@@ -17,11 +17,11 @@ async def link_related_articles_service() -> UpdateArticlesResponse:
         raise HTTPException(status_code=500, detail=f"Error linking related articles: {e}")
 
 
-async def delete_article_service(path: str, is_path: bool) -> DeleteArticleResponse | Response:
+async def delete_article_service(path: str) -> DeleteArticleResponse | Response:
     adapter_instance = get_adapter_instance()
 
     try:
-        errors = await asyncio.to_thread(adapter_instance.delete_article, path, is_path)
+        errors = await asyncio.to_thread(adapter_instance.delete_article, path)
         if errors:
             return DeleteArticleResponse(errors=errors)
         return Response(status_code=204)

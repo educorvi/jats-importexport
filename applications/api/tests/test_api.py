@@ -107,7 +107,7 @@ class MockStorageAdapter(StorageAdapter):
         self.uploaded_files.append((name, container, url))
         return url
 
-    def get_jats_document(self, path: str, is_path: bool = True, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
+    def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         if path == "nonexistent":
             raise PathNotFoundExpection(path)
         # Return a valid JATSDocument
@@ -127,13 +127,13 @@ class MockStorageAdapter(StorageAdapter):
         title = document.article.front.title or "article"
         return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
-    def get_article_by_webcode(self, webcode: str) -> dict:
-        return {"@id": f"http://mockstore/articles/{webcode}.xml"}
+    def get_path_from_webcode(self, webcode: str) -> str:
+        return f"/articles/{webcode}.xml"
 
     def link_related_articles(self) -> list[str]:
         return ["articles/article1.xml", "articles/article2.xml"]
 
-    def delete_article(self, path: str, is_path: bool) -> list[str]:
+    def delete_article(self, path: str) -> list[str]:
         # Simulate deletion by returning an empty list of errors
         return []
 
@@ -153,6 +153,7 @@ def mock_adapter(mocker):
     mocker.patch("api.services.upload.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
+    mocker.patch("api.services.common.get_adapter_instance", return_value=adapter)
     mocker.patch.object(APIConfig, "API_KEY", None)
     mocker.patch.object(APIConfig, "API_KEY_MANAGER_URL", None)
     return adapter
