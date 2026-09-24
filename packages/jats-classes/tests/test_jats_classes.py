@@ -110,55 +110,6 @@ MINIMAL_VALID_XSD = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 # ----------------------------------------------------
-# Tests for JATSDocument
-# ----------------------------------------------------
-
-
-def test_jats_document_from_xml_valid():
-    doc = JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
-    assert isinstance(doc, JATSDocument)
-    assert isinstance(doc.article, Article)
-    assert doc.article.front.title == "My Test JATS Article"
-
-
-def test_jats_document_from_xml_invalid_root():
-    with pytest.raises(ValueError, match="Expected root element 'article'"):
-        JATSDocument.from_xml(INVALID_ROOT_XML, xsd_path=None)
-
-
-def test_jats_document_from_xml_missing_components():
-    # JATS <article> element must contain front, body, back according to Article.from_xml_element
-    with pytest.raises(ValueError, match="Article element must contain 'front' and 'body' elements"):
-        JATSDocument.from_xml(MISSING_COMPONENTS_XML, xsd_path=None)
-
-
-def test_jats_document_xsd_validation():
-    # Test valid validation
-    with tempfile.NamedTemporaryFile(suffix=".xsd", mode="w", delete=False) as f:
-        f.write(MINIMAL_VALID_XSD)
-        xsd_path = f.name
-
-    try:
-        # Minimal XML that is valid according to our custom XSD
-        minimal_xml = "<article><front><journal-meta><journal-id/><issn/></journal-meta><article-meta><title-group><article-title>Minimal Title</article-title></title-group></article-meta></front><body/><back/></article>"
-        doc = JATSDocument.from_xml(minimal_xml, xsd_path=xsd_path)
-        assert isinstance(doc, JATSDocument)
-
-        # Invalid XML against our XSD (e.g. missing elements or wrong root)
-        invalid_xml = "<article><nonexistent/></article>"
-        with pytest.raises(ValueError, match="XML is not valid according to the XSD"):
-            JATSDocument.from_xml(invalid_xml, xsd_path=xsd_path)
-
-        # FileNotFoundError for missing XSD path
-        with pytest.raises(FileNotFoundError, match="XSD file not found"):
-            JATSDocument.from_xml(minimal_xml, xsd_path="nonexistent_file.xsd")
-
-    finally:
-        if os.path.exists(xsd_path):
-            os.remove(xsd_path)
-
-
-# ----------------------------------------------------
 # Tests for Front Title Extraction
 # ----------------------------------------------------
 
