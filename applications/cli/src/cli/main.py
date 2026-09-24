@@ -10,6 +10,7 @@ from jats_classes import JATSDocument
 from jats_exporters.jats import JatsExporter
 from jats_importexport_client import ApiClient, Configuration
 from jats_importexport_client.api.export_api import ExportApi
+from jats_importexport_client.api.list_api import ListApi
 from jats_importexport_client.api.upload_api import UploadApi
 from jats_importexport_client.exceptions import ApiException
 from rich.console import Console
@@ -263,6 +264,16 @@ def validate_main():
     typer.run(validate_command)
 
 
+def _reformat_and_save_jats_xml(jats: str, output_path: str = "exported_jats.xml") -> None:
+    """Reformat and save JATS XML to a file."""
+    from lxml import etree
+
+    parser = etree.XMLParser(remove_blank_text=True)
+    tree = etree.fromstring(jats.encode("utf-8"), parser)
+    pretty_jats = etree.tostring(tree, pretty_print=True, encoding="utf-8").decode("utf-8")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(pretty_jats)
+
 def validate_remote_command(
     path: str = typer.Argument(..., help="Path of the JATS document in the API storage."),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
@@ -276,6 +287,7 @@ def validate_remote_command(
     try:
         with ApiClient(configuration) as api_client:
             response = ExportApi(api_client).export_jats(path=path)
+        _reformat_and_save_jats_xml(response.jats, output_path="exported_jats.xml")
         JATSDocument.from_xml(response.jats, xsd_path=_get_jats_schema_path())
     except ApiException as error:
         console.print(f"[bold red]✖ API export failed for '{path}':[/bold red]\n{error}")
@@ -289,6 +301,83 @@ def validate_remote_command(
 
 def validate_remote_main():
     typer.run(validate_remote_command)
+
+
+def _safe_filename(value: str) -> str:
+    return "_".join(part for part in value.replace("\\", "/").split("/") if part) or "article"
+
+
+def _list_all_articles(api: ListApi, rubrik: str) -> list[str]:
+    articles: list[str] = []
+    batch_start = 0
+    batch_size = 200
+
+    while True:
+        response = api.list_articles(rubriken=[rubrik], batch_start=batch_start, batch_size=batch_size)
+        articles.extend(response.articles)
+        if batch_start + len(response.articles) >= response.count or not response.articles:
+            return articles
+        batch_start += len(response.articles)
+
+
+def validate_rubriken_command(
+    rubriken: list[str] = typer.Argument(..., help="Rubriken used to find articles in the API."),
+    output_folder: Path = typer.Argument(..., help="Folder where article XML and result files are written."),
+    host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+):
+    """Export and validate all articles found for the supplied Rubriken."""
+    output_folder.mkdir(parents=True, exist_ok=True)
+    configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
+
+    xsd_path = _get_jats_schema_path()
+    try:
+        with ApiClient(configuration) as api_client:
+            list_api = ListApi(api_client)
+            export_api = ExportApi(api_client)
+            for rubrik in rubriken:
+                try:
+                    articles = _list_all_articles(list_api, rubrik)
+                except Exception as error:
+                    (output_folder / f"rubrik_{_safe_filename(rubrik)}.txt").write_text(
+                        f"ERROR listing rubrik '{rubrik}':\n{error}\n", encoding="utf-8"
+                    )
+                    continue
+
+                if not articles:
+                    (output_folder / f"rubrik_{_safe_filename(rubrik)}.txt").write_text(
+                        f"NO ARTICLES\nrubrik: {rubrik}\n", encoding="utf-8"
+                    )
+                    continue
+
+                for index, article_path in enumerate(articles, start=1):
+                    stem = f"{_safe_filename(rubrik)}_{index:04d}_{_safe_filename(article_path)}"
+                    xml_path = output_folder / f"{stem}.xml"
+                    result_path = output_folder / f"{stem}.txt"
+                    try:
+                        response = export_api.export_jats(path=article_path)
+                        _reformat_and_save_jats_xml(response.jats, output_path=str(xml_path))
+                        JATSDocument.from_xml(response.jats, xsd_path=xsd_path)
+                        result_path.write_text(
+                            f"VALID\nrubrik: {rubrik}\npath: {article_path}\nxml: {xml_path.name}\n",
+                            encoding="utf-8",
+                        )
+                    except Exception as error:
+                        result_path.write_text(
+                            f"INVALID\nrubrik: {rubrik}\npath: {article_path}\nerror: {error}\n",
+                            encoding="utf-8",
+                        )
+    except ApiException as error:
+        console.print(f"[bold red]✖ API error:[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+
+    console.print(f"[bold green]✔ Results written to {output_folder}[/bold green]")
+
+
+def validate_rubriken_main():
+    typer.run(validate_rubriken_command)
 
 
 if __name__ == "__main__":
