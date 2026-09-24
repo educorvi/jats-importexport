@@ -33,6 +33,18 @@ uv run jats-validate article-with-assets
 uv run jats-validate 'documents/**/*.xml' --workers 4
 ```
 
+To validate JATS returned by the API export endpoint:
+
+```sh
+uv run jats-validate-remote storage/path/article.xml \
+  --host https://jats.example.org \
+  --api-key YOUR_API_KEY
+```
+
+This command calls `/export/jats` with the supplied path and validates the
+returned JATS once against the packaged XSD. It does not upload or modify the
+document.
+
 The validation command accepts `.xml`, `.zip`, `.ocf`, and directories, matching
 the upload command. Directories are packaged with the same relative paths as
 uploads, and every XML member in an archive is checked. Each source is parsed

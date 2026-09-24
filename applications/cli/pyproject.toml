@@ -15,6 +15,7 @@ dependencies = [
 [project.scripts]
 jats-cli = "cli.main:main"
 jats-validate = "cli.main:validate_main"
+jats-validate-remote = "cli.main:validate_remote_main"
 
 [dependency-groups]
 dev = [

@@ -9,6 +9,7 @@ import typer
 from jats_classes import JATSDocument
 from jats_exporters.jats import JatsExporter
 from jats_importexport_client import ApiClient, Configuration
+from jats_importexport_client.api.export_api import ExportApi
 from jats_importexport_client.api.upload_api import UploadApi
 from jats_importexport_client.exceptions import ApiException
 from rich.console import Console
@@ -260,6 +261,34 @@ def validate_command(
 
 def validate_main():
     typer.run(validate_command)
+
+
+def validate_remote_command(
+    path: str = typer.Argument(..., help="Path of the JATS document in the API storage."),
+    host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+):
+    """Export one document from the API and validate the returned JATS."""
+    configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
+
+    try:
+        with ApiClient(configuration) as api_client:
+            response = ExportApi(api_client).export_jats(path=path)
+        JATSDocument.from_xml(response.jats, xsd_path=_get_jats_schema_path())
+    except ApiException as error:
+        console.print(f"[bold red]✖ API export failed for '{path}':[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+    except Exception as error:
+        console.print(f"[bold red]✖ INVALID[/bold red] Exported JATS for '{path}'\n[red]{error}[/red]")
+        raise typer.Exit(code=1) from error
+
+    console.print(f"[bold green]✔ VALID[/bold green] Exported JATS for '{path}'")
+
+
+def validate_remote_main():
+    typer.run(validate_remote_command)
 
 
 if __name__ == "__main__":
