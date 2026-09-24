@@ -125,12 +125,13 @@ def _create_tag(
     text: str | None = None,
     nsmap: dict[str, str] = {},
     attributes: dict[str, str] = {},
-    children: list[etree._Element] = [],
+    children: list[etree._Element | None] = [],
 ) -> etree._Element:
     elem = etree.Element(tag, nsmap=nsmap, attrib=attributes)
     elem.text = text
     for child in children:
-        elem.append(child)
+        if child is not None:
+            elem.append(child)
     return elem
 
 
@@ -449,7 +450,7 @@ class Front:
                     _create_tag("day", text=str(self.pub_date_aktualisierte_fassung.day) if self.pub_date_aktualisierte_fassung else None), # noqa: E501
                     _create_tag("month", text=str(self.pub_date_aktualisierte_fassung.month) if self.pub_date_aktualisierte_fassung else None), # noqa: E501
                     _create_tag("year", text=str(self.pub_date_aktualisierte_fassung.year) if self.pub_date_aktualisierte_fassung else None), # noqa: E501
-                ]),
+                ]) if self.pub_date_aktualisierte_fassung else None,
                 _create_tag("history", children=[
                     _create_tag("date", attributes={"date-type": "initial-publication"}, children=[
                         _create_tag("year", text=self.history_initial_publication),
