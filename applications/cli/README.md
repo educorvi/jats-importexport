@@ -24,6 +24,23 @@ Run the CLI through uv:
 uv run jats-cli --help
 ```
 
+To validate JATS files locally without uploading them:
+
+```sh
+uv run jats-validate article.xml
+uv run jats-validate article.zip
+uv run jats-validate article-with-assets
+uv run jats-validate 'documents/**/*.xml' --workers 4
+```
+
+The validation command accepts `.xml`, `.zip`, `.ocf`, and directories, matching
+the upload command. Directories are packaged with the same relative paths as
+uploads, and every XML member in an archive is checked. Each source is parsed
+into `JATSDocument`, validated against the packaged XSD, exported with
+`JatsExporter`, and validated again. It prints the file or archive member,
+validation stage, schema location, and schema reason for invalid input, and exits
+non-zero if any document fails.
+
 ## Usage
 
 ```text

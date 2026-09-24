@@ -56,8 +56,10 @@ class JATSDocument:
         if xsd_path is not None:
             if not cls._file_exists(xsd_path):
                 raise FileNotFoundError(f"XSD file not found: {xsd_path}")
-            if not cls._validate_xml(xml_content, xsd_path):
-                raise ValueError("XML is not valid according to the XSD:")
+            errors = cls._validate_xml(xml_content, xsd_path)
+            if errors:
+                details = "\n".join(f"{path or '/'}: {reason}" for path, reason in errors)
+                raise ValueError(f"XML is not valid according to the XSD:\n{details}")
         parser = etree.XMLParser(remove_pis=False, remove_comments=False)
         tree = etree.parse(BytesIO(xml_content.encode("utf-8")), parser=parser)
         root = tree.getroot()
@@ -72,7 +74,11 @@ class JATSDocument:
         return os.path.isfile(file_path)
 
     @staticmethod
-    def _validate_xml(xml_content: str, xsd_path: str) -> bool:
-        """Validate XML string content against an XSD schema file."""
+    def _validate_xml(xml_content: str, xsd_path: str) -> list[tuple[str, str]]:
+        """Validate XML string content against an XSD schema file.
+
+        Returns a list of validation errors, each as a tuple of (path, reason).
+        An empty list indicates the XML is valid.
+        """
         schema = xmlschema.XMLSchema(xsd_path)
-        return schema.is_valid(xml_content)
+        return [(error.path or "/", error.reason or "") for error in schema.iter_errors(xml_content)]

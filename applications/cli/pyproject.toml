@@ -5,6 +5,8 @@ description = "CLI Application for uploading JATS documents"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "jats-classes",
+    "jats-exporters",
     "jats-importexport-client",
     "typer>=0.12",
     "rich>=13.0",
@@ -12,6 +14,7 @@ dependencies = [
 
 [project.scripts]
 jats-cli = "cli.main:main"
+jats-validate = "cli.main:validate_main"
 
 [dependency-groups]
 dev = [
@@ -20,6 +23,8 @@ dev = [
 ]
 
 [tool.uv.sources]
+jats-classes = {workspace = true}
+jats-exporters = {workspace = true}
 jats-importexport-client = {workspace = true}
 
 [tool.uv]

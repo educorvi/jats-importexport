@@ -348,6 +348,8 @@ name = "cli"
 version = "0.1.0"
 source = { editable = "applications/cli" }
 dependencies = [
+    { name = "jats-classes" },
+    { name = "jats-exporters" },
     { name = "jats-importexport-client" },
     { name = "rich" },
     { name = "typer" },
@@ -361,6 +363,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "jats-classes", editable = "packages/jats-classes" },
+    { name = "jats-exporters", editable = "packages/jats-exporters" },
     { name = "jats-importexport-client", editable = "packages/api-client" },
     { name = "rich", specifier = ">=13.0" },
     { name = "typer", specifier = ">=0.12" },
@@ -1096,7 +1100,7 @@ dev = [
 
 [[package]]
 name = "jats-importexport-client"
-version = "1.0.0a43"
+version = "1.0.0a44.dev0"
 source = { editable = "packages/api-client" }
 dependencies = [
     { name = "pydantic" },
