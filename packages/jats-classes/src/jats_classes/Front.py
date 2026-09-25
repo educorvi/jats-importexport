@@ -491,7 +491,7 @@ class Front:
                 ]),
                 _create_tag("kwd-group", attributes={"kwd-group-type": "author-generated"}, children=[
                     *[_create_tag("kwd", text=kw) for kw in self.subjects or []],
-                ]),
+                ]) if self.subjects else None,
                 _create_tag("custom-meta-group", children=[
                     _create_tag("custom-meta", children=[
                         _create_tag("meta-name", text="Beschreibender Typ"),
