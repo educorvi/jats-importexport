@@ -31,7 +31,7 @@ def _wrap_article_jats(jats: str, xml_lang: str) -> str:
     article_open = (
         '<article xmlns:mml="http://www.w3.org/1998/Math/MathML" '
         f'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="{xml_lang}" '
-        'article-type="DGUV Vorschrift" dtd-version="0.4">'
+        'article-type="DGUV Vorschriften- und Regelwerk" dtd-version="1.1">'
     )
     return f"{doctype}\n{article_open}\n\t{jats}\n</article>\n"
 

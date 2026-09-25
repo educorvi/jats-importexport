@@ -9,6 +9,10 @@ from lxml import etree
 
 from .GenericSection import GenericSection
 
+_DUMMY_TITLE = (
+    """<title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink"></title>"""
+)
+
 
 class Section(GenericSection):
     """Represents a basic JATS <sec> element which can recursively nest subsections."""
@@ -65,6 +69,7 @@ class Section(GenericSection):
         to_move = siblings[idx:]
         new_sec = etree.Element("sec")
         new_sec.set("sec-type", "highlight-info")
+        new_sec.append(etree.fromstring(_DUMMY_TITLE))
         for elem in to_move:
             section.remove(elem)
             new_sec.append(elem)
