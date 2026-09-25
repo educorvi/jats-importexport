@@ -426,7 +426,7 @@ class Front:
                 *([etree.fromstring(self.article_categories)] if self.article_categories else []),
                 _create_tag("title-group", children=[
                     _create_tag("article-title", text=self.title),
-                    *[_create_tag("subtitle", text=subtitle) for subtitle in self.article_subtitle],
+                    *[_create_tag("subtitle", text=subtitle) for subtitle in self.article_subtitle or [None]],
                 ]),
                 _create_tag("contrib-group", children=[
                     _create_tag("contrib", attributes={"contrib-type": "Autor"}, children=[
