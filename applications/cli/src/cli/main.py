@@ -307,26 +307,25 @@ def _safe_filename(value: str) -> str:
     return "_".join(part for part in value.replace("\\", "/").split("/") if part) or "article"
 
 
-def _list_all_articles(api: ListApi, rubrik: str) -> list[str]:
+def _list_all_articles(api: ListApi) -> list[str]:
     articles: list[str] = []
     batch_start = 0
     batch_size = 200
 
     while True:
-        response = api.list_articles(rubriken=[rubrik], batch_start=batch_start, batch_size=batch_size)
+        response = api.list_articles(batch_start=batch_start, batch_size=batch_size)
         articles.extend(response.articles)
         if batch_start + len(response.articles) >= response.count or not response.articles:
             return articles
         batch_start += len(response.articles)
 
 
-def validate_rubriken_command(
-    rubriken: list[str] = typer.Argument(..., help="Rubriken used to find articles in the API."),
+def validate_all_command(
     output_folder: Path = typer.Argument(..., help="Folder where article XML and result files are written."),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
     api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
 ):
-    """Export and validate all articles found for the supplied Rubriken."""
+    """Export and validate all articles found."""
     output_folder.mkdir(parents=True, exist_ok=True)
     configuration = Configuration(host=host)
     if api_key:
@@ -337,38 +336,29 @@ def validate_rubriken_command(
         with ApiClient(configuration) as api_client:
             list_api = ListApi(api_client)
             export_api = ExportApi(api_client)
-            for rubrik in rubriken:
+            try:
+                articles = _list_all_articles(list_api)
+            except Exception as error:
+                console.print(f"[bold red]✖ Error listing articles:[/bold red]\n{error}")
+                raise typer.Exit(code=1) from error
+
+            if not articles:
+                console.print("[bold red]✖ No articles found.[/bold red]")
+                raise typer.Exit(code=1)
+
+            for index, article_path in enumerate(articles, start=1):
+                stem = f"{index:04d}_{_safe_filename(article_path)}"
+                xml_path = output_folder / f"{stem}.xml"
+                result_path = output_folder / f"{stem}.txt"
                 try:
-                    articles = _list_all_articles(list_api, rubrik)
+                    response = export_api.export_jats(path=article_path)
+                    JATSDocument.from_xml(response.jats, xsd_path=xsd_path)
                 except Exception as error:
-                    (output_folder / f"rubrik_{_safe_filename(rubrik)}.txt").write_text(
-                        f"ERROR listing rubrik '{rubrik}':\n{error}\n", encoding="utf-8"
+                    _reformat_and_save_jats_xml(response.jats, output_path=str(xml_path))
+                    result_path.write_text(
+                        f"INVALID\npath: {article_path}\nerror: {error}\n",
+                        encoding="utf-8",
                     )
-                    continue
-
-                if not articles:
-                    (output_folder / f"rubrik_{_safe_filename(rubrik)}.txt").write_text(
-                        f"NO ARTICLES\nrubrik: {rubrik}\n", encoding="utf-8"
-                    )
-                    continue
-
-                for index, article_path in enumerate(articles, start=1):
-                    stem = f"{_safe_filename(rubrik)}_{index:04d}_{_safe_filename(article_path)}"
-                    xml_path = output_folder / f"{stem}.xml"
-                    result_path = output_folder / f"{stem}.txt"
-                    try:
-                        response = export_api.export_jats(path=article_path)
-                        _reformat_and_save_jats_xml(response.jats, output_path=str(xml_path))
-                        JATSDocument.from_xml(response.jats, xsd_path=xsd_path)
-                        result_path.write_text(
-                            f"VALID\nrubrik: {rubrik}\npath: {article_path}\nxml: {xml_path.name}\n",
-                            encoding="utf-8",
-                        )
-                    except Exception as error:
-                        result_path.write_text(
-                            f"INVALID\nrubrik: {rubrik}\npath: {article_path}\nerror: {error}\n",
-                            encoding="utf-8",
-                        )
     except ApiException as error:
         console.print(f"[bold red]✖ API error:[/bold red]\n{error}")
         raise typer.Exit(code=1) from error
@@ -376,8 +366,8 @@ def validate_rubriken_command(
     console.print(f"[bold green]✔ Results written to {output_folder}[/bold green]")
 
 
-def validate_rubriken_main():
-    typer.run(validate_rubriken_command)
+def validate_all_main():
+    typer.run(validate_all_command)
 
 
 if __name__ == "__main__":

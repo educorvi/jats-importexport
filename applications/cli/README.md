@@ -45,18 +45,17 @@ This command calls `/export/jats` with the supplied path and validates the
 returned JATS once against the packaged XSD. It does not upload or modify the
 document.
 
-To validate all articles belonging to one or more Rubriken:
+To validate all articles:
 
 ```sh
-uv run jats-validate-rubriken "Rubrik A" "Rubrik B" ./validation-results \
+uv run jats-validate-all ./validation-results \
   --host https://jats.example.org \
   --api-key YOUR_API_KEY
 ```
 
-The command reads all result pages from `/list` for each Rubrik, exports every
-article through `/export/jats`, validates the returned XML once, and writes one
-pretty-printed XML file and one matching `.txt` result file per article. Listing
-errors and Rubriken without matches also receive `.txt` result files.
+The command reads all result pages from `/list`, exports every article through
+`/export/jats`, validates the returned XML once, and writes one pretty-printed XML
+file and one matching `.txt` result file per article if there were validation errors.
 
 The validation command accepts `.xml`, `.zip`, `.ocf`, and directories, matching
 the upload command. Directories are packaged with the same relative paths as
