@@ -50,6 +50,10 @@ def adapt_docx_xml(xml_tree: etree._Element, XML_NAMESPACE: str, XLINK_NAMESPACE
     _convert_graphics_to_figures(xml_tree, XLINK_NAMESPACE)
     _add_title_to_tables(xml_tree)
 
+    # Conversions to match DGUV XSD Schema
+    _delete_mime_subtype_attributes(xml_tree)
+    _delete_alt_attributes_from_xref_tags(xml_tree)
+
     _add_sec_type_to_sections(xml_tree)
 
     # After adding sec-type attributes (toc has no labels / numbering)
@@ -900,3 +904,17 @@ def _add_title_to_tables_helper(xml_tree: etree._Element) -> None:
 
                     # Remove the previous sibling paragraph
                     xml_tree.remove(prev_sibling)
+
+
+def _delete_mime_subtype_attributes(xml_tree: etree._Element) -> None:
+    """Delete all 'mime-subtype' attributes from the XML tree."""
+    for elem in xml_tree.iter():
+        if "mime-subtype" in elem.attrib:
+            del elem.attrib["mime-subtype"]
+
+
+def _delete_alt_attributes_from_xref_tags(xml_tree: etree._Element) -> None:
+    """Delete all 'alt' attributes from <xref> tags in the XML tree."""
+    for elem in xml_tree.iter():
+        if elem.tag == "xref" and "alt" in elem.attrib:
+            del elem.attrib["alt"]

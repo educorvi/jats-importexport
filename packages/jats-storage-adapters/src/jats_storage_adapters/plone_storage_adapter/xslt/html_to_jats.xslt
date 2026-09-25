@@ -102,9 +102,7 @@
 
     <!-- TODO UI -->
     <xsl:template match="div">
-        <p>
-            <xsl:apply-templates/>
-        </p>
+        <xsl:apply-templates/>
     </xsl:template>
 
     <!-- TODO UI -->
@@ -297,6 +295,8 @@
                     </xsl:choose>
                 </xsl:attribute>
             </graphic>
+            <permissions>
+            </permissions>
         </fig>
     </xsl:template>
 
