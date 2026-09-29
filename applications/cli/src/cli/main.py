@@ -21,6 +21,7 @@ console = Console()
 
 # General utility functions for the CLI application
 
+
 def _resolve_paths(file_patterns: list[str]) -> list[Path]:
     files: list[Path] = []
     for pattern in file_patterns:
@@ -30,9 +31,7 @@ def _resolve_paths(file_patterns: list[str]) -> list[Path]:
         for match in matches:
             path = Path(match)
             if not path.is_file() and not path.is_dir():
-                console.print(
-                    f"[bold yellow]✖ Warning:[/bold yellow] Path '{path}' is neither a file nor a directory."
-                )
+                console.print(f"[bold yellow]✖ Warning:[/bold yellow] Path '{path}' is neither a file nor a directory.")
                 continue
             if path.is_file() and path.suffix.lower() not in [".xml", ".zip", ".ocf"]:
                 console.print(
@@ -50,9 +49,7 @@ def _resolve_paths(file_patterns: list[str]) -> list[Path]:
 def _create_zip(directory: Path) -> Path:
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
         zip_path = Path(tmp_zip.name)
-    console.print(
-        f"[bold yellow]📦 Zipping directory '{directory.name}' to '{zip_path}'...[/bold yellow]"
-    )
+    console.print(f"[bold yellow]📦 Zipping directory '{directory.name}' to '{zip_path}'...[/bold yellow]")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for entry in directory.rglob("*"):
             if entry.is_file():
@@ -61,6 +58,7 @@ def _create_zip(directory: Path) -> Path:
 
 
 # Uploading files to the server
+
 
 def _upload_single_file(
     file: Path,
@@ -183,6 +181,7 @@ def main():
 
 # JATS / XML schema validation
 
+
 def _get_jats_schema_path() -> str:
     import jats_classes
 
@@ -273,6 +272,7 @@ def _reformat_and_save_jats_xml(jats: str, output_path: str = "exported_jats.xml
     pretty_jats = etree.tostring(tree, pretty_print=True, encoding="utf-8").decode("utf-8")
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(pretty_jats)
+
 
 def validate_remote_command(
     path: str = typer.Argument(..., help="Path of the JATS document in the API storage."),
