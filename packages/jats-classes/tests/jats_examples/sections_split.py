@@ -50,7 +50,7 @@ SECTION_WITH_PARTIAL_VORBEMERKUNGEN = """
 		<label>1.</label>
 		<title>Main Section</title>
 		<p>Normal content.</p>
-		<p><span>Vorbemerkungen und mehr</span> extra text</p>
+		<p><named-content content-type="term">Vorbemerkungen und mehr</named-content> extra text</p>
 		<p>Following content.</p>
 	</sec>
 """
