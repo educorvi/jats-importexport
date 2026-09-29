@@ -41,9 +41,10 @@ class PloneListingService:
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
         rubriken: list[str] | None = None,
+        modified_since: datetime | None = None,
+        get_webcodes: bool = False,
         batch_start: int = 0,
         batch_size: int | None = None,
-        modified_since: datetime | None = None,
     ) -> tuple[list[dict], int]:
         url = f"{self.base_url}/@querystring-search"
         query = [{"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]}]
@@ -72,6 +73,8 @@ class PloneListingService:
         search: dict = {"query": query, "b_start": batch_start}
         if batch_size is not None:
             search["b_size"] = batch_size
+        if get_webcodes:
+            search["fullobjects"] = True
         response = self.httpx_client.post(url, json=search)
         response.raise_for_status()
         json_res = response.json()

@@ -141,7 +141,10 @@ class MockStorageAdapter(StorageAdapter):
     def list_fachbereiche(self) -> list[str]:
         raise NotImplementedError("list_fachbereiche is not implemented in MockStorageAdapter")
 
-    def list_sachgebiete(self) -> list[str]:
+    def list_fachbereiche_tree(self) -> dict[str, list[str]]:
+        raise NotImplementedError("list_fachbereiche_tree is not implemented in MockStorageAdapter")
+
+    def list_sachgebiete(self, fachbereich: str | None = None) -> list[str]:
         raise NotImplementedError("list_sachgebiete is not implemented in MockStorageAdapter")
 
     def download_file(self, url: str) -> tuple[bytes, str]:

@@ -23,9 +23,9 @@ async def test_list_articles_returns_requested_batch(mocker):
         }
     )
     modified_since = datetime(2026, 1, 1, tzinfo=UTC)
-    response = await list_articles(request, ["law", "tax"], None, None, None, batch_start=2, batch_size=3, modified_since=modified_since)
+    response = await list_articles(request, ["law", "tax"], None, None, None, modified_since=modified_since, batch_start=2, batch_size=3)
 
-    list_articles_mock.assert_awaited_once_with(["law", "tax"], None, None, None, 2, 3, modified_since)
+    list_articles_mock.assert_awaited_once_with(["law", "tax"], None, None, None, modified_since, False, 2, 3)
     assert response.articles == ["/articles/2", "/articles/3", "/articles/4"]
     assert response.count == 7
     assert response.batching.model_dump() == {

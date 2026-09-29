@@ -81,6 +81,9 @@ class PloneStorageAdapter(StorageAdapter):
         obj_id = obj.get("@id", "")
         return self.__get_path_from_url(obj_id)
 
+    def __get_webcode_from_plone_object(self, obj: dict) -> str:
+        return obj.get("webcode", "")
+
     # General methods
 
     def get_url_from_path(self, path: str) -> str:
@@ -226,21 +229,26 @@ class PloneStorageAdapter(StorageAdapter):
         sachgebiete: list[str] | None = None,
         organisationseinheiten: list[str] | None = None,
         rubriken: list[str] | None = None,
+        modified_since: datetime | None = None,
+        get_webcodes: bool = False,
         batch_start: int = 0,
         batch_size: int | None = None,
-        modified_since: datetime | None = None,
     ) -> tuple[list[str], int]:
-        items = PloneListingService(self.base_url, self.httpx_client).list_article_items(
+        items, total = PloneListingService(self.base_url, self.httpx_client).list_article_items(
             fachbereiche=fachbereiche,
             sachgebiete=sachgebiete,
             organisationseinheiten=organisationseinheiten,
             rubriken=rubriken,
+            modified_since=modified_since,
+            get_webcodes=get_webcodes,
             batch_start=batch_start,
             batch_size=batch_size,
-            modified_since=modified_since,
         )
-        paths = list(map(self.__get_path_from_plone_object, items[0]))
-        return paths, items[1]
+        if get_webcodes:
+            articles = list(map(self.__get_webcode_from_plone_object, items))
+        else:
+            articles = list(map(self.__get_path_from_plone_object, items))
+        return articles, total
 
     def list_fachbereiche(self) -> list[str]:
         return PloneListingService(self.base_url, self.httpx_client).list_metadata_contents("fachbereich")

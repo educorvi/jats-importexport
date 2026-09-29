@@ -33,15 +33,6 @@ async def list_articles(
     sachgebiete: Annotated[list[str] | None, Query()] = None,
     organisationseinheiten: Annotated[list[str] | None, Query()] = None,
     rubriken: Annotated[list[str] | None, Query()] = None,
-    batch_start: Annotated[int, Query(ge=0, description="Zero-based index of the first article in the batch")] = 0,
-    batch_size: Annotated[
-        int,
-        Query(
-            ge=1,
-            le=APIConfig.LIST_BATCH_SIZE,
-            description="Number of articles to return",
-        ),
-    ] = APIConfig.LIST_BATCH_SIZE,
     modified_since: Annotated[
         datetime | None,
         Query(
@@ -62,15 +53,28 @@ async def list_articles(
             },
         ),
     ] = None,
+    get_webcodes: Annotated[
+        bool, Query(description="Whether to list the webcodes for the articles instead of their paths")
+    ] = False,
+    batch_start: Annotated[int, Query(ge=0, description="Zero-based index of the first article in the batch")] = 0,
+    batch_size: Annotated[
+        int,
+        Query(
+            ge=1,
+            le=APIConfig.LIST_BATCH_SIZE,
+            description="Number of articles to return",
+        ),
+    ] = APIConfig.LIST_BATCH_SIZE,
 ):
     articles, count = await list_service.list_articles(
         fachbereiche,
         sachgebiete,
         organisationseinheiten,
         rubriken,
+        modified_since,
+        get_webcodes,
         batch_start,
         batch_size,
-        modified_since,
     )
     last_batch_start = ((count - 1) // batch_size) * batch_size if count else 0
 
