@@ -130,5 +130,17 @@ class ListSachgebieteResponse(BaseModel):
     sachgebiete: list[str] = Field(description="The list of Sachgebiete")
 
 
+class ListFachbereichWithSachgebiete(BaseModel):
+    fachbereich: str = Field(description="The Fachbereich")
+    sachgebiete: list[str] = Field(description="The list of Sachgebiete associated with the Fachbereich")
+
+
+class ListFachbereicheTreeResponse(BaseModel):
+    fachbereiche: list[ListFachbereichWithSachgebiete] = Field(
+        description="A tree structure of Fachbereiche and their associated Sachgebiete",
+        examples=[{"fachbereich": "law", "sachgebiete": ["civil-law", "criminal-law"]}],
+    )
+
+
 class AsyncExportAccepted(BaseModel):
     status: str = Field(description="The status of the export")

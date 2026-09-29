@@ -214,6 +214,11 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def list_fachbereiche_tree(self) -> dict[str, list[str]]:
+        """List all available Fachbereiche along with their associated Sachgebiete in a tree structure."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def list_sachgebiete(self, fachbereich: str | None = None) -> list[str]:
         """List all available Sachgebiete, optionally filtered by Fachbereich."""
         raise NotImplementedError

@@ -9,6 +9,8 @@ from api.models import (
     ListArticlesResponse,
     ListBatching,
     ListFachbereicheResponse,
+    ListFachbereicheTreeResponse,
+    ListFachbereichWithSachgebiete,
     ListSachgebieteResponse,
 )
 from api.services import list as list_service
@@ -104,6 +106,25 @@ async def list_fachbereiche(
     fachbereiche = await list_service.list_fachbereiche()
     return ListFachbereicheResponse(
         fachbereiche=fachbereiche,
+    )
+
+
+@router.get(
+    "/fachbereiche/tree",
+    response_model=ListFachbereicheTreeResponse,
+    responses={
+        500: {"model": HTTP500InternalServerError},
+    },
+    description="Returns a tree structure of Fachbereiche and their associated Sachgebiete",
+)
+async def list_fachbereiche_tree(
+    request: Request,
+):
+    fachbereiche_tree = await list_service.list_fachbereiche_tree()
+    return ListFachbereicheTreeResponse(
+        fachbereiche=[
+            ListFachbereichWithSachgebiete(fachbereich=fb, sachgebiete=sg) for fb, sg in fachbereiche_tree.items()
+        ]
     )
 
 
