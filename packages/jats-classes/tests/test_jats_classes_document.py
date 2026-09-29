@@ -4,8 +4,7 @@ import jats_classes
 import pytest
 import xmlschema
 from jats_classes import JATSDocument
-from jats_examples.base import MINIMAL_VALID_JATS, VALID_JATS_WITH_BACK
-from jats_examples.invalid_structure import INVALID_STRUCTURE_LIST
+from jats_examples.base import MINIMAL_VALID_JATS, VALID_JATS_WITH_BACK, INVALID_STRUCTURE_LIST
 from lxml.etree import XMLSyntaxError
 
 XSD_PATH = str(Path(jats_classes.__file__).parent / "schema" / "dguv_jats.xsd")
