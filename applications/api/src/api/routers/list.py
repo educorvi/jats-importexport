@@ -117,8 +117,9 @@ async def list_fachbereiche(
 )
 async def list_sachgebiete(
     request: Request,
+    fachbereich: str | None = None,
 ):
-    sachgebiete = await list_service.list_sachgebiete()
+    sachgebiete = await list_service.list_sachgebiete(fachbereich=fachbereich)
     return ListSachgebieteResponse(
         sachgebiete=sachgebiete,
     )

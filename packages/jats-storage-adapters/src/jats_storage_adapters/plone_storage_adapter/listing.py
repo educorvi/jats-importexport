@@ -21,9 +21,15 @@ class PloneListingService:
         self.base_url = base_url
         self.httpx_client = httpx_client
 
-    def list_metadata_contents(self, meta: str) -> list[str]:
-        url = f"/@faceted-search?portal_type=Article&facets={meta}&facets_only=1"
-        response = self.httpx_client.get(url)
+    def list_metadata_contents(self, meta: str, params: dict[str, str] | None = None) -> list[str]:
+        url = "/@faceted-search"
+        params = {
+            "portal_type": "Article",
+            "facets": meta,
+            "facets_only": "1",
+            **(params or {}),
+        }
+        response = self.httpx_client.get(url, params=params)
         response.raise_for_status()
         facets = response.json().get("facets", {}).get(meta, {}).get("items", [])
         values = list(map(lambda item: item.get("value", ""), facets))

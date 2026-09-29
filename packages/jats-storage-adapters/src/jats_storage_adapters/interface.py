@@ -214,8 +214,8 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_sachgebiete(self) -> list[str]:
-        """List all available Sachgebiete."""
+    def list_sachgebiete(self, fachbereich: str | None = None) -> list[str]:
+        """List all available Sachgebiete, optionally filtered by Fachbereich."""
         raise NotImplementedError
 
 

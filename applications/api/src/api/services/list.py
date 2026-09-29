@@ -39,8 +39,8 @@ async def list_fachbereiche():
         raise HTTPException(status_code=500, detail=f"Error listing Fachbereiche: {e}")
 
 
-async def list_sachgebiete():
+async def list_sachgebiete(fachbereich: str | None = None):
     try:
-        return await asyncio.to_thread(adapter_instance.list_sachgebiete)
+        return await asyncio.to_thread(adapter_instance.list_sachgebiete, fachbereich)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing Sachgebiete: {e}")

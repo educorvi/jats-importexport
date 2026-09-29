@@ -245,5 +245,7 @@ class PloneStorageAdapter(StorageAdapter):
     def list_fachbereiche(self) -> list[str]:
         return PloneListingService(self.base_url, self.httpx_client).list_metadata_contents("fachbereich")
 
-    def list_sachgebiete(self) -> list[str]:
-        return PloneListingService(self.base_url, self.httpx_client).list_metadata_contents("sachgebiet")
+    def list_sachgebiete(self, fachbereich: str | None = None) -> list[str]:
+        return PloneListingService(self.base_url, self.httpx_client).list_metadata_contents(
+            "sachgebiet", params={"fachbereich": fachbereich} if fachbereich else None
+        )
