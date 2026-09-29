@@ -99,7 +99,7 @@ class Section(GenericSection):
             if parent is None or parent is section:
                 break
             node = parent
-        if parent:
+        if parent is not None:
             parent.set("sec-type", sec_type)
 
     @classmethod

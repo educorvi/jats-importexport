@@ -5,7 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from pathlib import Path
 
+import jats_classes
 import typer
+import xmlschema
 from jats_classes import JATSDocument
 from jats_exporters.jats import JatsExporter
 from jats_importexport_client import ApiClient, Configuration
@@ -183,9 +185,11 @@ def main():
 
 
 def _get_jats_schema_path() -> str:
-    import jats_classes
-
     return str(Path(jats_classes.__file__).parent / "schema" / "dguv_jats.xsd")
+
+
+def _parse_jats_schema(xsd_path: str) -> xmlschema.XMLSchema:
+    return xmlschema.XMLSchema(xsd_path)
 
 
 def _validate_xml_content(xml_content: str, source_name: str, xsd_path: str) -> None:
@@ -332,6 +336,7 @@ def validate_all_command(
         configuration.api_key["APIKeyHeader"] = api_key
 
     xsd_path = _get_jats_schema_path()
+    xml_schema = _parse_jats_schema(xsd_path)
     try:
         with ApiClient(configuration) as api_client:
             list_api = ListApi(api_client)
@@ -352,7 +357,7 @@ def validate_all_command(
                 result_path = output_folder / f"{stem}.txt"
                 try:
                     response = export_api.export_jats(path=article_path)
-                    JATSDocument.from_xml(response.jats, xsd_path=xsd_path)
+                    JATSDocument.from_xml_with_parsed_schema(response.jats, xml_schema=xml_schema)
                 except Exception as error:
                     _reformat_and_save_jats_xml(response.jats, output_path=str(xml_path))
                     result_path.write_text(
