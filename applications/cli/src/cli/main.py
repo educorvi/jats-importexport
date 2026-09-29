@@ -5,10 +5,11 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from pathlib import Path
 
+import jats_classes
 import typer
+import xmlschema
 from jats_classes import JATSDocument
 from jats_exporters.jats import JatsExporter
-import xmlschema
 from jats_importexport_client import ApiClient, Configuration
 from jats_importexport_client.api.export_api import ExportApi
 from jats_importexport_client.api.list_api import ListApi
@@ -184,8 +185,6 @@ def main():
 
 
 def _get_jats_schema_path() -> str:
-    import jats_classes
-
     return str(Path(jats_classes.__file__).parent / "schema" / "dguv_jats.xsd")
 
 def _parse_jats_schema(xsd_path: str) -> xmlschema.XMLSchema:
