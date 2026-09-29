@@ -468,6 +468,7 @@
         <xsd:element ref="permissions" minOccurs="0"/>
         <xsd:element ref="uri" minOccurs="0" maxOccurs="unbounded"/>
         <xsd:element ref="self-uri" minOccurs="0" maxOccurs="unbounded"/>
+        <xsd:element ref="related-article" minOccurs="0" maxOccurs="unbounded"/>
         <xsd:element ref="abstract" minOccurs="1" maxOccurs="unbounded"/>
         <xsd:element ref="trans-abstract" minOccurs="0" maxOccurs="unbounded"/>
         <xsd:element ref="kwd-group" minOccurs="0" maxOccurs="unbounded"/>
@@ -1806,6 +1807,7 @@
         <xsd:group ref="references.class"/>
         <xsd:group ref="subsup.class"/>
       </xsd:choice>
+      <xsd:attribute name="related-article-type" use="optional" type="xsd:string"/>
       <xsd:attribute name="ext-link-type" use="optional" type="xsd:string"/>
       <xsd:attribute name="id" use="optional" type="xsd:ID"/>
       <xsd:attribute name="issue" use="optional" type="xsd:string"/>
@@ -3118,7 +3120,7 @@
     </xsd:annotation>
 
     <xsd:complexType mixed="true">
-      <xsd:choice/>
+      <!-- <xsd:choice/> -->
       <xsd:attribute name="content-type" use="optional" type="xsd:string"/>
       <xsd:attribute name="id" use="optional" type="xsd:ID"/>
       <xsd:attribute ref="xml:base" use="optional"/>
