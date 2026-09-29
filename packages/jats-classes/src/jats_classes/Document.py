@@ -53,10 +53,26 @@ class JATSDocument:
         Returns:
             A JATSDocument instance.
         """
+        xml_schema = None
         if xsd_path is not None:
             if not cls._file_exists(xsd_path):
                 raise FileNotFoundError(f"XSD file not found: {xsd_path}")
-            errors = cls._validate_xml(xml_content, xsd_path)
+            xml_schema = cls._parse_xml_schema(xsd_path)
+        return cls.from_xml_with_parsed_schema(xml_content, xml_schema)
+
+    @classmethod
+    def from_xml_with_parsed_schema(cls, xml_content: str, xml_schema: xmlschema.XMLSchema | None) -> JATSDocument:
+        """Parse XML content into a JATSDocument model, validating against XSD.
+
+        Args:
+            xml_content: String containing raw XML text.
+            xml_schema: Optional parsed XMLSchema object for schema validation.
+
+        Returns:
+            A JATSDocument instance.
+        """
+        if xml_schema is not None:
+            errors = cls._validate_xml(xml_content, xml_schema)
             if errors:
                 details = "\n".join(f"{path or '/'}: {reason}" for path, reason in errors)
                 raise ValueError(f"XML is not valid according to the XSD:\n{details}")
@@ -74,11 +90,15 @@ class JATSDocument:
         return os.path.isfile(file_path)
 
     @staticmethod
-    def _validate_xml(xml_content: str, xsd_path: str) -> list[tuple[str, str]]:
-        """Validate XML string content against an XSD schema file.
+    def _parse_xml_schema(xsd_path: str) -> xmlschema.XMLSchema:
+        """Parse an XSD schema file and return an XMLSchema object."""
+        return xmlschema.XMLSchema(xsd_path)
+
+    @staticmethod
+    def _validate_xml(xml_content: str, xml_schema: xmlschema.XMLSchema) -> list[tuple[str, str]]:
+        """Validate XML string content against a parsed XMLSchema object.
 
         Returns a list of validation errors, each as a tuple of (path, reason).
         An empty list indicates the XML is valid.
         """
-        schema = xmlschema.XMLSchema(xsd_path)
-        return [(error.path or "/", error.reason or "") for error in schema.iter_errors(xml_content)]
+        return [(error.path or "/", error.reason or "") for error in xml_schema.iter_errors(xml_content)]
