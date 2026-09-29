@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import pytest
 import jats_classes
+import pytest
 import xmlschema
 from jats_classes import JATSDocument
 from jats_examples.base import MINIMAL_VALID_JATS, VALID_JATS_WITH_BACK

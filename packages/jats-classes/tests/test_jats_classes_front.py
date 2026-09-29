@@ -3,15 +3,15 @@ from pathlib import Path
 
 import jats_classes
 import pytest
-from jats_classes import Front, JATSDocument
 import xmlschema
+from jats_classes import Front, JATSDocument
 from jats_examples.front import (
     ARTICLE_CATEGORIES,
     COMPLETE_FRONT,
-    FRONT_WITH_WHITESPACE,
     FRONT_DICT,
     FRONT_MISSING_ARTICLE_META,
     FRONT_MISSING_JOURNAL_META,
+    FRONT_WITH_WHITESPACE,
     FRONT_WITHOUT_TITLE,
 )
 from lxml import etree

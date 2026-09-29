@@ -187,6 +187,7 @@ def main():
 def _get_jats_schema_path() -> str:
     return str(Path(jats_classes.__file__).parent / "schema" / "dguv_jats.xsd")
 
+
 def _parse_jats_schema(xsd_path: str) -> xmlschema.XMLSchema:
     return xmlschema.XMLSchema(xsd_path)
 
