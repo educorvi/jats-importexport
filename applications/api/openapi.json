@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a43"
+    "version": "1.0.0a44"
   },
   "paths": {
     "/": {
@@ -136,33 +136,6 @@
             }
           },
           {
-            "name": "batch_start",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Zero-based index of the first article in the batch",
-              "default": 0,
-              "title": "Batch Start"
-            },
-            "description": "Zero-based index of the first article in the batch"
-          },
-          {
-            "name": "batch_size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 200,
-              "minimum": 1,
-              "description": "Number of articles to return",
-              "default": 200,
-              "title": "Batch Size"
-            },
-            "description": "Number of articles to return"
-          },
-          {
             "name": "modified_since",
             "in": "query",
             "required": false,
@@ -200,6 +173,45 @@
                 "value": "2026-01-01T12:30:00+02:00"
               }
             }
+          },
+          {
+            "name": "get_webcodes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Whether to list the webcodes for the articles instead of their paths",
+              "default": false,
+              "title": "Get Webcodes"
+            },
+            "description": "Whether to list the webcodes for the articles instead of their paths"
+          },
+          {
+            "name": "batch_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Zero-based index of the first article in the batch",
+              "default": 0,
+              "title": "Batch Start"
+            },
+            "description": "Zero-based index of the first article in the batch"
+          },
+          {
+            "name": "batch_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Number of articles to return",
+              "default": 200,
+              "title": "Batch Size"
+            },
+            "description": "Number of articles to return"
           }
         ],
         "responses": {
@@ -273,21 +285,21 @@
         ]
       }
     },
-    "/list/sachgebiete": {
+    "/list/fachbereiche/tree": {
       "get": {
         "tags": [
           "List"
         ],
-        "summary": "List Sachgebiete",
-        "description": "Returns a list of Sachgebiete",
-        "operationId": "list_sachgebiete_list_sachgebiete_get",
+        "summary": "List Fachbereiche Tree",
+        "description": "Returns a tree structure of Fachbereiche and their associated Sachgebiete",
+        "operationId": "list_fachbereiche_tree_list_fachbereiche_tree_get",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListSachgebieteResponse"
+                  "$ref": "#/components/schemas/ListFachbereicheTreeResponse"
                 }
               }
             }
@@ -308,6 +320,71 @@
             "APIKeyHeader": []
           }
         ]
+      }
+    },
+    "/list/sachgebiete": {
+      "get": {
+        "tags": [
+          "List"
+        ],
+        "summary": "List Sachgebiete",
+        "description": "Returns a list of Sachgebiete",
+        "operationId": "list_sachgebiete_list_sachgebiete_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fachbereich",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fachbereich"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSachgebieteResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP500InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/export/jats": {
@@ -2581,6 +2658,29 @@
         ],
         "title": "ListBatching"
       },
+      "ListFachbereichWithSachgebiete": {
+        "properties": {
+          "fachbereich": {
+            "type": "string",
+            "title": "Fachbereich",
+            "description": "The Fachbereich"
+          },
+          "sachgebiete": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sachgebiete",
+            "description": "The list of Sachgebiete associated with the Fachbereich"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fachbereich",
+          "sachgebiete"
+        ],
+        "title": "ListFachbereichWithSachgebiete"
+      },
       "ListFachbereicheResponse": {
         "properties": {
           "fachbereiche": {
@@ -2597,6 +2697,32 @@
           "fachbereiche"
         ],
         "title": "ListFachbereicheResponse"
+      },
+      "ListFachbereicheTreeResponse": {
+        "properties": {
+          "fachbereiche": {
+            "items": {
+              "$ref": "#/components/schemas/ListFachbereichWithSachgebiete"
+            },
+            "type": "array",
+            "title": "Fachbereiche",
+            "description": "A tree structure of Fachbereiche and their associated Sachgebiete",
+            "examples": [
+              {
+                "fachbereich": "law",
+                "sachgebiete": [
+                  "civil-law",
+                  "criminal-law"
+                ]
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "fachbereiche"
+        ],
+        "title": "ListFachbereicheTreeResponse"
       },
       "ListSachgebieteResponse": {
         "properties": {

@@ -17,18 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, ClassVar, Dict, List
+from jats_importexport_client.models.list_fachbereich_with_sachgebiete import ListFachbereichWithSachgebiete
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class HTTP409Conflict(BaseModel):
+class ListFachbereicheTreeResponse(BaseModel):
     """
-    HTTP409Conflict
+    ListFachbereicheTreeResponse
     """ # noqa: E501
-    detail: Optional[StrictStr] = 'Conflict.'
-    __properties: ClassVar[List[str]] = ["detail"]
+    fachbereiche: List[ListFachbereichWithSachgebiete] = Field(description="A tree structure of Fachbereiche and their associated Sachgebiete")
+    __properties: ClassVar[List[str]] = ["fachbereiche"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +49,7 @@ class HTTP409Conflict(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HTTP409Conflict from a JSON string"""
+        """Create an instance of ListFachbereicheTreeResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -69,11 +70,17 @@ class HTTP409Conflict(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in fachbereiche (list)
+        _items = []
+        if self.fachbereiche:
+            for _item_fachbereiche in self.fachbereiche:
+                _items.append(_item_fachbereiche.to_dict() if _item_fachbereiche is not None else None)
+            _dict['fachbereiche'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HTTP409Conflict from a dict"""
+        """Create an instance of ListFachbereicheTreeResponse from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +88,7 @@ class HTTP409Conflict(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "detail": obj.get("detail") if obj.get("detail") is not None else 'Conflict.'
+            "fachbereiche": [ListFachbereichWithSachgebiete.from_dict(_item) for _item in obj["fachbereiche"]] if obj.get("fachbereiche") is not None else None
         })
         return _obj
 

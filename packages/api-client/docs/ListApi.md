@@ -6,11 +6,12 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**list_articles**](ListApi.md#list_articles) | **GET** /list/ | List Articles
 [**list_fachbereiche_list_fachbereiche_get**](ListApi.md#list_fachbereiche_list_fachbereiche_get) | **GET** /list/fachbereiche | List Fachbereiche
+[**list_fachbereiche_tree_list_fachbereiche_tree_get**](ListApi.md#list_fachbereiche_tree_list_fachbereiche_tree_get) | **GET** /list/fachbereiche/tree | List Fachbereiche Tree
 [**list_sachgebiete_list_sachgebiete_get**](ListApi.md#list_sachgebiete_list_sachgebiete_get) | **GET** /list/sachgebiete | List Sachgebiete
 
 
 # **list_articles**
-> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size, modified_since=modified_since)
+> ListArticlesResponse list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, modified_since=modified_since, get_webcodes=get_webcodes, batch_start=batch_start, batch_size=batch_size)
 
 List Articles
 
@@ -51,13 +52,14 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     sachgebiete = ['sachgebiete_example'] # List[str] |  (optional)
     organisationseinheiten = ['organisationseinheiten_example'] # List[str] |  (optional)
     rubriken = ['rubriken_example'] # List[str] |  (optional)
+    modified_since = '2013-10-20T19:20:30+01:00' # datetime | Only include articles modified since this date (optional)
+    get_webcodes = False # bool | Whether to list the webcodes for the articles instead of their paths (optional) (default to False)
     batch_start = 0 # int | Zero-based index of the first article in the batch (optional) (default to 0)
     batch_size = 200 # int | Number of articles to return (optional) (default to 200)
-    modified_since = '2013-10-20T19:20:30+01:00' # datetime | Only include articles modified since this date (optional)
 
     try:
         # List Articles
-        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, batch_start=batch_start, batch_size=batch_size, modified_since=modified_since)
+        api_response = api_instance.list_articles(fachbereiche=fachbereiche, sachgebiete=sachgebiete, organisationseinheiten=organisationseinheiten, rubriken=rubriken, modified_since=modified_since, get_webcodes=get_webcodes, batch_start=batch_start, batch_size=batch_size)
         print("The response of ListApi->list_articles:\n")
         pprint(api_response)
     except Exception as e:
@@ -75,9 +77,10 @@ Name | Type | Description  | Notes
  **sachgebiete** | [**List[str]**](str.md)|  | [optional] 
  **organisationseinheiten** | [**List[str]**](str.md)|  | [optional] 
  **rubriken** | [**List[str]**](str.md)|  | [optional] 
+ **modified_since** | **datetime**| Only include articles modified since this date | [optional] 
+ **get_webcodes** | **bool**| Whether to list the webcodes for the articles instead of their paths | [optional] [default to False]
  **batch_start** | **int**| Zero-based index of the first article in the batch | [optional] [default to 0]
  **batch_size** | **int**| Number of articles to return | [optional] [default to 200]
- **modified_since** | **datetime**| Only include articles modified since this date | [optional] 
 
 ### Return type
 
@@ -178,8 +181,84 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **list_fachbereiche_tree_list_fachbereiche_tree_get**
+> ListFachbereicheTreeResponse list_fachbereiche_tree_list_fachbereiche_tree_get()
+
+List Fachbereiche Tree
+
+Returns a tree structure of Fachbereiche and their associated Sachgebiete
+
+### Example
+
+* Api Key Authentication (APIKeyHeader):
+
+```python
+import jats_importexport_client
+from jats_importexport_client.models.list_fachbereiche_tree_response import ListFachbereicheTreeResponse
+from jats_importexport_client.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = jats_importexport_client.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure API key authorization: APIKeyHeader
+configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
+
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['APIKeyHeader'] = 'Bearer'
+
+# Enter a context with an instance of the API client
+with jats_importexport_client.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = jats_importexport_client.ListApi(api_client)
+
+    try:
+        # List Fachbereiche Tree
+        api_response = api_instance.list_fachbereiche_tree_list_fachbereiche_tree_get()
+        print("The response of ListApi->list_fachbereiche_tree_list_fachbereiche_tree_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ListApi->list_fachbereiche_tree_list_fachbereiche_tree_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ListFachbereicheTreeResponse**](ListFachbereicheTreeResponse.md)
+
+### Authorization
+
+[APIKeyHeader](../README.md#APIKeyHeader)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  -  |
+**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **list_sachgebiete_list_sachgebiete_get**
-> ListSachgebieteResponse list_sachgebiete_list_sachgebiete_get()
+> ListSachgebieteResponse list_sachgebiete_list_sachgebiete_get(fachbereich=fachbereich)
 
 List Sachgebiete
 
@@ -216,10 +295,11 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.ListApi(api_client)
+    fachbereich = 'fachbereich_example' # str |  (optional)
 
     try:
         # List Sachgebiete
-        api_response = api_instance.list_sachgebiete_list_sachgebiete_get()
+        api_response = api_instance.list_sachgebiete_list_sachgebiete_get(fachbereich=fachbereich)
         print("The response of ListApi->list_sachgebiete_list_sachgebiete_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -230,7 +310,10 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **fachbereich** | **str**|  | [optional] 
 
 ### Return type
 
@@ -251,6 +334,7 @@ This endpoint does not need any parameter.
 |-------------|-------------|------------------|
 **200** | Successful Response |  -  |
 **500** | Internal Server Error |  -  |
+**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

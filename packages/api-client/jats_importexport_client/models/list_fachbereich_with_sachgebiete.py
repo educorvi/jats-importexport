@@ -17,18 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
-class HTTP409Conflict(BaseModel):
+class ListFachbereichWithSachgebiete(BaseModel):
     """
-    HTTP409Conflict
+    ListFachbereichWithSachgebiete
     """ # noqa: E501
-    detail: Optional[StrictStr] = 'Conflict.'
-    __properties: ClassVar[List[str]] = ["detail"]
+    fachbereich: StrictStr = Field(description="The Fachbereich")
+    sachgebiete: List[StrictStr] = Field(description="The list of Sachgebiete associated with the Fachbereich")
+    __properties: ClassVar[List[str]] = ["fachbereich", "sachgebiete"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -48,7 +49,7 @@ class HTTP409Conflict(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of HTTP409Conflict from a JSON string"""
+        """Create an instance of ListFachbereichWithSachgebiete from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +74,7 @@ class HTTP409Conflict(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of HTTP409Conflict from a dict"""
+        """Create an instance of ListFachbereichWithSachgebiete from a dict"""
         if obj is None:
             return None
 
@@ -81,7 +82,8 @@ class HTTP409Conflict(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "detail": obj.get("detail") if obj.get("detail") is not None else 'Conflict.'
+            "fachbereich": obj.get("fachbereich"),
+            "sachgebiete": obj.get("sachgebiete")
         })
         return _obj
 
