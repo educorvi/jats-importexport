@@ -6,13 +6,58 @@ from functools import partial
 from pathlib import Path
 
 import typer
+from jats_classes import JATSDocument
+from jats_exporters.jats import JatsExporter
 from jats_importexport_client import ApiClient, Configuration
+from jats_importexport_client.api.export_api import ExportApi
+from jats_importexport_client.api.list_api import ListApi
 from jats_importexport_client.api.upload_api import UploadApi
 from jats_importexport_client.exceptions import ApiException
 from rich.console import Console
 from rich.panel import Panel
 
 console = Console()
+
+
+# General utility functions for the CLI application
+
+
+def _resolve_paths(file_patterns: list[str]) -> list[Path]:
+    files: list[Path] = []
+    for pattern in file_patterns:
+        matches = glob.glob(pattern, recursive=True)
+        if not matches:
+            console.print(f"[bold red]✖ Error:[/bold red] No file or directory found for pattern '{pattern}'")
+        for match in matches:
+            path = Path(match)
+            if not path.is_file() and not path.is_dir():
+                console.print(f"[bold yellow]✖ Warning:[/bold yellow] Path '{path}' is neither a file nor a directory.")
+                continue
+            if path.is_file() and path.suffix.lower() not in [".xml", ".zip", ".ocf"]:
+                console.print(
+                    f"[bold red]✖ Error:[/bold red] Unsupported file extension '{path.suffix}' for file "
+                    f"'{path.name}'. Must be .xml, .zip, or .ocf"
+                )
+                continue
+            files.append(path)
+    if not files:
+        console.print("[bold red]✖ Error:[/bold red] No files or directories found to process.")
+        raise typer.Exit(code=1)
+    return files
+
+
+def _create_zip(directory: Path) -> Path:
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
+        zip_path = Path(tmp_zip.name)
+    console.print(f"[bold yellow]📦 Zipping directory '{directory.name}' to '{zip_path}'...[/bold yellow]")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for entry in directory.rglob("*"):
+            if entry.is_file():
+                zipf.write(entry, entry.relative_to(directory))
+    return zip_path
+
+
+# Uploading files to the server
 
 
 def _upload_single_file(
@@ -25,30 +70,15 @@ def _upload_single_file(
     exit_code = 0
     temp_file_to_upload: Path | None = None
     file_to_process = file
+    response: object = None
 
     try:
         if file.is_dir():
-            # Create a temporary zip file of the directory's contents
-            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_zip:
-                temp_file_to_upload = Path(tmp_zip.name)
-                console.print(
-                    f"[bold yellow]📦 Zipping directory '{file.name}' to '{temp_file_to_upload}'...[/bold yellow]"
-                )
-                with zipfile.ZipFile(temp_file_to_upload, "w", zipfile.ZIP_DEFLATED) as zipf:
-                    for entry in file.rglob("*"):
-                        if entry.is_file():
-                            zipf.write(entry, entry.relative_to(file))
-                file_to_process = temp_file_to_upload
+            temp_file_to_upload = _create_zip(file)
+            file_to_process = temp_file_to_upload
             file_ext = ".zip"
         else:
             file_ext = file_to_process.suffix.lower()
-
-        if file_ext not in [".xml", ".zip", ".ocf"]:
-            console.print(
-                f"[bold red]✖ Error:[/bold red] Unsupported file extension '{file_ext}' for file "
-                f"'{file.name}'. Must be .xml, .zip, or .ocf"
-            )
-            return 1
 
         # Each call gets its own ApiClient to avoid thread-safety issues with shared connections.
         with ApiClient(configuration) as api_client:
@@ -116,18 +146,7 @@ def upload_command(
     """
     Upload a JATS document (XML or ZIP) via the API.
     """
-    files: list[Path] = []
-    for pattern in file_patterns:
-        for p in glob.glob(pattern, recursive=True):
-            resolved_path = Path(p)
-            if resolved_path.is_file() or resolved_path.is_dir():
-                files.append(resolved_path)
-            else:
-                console.print(f"[bold red]✖ Error:[/bold red] No file or directory found for pattern '{p}'")
-
-    if not files:
-        console.print("[bold red]✖ Error:[/bold red] No files or directories found to upload.")
-        raise typer.Exit(code=1)
+    files = _resolve_paths(file_patterns)
 
     configuration = Configuration(host=host)
     if api_key:
@@ -158,6 +177,197 @@ def upload_command(
 
 def main():
     typer.run(upload_command)
+
+
+# JATS / XML schema validation
+
+
+def _get_jats_schema_path() -> str:
+    import jats_classes
+
+    return str(Path(jats_classes.__file__).parent / "schema" / "dguv_jats.xsd")
+
+
+def _validate_xml_content(xml_content: str, source_name: str, xsd_path: str) -> None:
+    try:
+        document = JATSDocument.from_xml(xml_content, xsd_path=xsd_path)
+    except Exception as error:
+        raise ValueError(f"Source JATS '{source_name}' is invalid: {error}") from error
+
+    try:
+        exported_xml = JatsExporter().export(document)
+        JATSDocument.from_xml(exported_xml, xsd_path=xsd_path)
+    except Exception as error:
+        raise ValueError(f"Exported JATS for '{source_name}' is invalid: {error}") from error
+
+
+def _validate_single_file(file: Path, xsd_path: str) -> int:
+    temporary_zip: Path | None = None
+    try:
+        file_to_process = file
+        if file.is_dir():
+            temporary_zip = _create_zip(file)
+            file_to_process = temporary_zip
+
+        if file_to_process.suffix.lower() == ".xml":
+            _validate_xml_content(file_to_process.read_text(encoding="utf-8"), str(file), xsd_path)
+            validated_sources = [str(file)]
+        else:
+            with zipfile.ZipFile(file_to_process) as archive:
+                xml_entries = [entry for entry in archive.infolist() if entry.filename.lower().endswith(".xml")]
+                if not xml_entries:
+                    raise ValueError("Archive contains no XML files")
+                for entry in xml_entries:
+                    _validate_xml_content(archive.read(entry).decode("utf-8"), entry.filename, xsd_path)
+                validated_sources = [entry.filename for entry in xml_entries]
+    except Exception as error:
+        console.print(f"[bold red]✖ INVALID[/bold red] {file}\n[red]{error}[/red]")
+        return 1
+    finally:
+        if temporary_zip and temporary_zip.exists():
+            console.print(f"[bold yellow]🗑 Deleting temporary zip file '{temporary_zip}'...[/bold yellow]")
+            temporary_zip.unlink()
+
+    console.print(
+        f"[bold green]✔ VALID[/bold green] {file} "
+        f"[dim]({len(validated_sources)} JATS document(s), import and export)[/dim]"
+    )
+    return 0
+
+
+def validate_command(
+    file_patterns: list[str] = typer.Argument(
+        ...,
+        help="Path(s) to JATS XML file(s) or directories to validate without uploading.",
+    ),
+    workers: int = typer.Option(1, "--workers", "-w", min=1, help="Number of concurrent validation workers."),
+):
+    """Validate source JATS and JATS regenerated by the exporter."""
+    files = _resolve_paths(file_patterns)
+
+    xsd_path = _get_jats_schema_path()
+    func = partial(_validate_single_file, xsd_path=xsd_path)
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            results = list(executor.map(func, files))
+    else:
+        results = [func(file) for file in files]
+
+    valid_count = sum(result == 0 for result in results)
+    console.print(f"\n[bold]Validation summary:[/bold] {valid_count}/{len(files)} files valid")
+    if valid_count != len(files):
+        raise typer.Exit(code=1)
+
+
+def validate_main():
+    typer.run(validate_command)
+
+
+def _reformat_and_save_jats_xml(jats: str, output_path: str = "exported_jats.xml") -> None:
+    """Reformat and save JATS XML to a file."""
+    from lxml import etree
+
+    parser = etree.XMLParser(remove_blank_text=True)
+    tree = etree.fromstring(jats.encode("utf-8"), parser)
+    pretty_jats = etree.tostring(tree, pretty_print=True, encoding="utf-8").decode("utf-8")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(pretty_jats)
+
+
+def validate_remote_command(
+    path: str = typer.Argument(..., help="Path of the JATS document in the API storage."),
+    host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+):
+    """Export one document from the API and validate the returned JATS."""
+    configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
+
+    try:
+        with ApiClient(configuration) as api_client:
+            response = ExportApi(api_client).export_jats(path=path)
+        _reformat_and_save_jats_xml(response.jats, output_path="exported_jats.xml")
+        JATSDocument.from_xml(response.jats, xsd_path=_get_jats_schema_path())
+    except ApiException as error:
+        console.print(f"[bold red]✖ API export failed for '{path}':[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+    except Exception as error:
+        console.print(f"[bold red]✖ INVALID[/bold red] Exported JATS for '{path}'\n[red]{error}[/red]")
+        raise typer.Exit(code=1) from error
+
+    console.print(f"[bold green]✔ VALID[/bold green] Exported JATS for '{path}'")
+
+
+def validate_remote_main():
+    typer.run(validate_remote_command)
+
+
+def _safe_filename(value: str) -> str:
+    return "_".join(part for part in value.replace("\\", "/").split("/") if part) or "article"
+
+
+def _list_all_articles(api: ListApi) -> list[str]:
+    articles: list[str] = []
+    batch_start = 0
+    batch_size = 200
+
+    while True:
+        response = api.list_articles(batch_start=batch_start, batch_size=batch_size)
+        articles.extend(response.articles)
+        if batch_start + len(response.articles) >= response.count or not response.articles:
+            return articles
+        batch_start += len(response.articles)
+
+
+def validate_all_command(
+    output_folder: Path = typer.Argument(..., help="Folder where article XML and result files are written."),
+    host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+):
+    """Export and validate all articles found."""
+    output_folder.mkdir(parents=True, exist_ok=True)
+    configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
+
+    xsd_path = _get_jats_schema_path()
+    try:
+        with ApiClient(configuration) as api_client:
+            list_api = ListApi(api_client)
+            export_api = ExportApi(api_client)
+            try:
+                articles = _list_all_articles(list_api)
+            except Exception as error:
+                console.print(f"[bold red]✖ Error listing articles:[/bold red]\n{error}")
+                raise typer.Exit(code=1) from error
+
+            if not articles:
+                console.print("[bold red]✖ No articles found.[/bold red]")
+                raise typer.Exit(code=1)
+
+            for index, article_path in enumerate(articles, start=1):
+                stem = f"{index:04d}_{_safe_filename(article_path)}"
+                xml_path = output_folder / f"{stem}.xml"
+                result_path = output_folder / f"{stem}.txt"
+                try:
+                    response = export_api.export_jats(path=article_path)
+                    JATSDocument.from_xml(response.jats, xsd_path=xsd_path)
+                except Exception as error:
+                    _reformat_and_save_jats_xml(response.jats, output_path=str(xml_path))
+                    result_path.write_text(
+                        f"INVALID\npath: {article_path}\nerror: {error}\n",
+                        encoding="utf-8",
+                    )
+    except ApiException as error:
+        console.print(f"[bold red]✖ API error:[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+
+    console.print(f"[bold green]✔ Results written to {output_folder}[/bold green]")
+
+
+def validate_all_main():
+    typer.run(validate_all_command)
 
 
 if __name__ == "__main__":

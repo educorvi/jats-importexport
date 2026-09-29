@@ -24,6 +24,47 @@ Run the CLI through uv:
 uv run jats-cli --help
 ```
 
+To validate JATS files locally without uploading them:
+
+```sh
+uv run jats-validate article.xml
+uv run jats-validate article.zip
+uv run jats-validate article-with-assets
+uv run jats-validate 'documents/**/*.xml' --workers 4
+```
+
+To validate JATS returned by the API export endpoint:
+
+```sh
+uv run jats-validate-remote storage/path/article.xml \
+  --host https://jats.example.org \
+  --api-key YOUR_API_KEY
+```
+
+This command calls `/export/jats` with the supplied path and validates the
+returned JATS once against the packaged XSD. It does not upload or modify the
+document.
+
+To validate all articles:
+
+```sh
+uv run jats-validate-all ./validation-results \
+  --host https://jats.example.org \
+  --api-key YOUR_API_KEY
+```
+
+The command reads all result pages from `/list`, exports every article through
+`/export/jats`, validates the returned XML once, and writes one pretty-printed XML
+file and one matching `.txt` result file per article if there were validation errors.
+
+The validation command accepts `.xml`, `.zip`, `.ocf`, and directories, matching
+the upload command. Directories are packaged with the same relative paths as
+uploads, and every XML member in an archive is checked. Each source is parsed
+into `JATSDocument`, validated against the packaged XSD, exported with
+`JatsExporter`, and validated again. It prints the file or archive member,
+validation stage, schema location, and schema reason for invalid input, and exits
+non-zero if any document fails.
+
 ## Usage
 
 ```text
