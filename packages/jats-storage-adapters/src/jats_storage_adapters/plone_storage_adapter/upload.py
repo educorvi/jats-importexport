@@ -73,7 +73,15 @@ class PloneUploadService:
         json_data = {"include_children": "true" if include_children else "false"}
         logger.debug(f"Applying workflow transition '{transition}' to {object_url}: {transition_url}")
         response = self.httpx_client.post(transition_url, json=json_data)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 302:
+                logger.warning(
+                    f"Redirect encountered when applying workflow transition '{transition}' to {object_url}."
+                )
+            else:
+                raise
 
     def __change_workflow_status(self, object_url: str, jats_status: str | None) -> None:
         """Change the workflow status of a Plone object based on the provided JATS status."""
