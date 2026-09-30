@@ -82,7 +82,7 @@ class PloneStorageAdapter(StorageAdapter):
         return self.__get_path_from_url(obj_id)
 
     def __get_webcode_from_plone_object(self, obj: dict) -> str:
-        return obj.get("webcode", "")
+        return obj.get("webcode") or ""
 
     # General methods
 
