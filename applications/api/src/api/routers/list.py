@@ -31,7 +31,7 @@ async def list_articles(
     request: Request,
     fachbereiche: Annotated[list[str] | None, Query()] = None,
     sachgebiete: Annotated[list[str] | None, Query()] = None,
-    organisationseinheiten: Annotated[list[str] | None, Query()] = None,
+    organisationseinheiten: Annotated[list[str] | None, Query()] = ["DGUV"],
     rubriken: Annotated[list[str] | None, Query()] = None,
     modified_since: Annotated[
         datetime | None,
