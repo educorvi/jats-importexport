@@ -1,3 +1,5 @@
+import pytest
+
 from jats_classes import (
     Appendix,
     AppendixGroup,
@@ -139,6 +141,36 @@ def test_html_exporter_caching():
     assert info_export2.misses == 1
     assert info_export2.hits == 1
     assert html1 == html2
+
+
+@pytest.mark.parametrize("exporter_class", [HtmlExporter, HtmlExporterStandalone])
+@pytest.mark.parametrize("prefix", ["mml:", "other:", ""])
+@pytest.mark.parametrize("formula, display", [("disp-formula", "block"), ("inline-formula", "inline")])
+def test_html_exporter_uses_unprefixed_mathml(exporter_class, prefix, formula, display):
+    namespace = "http://www.w3.org/1998/Math/MathML"
+    declaration = f"xmlns:{prefix[:-1]}" if prefix else "xmlns"
+    math_xml = f"""<{prefix}math {declaration}="{namespace}" display="{display}">
+        <{prefix}mrow><{prefix}mfrac>
+            <{prefix}mi mathvariant="italic">E</{prefix}mi>
+            <{prefix}mn>2</{prefix}mn>
+        </{prefix}mfrac><{prefix}mo>≤</{prefix}mo><{prefix}mn>1</{prefix}mn></{prefix}mrow>
+    </{prefix}math>"""
+    xml = etree.fromstring(
+        f"<article><body><p><{formula}>{math_xml}</{formula}></p></body></article>".encode()
+    )
+
+    result = exporter_class().transform(xml)
+    math_nodes = result.xpath("//m:math", namespaces={"m": namespace})
+    assert len(math_nodes) == 1
+    math = math_nodes[0]
+    assert math.get("display") == display
+    for element in math.iter():
+        assert etree.QName(element).namespace == namespace
+        assert element.prefix is None
+    assert math.find(f".//{{{namespace}}}mi").get("mathvariant") == "italic"
+    assert math.find(f".//{{{namespace}}}mo").text == "≤"
+    assert "<math " in str(result)
+    assert "<mfrac>" in str(result)
 
 
 def test_html_exporter_only_renders_non_empty_permissions():

@@ -2289,12 +2289,11 @@ or pipeline) parameterized.
 
 
     <xsl:template match="mml:*">
-        <!-- this stylesheet simply copies MathML through. If your browser
-             supports it, you will get it -->
-        <xsl:copy>
+        <!-- HTML requires unprefixed MathML element names. -->
+        <xsl:element name="{local-name()}" namespace="http://www.w3.org/1998/Math/MathML">
             <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
-        </xsl:copy>
+        </xsl:element>
     </xsl:template>
 
 
