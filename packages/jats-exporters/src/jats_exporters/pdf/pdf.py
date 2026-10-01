@@ -6,11 +6,13 @@ import logging
 import pathlib
 from collections.abc import Callable
 from typing import Any
+from xml.etree import ElementTree
 
 from bs4 import BeautifulSoup
 from jats_classes import JATSDocument
 from jinja2 import Template
 from weasyprint import HTML
+from ziamath import Math
 
 from jats_exporters import Exporter, HtmlExporter
 
@@ -59,7 +61,37 @@ class PdfExporter(Exporter[tuple[bytes, str]]):
         context = self._get_template_context(document)
         with open(self.TEMPLATE, encoding="utf-8") as template_file:
             template: Template = Template(template_file.read())
-            return template.render(**context)
+            return self._render_mathml(template.render(**context))
+
+    def _render_mathml(self, html_content: str) -> str:
+        """Typeset MathML as embedded vector images for WeasyPrint.
+
+        WeasyPrint does not lay out MathML. Render at a reference font size
+        and use em dimensions so equations scale with the surrounding text.
+        """
+        soup = BeautifulSoup(html_content, "html.parser")
+        formulas = soup.find_all("math")
+        if not formulas:
+            return html_content
+
+        size = 16
+        for formula in formulas:
+            mathml = ElementTree.fromstring(str(formula))
+            display = mathml.attrib.setdefault("display", "inline")
+            equation = Math(mathml, size=size)
+            svg = equation.svgxml()
+            encoded = base64.b64encode(ElementTree.tostring(svg)).decode("ascii")
+            image = soup.new_tag("img")
+            image["src"] = f"data:image/svg+xml;base64,{encoded}"
+            image["alt"] = formula.get("alttext") or formula.get_text(" ", strip=True)
+            image["class"] = f"pdf-math pdf-math--{'block' if display == 'block' else 'inline'}"
+            if formula.get("id"):
+                image["id"] = formula["id"]
+            width = float(svg.attrib["width"]) / size
+            baseline = (equation.getyofst() - equation.margin) / size
+            image["style"] = f"width: {width:.6f}em; vertical-align: {baseline:.6f}em;"
+            formula.replace_with(image)
+        return str(soup)
 
     def _get_template_context(self, document: JATSDocument) -> dict[str, Any]:
         """Prepare the context for rendering the PDF template."""

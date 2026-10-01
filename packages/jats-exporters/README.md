@@ -25,6 +25,12 @@ from jats_exporters.html import HtmlExporter, HtmlExporterStandalone
 html: str = HtmlExporter().export(document)
 ```
 
+### PDF — `PdfExporter`
+
+Renders documents with WeasyPrint. MathML formulas are typeset locally as
+embedded SVG images using Ziamath, including its bundled STIX math font.
+Both inline and block formulas are supported; no browser or JavaScript is needed.
+
 ## Extending
 
 Implement the abstract `Exporter[T]` base class to add new output formats:

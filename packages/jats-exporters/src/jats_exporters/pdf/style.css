@@ -944,6 +944,22 @@ a {
   margin-inline: auto;
 }
 
+/* Equations are typeset as SVG before WeasyPrint renders this document. */
+.pdf-math.pdf-math--inline {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.pdf-math.pdf-math--block {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5em auto;
+  break-inside: avoid;
+}
+
 .pdf-document .fig,
 .pdf-document .boxed-text,
 .pdf-document .disp-quote,

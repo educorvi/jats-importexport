@@ -1,4 +1,7 @@
+import base64
+
 import pytest
+from bs4 import BeautifulSoup
 
 from jats_classes import (
     Appendix,
@@ -196,6 +199,60 @@ def test_html_exporter_only_renders_non_empty_permissions():
 # ----------------------------------------------------
 # Tests for PdfExporter image embedding
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def mathml_equation():
+    return """<math xmlns="http://www.w3.org/1998/Math/MathML" display="block" id="equation-1"
+        alttext="Sum of squared field ratios is at most one">
+        <mrow><munder><mo>∑</mo><mi mathvariant="italic">k</mi></munder>
+        <msup><mrow><mo stretchy="false">(</mo><mfrac>
+        <msub><mi mathvariant="italic">E</mi><mi mathvariant="italic">k</mi></msub>
+        <msub><mi mathvariant="italic">E</mi><mrow><mi mathvariant="italic">a</mi>
+        <mo>,</mo><mi mathvariant="italic">k</mi></mrow></msub>
+        </mfrac><mo stretchy="false">)</mo></mrow><mn>2</mn></msup>
+        <mo>≤</mo><mn>1</mn></mrow></math>"""
+
+
+@pytest.mark.parametrize("display", ["block", "inline", None])
+def test_pdf_exporter_typesets_mathml_as_svg(mathml_equation, display):
+    equation = mathml_equation.replace('display="block"', f'display="{display}"' if display else "")
+    exporter = PdfExporter()
+    result = exporter._render_mathml(f"<p>Before {equation} after.</p>")
+    soup = BeautifulSoup(result, "html.parser")
+
+    assert soup.find("math") is None
+    assert soup.p.get_text() == "Before  after."
+    image = soup.find("img", class_="pdf-math")
+    assert f"pdf-math--{display or 'inline'}" in image["class"]
+    assert image["id"] == "equation-1"
+    assert image["alt"] == "Sum of squared field ratios is at most one"
+    assert "vertical-align: -" in image["style"]
+    svg = etree.fromstring(base64.b64decode(image["src"].split(",", 1)[1]))
+    assert svg.tag == "{http://www.w3.org/2000/svg}svg"
+    assert float(svg.get("width")) > 0
+    assert float(svg.get("height")) > 0
+    assert svg.findall(".//{http://www.w3.org/2000/svg}path")
+
+
+def test_pdf_exporter_renders_mathml_document(mathml_equation, monkeypatch, caplog):
+    doc = create_mock_document()
+    exporter = PdfExporter()
+    fragment = exporter.html_exporter.transform_xml(f"<disp-formula>{mathml_equation}</disp-formula>")
+    monkeypatch.setattr(exporter.html_exporter, "export", lambda document: fragment)
+
+    html = exporter._get_html(doc)
+    assert "<math" not in html
+    assert "data:image/svg+xml;base64," in html
+    pdf, filename = exporter.export(doc)
+    assert pdf.startswith(b"%PDF-")
+    assert filename == "Exporter_Test_Article.pdf"
+    assert not [record for record in caplog.records if record.levelname == "ERROR"]
+
+
+def test_pdf_exporter_leaves_html_without_mathml_untouched():
+    html = '<p>Text <img src="figure.png"></p>'
+    assert PdfExporter()._render_mathml(html) == html
 
 
 def test_pdf_exporter_embeds_remote_images_as_data_uris():
