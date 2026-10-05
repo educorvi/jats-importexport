@@ -47,6 +47,7 @@ class GenericSection:
         self.sec_type = sec_type
         self.label_title_raw = label_title_raw
         self.content_raw = content_raw
+        self.sections = []
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:
@@ -130,3 +131,19 @@ class GenericSection:
     def get_raw_content(cls, element: etree._Element) -> str | None:
         """Public method to get the raw content of a section like element."""
         return cls._get_raw_content(element)
+
+    def extract_keywords(self) -> list[str]:
+        keywords: list[str] = []
+        try:
+            root = etree.fromstring(f"<root>{self.label_title_raw}{self.content_raw or ''}</root>")
+            for element in cast(list[etree._Element], root.xpath('.//named-content[@specific-use="keyword"]')):
+                if element.text:
+                    if (k := clean_string(element.text)) not in keywords and k != "":
+                        keywords.append(k)
+        except etree.XMLSyntaxError:
+            pass
+
+        for section in self.sections:
+            section_keywords = section.extract_keywords()
+            keywords.extend(k for k in section_keywords if k not in keywords)
+        return keywords

@@ -102,3 +102,17 @@ class JATSDocument:
         An empty list indicates the XML is valid.
         """
         return [(error.path or "/", error.reason or "") for error in xml_schema.iter_errors(xml_content)]
+
+    def extract_keywords(self) -> list[str]:
+        """Extract keywords from elements with the attribute specific-use="keyword"."""
+        return self.article.extract_keywords()
+
+    def extract_and_add_keywords(self) -> None:
+        """Extract keywords and add them to the document's keyword set."""
+        keywords = self.extract_keywords()
+        if keywords:
+            old_keywords = self.article.front.subjects or []
+            for k in keywords:
+                if k not in old_keywords:
+                    old_keywords.append(k)
+            self.article.front.subjects = old_keywords or None

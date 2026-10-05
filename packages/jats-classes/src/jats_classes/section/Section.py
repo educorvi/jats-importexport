@@ -143,3 +143,6 @@ class Section(GenericSection):
             content_raw=content_raw,
             sections=sections,
         )
+
+    def extract_keywords(self) -> list[str]:
+        return super().extract_keywords()

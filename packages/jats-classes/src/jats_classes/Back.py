@@ -31,3 +31,10 @@ class Back:
         """
         appendix_groups = [AppendixGroup.from_xml_element(app_group) for app_group in element.findall("app-group")]
         return cls(appendix_groups=appendix_groups)
+
+    def extract_keywords(self) -> list[str]:
+        keywords = []
+        for appendix_group in self.appendix_groups:
+            group_keywords = appendix_group.extract_keywords()
+            keywords.extend(k for k in group_keywords if k not in keywords)
+        return keywords

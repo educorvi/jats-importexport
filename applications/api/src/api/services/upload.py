@@ -301,6 +301,7 @@ def _save_jats_document(
     options: SaveJATSDocumentOptions | None = None,
 ) -> str:
     try:
+        document.extract_and_add_keywords()
         path = adapter_instance.save_jats_document(document, container or CONTAINER, options)
         return path
     except Exception as e:

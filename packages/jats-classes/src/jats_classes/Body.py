@@ -53,3 +53,10 @@ class Body:
             sections.insert(0, body_as_section)
 
         return cls(sections=sections)
+
+    def extract_keywords(self) -> list[str]:
+        keywords = []
+        for section in self.sections:
+            section_keywords = section.extract_keywords()
+            keywords.extend(k for k in section_keywords if k not in keywords)
+        return keywords

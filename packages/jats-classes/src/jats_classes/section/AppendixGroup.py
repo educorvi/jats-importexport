@@ -51,3 +51,10 @@ class AppendixGroup(GenericSection):
             content_raw=content_raw,
             appendixes=appendixes,
         )
+
+    def extract_keywords(self) -> list[str]:
+        keywords = super().extract_keywords()
+        for appendix in self.appendixes:
+            appendix_keywords = appendix.extract_keywords()
+            keywords.extend(k for k in appendix_keywords if k not in keywords)
+        return keywords

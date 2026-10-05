@@ -54,3 +54,10 @@ class Article:
         else:
             back = None
         return cls(front=front, body=body, back=back)
+
+    def extract_keywords(self) -> list[str]:
+        keywords = list(self.body.extract_keywords())
+        if self.back is not None:
+            back_keywords = self.back.extract_keywords()
+            keywords.extend(k for k in back_keywords if k not in keywords)
+        return keywords
