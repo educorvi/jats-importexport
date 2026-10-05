@@ -3681,6 +3681,45 @@ or pipeline) parameterized.
     </xsl:template>
 
 
+    <!-- ============================================================= -->
+    <!--  "language-name-de" maps a language code to a German name     -->
+    <!-- ============================================================= -->
+
+    <xsl:template name="language-name-de">
+        <xsl:param name="lang"/>
+        <!-- the primary subtag is everything before '-', '_' or space -->
+        <xsl:variable name="code"
+                      select="translate(substring-before(concat($lang, '-'), '-'),
+                                        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                                        'abcdefghijklmnopqrstuvwxyz')"/>
+        <xsl:choose>
+            <xsl:when test="$code = 'de'">Deutsch</xsl:when>
+            <xsl:when test="$code = 'en'">Englisch</xsl:when>
+            <xsl:when test="$code = 'fr'">Franz&#246;sisch</xsl:when>
+            <xsl:when test="$code = 'es'">Spanisch</xsl:when>
+            <xsl:when test="$code = 'it'">Italienisch</xsl:when>
+            <xsl:when test="$code = 'nl'">Niederl&#228;ndisch</xsl:when>
+            <xsl:when test="$code = 'pl'">Polnisch</xsl:when>
+            <xsl:when test="$code = 'cs'">Tschechisch</xsl:when>
+            <xsl:when test="$code = 'da'">D&#228;nisch</xsl:when>
+            <xsl:when test="$code = 'sv'">Schwedisch</xsl:when>
+            <xsl:when test="$code = 'no'">Norwegisch</xsl:when>
+            <xsl:when test="$code = 'fi'">Finnisch</xsl:when>
+            <xsl:when test="$code = 'tr'">T&#252;rkisch</xsl:when>
+            <xsl:when test="$code = 'ru'">Russisch</xsl:when>
+            <xsl:when test="$code = 'uk'">Ukrainisch</xsl:when>
+            <xsl:when test="$code = 'zh'">Chinesisch</xsl:when>
+            <xsl:when test="$code = 'ja'">Japanisch</xsl:when>
+            <xsl:when test="$code = 'ar'">Arabisch</xsl:when>
+            <xsl:when test="$code = 'pt'">Portugiesisch</xsl:when>
+            <xsl:otherwise>
+                <!-- fall back to the raw code when unknown -->
+                <xsl:value-of select="$lang"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
     <xsl:template match="month" mode="map">
         <!-- maps numeric values to German months -->
         <xsl:choose>
@@ -4044,6 +4083,12 @@ or pipeline) parameterized.
                                             <a>
                                                 <xsl:call-template name="assign-href"/>
                                                 <xsl:choose>
+                                                    <xsl:when test="normalize-space(string(@xml:lang))">
+                                                        <xsl:call-template name="language-name-de">
+                                                            <xsl:with-param name="lang"
+                                                                            select="@xml:lang"/>
+                                                        </xsl:call-template>
+                                                    </xsl:when>
                                                     <xsl:when test="normalize-space(string(.))">
                                                         <xsl:apply-templates/>
                                                     </xsl:when>

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 _XLINK_NS = "http://www.w3.org/1999/xlink"
 _XLINK_HREF = f"{{{_XLINK_NS}}}href"
+_XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 
 
 def _clean_string(string: str | None) -> str | None:
@@ -189,9 +190,9 @@ class Front:
     # Raw xml snippet
     article_categories: str | None
 
-    # mapping from related article translation hrefs to their titles
-    related_articles_translations_map: dict[str, str] | None
-    # mapping from related article hrefs to their titles
+    # mapping from related article translation hrefs to their titles and languages
+    related_articles_translations_map: dict[str, tuple[str, str]] | None
+    # mapping from related article hrefs to their titles and languages
     related_articles_map: dict[str, str] | None
 
     # JATS: related-article[@href, @related-article-type='translation']
@@ -310,10 +311,11 @@ class Front:
         for ra in _related_articles:
             _href = _xlink_href(ra, ".")
             _title = _text(ra, "title")
+            _lang = ra.get(_XML_LANG)
             related_article_type = ra.get("related-article-type")
             if _href is not None:
                 if related_article_type == "translated-article":
-                    related_articles_translations_map[_href] = _title or ""
+                    related_articles_translations_map[_href] = (_title or "", _lang or "")
                 else:
                     related_articles_map[_href] = _title or ""
 
@@ -472,8 +474,10 @@ class Front:
                               nsmap={"xlink": _XLINK_NS},
                               attributes={"related-article-type": "translated-article",
                                           "ext-link-type": "Webcode",
+                                          _XML_LANG: lang,
                                           _XLINK_HREF: href} )
-                                          for href, title in (self.related_articles_translations_map or {}).items()],
+                                          for href, (title, lang)
+                                          in (self.related_articles_translations_map or {}).items()],
                 *[_create_tag("related-article",
                               text=title,
                               nsmap={"xlink": _XLINK_NS},
@@ -660,7 +664,7 @@ class Front:
         related_articles_translations = data.get("related_articles_translations")
         if isinstance(related_articles_translations, list):
             front.related_articles_translations_map = {
-                rat: "" for rat in related_articles_translations if isinstance(rat, str)
+                rat: ("", "") for rat in related_articles_translations if isinstance(rat, str)
             }
 
         # Publication Dates

@@ -201,7 +201,7 @@ def test_front_to_xml_omits_empty_optional_elements():
 def test_front_to_xml_preserves_related_article_titles():
     front = Front.empty()
     front.related_articles_map = {"p234": "Related article"}
-    front.related_articles_translations_map = {"p345": "Translated article"}
+    front.related_articles_translations_map = {"p345": ("Translated article", "en")}
     serialized = etree.fromstring(front.to_xml().encode("utf-8"))
 
     related_article = serialized.find("article-meta/related-article[@related-article-type='companion']")

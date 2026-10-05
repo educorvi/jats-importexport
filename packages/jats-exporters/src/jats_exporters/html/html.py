@@ -57,7 +57,8 @@ class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
                 for related_article_translation in doc.related_articles_translations:
                     if old_related_article_translation == related_article_translation[2].webcode:
                         new_related_articles_translations[related_article_translation[1]] = (
-                            related_article_translation[2].title or ""
+                            related_article_translation[2].title or "",
+                            related_article_translation[2].xml_lang or "",
                         )
                         break
             doc.article.front.related_articles_translations_map = new_related_articles_translations

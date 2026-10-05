@@ -147,7 +147,7 @@ class PloneDownloadService:
         # rebuild related_articles from related_articles and relatedItems
         # rebuild related_articles_translations from related_articles_translations and related_items_translations
         related_articles = {ra: "" for ra in data.get("related_articles") or []}
-        related_articles_translations = {rat: "" for rat in data.get("related_articles_translations") or []}
+        related_articles_translations = {rat: ("", "") for rat in data.get("related_articles_translations") or []}
         if resolve_related_items:
             related_items, related_items_translations = self.get_related_articles(
                 self.__get_path_from_plone_object(data)
@@ -163,7 +163,10 @@ class PloneDownloadService:
                     item_url = f"{self.base_url}/{item.strip('/')}"
                     metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
-                        related_articles_translations[metadata.webcode] = metadata.title or ""
+                        related_articles_translations[metadata.webcode] = (
+                            metadata.title or "",
+                            metadata.xml_lang or "",
+                        )
 
         front.related_articles_map = related_articles
         front.related_articles_translations_map = related_articles_translations
