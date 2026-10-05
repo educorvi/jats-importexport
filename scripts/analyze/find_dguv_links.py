@@ -52,7 +52,7 @@ class Scanner:
     def extract_links(self, data: bytes) -> list[str]:
         """Extract all matching links from the XML data."""
         text = data.decode("utf-8", errors="ignore")
-        return [f"{match.group("tag")} {match.group("href")}" for match in LINK_PATTERN.finditer(text)]
+        return [f"{match.group('tag')} {match.group('href')}" for match in LINK_PATTERN.finditer(text)]
 
     def scan_xml(self, data: bytes, path: str) -> None:
         """Scan an XML document in memory."""

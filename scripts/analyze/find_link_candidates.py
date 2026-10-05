@@ -14,9 +14,7 @@ TITLES = ["DGUV Vorschrift", "DGUV Regel", "DGUV Information", "DGUV Grundsatz"]
 
 NUMBER_PATTERN = r"\d+(?:-\d+)?"
 
-PATTERNS = [
-    re.compile(rf"{title} {NUMBER_PATTERN}") for title in TITLES
-]
+PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}") for title in TITLES]
 
 # Block-level elements from dguv_jats.xsd that own a piece of text in <body>/<back>.
 # Anything not in this set (emphasis.class: bold/italic/sc/strike/underline, subsup.class:
@@ -24,24 +22,65 @@ PATTERNS = [
 # is treated as inline: its text is attributed to the nearest block ancestor.
 BLOCK_LEVEL_TAGS = {
     # headings & labels
-    "label", "title", "subtitle", "trans-title",
+    "label",
+    "title",
+    "subtitle",
+    "trans-title",
     # paragraphs & quotes
-    "p", "disp-quote", "boxed-text", "abstract", "trans-abstract",
+    "p",
+    "disp-quote",
+    "boxed-text",
+    "abstract",
+    "trans-abstract",
     # lists & definition lists
-    "list", "list-item", "def-list", "def-item", "def", "def-head", "term", "term-head",
+    "list",
+    "list-item",
+    "def-list",
+    "def-item",
+    "def",
+    "def-head",
+    "term",
+    "term-head",
     # footnotes
-    "fn", "fn-group",
+    "fn",
+    "fn-group",
     # figures & tables
-    "fig", "fig-group", "caption", "table-wrap", "table-wrap-group", "table", "col", "colgroup",
-    "thead", "tbody", "tfoot", "tr", "td", "th",
+    "fig",
+    "fig-group",
+    "caption",
+    "table-wrap",
+    "table-wrap-group",
+    "table",
+    "col",
+    "colgroup",
+    "thead",
+    "tbody",
+    "tfoot",
+    "tr",
+    "td",
+    "th",
     # formulas & preformatted text
-    "disp-formula", "disp-formula-group", "preformat", "code",
+    "disp-formula",
+    "disp-formula-group",
+    "preformat",
+    "code",
     # structural containers
-    "sec", "sec-meta", "ack", "app", "app-group", "glossary", "notes",
+    "sec",
+    "sec-meta",
+    "ack",
+    "app",
+    "app-group",
+    "glossary",
+    "notes",
     # references (back matter)
-    "ref-list", "ref", "mixed-citation", "element-citation",
+    "ref-list",
+    "ref",
+    "mixed-citation",
+    "element-citation",
     # misc text holders
-    "alt-text", "comment", "kwd",
+    "alt-text",
+    "comment",
+    "kwd",
 }
 
 
