@@ -6,7 +6,9 @@
       <sourceFolder url="file://$MODULE_DIR$/applications/cli/src" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="jats-exporters" exported="" />
     <orderEntry type="module" module-name="jats_importexport_client" exported="" />
+    <orderEntry type="module" module-name="jats-classes" exported="" />
     <orderEntry type="jdk" jdkName="uv (jats-importexport)" jdkType="Python SDK" />
   </component>
 </module>

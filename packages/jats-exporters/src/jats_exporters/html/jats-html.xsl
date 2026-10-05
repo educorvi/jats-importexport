@@ -2292,6 +2292,11 @@ or pipeline) parameterized.
         <!-- HTML requires unprefixed MathML element names. -->
         <xsl:element name="{local-name()}" namespace="http://www.w3.org/1998/Math/MathML">
             <xsl:copy-of select="@*"/>
+            <xsl:if test="self::mml:math">
+                <xsl:attribute name="class">
+                    <xsl:value-of select="normalize-space(concat(@class, ' nexus-exclude'))"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:apply-templates/>
         </xsl:element>
     </xsl:template>
