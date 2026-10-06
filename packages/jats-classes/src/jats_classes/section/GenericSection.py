@@ -6,7 +6,7 @@ Section and Appendix nodes.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import abc
 from typing import cast
 
 from lxml import etree
@@ -17,14 +17,13 @@ def clean_string(string: str | None) -> str:
     return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ").strip() if string else ""
 
 
-class GenericSection:
-    """Base class for JATS Section and Appendix components.
+class GenericSection(metaclass=abc.ABCMeta):
+    """Base class for JATS Section, Appendix and AppendixGroup components.
 
     Holds common fields such as label, title, section type, and raw markup content,
     and provides utility methods to extract these elements from raw XML elements.
     """
 
-    sections: Sequence[GenericSection]
     sec_type: str | None
     label_title_raw: str
     content_raw: str | None
@@ -47,7 +46,12 @@ class GenericSection:
         self.sec_type = sec_type
         self.label_title_raw = label_title_raw
         self.content_raw = content_raw
-        self.sections = []
+
+    @property
+    @abc.abstractmethod
+    def sections(self) -> list[GenericSection]:
+        """Return the list of nested sections."""
+        raise NotImplementedError
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:
@@ -143,7 +147,4 @@ class GenericSection:
         except etree.XMLSyntaxError:
             pass
 
-        for section in self.sections:
-            section_keywords = section.extract_keywords()
-            keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords

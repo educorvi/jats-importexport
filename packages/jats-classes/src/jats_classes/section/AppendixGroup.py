@@ -14,7 +14,7 @@ from .GenericSection import GenericSection
 class AppendixGroup(GenericSection):
     """Represents a JATS <app-group> container wrapping Appendix elements."""
 
-    appendixes: list[Appendix]
+    _appendixes: list[Appendix]
 
     def __init__(
         self,
@@ -29,7 +29,11 @@ class AppendixGroup(GenericSection):
             label_title_raw=label_title_raw,
             content_raw=content_raw,
         )
-        self.appendixes = appendixes
+        self._appendixes = appendixes
+
+    @property
+    def sections(self) -> list[GenericSection]:
+        return list(self._appendixes)
 
     @classmethod
     def from_xml_element(cls, app_group: etree._Element) -> AppendixGroup:
@@ -54,7 +58,7 @@ class AppendixGroup(GenericSection):
 
     def extract_keywords(self) -> list[str]:
         keywords = super().extract_keywords()
-        for appendix in self.appendixes:
+        for appendix in self._appendixes:
             appendix_keywords = appendix.extract_keywords()
             keywords.extend(k for k in appendix_keywords if k not in keywords)
         return keywords

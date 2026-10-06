@@ -381,9 +381,9 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert len(doc.article.back.appendix_groups) == 1
     app_group = doc.article.back.appendix_groups[0]
     assert app_group.label == "G1"
-    assert len(app_group.appendixes) == 1
+    assert len(app_group.sections) == 1
 
-    app = app_group.appendixes[0]
+    app = app_group.sections[0]
     assert app.title == "Appendix 1"
     assert len(app.sections) == 1
     assert app.sections[0].title == "App Sec Title"

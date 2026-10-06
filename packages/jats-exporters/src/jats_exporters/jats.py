@@ -65,19 +65,18 @@ def _get_back_jats(back: Back | None) -> str:
 def _get_general_section_jats(section: GenericSection) -> str:
     """Recursively serialize a generic section (Section, Appendix or AppendixGroup) to JATS XML."""
     if isinstance(section, Section):
-        sub_content = "\n".join(map(_get_general_section_jats, section.sections))
         tag_name = "sec"
         sec_type_attr_name = "sec-type"
     elif isinstance(section, Appendix):
-        sub_content = "\n".join(map(_get_general_section_jats, section.sections))
         tag_name = "app"
         sec_type_attr_name = "app-type"
     elif isinstance(section, AppendixGroup):
-        sub_content = "\n".join(map(_get_general_section_jats, section.appendixes))
         tag_name = "app-group"
         sec_type_attr_name = "content-type"
     else:
         raise ValueError(f"Unsupported section type: {type(section)}")
+
+    sub_content = "\n".join(map(_get_general_section_jats, section.sections))
 
     sec_type = f' {sec_type_attr_name}="{section.sec_type}"' if section.sec_type else ""
     return f"<{tag_name}{sec_type}>{section.label_title_raw}\n{section.content_raw or ''}\n{sub_content}</{tag_name}>"

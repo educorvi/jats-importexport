@@ -164,8 +164,8 @@ class PloneModifyService:
             for appendix_group in container.appendix_groups:
                 asset_paths.update(self._find_assets_paths(appendix_group))
         elif isinstance(container, AppendixGroup):
-            for appendix in container.appendixes:
-                asset_paths.update(self._find_assets_paths(appendix))
+            for appendix in container.sections:
+                asset_paths.update(self._find_assets_paths(cast(Appendix, appendix)))
         elif isinstance(container, Appendix):
             for section in container.sections:
                 asset_paths.update(self._find_assets_paths(cast(Section, section)))
