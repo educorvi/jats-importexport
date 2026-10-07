@@ -147,7 +147,7 @@ def test_section_title_resolves_named_content_but_drops_other_tags():
 	# their tail text survives, the inner text itself is dropped.
 	elem_bold = etree.fromstring(SECTION_TITLE_WITH_BOLD)
 	sec_bold = Section.from_xml_element(elem_bold)
-	assert sec_bold.title == "Intro  tail"
+	assert sec_bold.title == "Intro tail"
 	assert "Bold" not in sec_bold.title
 
 

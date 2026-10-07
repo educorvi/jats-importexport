@@ -35,6 +35,14 @@ class AppendixGroup(GenericSection):
     def sections(self) -> list[GenericSection]:
         return list(self._appendixes)
 
+    @property
+    def _tag_name(self) -> str:
+        return "app-group"
+
+    @property
+    def _sec_type_attr_name(self) -> str:
+        return "content-type"
+
     @classmethod
     def from_xml_element(cls, app_group: etree._Element) -> AppendixGroup:
         """Construct an AppendixGroup from an lxml <app-group> element.

@@ -32,6 +32,13 @@ class Back:
         appendix_groups = [AppendixGroup.from_xml_element(app_group) for app_group in element.findall("app-group")]
         return cls(appendix_groups=appendix_groups)
 
+    def to_xml(self) -> str:
+        """Serialize the Back instance back to XML."""
+        content = "\n".join(ag.to_xml() for ag in self.appendix_groups)
+        if content:
+            content = f"{content}\n"
+        return f"<back>\n{content}</back>"
+
     def extract_keywords(self) -> list[str]:
         keywords = []
         for appendix_group in self.appendix_groups:

@@ -35,6 +35,14 @@ class Appendix(GenericSection):
     def sections(self) -> list[GenericSection]:
         return list(self._sections)
 
+    @property
+    def _tag_name(self) -> str:
+        return "app"
+
+    @property
+    def _sec_type_attr_name(self) -> str:
+        return "app-type"
+
     @classmethod
     def from_xml_element(cls, app: etree._Element) -> Appendix:
         """Construct an Appendix from an lxml element representing a JATS <app> tag.

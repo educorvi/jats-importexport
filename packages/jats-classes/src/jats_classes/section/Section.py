@@ -38,6 +38,14 @@ class Section(GenericSection):
     def sections(self) -> list[GenericSection]:
         return list(self._sections)
 
+    @property
+    def _tag_name(self) -> str:
+        return "sec"
+
+    @property
+    def _sec_type_attr_name(self) -> str:
+        return "sec-type"
+
     @classmethod
     def _split_on_durchfuehrungsanweisung(cls, section: etree._Element) -> None:
         """Split section at italic 'Durchführungsanweisung' into a new subsection.

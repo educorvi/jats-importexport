@@ -54,6 +54,13 @@ class Body:
 
         return cls(sections=sections)
 
+    def to_xml(self) -> str:
+        """Serialize the Body instance back to XML."""
+        content = "\n".join(sec.to_xml() for sec in self.sections)
+        if content:
+            content = f"{content}\n"
+        return f"<body>\n{content}</body>"
+
     def extract_keywords(self) -> list[str]:
         keywords = []
         for section in self.sections:
