@@ -62,7 +62,7 @@ class Article:
         back_xml = f"{self.back.to_xml()}\n" if self.back is not None else ""
         article_open = (
             '<article xmlns:mml="http://www.w3.org/1998/Math/MathML" '
-            f'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="{self.front.xml_lang}" '
+            f'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="{self.front.xml_lang or "de"}" '
             'article-type="DGUV Vorschriften- und Regelwerk" dtd-version="1.1">'
         )
         return f"{article_open}\n{front_xml}\n{body_xml}\n{back_xml}</article>"
