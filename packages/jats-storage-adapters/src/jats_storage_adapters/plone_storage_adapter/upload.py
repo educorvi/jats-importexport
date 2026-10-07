@@ -21,6 +21,7 @@ from jats_classes import (
     GenericSection,
     Section,
 )
+from jats_classes.section import Appendix
 from jats_exporters import HtmlExporter
 from lxml import etree, html
 from lxml.html import HtmlElement
@@ -227,42 +228,31 @@ class PloneUploadService:
             container_url,
             json={
                 "@type": "Back",
-                "title": "Anhang",
+                "title": "Schlussteil",
             },
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
         for app in back.appendix_groups:
-            self.__create_appendix_group(app, response_url)
-        return response_url
-
-    def __create_appendix_group(self, app_group: AppendixGroup, container_url: str) -> str:
-        """Create an AppendixGroup node inside Plone Back and upload sections."""
-        logger.debug(f"Creating appendix group node for article: {container_url}")
-        response = self.httpx_client.post(
-            container_url,
-            json={
-                "@type": "AppendixGroup",
-                "title": app_group.title or "Anhanggruppe",
-                "label_title_raw": app_group.label_title_raw,
-                "content_raw": app_group.content_raw,
-            },
-        )
-        response.raise_for_status()
-        response_url: str = response.json().get("@id")
-        for app in app_group.appendixes:
             self.__create_section(app, response_url)
         return response_url
 
     def __create_section(self, section: GenericSection, container_url: str) -> str:
-        """Recursively create a Section/Appendix node structure in a Plone container."""
+        """Recursively create a Section/Appendix/AppendixGroup node structure in a Plone container."""
         portal_type: str
         if isinstance(section, Section):
             portal_type = "Section"
-        else:
+            generic_title = "JATS-Abschnitt"
+        elif isinstance(section, Appendix):
             portal_type = "Appendix"
+            generic_title = "Anhang"
+        elif isinstance(section, AppendixGroup):
+            portal_type = "AppendixGroup"
+            generic_title = "Anhanggruppe"
+        else:
+            raise ValueError(f"Unsupported section type: {type(section)}")
 
-        title = section.title or "JATS-Abschnitt"
+        title = section.title or generic_title
 
         logger.debug(f"Creating section node for article: {container_url}")
         logger.debug(f"Section title: {json.dumps(title)}")

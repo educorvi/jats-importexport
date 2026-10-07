@@ -6,59 +6,31 @@ Section and Appendix nodes.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import abc
+import re
 from typing import cast
 
 from lxml import etree
 
 
-def clean_string(string: str | None) -> str:
+def clean_string(string: str) -> str:
     """Remove leading and trailing whitespace and newlines from a string."""
-    return string.strip().replace("\n", " ").replace("\t", " ").replace("\r", " ").strip() if string else ""
+    return re.sub(r"[\s]+", " ", string).strip()
 
 
-class GenericSection:
-    """Base class for JATS Section and Appendix components.
+class GenericSection(metaclass=abc.ABCMeta):
+    """Base class for JATS Section, Appendix and AppendixGroup components.
 
     Holds common fields such as label, title, section type, and raw markup content,
     and provides utility methods to extract these elements from raw XML elements.
     """
 
-    sections: Sequence[GenericSection]
     sec_type: str | None
     label_title_raw: str
     content_raw: str | None
 
     @property
     def title(self) -> str | None:
-        return self.get_title()
-
-    @property
-    def label(self) -> str | None:
-        return self.get_label()
-
-    def __init__(
-        self,
-        sec_type: str | None,
-        label_title_raw: str,
-        content_raw: str | None,
-    ):
-        """Initialize the GenericSection base properties."""
-        self.sec_type = sec_type
-        self.label_title_raw = label_title_raw
-        self.content_raw = content_raw
-        self.sections = []
-
-    @classmethod
-    def _get_raw_label_title(cls, section: etree._Element) -> str:
-        """Extract raw label and title xml."""
-        label_element = section.find("label")
-        label_string = etree.tostring(label_element, encoding="unicode") if label_element is not None else ""
-        title_element = section.find("title")
-        title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
-        return label_string + title_string
-
-    def get_title(self) -> str | None:
         """Recursively resolve textual title content from the raw label+title XML.
 
         Iterates through <named-content> and <styled-content> tags and ignores all other tags.
@@ -84,7 +56,8 @@ class GenericSection:
 
         return clean_string(collect_text(title)) or None
 
-    def get_label(self) -> str | None:
+    @property
+    def label(self) -> str | None:
         """Get the textual label content from the raw label+title XML."""
         try:
             element = etree.fromstring(f"<root>{self.label_title_raw}</root>")
@@ -95,6 +68,50 @@ class GenericSection:
             return None
 
         return clean_string(label.text) if label.text else None
+
+    def __init__(self, sec_type: str | None, label_title_raw: str, content_raw: str | None):
+        """Initialize the GenericSection base properties."""
+        self.sec_type = sec_type
+        self.label_title_raw = label_title_raw
+        self.content_raw = content_raw
+
+    @property
+    @abc.abstractmethod
+    def sections(self) -> list[GenericSection]:
+        """Return the list of nested sections."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def _tag_name(self) -> str:
+        """Return the XML tag name for this section type."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def _sec_type_attr_name(self) -> str:
+        """Return the name of the XML attribute that specifies the section type."""
+        raise NotImplementedError
+
+    def to_xml(self) -> str:
+        """Serialize the GenericSection back to XML."""
+        sec_type = f' {self._sec_type_attr_name}="{self.sec_type}"' if self.sec_type else ""
+        sub_content = "\n".join(section.to_xml() for section in self.sections)
+        if sub_content:
+            sub_content = f"{sub_content}\n"
+        content = self.content_raw or ""
+        if content:
+            content = f"{content}\n"
+        return f"<{self._tag_name}{sec_type}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+
+    @classmethod
+    def _get_raw_label_title(cls, section: etree._Element) -> str:
+        """Extract raw label and title xml."""
+        label_element = section.find("label")
+        label_string = etree.tostring(label_element, encoding="unicode") if label_element is not None else ""
+        title_element = section.find("title")
+        title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
+        return label_string + title_string
 
     @classmethod
     def _get_raw_content(cls, section: etree._Element) -> str | None:
@@ -143,7 +160,4 @@ class GenericSection:
         except etree.XMLSyntaxError:
             pass
 
-        for section in self.sections:
-            section_keywords = section.extract_keywords()
-            keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords

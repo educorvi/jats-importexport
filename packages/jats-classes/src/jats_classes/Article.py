@@ -55,6 +55,18 @@ class Article:
             back = None
         return cls(front=front, body=body, back=back)
 
+    def to_xml(self) -> str:
+        """Serialize the Article instance back to XML."""
+        front_xml = self.front.to_xml()
+        body_xml = self.body.to_xml()
+        back_xml = f"{self.back.to_xml()}\n" if self.back is not None else ""
+        article_open = (
+            '<article xmlns:mml="http://www.w3.org/1998/Math/MathML" '
+            f'xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="{self.front.xml_lang or "de"}" '
+            'article-type="DGUV Vorschriften- und Regelwerk" dtd-version="1.1">'
+        )
+        return f"{article_open}\n{front_xml}\n{body_xml}\n{back_xml}</article>"
+
     def extract_keywords(self) -> list[str]:
         keywords = list(self.body.extract_keywords())
         if self.back is not None:

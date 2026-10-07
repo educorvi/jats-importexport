@@ -84,6 +84,15 @@ class JATSDocument:
         article = Article.from_xml_element(root)
         return cls(article=article)
 
+    def to_xml(self) -> str:
+        """Serialize the JATSDocument instance back to XML."""
+        doctype = (
+            '<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD '
+            'with OASIS Tables with MathML3 v1.1 20151215//EN" '
+            '"JATS-journalpublishing-oasis-article1-mathml3.dtd">'
+        )
+        return f"{doctype}\n{self.article.to_xml()}\n"
+
     @staticmethod
     def _file_exists(file_path: str) -> bool:
         """Check if the given path points to an existing file."""

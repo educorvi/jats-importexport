@@ -1,4 +1,4 @@
-from jats_classes import Appendix, AppendixGroup, Back, Body, GenericSection, JATSDocument, Section
+from jats_classes import Section
 from jats_examples.sections_split import (
 	SECTION_WITH_CONTENTS,
 	SECTION_WITH_DURCHFUEHRUNGSANWEISUNG,

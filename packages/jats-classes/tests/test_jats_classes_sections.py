@@ -75,8 +75,8 @@ def test_back_appendix_parsing():
 	assert app_group.label == "Appendix Group Label"
 	assert app_group.title == "Appendix Group Title"
 
-	assert len(app_group.appendixes) == 1
-	app = app_group.appendixes[0]
+	assert len(app_group.sections) == 1
+	app = app_group.sections[0]
 	assert isinstance(app, Appendix)
 	assert app.sec_type == "annex"  # maps to app-type attribute
 	assert app.label == "A"
@@ -147,7 +147,7 @@ def test_section_title_resolves_named_content_but_drops_other_tags():
 	# their tail text survives, the inner text itself is dropped.
 	elem_bold = etree.fromstring(SECTION_TITLE_WITH_BOLD)
 	sec_bold = Section.from_xml_element(elem_bold)
-	assert sec_bold.title == "Intro  tail"
+	assert sec_bold.title == "Intro tail"
 	assert "Bold" not in sec_bold.title
 
 
@@ -185,16 +185,16 @@ def test_back_multiple_appendix_groups():
 	assert len(back.appendix_groups) == 2
 	assert back.appendix_groups[0].title == "First Group"
 	assert back.appendix_groups[1].title == "Second Group"
-	assert back.appendix_groups[0].appendixes[0].title == "First Group Appendix"
-	assert back.appendix_groups[1].appendixes[0].title == "Second Group Appendix"
+	assert back.appendix_groups[0].sections[0].title == "First Group Appendix"
+	assert back.appendix_groups[1].sections[0].title == "Second Group Appendix"
 
 
 def test_appendix_group_with_multiple_appendixes():
 	elem = etree.fromstring(APP_GROUP_MULTIPLE_APPENDIXES)
 	app_group = AppendixGroup.from_xml_element(elem)
-	assert len(app_group.appendixes) == 2
-	assert [a.label for a in app_group.appendixes] == ["A", "B"]
-	assert [a.title for a in app_group.appendixes] == ["Appendix A", "Appendix B"]
+	assert len(app_group.sections) == 2
+	assert [a.label for a in app_group.sections] == ["A", "B"]
+	assert [a.title for a in app_group.sections] == ["Appendix A", "Appendix B"]
 
 
 def test_appendix_group_without_content_type_has_none_sec_type():
@@ -206,7 +206,7 @@ def test_appendix_group_without_content_type_has_none_sec_type():
 def test_appendix_without_app_type_has_none_sec_type():
 	elem = etree.fromstring(APP_GROUP_WITHOUT_OPTIONAL_ATTRIBUTES)
 	app_group = AppendixGroup.from_xml_element(elem)
-	assert app_group.appendixes[0].sec_type is None
+	assert app_group.sections[0].sec_type is None
 
 
 # --------------------------------------------------
@@ -258,4 +258,4 @@ def test_jats_document_accepts_section_document_against_schema():
 	doc = JATSDocument.from_xml(SCHEMA_VALID_SECTION_DOCUMENT, xsd_path=XSD_PATH)
 	assert doc.article.body.sections[0].title == "Introduction"
 	assert doc.article.back is not None
-	assert doc.article.back.appendix_groups[0].appendixes[0].title == "First Appendix"
+	assert doc.article.back.appendix_groups[0].sections[0].title == "First Appendix"

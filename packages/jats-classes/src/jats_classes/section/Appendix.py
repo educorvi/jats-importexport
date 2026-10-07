@@ -14,6 +14,8 @@ from .Section import Section
 class Appendix(GenericSection):
     """Represents a JATS <app> (Appendix) element containing nested Sections."""
 
+    _sections: list[Section]
+
     def __init__(
         self,
         sec_type: str | None,
@@ -27,7 +29,19 @@ class Appendix(GenericSection):
             label_title_raw=label_title_raw,
             content_raw=content_raw,
         )
-        self.sections = sections
+        self._sections = sections
+
+    @property
+    def sections(self) -> list[GenericSection]:
+        return list(self._sections)
+
+    @property
+    def _tag_name(self) -> str:
+        return "app"
+
+    @property
+    def _sec_type_attr_name(self) -> str:
+        return "app-type"
 
     @classmethod
     def from_xml_element(cls, app: etree._Element) -> Appendix:
@@ -51,4 +65,8 @@ class Appendix(GenericSection):
         )
 
     def extract_keywords(self) -> list[str]:
-        return super().extract_keywords()
+        keywords = super().extract_keywords()
+        for section in self._sections:
+            section_keywords = section.extract_keywords()
+            keywords.extend(k for k in section_keywords if k not in keywords)
+        return keywords
