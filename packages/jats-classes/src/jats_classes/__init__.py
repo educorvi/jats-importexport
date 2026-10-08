@@ -8,6 +8,7 @@ from .Back import Back
 from .Body import Body
 from .Document import JATSDocument
 from .Front import Front
+from .SchemaValidator import SchemaValidator
 from .section import Appendix, AppendixGroup, GenericSection, Section
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "Section",
     "GenericSection",
     "Appendix",
+    "SchemaValidator",
 ]

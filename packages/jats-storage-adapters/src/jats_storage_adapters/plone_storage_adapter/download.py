@@ -5,6 +5,7 @@ Provides functionality to download files and articles from a Plone CMS instance.
 
 import logging
 import os
+import re
 from typing import Any, NotRequired
 from urllib.parse import urlparse
 
@@ -16,6 +17,8 @@ from jats_classes import (
     Back,
     Body,
     Front,
+    GenericSection,
+    SchemaValidator,
     Section,
 )
 from lxml import etree
@@ -33,8 +36,10 @@ class PloneGetJATSDocumentOptions(BaseGetJATSDocumentOptions):
     pre_requested_sections: NotRequired[dict[str, dict[str, Any]] | None]
 
 
+# Path to the XSLT file used for transforming HTML to JATS (EasySections)
 XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
 
+# Processing Instruction to append to Label / Title
 EDIT_PI_PLONE = EDIT_PI.format(url="{url}/edit")
 
 # review state mapping from vur workflow
@@ -46,6 +51,19 @@ REVIEW_STATE_MAPPING: dict[str, str] = {
     "draft": "Entwurf",
 }
 DEFAULT_REVIEW_STATE: str = "draft"
+
+_XLINK_NS = "http://www.w3.org/1999/xlink"
+_XLINK_HREF = f"{{{_XLINK_NS}}}href"
+_XLINK_TITLE = f"{{{_XLINK_NS}}}title"
+_XLINK_SHOW = f"{{{_XLINK_NS}}}show"
+
+# Regular expression patterns for identifying DGUV references in text
+DASHES = "\u002d\u2013\u2014"
+TITLE_PATTERN = rf"(?:DGUV[{DASHES}\s](?:Vorschrift|Regel|Information|Grundsatz))"
+NUMBER_PATTERN = rf"\d+(?:[{DASHES}]\d+)?"
+BOUNDARY_PATTERN = rf"(?![{DASHES}\d])"
+REJECTED_PATTERN = r"(?!\s*[,/]\s*\d)(?!\s+(?:und|sowie|bzw\.|bzw|oder|and|or)\s+\d)"
+LINK_PATTERN = re.compile(rf"{TITLE_PATTERN} {NUMBER_PATTERN}{BOUNDARY_PATTERN}{REJECTED_PATTERN}")
 
 
 class PloneDownloadService:
@@ -138,7 +156,9 @@ class PloneDownloadService:
         if not all([front, body]):
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
-        return Article(front=front, body=body, back=back)
+        article = Article(front=front, body=body, back=back)
+        self.__find_and_replace_link_candidates(article)
+        return article
 
     def __fetch_front(self, data: dict, resolve_related_items: bool = True) -> Front:
         """Convert Plone front node data into a Front domain model."""
@@ -304,6 +324,104 @@ class PloneDownloadService:
 
         return label_title_raw
 
+    def __normalize_identifier(self, value: str) -> str:
+        replaced_dashes = re.sub(r"[\u2013\u2014]", "-", value)
+        return re.sub(r"DGUV[-\s]", "DGUV ", replaced_dashes)
+
+    def __is_self_match(self, normalized_article_id: str | None, normalized_match: str) -> bool:
+        if not normalized_article_id:
+            return False
+        return normalized_match == normalized_article_id
+
+    def __find_and_replace_links_in_section(self, article_id: str | None, language: str, section: GenericSection):
+        """Wrap mentions of other DGUV articles in the section content with <ext-link> tags.
+
+        Matches are only replaced if:
+            - The match does not reference the article itself.
+            - The match is allowed as a direct child of the owning element per the JATS schema.
+            - The match corresponds to an existing article in Plone.
+        """
+        for subsection in section.sections:
+            self.__find_and_replace_links_in_section(article_id, language, subsection)
+
+        if not section.content_raw:
+            return
+
+        try:
+            parser = etree.XMLParser(recover=True, resolve_entities=False)
+            root = etree.fromstring(f"<root>{section.content_raw}</root>", parser=parser)
+        except etree.XMLSyntaxError as exc:
+            logger.warning(f"Could not parse section content for link candidates: {exc}")
+            return
+        if root is None:
+            return
+
+        if article_id is not None:
+            article_id = self.__normalize_identifier(article_id)
+
+        # Collect the fixes first, applying them changes the tree.
+        # Each fix: (owner element, child whose tail holds the text or None for element.text, list of (match, href)).
+        replacements: list[tuple[etree._Element, etree._Element | None, list[tuple[re.Match[str], str]]]] = []
+        for element in root.iter(tag=etree.Element):
+            text_sources = [(None, element.text)] + [(child, child.tail) for child in element]
+            for ref_child, text in text_sources:
+                if not text:
+                    continue
+                matches = []
+                for match in LINK_PATTERN.finditer(text):
+                    normalized_match = self.__normalize_identifier(match.group(0))
+                    if self.__is_self_match(article_id, normalized_match):
+                        continue
+                    href = self.__get_href_from_article_id(normalized_match, language)
+                    if href is None:
+                        continue
+                    matches.append((match, href))
+                if not matches:
+                    continue
+                tag = etree.QName(element).localname if isinstance(element.tag, str) else ""
+                if not SchemaValidator.allows_direct_child(tag, "ext-link"):
+                    continue
+                replacements.append((element, ref_child, matches))
+
+        if not replacements:
+            return
+
+        for element, ref_child, matches in replacements:
+            # The matched text lives either in the element's own text or in the tail of ref_child.
+            if ref_child is None:
+                text = element.text or ""
+                insert_index = 0
+            else:
+                text = ref_child.tail or ""
+                insert_index = element.index(ref_child) + 1
+            # Work in reverse so the offsets of the earlier matches stay valid after each cut.
+            for match, href in reversed(matches):
+                ext_link = etree.Element("ext-link", nsmap={"xlink": _XLINK_NS})
+                ext_link.set(_XLINK_HREF, href)
+                ext_link.set(_XLINK_TITLE, match.group(0))
+                ext_link.set(_XLINK_SHOW, "new")
+                ext_link.text = match.group(0)
+                ext_link.tail = text[match.end() :]
+                text = text[: match.start()]
+                element.insert(insert_index, ext_link)
+            if ref_child is None:
+                element.text = text
+            else:
+                ref_child.tail = text
+
+        rendered = etree.tostring(root, encoding="unicode")
+        # Strip the wrapping <root ...> ... </root> that was only added for parsing.
+        section.content_raw = re.sub(r"^<root\b[^>]*>|</root>$", "", rendered)
+
+    def __find_and_replace_link_candidates(self, article: Article):
+        article_id = article.front.article_id
+        language = article.front.xml_lang
+        for section in article.body.sections:
+            self.__find_and_replace_links_in_section(article_id, language, section)
+        if article.back is not None:
+            for section in article.back.appendix_groups:
+                self.__find_and_replace_links_in_section(article_id, language, section)
+
     def get_metadata(self, url: str, resolve_related_items: bool = True) -> Front:
         article = self.__get_json(url, None)
         front = self.__fetch_front(article, resolve_related_items=resolve_related_items)
@@ -350,3 +468,32 @@ class PloneDownloadService:
         result = search_results[0]
         path = self.__get_path_from_plone_object(result)
         return path
+
+    def __get_href_from_article_id(self, article_id: str, language: str) -> str | None:
+        """Look up the URL of the article whose article_id matches, or None if not found."""
+        url = f"{self.base_url}/@querystring-search"
+        query = [
+            {"i": "portal_type", "o": "plone.app.querystring.operation.selection.any", "v": ["Article"]},
+            {"i": "article_id", "o": "plone.app.querystring.operation.string.is", "v": article_id},
+        ]
+        try:
+            search_response = self.httpx_client.post(url, json={"query": query, "fullobjects": True})
+            search_response.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.warning(f"Could not look up article_id '{article_id}': {exc}")
+            return None
+        search_results = search_response.json().get("items", [])
+
+        if not search_results:
+            return None
+        if len(search_results) == 1:
+            return search_results[0].get("@id")
+
+        matching_language = next((item.get("@id") for item in search_results if item.get("xml_lang") == language), None)
+        if matching_language:
+            return matching_language
+        german_match = next((item.get("@id") for item in search_results if item.get("xml_lang") == "de"), None)
+        if german_match:
+            return german_match
+
+        return search_results[0].get("@id")
