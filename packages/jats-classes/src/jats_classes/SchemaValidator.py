@@ -1,4 +1,3 @@
-
 import pathlib
 from functools import cache, lru_cache
 from typing import Any
@@ -29,6 +28,7 @@ class SchemaValidator:
             - xs:group ref="..."
             - sequence / choice / all
         """
+
         def check(particle: XsdGroup | XsdElement | Any) -> bool:
             # <xsd:element ...>
             # resolves ref automatically if present

@@ -58,7 +58,7 @@ _XLINK_TITLE = f"{{{_XLINK_NS}}}title"
 _XLINK_SHOW = f"{{{_XLINK_NS}}}show"
 
 # Regular expression patterns for identifying DGUV references in text
-DASHES = "\u002D\u2013\u2014"
+DASHES = "\u002d\u2013\u2014"
 TITLE_PATTERN = rf"(?:DGUV[{DASHES}\s](?:Vorschrift|Regel|Information|Grundsatz))"
 NUMBER_PATTERN = rf"\d+(?:[{DASHES}]\d+)?"
 BOUNDARY_PATTERN = rf"(?![{DASHES}\d])"
