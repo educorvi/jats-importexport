@@ -2470,7 +2470,7 @@ or pipeline) parameterized.
 
 
     <xsl:template match="ext-link | uri | inline-supplementary-material">
-        <a target="xrefwindow">
+        <a target="xrefwindow" class="jats-ext-link">
             <xsl:attribute name="href">
                 <xsl:value-of select="."/>
             </xsl:attribute>
