@@ -27,7 +27,7 @@ Name | Type | Description | Notes
 **co_author_aff** | **str** |  | 
 **self_uri** | **str** |  | 
 **article_categories** | **str** |  | 
-**related_articles_translations_map** | **Dict[str, str]** |  | 
+**related_articles_translations_map** | **Dict[str, List[object]]** |  | 
 **related_articles_map** | **Dict[str, str]** |  | 
 **pub_date_ausgabedatum** | **date** |  | 
 **pub_date_aktualisierte_fassung** | **date** |  | 
