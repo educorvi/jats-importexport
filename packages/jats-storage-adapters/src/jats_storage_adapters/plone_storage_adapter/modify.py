@@ -4,7 +4,6 @@ Provides functionality to modify existing files and articles in a Plone CMS inst
 """
 
 import logging
-import re
 from pathlib import PurePosixPath
 from typing import cast
 from urllib.parse import urlsplit, urlunsplit
@@ -18,10 +17,14 @@ from jats_classes import (
     Body,
     Section,
 )
+from lxml import etree
 
 logger = logging.getLogger(__name__)
 
-XLINK_HREF_PATTERN = re.compile(r"xlink:href\s*=\s*[\"']([^\"']+)[\"']", re.IGNORECASE)
+XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+XLINK_HREF_ATTRIBUTE = f"{{{XLINK_NAMESPACE}}}href"
+XLINK_HREF_LITERAL = "xlink:href"
+ASSET_ELEMENT_TAGS = frozenset({"graphic", "inline-graphic", "media"})
 
 
 class PloneModifyService:
@@ -143,9 +146,6 @@ class PloneModifyService:
     def _find_assets_paths(self, container: Article | Body | Back | AppendixGroup | Appendix | Section) -> list[str]:
         """Finds all asset paths (xlink:href values) referenced in the raw content of the given structure.
 
-        Recursively walks the article body and back sections and collects all ``xlink:href`` values
-        found in the ``content_raw`` of every Section, Appendix, and AppendixGroup.
-
         Args:
             container: The article or section to search for assets.
 
@@ -175,10 +175,7 @@ class PloneModifyService:
 
         if isinstance(container, Section) or isinstance(container, Appendix) or isinstance(container, AppendixGroup):
             if container.content_raw:
-                for href_value in XLINK_HREF_PATTERN.findall(container.content_raw):
-                    if not href_value or not isinstance(href_value, str) or href_value.startswith("#"):
-                        continue
-
+                for href_value in self._find_asset_hrefs_in_content(container.content_raw):
                     parsed = urlsplit(href_value)
                     if parsed.scheme or parsed.netloc:
                         base = urlsplit(self.base_url)
@@ -191,6 +188,42 @@ class PloneModifyService:
                             asset_paths.add(self._strip_image_alias(href_value))
 
         return list(asset_paths)
+
+    def _find_asset_hrefs_in_content(self, content_raw: str) -> list[str]:
+        """Collect the ``xlink:href`` values of asset elements (images, media) in a section's content.
+
+        The content is parsed as XML and only the elements of ``ASSET_ELEMENT_TAGS`` are taken into
+        account, so hrefs of link elements (``ext-link``, ``uri``, ``related-article``, ...) — which
+        may reference other articles of the same Plone site — are not mistaken for assets.
+
+        Args:
+            content_raw: The raw XML content of a Section, Appendix or AppendixGroup.
+
+        Returns:
+            list[str]: The href values found on asset elements, ignoring anchors (``#...``) and empty
+            values.
+        """
+        try:
+            root = etree.fromstring(
+                f"<root>{content_raw}</root>",
+                parser=etree.XMLParser(recover=True, resolve_entities=False),
+            )
+        except etree.XMLSyntaxError as e:
+            logger.warning(f"Could not parse content to collect assets: {e}")
+            return []
+        if root is None:
+            return []
+
+        hrefs = []
+        for element in root.iter(tag=etree.Element):
+            tag = etree.QName(element).localname.lower() if isinstance(element.tag, str) else ""
+            if tag not in ASSET_ELEMENT_TAGS:
+                continue
+            href_value = element.get(XLINK_HREF_ATTRIBUTE) or element.get(XLINK_HREF_LITERAL)
+            if not href_value or not isinstance(href_value, str) or href_value.startswith("#"):
+                continue
+            hrefs.append(href_value)
+        return hrefs
 
     def _strip_image_alias(self, url: str) -> str:
         """Strip a Plone image scaling alias (e.g. ``/@@images/image-600-...``) from an asset URL.

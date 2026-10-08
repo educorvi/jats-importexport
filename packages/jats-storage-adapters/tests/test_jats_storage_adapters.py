@@ -503,3 +503,99 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     sub_sec_url = sec_posts[1][0]
     # Subsection is posted *inside* parent section URL
     assert "main" in sub_sec_url
+
+
+# ----------------------------------------------------
+# Tests for PloneModifyService asset collection
+# ----------------------------------------------------
+
+
+def make_modify_service():
+    from jats_storage_adapters.plone_storage_adapter.modify import PloneModifyService
+
+    return PloneModifyService("http://localhost:8080/Plone", httpx.Client())
+
+
+def make_article_with_content(content_raw: str) -> Article:
+    section = Section(
+        sec_type="main",
+        label_title_raw="<title>Main</title>",
+        content_raw=content_raw,
+        sections=[],
+    )
+    return Article(front=Front.empty(), body=Body(sections=[section]), back=None)
+
+
+BASE = "http://localhost:8080/Plone"
+
+
+def test_find_assets_paths_collects_media_elements():
+    service = make_modify_service()
+    article = make_article_with_content(
+        '<p>Text <fig><graphic xlink:href="{base}/images/pic.jpg/@@images/image-600-400.jpeg"/></fig>'
+        '<media mimetype="application/pdf" xlink:href="{base}/attachments/doc.pdf"/></p>'.format(base=BASE)
+    )
+
+    assets = sorted(service._find_assets_paths(article))
+
+    assert assets == [f"{BASE}/attachments/doc.pdf", f"{BASE}/images/pic.jpg"]
+
+
+def test_find_assets_paths_excludes_article_links():
+    """Links to other articles of the same Plone site must not be collected as assets."""
+    service = make_modify_service()
+    article = make_article_with_content(
+        '<p>Weiter mit '
+        f'<ext-link ext-link-type="uri" xlink:href="{BASE}/artikel/DGUV-Vorschrift-1">DGUV Vorschrift 1</ext-link> '
+        f'<uri xlink:href="{BASE}/andere-seite">andere Seite</uri> '
+        f'<graphic xlink:href="{BASE}/images/pic.jpg"/></p>'
+    )
+
+    assets = service._find_assets_paths(article)
+
+    assert assets == [f"{BASE}/images/pic.jpg"]
+
+
+def test_find_assets_paths_ignores_relative_and_foreign_urls():
+    service = make_modify_service()
+    article = make_article_with_content(
+        '<p><graphic xlink:href="#anchor"/>'
+        '<graphic xlink:href="images/relative.png"/>'
+        '<graphic xlink:href="https://other.example.org/Plone/images/foreign.png"/>'
+        '<graphic xlink:href="http://localhost:8080/Plone/images/keep.png"/></p>'
+    )
+
+    assert service._find_assets_paths(article) == [f"{BASE}/images/keep.png"]
+
+
+def test_delete_article_does_not_delete_linked_articles(mocker):
+    service = make_modify_service()
+
+    article_url = f"{BASE}/artikel/quellartikel"
+    linked_article_url = f"{BASE}/artikel/anderer-artikel"
+    image_url = f"{BASE}/images/pic.jpg"
+
+    article = make_article_with_content(
+        f'<p>Siehe <ext-link ext-link-type="uri" xlink:href="{linked_article_url}">DGUV Regel 1</ext-link> '
+        f'<fig><graphic xlink:href="{image_url}"/></fig></p>'
+    )
+
+    deleted_urls: list[str] = []
+
+    def mock_delete(url, *args, **kwargs):
+        deleted_urls.append(url)
+        return make_response(status_code=204, method="DELETE", url=url)
+
+    mocker.patch.object(service.httpx_client, "delete", side_effect=mock_delete)
+    # The image container is not empty, so it must not be deleted either
+    mocker.patch.object(
+        service,
+        "_assets_container_is_empty",
+        return_value=False,
+    )
+
+    errors = service.delete_article(article_url, article)
+
+    assert errors == []
+    assert sorted(deleted_urls) == sorted([article_url, image_url])
+    assert linked_article_url not in deleted_urls
