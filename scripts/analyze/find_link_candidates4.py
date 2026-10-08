@@ -10,20 +10,21 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from files import find_xml_files_and_apply_function
 
-TITLES = ["DGUV Vorschrift", "DGUV Regel", "DGUV Information", "DGUV Grundsatz"]
+DASHES = "-–—"  # Unicode: 002D, 2013, 2014
 
-NUMBER_PATTERN = r"\d+(?:-\d+)?"
+# IMPORTANT: the alternatives must be wrapped in a non-capturing group, otherwise the
+# number/reject parts after the alternation only apply to the LAST branch ("Grundsatz").
+TITLE_PATTERN = rf"(?:DGUV[{DASHES}\s](?:Vorschrift|Regel|Information|Grundsatz))"
+
+NUMBER_PATTERN = rf"\d+(?:[{DASHES}]\d+)?"
 
 # The number must not be followed by more digits/hyphens, so "100-001" is one reference.
-BOUNDARY = r"(?![\d-])"
+# Note: the dash must come first in the class (or be escaped), otherwise it forms a range.
+BOUNDARY_PATTERN = rf"(?![{DASHES}\d])"
 
-NOTHING_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}$") for title in TITLES]
-SPACE_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=\s)") for title in TITLES]
-DOT_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=\.)") for title in TITLES]
-SLASH_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=/)") for title in TITLES]
-COMMA_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=,)") for title in TITLES]
-RPAREN_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=\))") for title in TITLES]
-OTHER_PATTERNS = [re.compile(rf"{title} {NUMBER_PATTERN}{BOUNDARY}(?=[^\s.,)/])") for title in TITLES]
+REJECTED_PATTERN = r"(?!\s*[,/]\s*\d)(?!\s+(?:und|sowie|bzw\.|bzw|oder|and|or)\s+\d)"
+
+PATTERN = re.compile(rf"{TITLE_PATTERN} {NUMBER_PATTERN}{BOUNDARY_PATTERN}{REJECTED_PATTERN}")
 
 # Block-level elements from dguv_jats.xsd that own a piece of text in <body>/<back>.
 # Anything not in this set (emphasis.class: bold/italic/sc/strike/underline, subsup.class:
@@ -97,21 +98,12 @@ def _localname(element: etree._Element) -> str:
     return etree.QName(element).localname if isinstance(element.tag, str) else str(element.tag)
 
 
-ALL_PATTERNS = [
-    *NOTHING_PATTERNS,
-    *SPACE_PATTERNS,
-    *DOT_PATTERNS,
-    *SLASH_PATTERNS,
-    *COMMA_PATTERNS,
-    *RPAREN_PATTERNS,
-    *OTHER_PATTERNS,
-]
+def _count_matches(text: str) -> list[str]:
+    return [match.group(0) for match in PATTERN.finditer(text)]
 
 
-def _count_matches(text: str) -> int:
-    # The seven category patterns look at mutually exclusive following characters,
-    # so summing them counts each mention exactly once.
-    return sum(len(pattern.findall(text)) for pattern in ALL_PATTERNS)
+def _display_path(file_path: str) -> str:
+    return file_path.split("::", 1)[1].removeprefix("content\\") if "::" in file_path else file_path
 
 
 class Scanner:
@@ -122,6 +114,9 @@ class Scanner:
         # tag -> number of matches, once per attribution mode
         self.tags_block: dict[str, int] = {}
         self.tags_flat: dict[str, int] = {}
+        # per attribution mode: list of (tag, match, display_path, text)
+        self.results_block: list[tuple[str, str, str, str]] = []
+        self.results_flat: list[tuple[str, str, str, str]] = []
 
     def _parse(self, data: bytes) -> etree._Element | None:
         parser = etree.XMLParser(recover=True, resolve_entities=False)
@@ -174,15 +169,18 @@ class Scanner:
         if root is None:
             return
 
+        display = _display_path(path)
         matched = {True: False, False: False}
-        for block_level, tags in ((True, self.tags_block), (False, self.tags_flat)):
+        modes = ((True, self.tags_block, self.results_block), (False, self.tags_flat, self.results_flat))
+        for block_level, tags, results in modes:
             for element, texts in self._collect_element_texts(root, block_level).items():
                 text = " ".join(" ".join(texts).split())
                 matches = _count_matches(text)
                 if not matches:
                     continue
                 tag = _localname(element)
-                tags[tag] = tags.get(tag, 0) + matches
+                tags[tag] = tags.get(tag, 0) + len(matches)
+                results.extend((tag, match, display, text) for match in matches)
                 matched[block_level] = True
 
         if matched[True]:
@@ -190,12 +188,35 @@ class Scanner:
         if matched[False]:
             self.matching_documents_flat += 1
 
+    def write_results(self, path_block: str, path_flat: str) -> None:
+        variants = ((path_block, self.results_block, self.tags_block), (path_flat, self.results_flat, self.tags_flat))
+        for path, results, tags in variants:
+            lines = [f"# Link-Kandidaten nach Tag ({sum(tags.values())} Treffer in {len(tags)} Tags)\n"]
+            for tag in sorted({tag for tag, _, _, _ in results}):
+                tag_results = [row for row in results if row[0] == tag]
+                lines.append(f"\n## <{tag}> ({len(tag_results)} Treffer)\n")
+                for _, match, display, text in tag_results:
+                    lines.append(f"- **{match}** ({display}): {text}")
+            lines.append("")
+            try:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write("\n".join(lines))
+                print(f"Result successfully written to {path}", file=sys.stderr)
+            except OSError as exc:
+                print(f"[ERROR] Failed to write result to {path}: {exc}", file=sys.stderr)
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=("Compare per-tag match counts with and without BLOCK_LEVEL_TAGS attribution.")
     )
     parser.add_argument("path", type=Path, help="File or directory to scan")
+    parser.add_argument(
+        "--output-block", type=Path, default=Path("result_block.md"), help="File to write the block-level results to"
+    )
+    parser.add_argument(
+        "--output-flat", type=Path, default=Path("result_flat.md"), help="File to write the no-block-level results to"
+    )
     args = parser.parse_args()
 
     scanner = Scanner()
@@ -220,6 +241,8 @@ def main() -> int:
     print(f"{'tag':<20} {'block-level':>12} {'no-block-level':>15}")
     for tag in all_tags:
         print(f"{tag:<20} {scanner.tags_block.get(tag, 0):>12} {scanner.tags_flat.get(tag, 0):>15}")
+
+    scanner.write_results(str(args.output_block), str(args.output_flat))
 
     return 0
 
