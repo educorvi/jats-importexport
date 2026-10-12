@@ -1,6 +1,6 @@
 [project]
 name = "jats_importexport_client"
-version = "1.0.0a48"
+version = "1.0.0a49"
 description = "JATS Import/Export API"
 authors = [
   {name = "OpenAPI Generator Community",email = "team@openapitools.org"},

@@ -1,0 +1,2670 @@
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" xml:lang="de" article-type="DGUV Vorschriften- und Regelwerk" dtd-version="1.1">
+  <front>
+    <journal-meta>
+      <journal-id/>
+      <journal-title-group>
+        <journal-title>DGUV Information</journal-title>
+        <journal-subtitle/>
+      </journal-title-group>
+      <issn/>
+      <publisher>
+        <publisher-name>Deutsche Gesetzliche Unfallversicherung e.V. (DGUV)</publisher-name>
+        <publisher-loc>
+          <institution>Deutsche Gesetzliche Unfallversicherung e.V. (DGUV)</institution>
+          <addr-line>Glinkastraße 40</addr-line>
+          <postal-code>10117</postal-code>
+          <city>Berlin</city>
+          <phone>030 13001-0</phone>
+          <email>info@dguv.de</email>
+          <uri>www.dguv.de</uri>
+        </publisher-loc>
+      </publisher>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="publisher-id">DGUV Information 201-033</article-id>
+      <article-categories xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <subj-group>
+          <subject>Bauwesen</subject>
+          <subj-group>
+            <subject>Tiefbau</subject>
+          </subj-group>
+        </subj-group>
+      </article-categories>
+      <title-group>
+        <article-title>Tauchen mit Mischgas</article-title>
+        <subtitle>Handlungsanleitung</subtitle>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="Autor">
+          <name>
+            <surname>Sachgebiet Tiefbau des Fachbereichs Bauwesen der DGUV</surname>
+          </name>
+        </contrib>
+        <contrib contrib-type="Co-Autor">
+          <name>
+            <surname/>
+          </name>
+          <aff/>
+        </contrib>
+      </contrib-group>
+      <pub-date date-type="Ausgabedatum">
+        <day>14</day>
+        <month>9</month>
+        <year>2020</year>
+      </pub-date>
+      <history>
+        <date date-type="initial-publication">
+          <year/>
+        </date>
+        <date date-type="correction">
+          <year/>
+        </date>
+        <date date-type="latest-version">
+          <year/>
+        </date>
+      </history>
+      <permissions>
+        <copyright-statement>Diese Publikation ist urheberrechtlich geschützt. Die Vervielfältigung, auch auszugsweise, ist nur mit ausdrücklicher Genehmigung gestattet.</copyright-statement>
+        <copyright-holder>Deutsche Gesetzliche Unfallversicherung e.V.</copyright-holder>
+      </permissions>
+      <self-uri xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://publikationen.dguv.de/DguvWebcode/index/query/p201033"/>
+      <abstract abstract-type="short">
+        <title>Zusammenfassung: DGUV Information 201-033</title>
+        <p>Die DGUV Information 201-033 dient Unternehmerinnen und Unternehmern als Hilfestellung, um Tauchgänge mit Mischgas sicherheitsgerecht vorzubereiten. Unter anderem werden die Auswahl geeigneter Tauchausrüstung, die Prüfung der eingesetzten Arbeitsmittel und die sichere Verwendung von Mischgas detailliert beschrieben. Mehrere Tabellen zur Tauchgangberechnung komplettieren die Information.</p>
+      </abstract>
+      <abstract abstract-type="summary">
+        <title>Zusammenfassung: DGUV Information 201-033</title>
+        <p>Die DGUV Information 201-033 dient Unternehmerinnen und Unternehmern als Hilfestellung, um Tauchgänge mit Mischgas sicherheitsgerecht vorzubereiten. Unter anderem werden die Auswahl geeigneter Tauchausrüstung, die Prüfung der eingesetzten Arbeitsmittel und die sichere Verwendung von Mischgas detailliert beschrieben. Mehrere Tabellen zur Tauchgangberechnung komplettieren die Information.</p>
+      </abstract>
+      <kwd-group kwd-group-type="author-generated">
+        <kwd>DGUV Information 201-033</kwd>
+        <kwd>DGUV Information</kwd>
+        <kwd>Tauchen</kwd>
+        <kwd>Taucheinsatz</kwd>
+        <kwd>Mischgas</kwd>
+        <kwd>Tauchausrüstung</kwd>
+        <kwd>Taucher</kwd>
+        <kwd>Überwachungssystem</kwd>
+        <kwd>Steuerpult</kwd>
+        <kwd>Anzeigesystem</kwd>
+      </kwd-group>
+      <custom-meta-group>
+        <custom-meta>
+          <meta-name>Beschreibender Typ</meta-name>
+          <meta-value/>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Bisherige Bestellnummer</meta-name>
+          <meta-value>BGI 897</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Webcode</meta-name>
+          <meta-value>p201033</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Organisationseinheit</meta-name>
+          <meta-value>DGUV</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Fachbereich</meta-name>
+          <meta-value>Bauwesen</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Sachgebiet</meta-name>
+          <meta-value>Tiefbau</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Status</meta-name>
+          <meta-value>veröffentlicht</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Bildnachweis</meta-name>
+          <meta-value>Titelfoto © BG Bau</meta-value>
+        </custom-meta>
+        <custom-meta>
+          <meta-name>Überschriften mit Nummerierung</meta-name>
+          <meta-value>ja</meta-value>
+        </custom-meta>
+      </custom-meta-group>
+    </article-meta>
+  </front>
+  <body>
+    <sec sec-type="_4octextparaUeberschriftVorwort">
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Vorbemerkung</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Inhalte der DGUV Information 201-033 wurden entsprechend den Neuerungen im staatlichen Regelwerk und im Regelwerk der Unfallversicherungsträger aktualisiert.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Diese DGUV Information gibt erläuternde Hinweise zu den Regelungen des Arbeitsschutzgesetzes (ArbSchG), der Verordnung über Sicherheit und Gesundheitsschutz bei der Verwendung von Arbeitsmitteln (Betriebssicherheitsverordnung – BetrSichV), der Baustellenverordnung (BaustellV), der Arbeitsstättenverordnung (ArbStättV) und deren technischen Regeln (ASR), den Regelungen der Unfallversicherungsträger und zu einschlägigen Normen, die bei der Ausführung der Arbeiten sowie im Rahmen der Gefährdungsbeurteilung zu berücksichtigen sind.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">DGUV Informationen richten sich in erster Linie an Unternehmer und Unternehmerinnen und sollen Hilfestellung bei der Umsetzung von Pflichten aus staatlichen Arbeitsschutzvorschriften und Unfallverhütungsvorschriften geben sowie Wege aufzeigen, wie Arbeitsunfälle, Berufskrankheiten und arbeitsbedingte Gesundheitsgefahren vermieden werden können.<?dguv pbr 6?></p>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Anwendungsbereich</named-content>
+      </title>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1.1</label>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Diese DGUV Information findet Anwendung auf von der Oberfläche ausgeführte Tauchgänge mit Mischgas.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Für Sättigungstauchgänge sind weitergehende Forderungen zu berücksichtigen.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1.2</label>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Das Tauchen mit Mischgas stellt eine Abweichung von der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> „Taucherarbeiten“ dar und bedarf einer Genehmigung durch den zuständigen Unfallversicherungsträger.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1.3</label>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei der Umsetzung der DGUV Information ist die Norm EN 12021 „Atemschutzgeräte — Druckgase für Atemschutzgeräte“ zu berücksichtigen.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1.4</label>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Diese DGUV Information findet keine Anwendung auf Notatemgeräte, z. B. Tauchretter.<?dguv pbr 7?></p>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Begriffsbestimmungen</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Im Sinne dieser DGUV Information werden folgende Begriffe bestimmt:</p>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Mischgas</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Mischgas ist ein Atemgas mit einer von der natürlichen Luft abweichenden Zusammensetzung.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Trimix</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Gas, bestehend aus einer speziellen Mischung aus Sauerstoff, Helium und Stickstoff, das unter geeigneten Tauch- oder Überdruckbedingungen menschliches Leben sichern kann.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Dies umfasst gefertigte Gasmischungen aus Kombinationen aus reinem Sauerstoff, reinem Helium und reinem Stickstoff, mit oder ohne Druckluft.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.3</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Heliox</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Gas, bestehend aus einer speziellen Mischung aus Sauerstoff und Helium, das unter geeigneten Tauch- oder Überdruckbedingungen menschliches Leben sichern kann.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.4</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sauerstoff- und Stickstoff-Gasmischung</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Gas, bestehend aus einer speziellen Mischung aus Sauerstoff und Stickstoff, das unter geeigneten Tauch- oder Überdruckbedingungen menschliches Leben sichern kann.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 1 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Gasmischungen aus Sauerstoff und Stickstoff sind auch als „Nitrox“ bekannt.</italic>
+          <?dguv pbr 8?>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 2 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Diese Definition gilt nicht für Gasmischungen aus sauerstoffkompatibler Luft oder stickstoffarmer Luft.</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 3 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Der zur Veratmung zugefügte Sauerstoff aus einer Druckgasflasche muss medizinischer Sauerstoff sein.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.5</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sauerstoffkompatible Luft</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Komprimierte natürliche Atemluft, in der die Verunreinigungen soweit reduziert sind, dass sie in Gasmischungen, einschließlich jenen mit Sauerstoffkonzentrationen über 22 %, eingesetzt werden kann.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 1 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Sauerstoffkompatible Luft wird in der Tauchbranche auch als „ölfreie Luft“, „saubere Luft“ oder „doppelt gefilterte Luft“ bezeichnet.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.6</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Stickstoffarme Luft</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Sauerstoffkompatible Luft, der ein Teil des Stickstoffs entzogen wurde, um sie in oder als Gasmischungen mit Sauerstoffkonzentrationen über 22 %, einsetzen zu können.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 1 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Stickstoffarme Luft ist auch als „Nitrox“ bekannt.</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 2 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Der zur Veratmung zugefügte Sauerstoff aus einer Druckgasflasche muss medizinischer Sauerstoff sein.</italic>
+          <?dguv pbr 9?>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.7</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sauerstoffangereicherte Luft</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Komprimierte natürliche Atemluft, der vor der Kompression etwas Sauerstoff zugefügt und der Gehalt einiger Verunreinigungen reduziert wurde, um sie in oder als Gasmischungen mit Sauerstoffkonzentrationen über 22 %, einsetzen zu können.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 1 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Sauerstoffangereicherte Luft ist auch als „Nitrox“ bekannt.</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 2 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Der zur Veratmung zugefügte Sauerstoff aus einer Druckgasflasche muss medizinischer Sauerstoff sein.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.8</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Synthetische Luft</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Mischung aus Sauerstoff und Stickstoff mit einem Sauerstoffgehalt von (21 ± 1) %.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 1 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Synthetische Luft ist auch als „Nitrox“ bekannt.</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Anmerkung 2 zum Begriff:</italic>
+        </p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <italic>Der zur Veratmung zugefügte Sauerstoff aus einer Druckgasflasche muss medizinischer Sauerstoff sein.</italic>
+        </p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.9</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchausrüstung</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Tauchausrüstung umfasst unter anderem das Atemgerät (Tauchgerät) und einen Tauchanzug.<?dguv pbr 10?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.10</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Atemgerät</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Das Atemgerät muss unter den vorhersehbaren Einsatzbedingungen und insbesondere unter Berücksichtigung der maximalen Tauchtiefe die Versorgung des Nutzers mit einem atembaren Gasgemisch ermöglichen.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.11</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchanzug</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Ein Tauchanzug dient zum Schutz vor Kälte und/oder vor dem aus der Tauchtiefe resultierenden Druck. Wird der Tauchanzug mit Gas zur Isolierung beaufschlagt, darf das Gas nicht mit dem Anzug und dem Unterzieher reagieren.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.12</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Unterwasser-Basen (UW-Basen)</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Unterwasser-Basen sind Unterwassereinrichtungen, wie Tauchkammern und Tauchglocken, die bei konstantem oder variablem Innendruck mit Atemgas gefüllt sind und aus denen und in welche Taucher oder Taucherinnen aus- bzw. einsteigen können.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.13</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Umbilical</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Umbilical ist die Zusammenfassung der Versorgungsleitungen des Tauchers bzw. der Taucherin, wie Luftversorgungsleitung, Kommunikationskabel, Stromversorgungsleitung, Tiefenmessschlauch/-kabel.<?dguv pbr 11?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.14</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sachverständiger/Sachverständige</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Der oder die Sachverständige ist eine unabhängige integre Person, die auf Grund der fachlichen Ausbildung und Erfahrung besondere Sach- bzw. Fachkunden und Erfahrung auf dem Gebiet der Atemgasversorgung unter Druckluft sowie in Bau und Einrichtung von Mischgas-Tauchgeräten und Versorgungsanlagen verfügt. Der oder die Sachverständige muss Kenntnisse über die Rechtsvorschriften des Prüfgegenstands (u. a. internationale und nationale Richtlinien, DGUV Vorschriften und Regeln zur Sicherheit und Gesundheit bei der Arbeit, Normen, Stand der Technik, Herstellervorschriften) verfügen. Der oder die Sachverständige trifft aufgrund eines Auftrages allgemeingültige Aussagen über einen vorgelegten oder von ihm oder ihr festgehaltenen Sachverhalt. Die sachverständige Person besitzt ebenfalls die Fähigkeit, die Beurteilung dieses Sachverhaltes in Wort und Schrift nachvollziehbar darzustellen. Sie muss Mischgas-Tauchgeräte und Versorgungsanlagen nebst Zubehör prüfen und gutachterlich beurteilen können.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Hierzu zählen Ingenieure oder Ingenieurinnen der Herstellerfirmen, DNV GL und vergleichbare Personen.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.15</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Zur Prüfung befähigte Person</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die zur Prüfung befähigte Person muss eine Berufsausbildung abgeschlossen haben, die es ermöglicht, ihre beruflichen Kenntnisse nachvollziehbar festzustellen. Sie muss eine nachgewiesene Zeit im Berufsleben praktisch mit Arbeitsmitteln umgegangen sein, in der sie Anlässe kennengelernt hat, die Prüfungen auslösen (Gefährdungsbeurteilungen). Eine zeitnahe berufliche Tätigkeit im Umfeld der anstehenden Prüfung des Prüfgegenstandes und eine angemessene Weiterbildung sind unabdingbar. Die zur Prüfung befähigte Person muss über rechtliche und technische Kenntnisse hinsichtlich des zu prüfenden Arbeitsmittels (z. B. Atemgasversorgung unter Druckluft sowie in Bau und Einrichtung von Mischgas-Tauchgeräten und Versorgungs<?dguv pbr 12?>anlagen) und der zu betrachtenden Gefährdungen verfügen. Die zur Prüfung befähige Person hat die Aufgabe den Prüfgegenstand unabhängig, neutral (ohne Weisungsbefugnis einer vorgesetzten Person) zu bewerten. Diese Person erstellt ein Prüfprotokoll für den Auftraggeber oder die Auftraggeberin.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.16</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Zur Prüfung sachkundige Person von persönlicher Schutzausrüstung</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die zur Prüfung sachkundige Person ist in Analogie zu der zur Prüfung befähigten Person zu sehen. Diese Person prüft „Persönliche Schutzausrüstungen“ (PSA).</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.17</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Aufstiegsgeschwindigkeit</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Aufstiegsgeschwindigkeit ist die Steiggeschwindigkeit eines Tauchers oder einer Taucherin im Wasser. Meist angegeben in Meter pro Minute.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.18</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Grundzeit</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Grundzeit ist die Zeit vom Beginn des Abstiegs bis zum Beginn des Austauchens.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.19</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Äquivalente Luft Tauchtiefe</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die äquivalente Luft Tauchtiefe, engl. equivalent air depth (EAD), bezeichnet die Tiefe, in der man sich bei der Verwendung von Luft dem gleichen Stickstoffpartialdruck aussetzen würde, der bei der tatsächlich aufgesuchten Tauchtiefe mit einem Atemgasgemisch, das einen anderen Stickstoffanteil aufweist, herrschen würde.<?dguv pbr 13?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.20</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Maximale Tauchtiefe</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die größte Tiefe, die während des Tauchgangs erreicht wird.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.21</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Keine Dekogrenze (Nullzeit)</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">(Freie Tauchzeit) Tauchzeitlimits ohne Dekompressionsverpflichtung.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.22</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Wiederholungsintervall</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Minimales Zeitintervall zwischen dem Ende des vorherigen Tauchgangs (plus Dekompression) und dem nächsten Tauchgang.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.23</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Wiederholungstauchgang</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Wiederholungstauchgänge sind Tauchgänge, die in weniger als 12 Stunden Abstand auf das Ende des vorangegangenen folgen.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.24</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Haltezeit (Stop time)</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Benötigte Zeit an einer angegebenen Austauchstufe (Stop). Die Haltezeit beginnt, wenn der Taucher oder die Taucherin die richtige Tiefe erreicht hat und das für diese Tiefe geeignete Gas einatmet.<?dguv pbr 14?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.25</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">OTE (oxigen tolerance unit)</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Einheitsmessung, die nach längerer Zeit die Sauerstofftoxizität ausdrückt. Die Einheit dient der Abschätzung der akkumulierten Lungengiftigkeit des Sauerstoffs (Lorraine-Smith- Effekt).</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.26</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Partialdruck</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Der Partialdruck bezeichnet den Teildruck einer einzelnen Gaskomponente in einem (idealen) Gasgemisch.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.27</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">CNS-Zeit (central nervous system/syndrom)</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die CNS ist ein errechneter Wert in %, der die Sauerstoffexposition eines Tauchers oder einer Taucherin über die Zeit angibt. Der Wert muss unterhalb von 100 % liegen, damit keine neuronale Sauerstoffvergiftung (Paul Bert Effekt) auftritt.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">2.28</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">NOAA</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">NOAA ist die National Oceanic and Atmospheric Administration (Nationale Ozean- und Atmosphärenbehörde) die Wetter- und Ozeanografiebehörde der Vereinigten Staaten. Sie hat z. B. auch eine Tabelle für die Sauerstofftoxizität entwickelt.<?dguv pbr 15?></p>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Auswahl der geeigneten Tauchausrüstung</named-content>
+      </title>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchausrüstung</named-content>
+        </title>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>Die vom 1. Juli 1996 bis 20. April 2018 in Verkehr gebrachte Tauchausrüstung muss den sicherheitstechnischen Anforderungen der mittlerweile zurückgezogenen Achten Verordnung zum Produktsicherheitsgesetz entsprechen.</p>
+            <p>Die ab dem 21. April 2018 in Verkehr gebrachten Tauchgeräte müssen den sicherheitstechnischen Anforderungen der Verordnung (EU) 2016/425 des Europäischen Parlaments und des Rates vom 9. März 2016 über persönliche Schutzausrüstungen entsprechen. Tauchausrüstung mit einer EG-Baumusterprüfbescheinigungen nach der Richtlinie können noch bis zum 21. April 2023 im Handel verkauft werden.</p>
+            <p>D. h., die Tauchausrüstung muss von einer hier zugelassenen Stelle zertifiziert sein. Bei der entsprechenden Baumusterprüfung muss auch die Eignung für das vorgesehene Atemgas/Gas geprüft worden sein.</p>
+          </list-item>
+          <list-item>
+            <p>Vor dem 1. Juli 1996 in Verkehr gebrachten Tauchausrüstungen sind von einem Sachverständigen auf ihre Eignung für das vorgesehene Atemgas prüfen zu lassen.</p>
+          </list-item>
+          <list-item>
+            <p>Die sonstige Tauchausrüstung muss dem anerkannten Stand der Technik entsprechen und nach den jeweils geltenden Vorschriften geprüft und gegebenenfalls zugelassen sein. Sie muss für den vorgesehenen Einsatz geeignet sein.</p>
+          </list-item>
+          <list-item>
+            <p>Sicherheitsrelevante Komponenten der Tauchausrüstung müssen dauerhaft und eindeutig gekennzeichnet sein.</p>
+          </list-item>
+          <list-item>
+            <p>Für alle Geräte und Einrichtungen muss eine Betriebsanleitung vorliegen. An der Einsatzstelle müssen jeweils eine Kurzbetriebsanleitung und eine Check-Liste für Prüfung und Wartung vorhanden sein.<?dguv pbr 16?></p>
+          </list-item>
+          <list-item>
+            <p>Falls für die in der jeweiligen Betriebsanleitung vorgeschriebenen Prüfungen Prüfeinrichtungen erforderlich sind, müssen diese vorhanden sein.</p>
+          </list-item>
+          <list-item>
+            <p>Autonome Regenerationsgeräte müssen der harmonisierten Norm DIN EN 14143:2013 entsprechen. Die Aufnahmefähigkeit des CO<sub>2</sub>-Absorbers eines Mischgas-Regenerationsgerätes muss so groß sein, dass die während eines Tauchganges anfallende CO<sub>2</sub>-Menge sowohl von der momentanen Absorptionsleistung wie auch von der Gesamtkapazität her absorbiert werden kann. Bei der Berechnung der Gesamtkapazität ist eine Sicherheitsreserve von 20 % anzusetzen.</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Gasflaschen</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Gasflaschen müssen den Vorschriften, die für das Anwendungsland gelten, entsprechen. Sie müssen für den Nennarbeitsdruck und für den Gasgehalt, falls zutreffend, geprüft und zugelassen sein. Atemgasflaschen müssen unverwechselbar und dauerhaft mit Angaben über die enthaltenen Gase und das Mischverhältnis gekennzeichnet sein. Die Einhaltung ist durch Sichtprüfung zu kontrollieren.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.3</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Anschlusselemente der Versorgungsleitungen</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Anschlusselemente der Versorgungsleitungen müssen so beschaffen sein, dass ein Verwechseln nicht möglich ist.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.4</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Reserveluftgerät</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Es ist ein Reservegasvorrat mitzuführen, der den Taucher oder die Taucherin in der geplanten maximalen Tauchtiefe für mindestens 10 Minuten mit Atemgas versorgen kann.<?dguv pbr 17?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.5</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchtiefen über 50 m</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei Tauchtiefen über 50 m sind weitere Transport- und Sicherungsmittel erforderlich, die über Einrichtungen zum Bergen von bewusstlosem Tauchpersonal verfügen, z. B. trockene Tauchglocke.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">3.6</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Heliumhaltiges Atemgas</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei Benutzung von heliumhaltigem Atemgas und Tauchtiefen von größer 120 m ist das Atemgas vorzuwärmen.<?dguv pbr 18?></p>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Betrieb</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Wer ein Unternehmen führt, hat vor der Ausführung der Arbeiten eine Gefährdungsbeurteilung nach §§ 5 und 6 des ArbSchG zu erstellen und geeignete Maßnahmen zum Arbeitsschutz festzulegen. Technische Maßnahmen zum Arbeitsschutz sind organisatorischen und persönlichen Maßnahmen vorzuziehen.</p>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Einsatz leitende Personen für Mischgas</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Der Unternehmer oder die Unternehmerin hat für jeden Taucheinsatz mit Mischgas-Tauchgeräten eine Einsatz leitende Person schriftlich zu bestellen. Die Einsatz leitende Person ist für den Einsatz verantwortlich und darf an den von ihr geleiteten Tauchgängen nicht selbst teilnehmen.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Es ist ebenfalls ein Stellvertreter oder Stellvertreterin der Einsatz leitenden Person schriftlich zu benennen.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Einsatz leitende Person führt mit der Tauchgruppe Taucharbeiten durch. Sie ist gegenüber allen Personen der Tauchgruppe weisungsbefugt. Die Einsatz leitende Person muss die Einsatzbedingungen beurteilen, den sicheren Ablauf des Taucheinsatzes überwachen und die bei Unfällen und Störungen erforderlichen Maßnahmen treffen können.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Einsatz leitende Person muss folgende Anforderungen erfüllen:</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">1.</named-content> Sie muss körperlich und geistig geeignet sein.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">2.</named-content> Sie muss eine Ausbildung zum geprüften Taucher oder zur geprüften Taucherin oder eine vergleichbare Qualifikation erfolgreich abgeschlossen haben und über hinreichende Kenntnisse, Fähigkeiten und Fertigkeiten für die sichere Durchführung der geplanten Taucharbeiten verfügen (siehe Anhang 1, <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link>).</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">3.</named-content> Sie muss eine Zusatzausbildung für Einsatz leitende Personen für Mischgastauchen erfolgreich abgeschlossen haben.<?dguv pbr 19?></p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Einsatz leitende Person ist verantwortlich insbesondere für</p>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>die Einweisung des eingesetzten Personals,</p>
+          </list-item>
+          <list-item>
+            <p>die ordnungsgemäße Durchführung des Tauchganges,</p>
+          </list-item>
+          <list-item>
+            <p>die Verwendung eines geeigneten Atemgases,</p>
+          </list-item>
+          <list-item>
+            <p>die Kontrolle der erforderlichen Atemgasqualität und -menge,</p>
+          </list-item>
+          <list-item>
+            <p>den bestimmungsgemäßen Einsatz der verwendeten Ausrüstung entsprechend den einschlägigen Vorschriften und Betriebsanweisungen,</p>
+          </list-item>
+          <list-item>
+            <p>die Überwachung der Dekompression des Tauchpersonals,</p>
+          </list-item>
+          <list-item>
+            <p>die Vorbereitung und gegebenenfalls Durchführung von Rettungsmaßnahmen,</p>
+          </list-item>
+          <list-item>
+            <p>die Funktionsfähigkeit der Mischgasversorgungsanlage.</p>
+          </list-item>
+        </list>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Einsatz leitende Person hält sich ständig unmittelbar an der Tauchstelle auf und steht im direkten Kontakt mit der Tauchergruppe. Die Einsatz leitende Person kann nicht als Reservetaucher bzw. Reservetaucherin eingesetzt werden.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Qualifikation des Mischgas-Tauchers bzw. der Mischgas-Taucherin</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Als Tauchpersonal für das Mischgas-Tauchen dürfen nur solche Personen eingesetzt werden, die</p>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>geprüfte Taucher oder geprüfte Taucherin sind oder eine vergleichbare Qualifikation (siehe <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link>) besitzen,</p>
+          </list-item>
+          <list-item>
+            <p>mindestens 400 Taucheinsatzstunden aufweisen können,</p>
+          </list-item>
+          <list-item>
+            <p>sich einer arbeitsmedizinischen Pflichtvorsorge nach § 7 Abs. 1 ArbMedVV berechtigten Arzt bzw. Ärztin unterzogen und keine gesundheitlichen Einschränkungen für das Tauchen haben und</p>
+          </list-item>
+          <list-item>
+            <p>einen oder mehrere Lehrgänge (modularer Aufbau) zum Mischgastaucher bzw. zur Mischgastaucherin mit Erfolg absolviert haben.<?dguv pbr 20?></p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4.3</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sauerstoffgrenzwerte</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei der Verwendung von Mischgasen sind folgende Sauerstoff-Werte einzuhalten:</p>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>Reiner Sauerstoff darf nur im Verlauf der Behandlung einer Dekompressionskrankheit eingeatmet werden.</p>
+          </list-item>
+          <list-item>
+            <p>Der Partialdruck des Sauerstoffes im zugeführten Atemgas darf 0,16 bar nicht unterschreiten.</p>
+          </list-item>
+          <list-item>
+            <p>Der Partialdruck des Sauerstoffes im zugeführten Atemgas darf die in der Tauchgangsberechnung angegebenen Werte nicht überschreiten. D. h., der Maximalwert darf 1,4 bar nicht überschreiten (siehe IMCA D048).</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4.4</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Umbilical</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei Einsätzen aus einer UW-Basis darf das Umbilical nicht länger als 30 m sein.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">4.5</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Dekompressionstabellen</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Der Unternehmer oder die Unternehmerin hat bei Einsätzen mit Mischgas die vorgesehene Dekompressionstabelle vor dem Einsatz von einer sachverständigen Stelle prüfen zu lassen.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Für Nitrox-Tauchgänge kann die im Anhang 2 abgedruckte Korrektur-Tabelle verwendet werden.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Dekompressionstabellen müssen Angaben über Mindestwartezeiten für Wiederholungstauchgänge (Wiederholungsintervall) enthalten.<?dguv pbr 21?></p>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">5</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Prüfung</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Nach § 14 der Betriebssicherheitsverordnung hat der Arbeitgeber oder die Arbeitgeberin Art, Umfang und Fristen erforderlicher Prüfungen der Arbeitsmittel mit Hilfe einer Gefährdungsbeurteilung und Herstellerangaben zu ermitteln.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Nach § 2 Abs. 4 der PSA-Benutzerverordnung hat der Arbeitgeber oder die Arbeitgeberin Art, Umfang und Fristen erforderlicher Wartungs- und Reparaturmaßnahmen der persönlichen Schutzausrüstung festzulegen.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei diesen Prüfungen/Wartungen sollen sicherheitstechnische Mängel systematisch erkannt und abgestellt werden.</p>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">5.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Vor jedem Einsatz</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Vor jedem Einsatz sind Geräte und Einrichtungen von einer befähigten/fachkundigen Person entsprechend der Betriebs- und Wartungsanleitung des Herstellers zu prüfen und einsatzklar zu machen. Das Ergebnis der Prüfungen ist zu dokumentieren.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">5.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Vor jedem Tauchgang</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Vor jedem Tauchgang hat die Einsatz leitende Person den Atemgasvorrat auf ausreichende Menge und die für den Tauchgang erforderliche Gaszusammensetzung zu prüfen.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei betriebseigener Mischgasherstellung hat die Einsatz leitende Person darüber hinaus zu prüfen, dass nach vollständiger Durchmischung in den gebrauchsfertigen Mischgasen keine unzulässigen Konzentrationen von Verunreinigungen enthalten sind. Die Prüfung hat nach anerkannten Standards zu erfolgen (DIN EN 12021:2014-07).<?dguv pbr 22?></p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">5.3</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Prüfung in regelmäßigen Abständen</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">In der BetrSichV Anhang 2 Abschnitt 4 sind die Prüfintervalle für Druckanlagen (Wiederkehrende Prüfungen von Anlagen und Anlagenteilen: Nummer 5, Tabelle 1 und für Flaschen für Atemschutzgeräte: Nummer 7.6) aufgeführt.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Mindestens alle zwei Jahre hat der Unternehmer oder die Unternehmerin Tauchgeräte und Mischgas-Versorgungsanlagen sowie deren Zubehör von einem oder einer Sachverständigen auf ihren betriebssicheren Zustand prüfen zu lassen.<?dguv pbr 23?></p>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">6</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Grundsätze Verwendung von Mischgas</named-content>
+      </title>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">6.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Sichere Einsatzbedingung</named-content>
+        </title>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>Bei Einhaltung der angeführten Grenzwerte und angegebenen Tauchprofile der Tabellen sollte das Tauchen mit Mischgas sicher sein. Trotzdem kann es zu Unvorhersehbarkeiten kommen, die eine Dekompressionskrankheit verursachen.</p>
+          </list-item>
+          <list-item>
+            <p>Sollten Symptome einer Dekompressionskrankheit beim Tauchpersonal auftreten, muss ein Rettungskonzept vorliegen. Dies beinhaltet die Rettung aus dem Wasser, Versorgung mit medizinischem Sauerstoff (z. B. Wenoll-System), Behandlung in einer Taucherdruckkammer (siehe <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> „Taucherarbeiten“) mit der Tabelle 6 oder 7 der US Navy oxygen treatment. Der im Rettungskonzept festgelegte Arzt oder die Ärztin mit einer Qualifikation für Tauch- und Hyperbarmedizin muss informiert werden und leitet weitere Schritte ein. Nach einem Notfall ist vor dem nächsten Tauchgang eine Freigabe durch das ärztliche Personal erforderlich.</p>
+          </list-item>
+          <list-item>
+            <p>Sollte die gewünschte Tauchtiefe, Tauchzeit oder Sauerstoffpartialdruckwert in den Tabellen nicht zu finden sein, muss der nächst naheliegende Wert, der eine größere Sicherheit für das Tauchpersonal gewährleistet, verwendet werden.</p>
+          </list-item>
+          <list-item>
+            <p>Die Taucher oder Taucherinnen sollen in 24 Stunden nicht mehr als 8 Stunden einem Überdruck ausgesetzt sein.</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">6.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Wiederholungstauchgänge</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Wiederholungstauchgänge können nur ausgeführt werden, wenn dies die Tauchtabelle hergibt und das Wiederholungsintervall berücksichtigt wird. Es wird empfohlen, nach einem Wiederholungstauchgang regelmäßig ein Wiederholungsintervall von 12 Stunden einzuhalten. Sind laut Tabelle mehrere Wiederholungstauchgänge möglich, kann dies das Auftreten von Dekompressionskrankheit erhöhen. Umgekehrt verringert sich dies proportional mit einem längeren Wiederholungsintervall. Es ist darauf zu achten, dass <?dguv pbr 24?>die Grenzwerte die Gesamttauchzeit pro Tag und der Sauersofftoxizität nicht überschritten wird. Es sind maximal 2 Wiederholungstauchgänge möglich. Es ist wichtig, den Druck während der Stopps so gleichmäßig wie möglich zu halten. Die zulässige Abweichung hängt vom Wellengang ab und darf nicht mehr als +/– 0,5 Meter sein.</p>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">6.2</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Aufstiegsgeschwindigkeit</named-content>
+        </title>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>Die maximal zulässige Aufstiegsgeschwindigkeit beträgt 10 Meter pro Minute. Die Aufstiegszeit ist nicht in die Stoppzeit einzubeziehen. Sollte die maximale Geschwindigkeit überschritten werden, muss die verbleibende Zeit zur Stoppzeit addiert werden.</p>
+          </list-item>
+          <list-item>
+            <p>Die Aufstiegsgeschwindigkeit zum ersten Stopp darf nicht weniger als 5 Meter pro Minute betragen. Sollte der Aufstieg langsamer sein, muss die Überschreitung der Aufstiegszeit zur Tauchzeit addiert werden. Die Aufstiegszeit zwischen aufeinanderfolgenden Stopps mit einer Tiefe von mehr als 6 Metern darf 1 Minute nicht überschreiten.</p>
+          </list-item>
+          <list-item>
+            <p>Die Aufstiegsgeschwindigkeit aus Tiefen von weniger als oder gleich 6 Metern sollte langsamer erfolgen.</p>
+          </list-item>
+        </list>
+      </sec>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">6.6</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchbedingungen</named-content>
+        </title>
+        <list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" list-type="bullet">
+          <list-item>
+            <p>Bei schwierigen Bedingungen wie raue See, Strömung, niedrigen Temperaturen ist durch die Gefährdungsbeurteilung zu prüfen, ob die Tauchtabellen geeignet sind.</p>
+          </list-item>
+          <list-item>
+            <p>Des Weiteren sollte zur Vermeidung von Dekompressionskrankheiten vorab geprüft werden, ob eine Tauchglocke (Bell-Diving-System/z. B. TUP) das Risiko minimiert. Sollte dies der Fall sein, ist eine solche einzusetzen.<?dguv pbr 25?></p>
+          </list-item>
+        </list>
+      </sec>
+    </sec>
+    <sec sec-type="_1KapitelUeberschrift">
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">7</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Tauchgangsberechnung/Verwendung der Tauchtabellen</named-content>
+      </title>
+      <sec sec-type="_1Ueberschrift2">
+        <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">7.1</label>
+        <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <named-content content-type="span" specific-use="keyword">Tauchgangsberechnung</named-content>
+        </title>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Bei der Berechnung des Mischgastauchgangs wurden tauchphysikalisch/medizinische Grundlagen berücksichtigt. Anerkannte Sauerstoffgrenzwerte fließen in die Berechnung ein. Die verwendeten Tabellen beziehen sich auf ein Mischgas aus Sauerstoff und Stickstoff.</p>
+        <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Sollte eine andere Tauchgangsberechnung als die in dem Anhang 1 verwendet werden, ist eine Genehmigung von der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> abzuweichen beim zuständigen Unfallversicherungsträger zu stellen. Die Berechnung muss von einem anerkannten Gutachter, einer anerkannten Gutachterin, einem Mediziner, einer Medizinerin, einem oder einer Sachverständigen erstellt und tauchtechnisch erprobt sein.<?dguv pbr 26?></p>
+      </sec>
+    </sec>
+  </body>
+  <back>
+    <app-group>
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Anhang 1</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Zulässiger Sauerstoffpartialdruck/Zulässige tägliche Sauerstoffdosis</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">1. Zulässiger Sauerstoffpartialdruck (pO<sub>2</sub>) im Verlauf eines Tauchgangs (Max. 140 kPa)</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 1</label>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="34%"/>
+            <col width="33%"/>
+            <col width="33%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(in kPa)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Zeitdauer (in h)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Max. pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(in kPa) pro Tauchgang</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>160</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>3</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>480</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>140</p>
+              </td>
+              <td align="left" valign="top">
+                <p>4</p>
+              </td>
+              <td align="left" valign="top">
+                <p>560</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>120</p>
+              </td>
+              <td align="left" valign="top">
+                <p>5</p>
+              </td>
+              <td align="left" valign="top">
+                <p>600</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>100</p>
+              </td>
+              <td align="left" valign="top">
+                <p>6</p>
+              </td>
+              <td align="left" valign="top">
+                <p>600</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>90</p>
+              </td>
+              <td align="left" valign="top">
+                <p>8</p>
+              </td>
+              <td align="left" valign="top">
+                <p>720</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">2. Ermittlung des maximalen Einsatztiefe – MOD bei dem gewählten Sauerstoffpartialdruck</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">MOD <inline-formula><mml:math><mml:mrow><mml:mo>=</mml:mo><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mfrac><mml:mrow><mml:mi mathvariant="normal">p</mml:mi><mml:msub><mml:mn>0</mml:mn><mml:mn>2</mml:mn></mml:msub><mml:mrow><mml:mspace width="0.333em"/><mml:mtext mathvariant="normal"> max </mml:mtext><mml:mspace width="0.333em"/></mml:mrow></mml:mrow><mml:mrow><mml:mi mathvariant="normal">f</mml:mi><mml:msub><mml:mn>0</mml:mn><mml:mn>2</mml:mn></mml:msub></mml:mrow></mml:mfrac><mml:mo>−</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>×</mml:mo><mml:mn>10</mml:mn></mml:mrow></mml:math></inline-formula></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">f0<sub>2</sub></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">fO<sub>2</sub> = Fraktion des Gases</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">pO<sub>2</sub> = Sauerstoffpartialdruck [bar]</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">MOD = Maximale Einsatztiefe [m]</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Beispiel: MOD bei 140 kPa und einem Sauerstoffanteil im Gemisch von 30 % <inline-formula><mml:math><mml:mrow><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:msub><mml:mi mathvariant="normal">f</mml:mi><mml:mn>02</mml:mn></mml:msub><mml:mo>=</mml:mo><mml:mn>0</mml:mn><mml:mo>,</mml:mo><mml:mn>3</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo stretchy="false" form="prefix">(</mml:mo></mml:mrow></mml:math></inline-formula> Nitrox–Gemisch 30/70) = 36,7 m Wassertiefe<?dguv pbr 27?></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">3. Ermittlung der „äquivalenten Luft Tauchtiefe“ mit Festlegung des Tauchgangprofils</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Zur Ermittlung des Tauchgangprofils muss die äquivalente Luft Tauchtiefe ermittelt werden. In der Tabelle 2 wird die tatsächliche Tauchtiefe (linke Spalte) für das festgelegte Sauerstoff/Stickstoff Gemisch (Nitrox) bestimmt. Die äquivalente Luft Tauchtiefe wird in der Spalte des gewählten Gemisches abgelesen.</p>
+      <fig xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label/>
+        <caption>
+          <title/>
+        </caption>
+        <alt-text/>
+        <graphic content-type="stimmungsbild" xlink:href="https://uvnexus.vur.uv-kooperation.org/informationen-assets/dguv-information-201-033/201-033_201-033_stimm1.png" position="float" orientation="portrait" specific-use="image-size:l"/>
+        <permissions>
+          <copyright-statement/>
+          <copyright-holder/>
+        </permissions>
+      </fig>
+      <?dguv pbr 28?>
+      <fig xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 2</label>
+        <caption>
+          <title>Ermittlung der äquivalenten Tauchgangtiefe</title>
+        </caption>
+        <alt-text>Ermittlung der äquivalenten Tauchgangtiefe</alt-text>
+        <graphic xlink:href="https://uvnexus.vur.uv-kooperation.org/informationen-assets/dguv-information-201-033/201-033_201-033_abb1.png" position="float" specific-use="image-size:l"/>
+        <permissions>
+          <copyright-statement/>
+          <copyright-holder/>
+        </permissions>
+      </fig>
+      <?dguv pbr 29?>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Ermittlung:</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">1.</named-content> Festlegen der tatsächlichen Tauchtiefe (Spalte 1/links)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">2.</named-content> Ablesen der „äquivalenten Tauchtiefe“ im Schnittfeld der</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <list list-type="bullet">
+          <list-item>
+            <p>Zeile für die tatsächliche Tauchtiefe (zu Beispiel: Festlegung 33 m) und der</p>
+          </list-item>
+          <list-item>
+            <p>Spalte für das verwendete Nitroxgemisch (zu Beispiel: Festlegung Nitrox 30/70)</p>
+          </list-item>
+          <list-item>
+            <p>Tabellenwert der äquivalenten Luft Tauchtiefe für dieses Beispiel 30 m</p>
+          </list-item>
+        </list>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_4octextpara_ListeFrei"><?dguv ListeFrei level=1?><named-content content-type="span" specific-use="_4octextinline_ListenpunktFrei">3.</named-content> Die so ermittelte „äquivalente Tauchtiefe“ (Beispiel wird als „Tauchtiefe“ für das Austauchen nach Tabelle 2 nach Anlage 1 der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> zu Grunde gelegt.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <italic>Zum Beispiel:</italic>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <italic>Auszug aus der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link>/Festlegung Tauchzeit 60 Minuten.</italic>
+      </p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 3</label>
+        <caption>
+          <title>Drucklufttabelle</title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="11%"/>
+            <col width="18%"/>
+            <col width="6%"/>
+            <col width="7%"/>
+            <col width="6%"/>
+            <col width="6%"/>
+            <col width="6%"/>
+            <col width="6%"/>
+            <col width="17%"/>
+            <col width="17%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th rowspan="2" align="left" valign="top">
+                <p>
+                  <bold>Tauchzeit (min)</bold>
+                </p>
+              </th>
+              <th rowspan="2" align="left" valign="top">
+                <p>
+                  <bold>Aufstieg bis zur ersten Austauchstufe (min : sec)</bold>
+                </p>
+              </th>
+              <th colspan="6" align="left" valign="top">
+                <p>
+                  <bold>Haltezeiten während des Austauchens auf den Austauchstufen (min)</bold>
+                </p>
+              </th>
+              <th rowspan="2" align="left" valign="top">
+                <p>
+                  <bold>Gesamtzeit der Dekompression (min : sec)</bold>
+                </p>
+              </th>
+              <th rowspan="2" align="left" valign="top">
+                <p>
+                  <bold>Wiederholungsgang möglich</bold>
+                </p>
+              </th>
+            </tr>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>18 m</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>15 m</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>12 m</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>9 m</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>6 m</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>3 m</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="10" align="left" valign="top">
+                <p>Tauchtiefe 30 m</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>20</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>5:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>25</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>5</p>
+              </td>
+              <td align="left" valign="top">
+                <p>7:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>10</p>
+              </td>
+              <td align="left" valign="top">
+                <p>12:15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>35</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>12</p>
+              </td>
+              <td align="left" valign="top">
+                <p>17:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>40</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>5</p>
+              </td>
+              <td align="left" valign="top">
+                <p>17</p>
+              </td>
+              <td align="left" valign="top">
+                <p>24:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>45</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>7</p>
+              </td>
+              <td align="left" valign="top">
+                <p>20</p>
+              </td>
+              <td align="left" valign="top">
+                <p>29:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>50</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>10</p>
+              </td>
+              <td align="left" valign="top">
+                <p>25</p>
+              </td>
+              <td align="left" valign="top">
+                <p>37:00</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>60</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>1:45</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>–</p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>3</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>15</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>35</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>54:45</p>
+              </td>
+              <td align="left" valign="top">
+                <p>Ja</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <?dguv pbr 30?>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">4. Berücksichtigung der Sauerstofftoxizität (nach Paul Bert)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">4.1 Ermittlung der Sauerstofftoxizität und deren Grenzwert</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 4</label>
+        <caption>
+          <title>Zulässiger Sauerstoffpartialdruck (pO<sub>2</sub>) im Verlauf eines Tauchganges (Sauerstofftoxizität – CNS Tabelle nach NOAA)</title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="25%"/>
+            <col width="26%"/>
+            <col width="24%"/>
+            <col width="25%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>max. pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(in kPa)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>CNS O</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>% (%/min)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>max. Zeit pro Tauchgang (in min)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>max. Zeit pro Tag (in min)</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>160</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,22</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>45</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>150</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>150</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>0,83</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>120</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>180</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>140</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,65</p>
+              </td>
+              <td align="left" valign="top">
+                <p>150</p>
+              </td>
+              <td align="left" valign="top">
+                <p>180</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>130</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,56</p>
+              </td>
+              <td align="left" valign="top">
+                <p>180</p>
+              </td>
+              <td align="left" valign="top">
+                <p>210</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>120</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,47</p>
+              </td>
+              <td align="left" valign="top">
+                <p>210</p>
+              </td>
+              <td align="left" valign="top">
+                <p>240</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>110</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,42</p>
+              </td>
+              <td align="left" valign="top">
+                <p>240</p>
+              </td>
+              <td align="left" valign="top">
+                <p>270</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>100</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,33</p>
+              </td>
+              <td align="left" valign="top">
+                <p>300</p>
+              </td>
+              <td align="left" valign="top">
+                <p>300</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>90</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,28</p>
+              </td>
+              <td align="left" valign="top">
+                <p>360</p>
+              </td>
+              <td align="left" valign="top">
+                <p>360</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>80</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,22</p>
+              </td>
+              <td align="left" valign="top">
+                <p>450</p>
+              </td>
+              <td align="left" valign="top">
+                <p>450</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,18</p>
+              </td>
+              <td align="left" valign="top">
+                <p>570</p>
+              </td>
+              <td align="left" valign="top">
+                <p>570</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>60</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,14</p>
+              </td>
+              <td align="left" valign="top">
+                <p>720</p>
+              </td>
+              <td align="left" valign="top">
+                <p>720</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <inline-formula>
+          <mml:math>
+            <mml:mrow>
+              <mml:mrow>
+                <mml:mspace width="0.333em"/>
+                <mml:mtext mathvariant="normal"> CNS </mml:mtext>
+                <mml:mspace width="0.333em"/>
+              </mml:mrow>
+              <mml:mo>=</mml:mo>
+              <mml:mi mathvariant="normal">Σ</mml:mi>
+              <mml:mfrac>
+                <mml:mrow>
+                  <mml:mspace width="0.333em"/>
+                  <mml:mtext mathvariant="normal"> Echttauchzeit </mml:mtext>
+                  <mml:mspace width="0.333em"/>
+                </mml:mrow>
+                <mml:mrow>
+                  <mml:mspace width="0.333em"/>
+                  <mml:mtext mathvariant="normal"> max. Tauchzeit </mml:mtext>
+                  <mml:mspace width="0.333em"/>
+                </mml:mrow>
+              </mml:mfrac>
+            </mml:mrow>
+          </mml:math>
+        </inline-formula>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>Der Wert für die CNS darf den Wert von 100 CNS % nicht überschreiten. Sollte der Wert über 100 CNS % liegen, ist der Tauchgang nicht durchführbar.</bold>
+        <?dguv pbr 31?>
+      </p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 5</label>
+        <caption>
+          <title>Ermittlung der CNS in % anhand eines Beispiels</title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="14%"/>
+            <col width="14%"/>
+            <col width="14%"/>
+            <col width="15%"/>
+            <col width="14%"/>
+            <col width="16%"/>
+            <col width="13%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th colspan="7" align="left" valign="top">
+                <p>
+                  <bold>Erster Tauchgang</bold>
+                </p>
+              </th>
+            </tr>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Tiefe (m)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Zeit (min)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>O</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(%) Gem</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>isch N</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(%)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(kPa)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>CNS %/min</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>CNS %</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>33</p>
+              </td>
+              <td align="left" valign="top">
+                <p>60</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>129</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,56</p>
+              </td>
+              <td align="left" valign="top">
+                <p>33,6</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>33</p>
+              </td>
+              <td align="left" valign="top">
+                <p>4</p>
+                <p>(ges. Austauchzeit)</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>129</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,56</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2,24</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>9</p>
+              </td>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>57</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,14</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,42</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>6</p>
+              </td>
+              <td align="left" valign="top">
+                <p>15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>48</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,14</p>
+              </td>
+              <td align="left" valign="top">
+                <p>2,1</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>35</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>39</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,14</p>
+              </td>
+              <td align="left" valign="top">
+                <p>4,9</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top"/>
+              <td align="left" valign="top">
+                <p>117</p>
+              </td>
+              <td colspan="4" align="right" valign="top">
+                <p>Summe</p>
+              </td>
+              <td align="left" valign="top">
+                <p>43,26</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Der Wert ist mit 43,26 CNS % somit kleiner als 100 CNS %. Der Tauchgang ist durchführbar.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>Empfehlung:</bold>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Liegt der Wert eines Einzeltauchgangs über 50 CNS % sollte man mindestens 45 Minuten an der Oberfläche bei normobarem Druck verweilen. Liegt der Wert größer 90 CNS % sollte man mindestens 2 Std. an der Oberfläche verweilen.<?dguv pbr 32?></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">4.2 Ermittlung der Reduktion der CNS % durch eine Oberflächenpause</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Für die Berechnung eines Wiederholungstauchgangs muss der beim 1. Tauchgang ermittelte CNS % Wert berücksichtigt werden. Diese CNS % reduziert sich um einen Anteil durch die Oberflächenpause. Bestimmt wird diese Reduktion durch die Halbwertszeit.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Halbwertszeit: CNS %(t) = CNS % * (½)<sup>t/90</sup> = CNS % * e<sup>–t/130</sup></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">t = Oberflächenpause in Minuten</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 6</label>
+        <caption>
+          <title>Reduktionsfaktoren</title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="25%"/>
+            <col width="25%"/>
+            <col width="25%"/>
+            <col width="25%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Oberflächenpause t in min</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Reduktionsfaktor</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Oberflächenpause t in min</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Reduktionsfaktor</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>15 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,89</p>
+              </td>
+              <td align="left" valign="top">
+                <p>150 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,32</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>30 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,8</p>
+              </td>
+              <td align="left" valign="top">
+                <p>180 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,25</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>45 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,71</p>
+              </td>
+              <td align="left" valign="top">
+                <p>210 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,2</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>60 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,63</p>
+              </td>
+              <td align="left" valign="top">
+                <p>240 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,16</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>75 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,56</p>
+              </td>
+              <td align="left" valign="top">
+                <p>270 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,13</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>90 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,5</p>
+              </td>
+              <td align="left" valign="top">
+                <p>300 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,1</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>105 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,45</p>
+              </td>
+              <td align="left" valign="top">
+                <p>360 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,07</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>120 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,4</p>
+              </td>
+              <td align="left" valign="top">
+                <p>420 min</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,04</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Beispiel: Gewählte Oberflächenpause 2 Stunden. Nach 2 Stunden reduziert sich die Sättigung somit auf 0,4 * 43,26 CNS %. = 17,30 CNS %.<?dguv pbr 33?></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">4.3 Wiederholungstauchgänge</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>Bei der Planung eines Wiederholungtauchgangs ist die Tabelle 6 der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> zu berücksichtigen.</bold>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Ermittlung der CNS % erfolgt analog der Punkte 1 bis 4 des Anhangs. Zusätzlich muss die Restsättigung zu dem ermittelten Wert addiert werden. Die CNS % Wert darf 100 nicht überschreiten.<?dguv pbr 34?></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">5. Berücksichtigung der Sauerstofftoxizität nach Lorraine-Smith</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="_1UnterUeberschrift">5.1 Ermittlung der Sauerstoff-Toleranz-Einheiten (OTE)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die Ermittlung der täglichen Sauerstoff-Toleranz-Einheiten (OTE) erfolgt nach folgender Formel:</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <inline-formula>
+          <mml:math>
+            <mml:mrow>
+              <mml:mrow>
+                <mml:mspace width="0.333em"/>
+                <mml:mtext mathvariant="normal"> OTE </mml:mtext>
+                <mml:mspace width="0.333em"/>
+              </mml:mrow>
+              <mml:mo>=</mml:mo>
+              <mml:msup>
+                <mml:mi>t</mml:mi>
+                <mml:mo>*</mml:mo>
+              </mml:msup>
+              <mml:msup>
+                <mml:mrow>
+                  <mml:mo stretchy="true" form="prefix">(</mml:mo>
+                  <mml:mfrac>
+                    <mml:mrow>
+                      <mml:mi>p</mml:mi>
+                      <mml:msub>
+                        <mml:mi>O</mml:mi>
+                        <mml:mn>2</mml:mn>
+                      </mml:msub>
+                      <mml:mo>−</mml:mo>
+                      <mml:mn>0</mml:mn>
+                      <mml:mo>,</mml:mo>
+                      <mml:mn>5</mml:mn>
+                    </mml:mrow>
+                    <mml:mrow>
+                      <mml:mn>0</mml:mn>
+                      <mml:mo>,</mml:mo>
+                      <mml:mn>5</mml:mn>
+                    </mml:mrow>
+                  </mml:mfrac>
+                  <mml:mo stretchy="true" form="postfix">)</mml:mo>
+                </mml:mrow>
+                <mml:mrow>
+                  <mml:mn>5</mml:mn>
+                  <mml:mi>/</mml:mi>
+                  <mml:mn>6</mml:mn>
+                </mml:mrow>
+              </mml:msup>
+            </mml:mrow>
+          </mml:math>
+        </inline-formula>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">t = Zeit in Minuten</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">pO<sub>2</sub> = Sauerstoffpartialdruck in bar</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">1 bar = 100 kPa; 1 kPa = 0,01 bar</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 7</label>
+        <caption>
+          <title>Sauerstoff-Toleranz-Einheiten (OTE) pro Zeiteinheit in Abhängigkeit vom Sauerstoffpartialdruck</title>
+        </caption>
+        <table width="100%" style="_4octextparaTabelleKopfgrün">
+          <colgroup>
+            <col width="33%"/>
+            <col width="33%"/>
+            <col width="34%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>kPa</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>OTE pro min</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>OTE pro h</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>60</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,26</p>
+              </td>
+              <td align="left" valign="top">
+                <p>16</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,47</p>
+              </td>
+              <td align="left" valign="top">
+                <p>28</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>80</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,65</p>
+              </td>
+              <td align="left" valign="top">
+                <p>39</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>90</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,83</p>
+              </td>
+              <td align="left" valign="top">
+                <p>50</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>100</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1</p>
+              </td>
+              <td align="left" valign="top">
+                <p>60</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>110</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,16</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>120</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,32</p>
+              </td>
+              <td align="left" valign="top">
+                <p>79</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>130</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,48</p>
+              </td>
+              <td align="left" valign="top">
+                <p>89</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>140</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,63</p>
+              </td>
+              <td align="left" valign="top">
+                <p>98</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>150</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>1,78</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>107</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>160</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>1,93</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>116</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <?dguv pbr 35?>
+                <p>
+                  <bold>170</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,07</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>125</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>180</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,22</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>134</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>190</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,36</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>142</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>200</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,5</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>150</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>210</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,64</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>159</bold>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>
+                  <bold>220</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>2,77</bold>
+                </p>
+              </td>
+              <td align="left" valign="top">
+                <p>
+                  <bold>167</bold>
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <?dguv pbr 36?>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>5.2 Tabelle der täglichen Sauerstoff-Toleranz-Einheiten (OTE)</bold>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Die tägliche Sauerstoffdosis darf die in Spalte 2 der nachfolgenden Tabelle 8 angegebenen Werte für die Sauerstoff-Toleranz-Einheiten (OTE) nicht überschreiten, wenn an der in Spalte 1 angegebenen Zahl von aufeinanderfolgenden Tagen getaucht wird.</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 8</label>
+        <caption>
+          <title>Höchstzulässige Sauerstoffdosis pro Tag (in Sauerstoff-Toleranz-Einheiten/OTE) in Abhängigkeit von der Zeitdauer des Taucheinsatzes</title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="50%"/>
+            <col width="50%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Dauer der Exposition in Tagen</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>OTE pro Tag</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>1</p>
+              </td>
+              <td align="left" valign="top">
+                <p>850</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>2</p>
+              </td>
+              <td align="left" valign="top">
+                <p>700</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>620</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>4</p>
+              </td>
+              <td align="left" valign="top">
+                <p>525</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>5</p>
+              </td>
+              <td align="left" valign="top">
+                <p>460</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>6</p>
+              </td>
+              <td align="left" valign="top">
+                <p>420</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>7</p>
+              </td>
+              <td align="left" valign="top">
+                <p>380</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>8</p>
+              </td>
+              <td align="left" valign="top">
+                <p>350</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>9</p>
+              </td>
+              <td align="left" valign="top">
+                <p>330</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>10</p>
+              </td>
+              <td align="left" valign="top">
+                <p>310</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>11–30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>300</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <?dguv pbr 37?>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <italic>Beispiel:</italic>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Ermittlung der im Verlauf eines Tauchganges aufgenommenen Sauerstoff-Toleranz-Einheiten mit folgenden Randbedingungen.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Festgelegt:</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Atemgas: Nitrox 30/70; tatsächliche Tauchtiefe: 33 m; Tauchzeit: 60 min Max. Partialdruck des Sauerstoffs 140 kPa berücksichtigen.</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Äquivalente Luft Tauchtiefe = 30 m (Ermittlung siehe Tabelle 2)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Für die Berechnung des Sauerstoffpartialdruckes pO<sub>2</sub> ist die tatsächliche Tauchtiefe anzusetzen, für die Bestimmung der Dekompressionszeit ist die äquivalente Tauchtiefe anzusetzen.</p>
+      <table-wrap xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>Tabelle 9</label>
+        <caption>
+          <title>Das Austauchen erfolgt entsprechend der Tabelle 2 der <ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link></title>
+        </caption>
+        <table style="_4octextparaTabelleKopfgrau">
+          <colgroup>
+            <col width="13%"/>
+            <col width="14%"/>
+            <col width="15%"/>
+            <col width="15%"/>
+            <col width="13%"/>
+            <col width="16%"/>
+            <col width="14%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th colspan="7" align="left" valign="top">
+                <p>
+                  <bold>Tauchgang</bold>
+                </p>
+              </th>
+            </tr>
+            <tr>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Tiefe (m)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>Zeit (min)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>O</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(%) Gemi</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>sch N</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(%)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>(kPa)</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>pO</bold>
+                  <sub>
+                    <bold>2</bold>
+                  </sub>
+                  <bold>/min</bold>
+                </p>
+              </th>
+              <th align="left" valign="top">
+                <p>
+                  <bold>OTE gesamt</bold>
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td align="left" valign="top">
+                <p>33</p>
+              </td>
+              <td align="left" valign="top">
+                <p>60</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>129</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,48</p>
+              </td>
+              <td align="left" valign="top">
+                <p>88,8</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>33</p>
+              </td>
+              <td align="left" valign="top">
+                <p>4</p>
+                <p>(ges. Austauchzeit)</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>129</p>
+              </td>
+              <td align="left" valign="top">
+                <p>1,48</p>
+              </td>
+              <td align="left" valign="top">
+                <p>5,92</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>9</p>
+              </td>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top"/>
+              <td align="left" valign="top"/>
+              <td align="left" valign="top"/>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>6</p>
+              </td>
+              <td align="left" valign="top">
+                <p>15</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>48</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,26</p>
+              </td>
+              <td align="left" valign="top">
+                <p>3,9</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" valign="top">
+                <p>3</p>
+              </td>
+              <td align="left" valign="top">
+                <p>35</p>
+              </td>
+              <td align="left" valign="top">
+                <p>30</p>
+              </td>
+              <td align="left" valign="top">
+                <p>70</p>
+              </td>
+              <td align="left" valign="top">
+                <p>39</p>
+              </td>
+              <td align="left" valign="top">
+                <p>0,26</p>
+              </td>
+              <td align="left" valign="top">
+                <p>9,1</p>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6" align="right" valign="top">
+                <p>Summe</p>
+              </td>
+              <td align="left" valign="top">
+                <p>108,5</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </table-wrap>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Ein weiterer Tauchgang wäre möglich und würde analog der obigen Berechnung für Wiederholungstauchgänge berechnet.<?dguv pbr 38?></p>
+    </app-group>
+    <app-group>
+      <label xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Anhang 2</label>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Vorschriften, Regeln, Informationen</named-content>
+      </title>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Nachstehend sind die insbesondere zu beachtenden einschlägigen Vorschriften und Regeln zusammengestellt.</p>
+      <ref-list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="gesetze">
+        <label>1.</label>
+        <title>
+          <named-content content-type="span" specific-use="keyword">Gesetze, Verordnungen</named-content>
+        </title>
+        <p>
+          <bold>
+            <italic>Bezugsquelle:</italic>
+          </bold>
+        </p>
+        <p>
+          <italic>Internet: <ext-link xlink:href="https://eur-lex.europa.eu" xlink:title="https://eur-lex.europa.eu">https://eur-lex.europa.eu</ext-link>, <ext-link xlink:href="https://www.gesetze-im-internet.de" xlink:title="https://www.gesetze-im-internet.de">https://www.gesetze-im-internet.de</ext-link>, <ext-link xlink:href="https://www.baua.de" xlink:title="https://www.baua.de">https://www.baua.de</ext-link></italic>
+        </p>
+        <ref>
+          <mixed-citation>PSA Verordnung (EU) 2016/425</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>PSA-Durchführungsgesetz (PSA-DG)</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>Gesetz über die Bereitstellung von Produkten auf dem Markt – Produktsicherheitsgesetz (ProdSG)</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>Arbeitsschutzgesetz (ArbSchG)</mixed-citation>
+        </ref>
+      </ref-list>
+      <ref-list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <label>2.</label>
+        <title>
+          <named-content content-type="span" specific-use="keyword">DGUV Regelwerk für Sicherheit und Gesundheit bei der Arbeit</named-content>
+        </title>
+        <p>
+          <bold>
+            <italic>Bezugsquelle:</italic>
+          </bold>
+        </p>
+        <p>
+          <italic>Bei Ihrem zuständigen Unfallversicherungsträger und unter <ext-link xlink:href="https://www.dguv.de/publikationen" xlink:title="www.dguv.de/publikationen">www.dguv.de/publikationen</ext-link></italic>
+        </p>
+        <ref-list content-type="dguv_vorschriften">
+          <title>
+            <named-content content-type="span" specific-use="keyword">Vorschriften</named-content>
+          </title>
+          <ref>
+            <mixed-citation><ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/grundsaetze-der-praevention" xlink:title="DGUV Vorschrift 1" xlink:show="new">DGUV Vorschrift 1</ext-link> „Grundsätze der Prävention“</mixed-citation>
+          </ref>
+          <ref>
+            <mixed-citation><ext-link xlink:href="https://uvnexus.vur.uv-kooperation.org/vorschriften/taucherarbeiten" xlink:title="DGUV Vorschrift 40" xlink:show="new">DGUV Vorschrift 40</ext-link> „Taucherarbeiten“<?dguv pbr 39?></mixed-citation>
+          </ref>
+        </ref-list>
+      </ref-list>
+      <ref-list xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" content-type="normen">
+        <label>3.</label>
+        <title>
+          <named-content content-type="span" specific-use="keyword">Normen/VDE-Bestimmungen</named-content>
+        </title>
+        <p>
+          <bold>
+            <italic>Bezugsquelle:</italic>
+          </bold>
+        </p>
+        <p>
+          <italic>Beuth-Verlag GmbH, Burggrafenstraße 6, 10787 Berlin und VDE-Verlag, Bismarckstraße 33, 10625 Berlin</italic>
+        </p>
+        <ref>
+          <mixed-citation>DIN EN 250:2014-07 „Atemgeräte – Autonome Leichttauchgeräte mit Druckluft; Anforderungen, Prüfung, Kennzeichnung“</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>DIN EN 12021:2014-07 „Atemgeräte – Druckgase für Atemschutzgeräte“</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>DIN EN 13949:2003-06 „Atemgeräte – Autonome Leichttauchgeräte mit Nitrox-Gasgemisch und Sauerstoff – Anforderungen, Prüfung, Kennzeichnung“</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>DIN EN 15333-1:2008-04 + Berichtigung 1: 2010-05 „Atemgeräte – Schlauchversorgte Leichttauchgeräte mit Druckgas – Teil 1: Lungenautomatisch gesteuerte Geräte“</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>DIN EN 15333-2:2009-07 „Atemgeräte – Schlauchversorgte Leichttauchgeräte mit Druckgas – Teil 2: Geräte mit konstantem Volumenstrom“</mixed-citation>
+        </ref>
+        <ref>
+          <mixed-citation>DIN EN 14143:2013 „Atemgeräte – Autonome Regenerationstauchgeräte“</mixed-citation>
+        </ref>
+      </ref-list>
+      <?dguv pbr 40?>
+    </app-group>
+    <app-group>
+      <title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <named-content content-type="span" specific-use="keyword">Impressum</named-content>
+      </title>
+      <?dguv impressum?>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>Herausgegeben von:</bold>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Deutsche Gesetzliche Unfallversicherung e. V. (DGUV)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Glinkastraße 40</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">10117 Berlin</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Telefon: 030 13001-0 (Zentrale)</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Fax: 030 13001-9876</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">E-Mail: <ext-link xlink:href="mailto:info@dguv.de" xlink:title="info@dguv.de" ext-link-type="email">info@dguv.de</ext-link></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Internet: <ext-link xlink:href="https://www.dguv.de" xlink:title="www.dguv.de">www.dguv.de</ext-link></p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Sachgebiet Tiefbau des Fachbereichs Bauwesen der DGUV</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Ausgabe: September 2020</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">DGUV Information 201-033</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">zu beziehen bei Ihrem zuständigen Unfallversicherungsträger oder unter <ext-link xlink:href="https://www.dguv.de/publikationen" xlink:title="www.dguv.de/publikationen">www.dguv.de/publikationen</ext-link> Webcode: p201033</p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <bold>Bildnachweis</bold>
+      </p>
+      <p xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink">Titelfoto © BG Bau</p>
+    </app-group>
+  </back>
+</article>
