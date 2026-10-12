@@ -34,6 +34,7 @@ docker run -p 8000:8000 \
   -e API_KEY=your-secret-key \
   -e STORAGE_ADAPTER=plone \
   -e PLONE_BASE_URL=http://localhost:8080/Plone \
+  -e PLONE_EXTERNAL_URL=http://localhost:8080/Plone \
   -e PLONE_USERNAME=admin \
   -e PLONE_PASSWORD=admin \
   ghcr.io/educorvi/jats-importexport:latest

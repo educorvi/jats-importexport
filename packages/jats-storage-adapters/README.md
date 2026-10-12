@@ -16,6 +16,12 @@ Reads and writes JATS documents to a [Plone CMS](https://plone.org/) instance vi
 | `PLONE_USERNAME` | Plone username |
 | `PLONE_PASSWORD` | Plone password |
 
+**Optional environment variables:**
+
+| Variable | Description |
+|---|---|
+| `PLONE_EXTERNAL_URL` | External URL of the Plone instance (e.g. `http://localhost:8080/Plone`). Defaults to `PLONE_BASE_URL` if unset. |
+
 ```python
 from jats_storage_adapters import PloneStorageAdapter
 

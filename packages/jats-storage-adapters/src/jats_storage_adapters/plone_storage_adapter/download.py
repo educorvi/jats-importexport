@@ -70,6 +70,7 @@ class PloneDownloadService:
     """Service class for handling Plone file downloads and article retrieval."""
 
     base_url: str
+    external_url: str
     httpx_client: httpx.Client
     transform: etree.XSLT
 
@@ -78,6 +79,12 @@ class PloneDownloadService:
         self.httpx_client = httpx_client
         xsl_path = os.path.abspath(XSL_PATH)
         self.transform = etree.XSLT(etree.parse(xsl_path))
+
+        external_url = os.environ.get("PLONE_EXTERNAL_URL")
+        if external_url is None:
+            logger.warning("PLONE_EXTERNAL_URL environment variable is not set, defaulting to PLONE_BASE_URL")
+            external_url = base_url
+        self.external_url = external_url.rstrip("/")
 
     # Private helper methods
 
@@ -319,7 +326,8 @@ class PloneDownloadService:
             raise ValueError(f"Unsupported section type: {section_type}")
 
         if options and options.get("include_edit_links"):
-            edit_pi = EDIT_PI_PLONE.format(url=url)
+            external_url = url.replace(self.base_url, self.external_url)
+            edit_pi = EDIT_PI_PLONE.format(url=external_url)
             label_title_raw += edit_pi
 
         return label_title_raw
