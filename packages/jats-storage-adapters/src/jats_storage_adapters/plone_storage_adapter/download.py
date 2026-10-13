@@ -178,6 +178,10 @@ class PloneDownloadService:
         """Return a callback function that replaces media links for a given URL."""
 
         def replace_media_link(url: str) -> str:
+            if url.startswith(self.base_url):
+                url = url.replace(self.base_url, "")
+                if not url.startswith("/"):
+                    url = f"/{url}"
             if url.startswith("/"):
                 return f"{self.ieh_base_url}/public/media?{urlencode({'path': url})}"
             return url
