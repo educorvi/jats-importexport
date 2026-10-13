@@ -6,8 +6,9 @@ Provides functionality to download files and articles from a Plone CMS instance.
 import logging
 import os
 import re
+from collections.abc import Callable
 from typing import Any, NotRequired
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 import httpx
 from jats_classes import (
@@ -70,6 +71,7 @@ class PloneDownloadService:
     """Service class for handling Plone file downloads and article retrieval."""
 
     base_url: str
+    ieh_base_url: str
     external_url: str
     httpx_client: httpx.Client
     transform: etree.XSLT
@@ -85,6 +87,11 @@ class PloneDownloadService:
             logger.warning("PLONE_EXTERNAL_URL environment variable is not set, defaulting to PLONE_BASE_URL")
             external_url = base_url
         self.external_url = external_url.rstrip("/")
+
+        ieh_base_url = os.environ.get("IEH_BASE_URL")
+        if ieh_base_url is None:
+            raise ValueError("IEH_BASE_URL environment variable is not set")
+        self.ieh_base_url = ieh_base_url.rstrip("/")
 
     # Private helper methods
 
@@ -167,6 +174,16 @@ class PloneDownloadService:
         self.__find_and_replace_link_candidates(article)
         return article
 
+    def _get_replace_media_links_callback(self) -> Callable[[str], str]:
+        """Return a callback function that replaces media links for a given URL."""
+
+        def replace_media_link(url: str) -> str:
+            if url.startswith("/"):
+                return f"{self.ieh_base_url}/public/media?{urlencode({'path': url})}"
+            return url
+
+        return replace_media_link
+
     def __fetch_front(self, data: dict, resolve_related_items: bool = True) -> Front:
         """Convert Plone front node data into a Front domain model."""
         front = Front.from_dict(data)
@@ -237,6 +254,7 @@ class PloneDownloadService:
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             appendixes=appendixes,
+            media_link_conversion=self._get_replace_media_links_callback(),
         )
 
     def __fetch_appendix(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Appendix:
@@ -252,6 +270,7 @@ class PloneDownloadService:
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             sections=sections,
+            media_link_conversion=self._get_replace_media_links_callback(),
         )
 
     def __fetch_section(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Section:
@@ -269,6 +288,7 @@ class PloneDownloadService:
                 label_title_raw=label_title_raw,
                 content_raw=data.get("content_raw"),
                 sections=sections,
+                media_link_conversion=self._get_replace_media_links_callback(),
             )
         elif data.get("@type") == "EasySection":
             content = data.get("content", {}).get("data", "")
@@ -288,6 +308,7 @@ class PloneDownloadService:
                 label_title_raw=label_title_raw,
                 content_raw=jats_content,
                 sections=sections,
+                media_link_conversion=self._get_replace_media_links_callback(),
             )
         else:
             raise ValueError(f"Unsupported section type: {data.get('@type')}")
