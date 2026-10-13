@@ -7,7 +7,7 @@ and store JATS documents and arbitrary files in a repository backend.
 import abc
 import enum
 from datetime import datetime
-from typing import BinaryIO, TypedDict
+from typing import TypedDict
 
 from jats_classes import Front, JATSDocument
 
@@ -53,34 +53,51 @@ class StorageAdapter(metaclass=abc.ABCMeta):
     # Upload related methods
 
     @abc.abstractmethod
-    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
+    def upload_file(self, file: bytes, filename: str, container: str, status: str | None = None) -> str:
         """Upload a binary file into a target container.
 
         Args:
             file: The binary file stream/object to upload.
+            filename: The name of the file being uploaded.
             container: The path to the container in the storage system.
             status: Optional publication status of the article that the file
                 belongs to. Storage backends that support per-object workflow status
                 may use this status to set the initial state of the uploaded object.
 
         Returns:
-            The URL of the uploaded file.
+            The path of the uploaded file.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def save_jats_document(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
-        """Save a JATSDocument structure into a target container.
+    def create_empty_article(
+        self, front: Front, container: str, create_media_container: bool = False
+    ) -> tuple[str, str | None]:
+        """Create an empty Article with metadata from the provided Front object in the specified container.
 
         Args:
-            document: The JATSDocument to save.
-            container: The path to the target container in the storage system.
-            options: Additional options for saving the JATSDocument.
+            front: The Front object containing metadata for the article.
+            container: The path to the container in the storage system.
+            create_media_container: Whether to create a media container inside the article.
 
         Returns:
-            The path of the saved file or main container object.
+            A tuple containing the path of the created article and the path of the media container (if created).
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create_article_content(
+        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        """Create the content of an article in the specified container.
+
+        Args:
+            document: The JATSDocument containing the article content.
+            container: The path to the container in the storage system.
+            options: Additional options for saving the article content.
+
+        Returns:
+            The path of the article.
         """
         raise NotImplementedError
 

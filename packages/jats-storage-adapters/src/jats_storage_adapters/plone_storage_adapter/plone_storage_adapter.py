@@ -6,7 +6,7 @@ Connects to a live Plone CMS REST API to manage JATS documents and files.
 import logging
 import os
 from datetime import datetime
-from typing import BinaryIO, cast, overload
+from typing import cast, overload
 from urllib.parse import urlparse
 
 import httpx
@@ -94,29 +94,36 @@ class PloneStorageAdapter(StorageAdapter):
 
     # Upload related methods
 
-    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
+    def upload_file(self, file: bytes, filename: str, container: str, status: str | None = None) -> str:
         """Upload a binary file to Plone.
 
-        Converts the stream content into base64 and posts a new 'File' content type.
+        Converts the content into base64 and posts a new 'File' or 'Image' content type.
         If ``status`` is provided, the uploaded object is given the same initial
         workflow status derived from the article's publication status.
         """
         try:
-            return PloneUploadService(self.base_url, self.httpx_client).upload_file(file, container, status)
+            return PloneUploadService(self.base_url, self.httpx_client).upload_file(file, filename, container, status)
         except Exception:
             raise InternalError(f"Error uploading file to {container}")
 
-    def save_jats_document(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
-        """Serialize and upload a JATSDocument object graph to Plone."""
+    def create_empty_article(
+        self, front: Front, container: str, create_media_container: bool = False
+    ) -> tuple[str, str | None]:
+        """Create an empty Article with metadata from the provided Front object in the specified container."""
         try:
             upload_service = PloneUploadService(self.base_url, self.httpx_client)
-            result_url = upload_service.create_article(document.article, container, options)
-            return self.__get_path_from_url(result_url)
-        except Exception as e:
-            logger.error(f"Error saving JATS document: {e}")
-            raise
+            return upload_service.create_empty_article(front, container, create_media_container)
+        except Exception:
+            raise InternalError(f"Error creating empty article in {container}")
+
+    def create_article_content(
+        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        try:
+            upload_service = PloneUploadService(self.base_url, self.httpx_client)
+            return upload_service.create_article_content(document.article, container, options)
+        except Exception:
+            raise InternalError(f"Error creating article content in {container}")
 
     # Download / export related methods
 

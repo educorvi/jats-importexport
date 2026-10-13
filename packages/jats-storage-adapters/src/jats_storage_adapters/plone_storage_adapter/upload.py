@@ -7,9 +7,8 @@ import base64
 import json
 import logging
 import mimetypes
-import os
 import re
-from typing import BinaryIO, cast
+from typing import cast
 from urllib.parse import urlparse
 
 import httpx
@@ -18,6 +17,7 @@ from jats_classes import (
     Article,
     Back,
     Body,
+    Front,
     GenericSection,
     Section,
 )
@@ -89,25 +89,19 @@ class PloneUploadService:
         for transition in self.__jats_status_to_plone_transitions(jats_status):
             self._apply_workflow_transition(object_url, transition)
 
-    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
-        new_container = self.__create_container(container)
-
-        filename = os.path.basename(getattr(file, "name", "") or "upload")
-
+    def upload_file(self, file: bytes, filename: str, container: str, status: str | None = None) -> str:
         content_type, _ = mimetypes.guess_type(filename)
         if content_type is None:
             content_type = "application/octet-stream"
 
-        encoded = base64.b64encode(file.read()).decode("ascii")
-
-        url = f"{self.base_url}/{new_container.strip('/')}"
+        encoded = base64.b64encode(file).decode("ascii")
 
         is_image = content_type.startswith("image/")
         portal_type = "Image" if is_image else "File"
         field_name = "image" if is_image else "file"
 
         response = self.httpx_client.post(
-            url,
+            f"{self.base_url}/{container.strip('/')}",
             json={
                 "@type": portal_type,
                 "title": filename,
@@ -121,36 +115,50 @@ class PloneUploadService:
         )
         response.raise_for_status()
 
-        object_url = response.json().get("@id", url)
+        object_url = response.json().get("@id")
         # TODO Once clear whether workflow will be enabled for images, this might need to be changed
         try:
             self.__change_workflow_status(object_url, status)
         except Exception:
             logger.warning(f"Failed to change workflow status for {object_url}")
-        return object_url
+        return self.__get_path_from_url(object_url)
 
-    def create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
-        """Create an Article root node and Front, Body, Back children in Plone."""
+    def create_empty_article(
+        self, front: Front, container: str, create_media_container: bool = False
+    ) -> tuple[str, str | None]:
+        """Create an empty Article in the specified container."""
         new_container = self.__create_container(container)
         url = f"{self.base_url}/{new_container.strip('/')}"
-        metadata = article.front.to_dict()
+        metadata = front.to_dict()
         if not metadata.get("title"):
-            metadata["title"] = "Artikel"
+            metadata["title"] = "Empty Article"
         logger.debug(f"Creating article node in container: {url}")
         response = self.httpx_client.post(
             url,
             json={"@type": "Article", **metadata},
         )
         response.raise_for_status()
-
         result_url: str = response.json().get("@id")
-        self.__create_body(article.body, result_url, options)
-        self.__create_back(article.back, result_url)
+
+        media_container_path: str | None = None
+        if create_media_container:
+            media_container_path = self.__get_path_from_url(self.__create_article_media_container(result_url))
+
+        self.__change_workflow_status(result_url, front.veroeffentlichungsstatus)
+        return (self.__get_path_from_url(result_url), media_container_path)
+
+    def create_article_content(
+        self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        """Create Body and Back children in Plone."""
+        url = f"{self.base_url}/{container.strip('/')}"
+        self.__create_body(article.body, url, options)
+        self.__create_back(article.back, url)
 
         # set to workflow state derived from veroeffentlichungsstatus
-        self.__change_workflow_status(result_url, article.front.veroeffentlichungsstatus)
+        self.__change_workflow_status(url, article.front.veroeffentlichungsstatus)
 
-        return result_url
+        return url
 
     def __make_path_part_id_safe(self, part: str) -> str:
         """Make a path safe for use as a Plone object ID"""
@@ -189,6 +197,20 @@ class PloneUploadService:
             self._apply_workflow_transition(object_url, PUBLISH_FOLDER_TRANSITION, include_children=False)
 
         return self.__get_path_from_url(object_url)
+
+    def __create_article_media_container(self, container_url: str) -> str:
+        """Create a media container inside a Plone Article for storing media files."""
+        logger.debug(f"Creating article media container for article: {container_url}")
+        response = self.httpx_client.post(
+            container_url,
+            json={
+                "@type": "ArticleMedia",
+                "title": "Medien",
+                "id": "articlemedia",
+            },
+        )
+        response.raise_for_status()
+        return response.json().get("@id")
 
     def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""

@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import logging
+import os
 import shutil
 import stat
 import tempfile
@@ -11,7 +12,7 @@ from urllib.parse import unquote, urlparse
 
 import pypandoc
 from fastapi import File, HTTPException, UploadFile
-from jats_classes import Front, JATSDocument
+from jats_classes import JATSDocument
 from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
 from lxml import etree
 
@@ -87,8 +88,9 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
         xml_tree = await asyncio.to_thread(etree.parse, uploaded_file.file, parser=parser)
 
         document = await asyncio.to_thread(_create_JATSDocument_from_xml_tree, xml_tree)
+        article_path, _ = _create_empty_article(adapter_instance, document, container)
 
-        url = await asyncio.to_thread(_save_jats_document, adapter_instance, document, container)
+        url = await asyncio.to_thread(_create_article_content, adapter_instance, document, article_path)
 
         return UploadFileResponse(urls=[url])
 
@@ -103,9 +105,7 @@ async def upload_xml(uploaded_file: UploadFile = File(...), container: str | Non
         await uploaded_file.close()
 
 
-async def upload_zip(
-    uploaded_file: UploadFile = File(...), container: str | None = None, asset_container: str | None = None
-) -> UploadFileResponse:
+async def upload_zip(uploaded_file: UploadFile = File(...), container: str | None = None) -> UploadFileResponse:
     adapter_instance = get_adapter_instance()
 
     try:
@@ -130,14 +130,21 @@ async def upload_zip(
                     parser = _create_xml_parser()
                     xml_tree = etree.parse(str(xml_file), parser=parser)
 
-                    _create_JATSDocument_from_xml_tree(xml_tree)
+                    document = _create_JATSDocument_from_xml_tree(xml_tree)
+                    local_files = _get_files(xml_tree.getroot(), xml_file, tmp_dir_path)
+                    local_files_exist = len(local_files) > 0
 
-                    _upload_files_and_update_references(
-                        xml_tree, xml_file, tmp_dir_path, adapter_instance, asset_container
+                    article_path, media_path = _create_empty_article(
+                        adapter_instance, document, container, local_files_exist
                     )
 
+                    if local_files_exist and media_path is not None:
+                        _upload_files_and_update_references(
+                            adapter_instance, local_files, media_path, document.article.front.veroeffentlichungsstatus
+                        )
                     modified_document = _create_JATSDocument_from_xml_tree(xml_tree)
-                    urls.append(_save_jats_document(adapter_instance, modified_document, container))
+
+                    urls.append(_create_article_content(adapter_instance, modified_document, article_path))
                     logger.info(
                         f"File {xml_file.name} uploaded successfully.\n    Journal Title: {modified_document.article.front.journal_title}.\n    URL: {urls[-1]}"  # noqa: E501
                     )
@@ -161,7 +168,6 @@ async def upload_zip(
 async def upload_docx(
     uploaded_file: UploadFile = File(...),
     container: str | None = None,
-    asset_container: str | None = None,
     use_html_sections: bool = False,
 ) -> UploadFileResponse:
     adapter_instance = get_adapter_instance()
@@ -226,22 +232,29 @@ async def upload_docx(
             # Adapt the converted DOCX XML tree to conform to JATS structure and conventions
             await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE, media_dir)
 
-            await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
-            await asyncio.to_thread(
-                _upload_files_and_update_references_root,
-                xml_tree,
-                dummy_xml_path,
-                media_dir,
-                adapter_instance,
-                asset_container,
-                True,
+            document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
+            local_files = await asyncio.to_thread(_get_files, xml_tree, dummy_xml_path, media_dir, True)
+            local_files_exist = len(local_files) > 0
+
+            article_path, media_path = await asyncio.to_thread(
+                _create_empty_article, adapter_instance, document, container, local_files_exist
             )
+
+            if local_files_exist and media_path is not None:
+                await asyncio.to_thread(
+                    _upload_files_and_update_references,
+                    adapter_instance,
+                    local_files,
+                    media_path,
+                    document.article.front.veroeffentlichungsstatus,
+                )
             modified_document = await asyncio.to_thread(_create_JATSDocument_from_xml_root, xml_tree)
+
             url = await asyncio.to_thread(
-                _save_jats_document,
+                _create_article_content,
                 adapter_instance,
                 modified_document,
-                container,
+                article_path,
                 {"use_html_sections": use_html_sections},
             )
 
@@ -294,19 +307,33 @@ def _create_JATSDocument_from_xml_root(root: etree._Element) -> JATSDocument:
         raise HTTPException(status_code=400, detail=f"Invalid JATS XML: {e}")
 
 
-def _save_jats_document(
+def _create_empty_article(
+    adapter_instance: StorageAdapter,
+    document: JATSDocument,
+    container: str | None = None,
+    create_media_container: bool = False,
+) -> tuple[str, str | None]:
+    try:
+        document.extract_and_add_keywords()
+        return adapter_instance.create_empty_article(
+            document.article.front, container or CONTAINER, create_media_container
+        )
+    except Exception as e:
+        logger.error(f"Error creating empty article: {e}")
+        raise HTTPException(status_code=500, detail=f"Could not create empty article in the storage adapter: {e}")
+
+
+def _create_article_content(
     adapter_instance: StorageAdapter,
     document: JATSDocument,
     container: str | None = None,
     options: SaveJATSDocumentOptions | None = None,
 ) -> str:
     try:
-        document.extract_and_add_keywords()
-        path = adapter_instance.save_jats_document(document, container or CONTAINER, options)
-        return path
+        return adapter_instance.create_article_content(document, container or CONTAINER, options)
     except Exception as e:
-        logger.error(f"Error saving JATS document: {e}")
-        raise HTTPException(status_code=500, detail=f"Could not save the JATS document to the storage adapter: {e}")
+        logger.error(f"Error creating article content: {e}")
+        raise HTTPException(status_code=500, detail=f"Could not create article content in the storage adapter: {e}")
 
 
 # Helper functions for ZIP processing and XML reference handling
@@ -421,51 +448,20 @@ def _find_xml_file(extraction_root: Path) -> list[Path]:
     return xml_files
 
 
-def _upload_files_and_update_references(
-    xml_tree: etree._ElementTree,
-    xml_file: Path,
-    extraction_root: Path,
-    adapter_instance: StorageAdapter,
-    asset_container: str | None = None,
-) -> None:
-    """Find all xlink:href attributes in the XML tree,
-    upload the referenced files to the storage adapter
-    and update the href values to point to the uploaded file URLs.
-    Only local file references that are within the extracted archive directory are processed.
-    External URLs and fragment identifiers are ignored.
-    """
-    root = xml_tree.getroot()
-    _upload_files_and_update_references_root(root, xml_file, extraction_root, adapter_instance, asset_container)
-
-
-def _upload_files_and_update_references_root(
+def _get_files(
     xml_root: etree._Element,
     xml_file: Path,
     extraction_root: Path,
-    adapter_instance: StorageAdapter,
-    asset_container: str | None = None,
     skip_path_validation: bool = False,
-) -> None:
-    """Find all xlink:href attributes in the XML root element,
-    upload the referenced files to the storage adapter
-    and update the href values to point to the uploaded file URLs.
-    Only local file references that are within the extracted archive directory are processed.
-    External URLs and fragment identifiers are ignored.
-    If skip_path_validation is True, the function will not check if the referenced files are within the extraction_root.
-    It should only be set to True if the paths are known to be safe, such as when processing DOCX media extraction.
-    """
+) -> list[tuple[etree._Element, str, bytes]]:
+    """Return each local referenced file as (XML element, filename, contents)."""
     href_attr = f"{{{XLINK_NAMESPACE}}}href"
-    uploaded_files: dict[Path, str] = {}
     xml_directory = xml_file.parent.resolve()
     archive_root = extraction_root.resolve()
+    file_contents: dict[Path, bytes] = {}
+    files: list[tuple[etree._Element, str, bytes]] = []
 
-    front_element = xml_root.find(".//front")
-    if front_element is None:
-        raise ValueError("JATS article must contain a 'front' element")
-    front = Front.from_xml_element(front_element)
-
-    root = xml_root
-    for element in root.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
+    for element in xml_root.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
         href_value_raw = element.get(href_attr)
         href_value = href_value_raw if isinstance(href_value_raw, str) else ""
         if not href_value:
@@ -483,10 +479,7 @@ def _upload_files_and_update_references_root(
 
         if not skip_path_validation:
             local_reference = local_reference.replace("\\", "/")
-
-            # Resolve the referenced path case-insensitively
-            relative_to_xml_dir = Path(local_reference)
-            referenced_path = _find_case_insensitive_path(xml_directory, relative_to_xml_dir)
+            referenced_path = _find_case_insensitive_path(xml_directory, Path(local_reference))
 
             if not referenced_path or not _is_path_within(archive_root, referenced_path):
                 logger.warning(
@@ -500,19 +493,32 @@ def _upload_files_and_update_references_root(
             logger.warning(f"Referenced file '{referenced_path}' does not exist or is not a file. Skipping upload.")
             continue
 
-        if referenced_path not in uploaded_files:
+        if referenced_path not in file_contents:
             try:
-                asset_path = asset_container or ASSETS_CONTAINER
-                if front.article_id:
-                    asset_path += "/" + front.article_id
-                with referenced_path.open("rb") as referenced_file:
-                    uploaded_files[referenced_path] = adapter_instance.upload_file(
-                        referenced_file, asset_path, front.veroeffentlichungsstatus
-                    )
-            except Exception as e:
-                logger.error(f"Failed to upload referenced file '{referenced_path.name}': {e}")
-                raise HTTPException(
-                    status_code=500, detail=f"Failed to upload referenced file '{referenced_path.name}'."
-                )
+                file_contents[referenced_path] = referenced_path.read_bytes()
+            except OSError as e:
+                logger.error(f"Failed to read referenced file '{referenced_path.name}': {e}")
+                raise HTTPException(status_code=500, detail=f"Failed to read referenced file '{referenced_path.name}'.")
 
-        element.set(href_attr, uploaded_files[referenced_path])
+        filename = os.path.basename(getattr(referenced_path, "name", "") or "upload")
+        files.append((element, filename, file_contents[referenced_path]))
+
+    return files
+
+
+def _upload_files_and_update_references(
+    adapter_instance: StorageAdapter,
+    local_files: list[tuple[etree._Element, str, bytes]],
+    container: str,
+    status: str | None = None,
+) -> None:
+    """Upload local files and update their references in the XML.
+
+    Args:
+        local_files: A list of tuples containing the XML element, the filename, and the file content.
+        container: The storage container to upload the files to.
+        status: Optional status to associate with the uploaded files.
+    """
+    for element, filename, content in local_files:
+        uploaded_path = adapter_instance.upload_file(content, filename, container, status)
+        element.set(f"{{{XLINK_NAMESPACE}}}href", uploaded_path)
