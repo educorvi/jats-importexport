@@ -368,6 +368,8 @@ class PloneUploadService:
                 title = None
                 title_element = None
 
+                new_src = f"{self.base_url}{img.get('src', '')}"
+
                 # Look at preceding siblings for optional caption elements
                 prev = img.getprevious()
                 if prev is not None and prev.tag == "h3" and "title" in prev.get("class", "").split():
@@ -388,7 +390,7 @@ class PloneUploadService:
 
                     picture = etree.SubElement(figure, "picture", attrib={"class": "captioned"})
 
-                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": img.get("src", "")})
+                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": new_src})
 
                     caption = etree.SubElement(figure, "figcaption", attrib={"class": "image-caption"})
                     caption.text = f"{label or ''} {title or ''}".strip()
@@ -402,7 +404,7 @@ class PloneUploadService:
                         attrib={
                             "alt": img.get("alt", ""),
                             "class": "image-richtext picture-variant-medium",
-                            "src": img.get("src", ""),
+                            "src": new_src,
                         },
                     )
 
