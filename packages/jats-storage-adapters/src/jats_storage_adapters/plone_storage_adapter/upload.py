@@ -158,7 +158,7 @@ class PloneUploadService:
         # set to workflow state derived from veroeffentlichungsstatus
         self.__change_workflow_status(url, article.front.veroeffentlichungsstatus)
 
-        return url
+        return container
 
     def __make_path_part_id_safe(self, part: str) -> str:
         """Make a path safe for use as a Plone object ID"""

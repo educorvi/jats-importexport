@@ -11,7 +11,7 @@ import pytest
 from api.config import APIConfig
 from api.main import app
 from fastapi.testclient import TestClient
-from jats_classes import JATSDocument
+from jats_classes import Front, JATSDocument
 
 client = TestClient(app)
 
@@ -100,13 +100,25 @@ class MockStorageAdapter(StorageAdapter):
         self.uploaded_files = []
         self.saved_docs = []
 
-    def upload_file(self, file, container: str, status: str | None = None) -> str:
-        import os
-
-        name = os.path.basename(getattr(file, "name", "file") or "file")
-        url = f"http://mockstore/assets/{name}"
-        self.uploaded_files.append((name, container, url))
+    def upload_file(self, file, filename, container: str, status: str | None = None) -> str:
+        url = f"http://mockstore/assets/{filename}"
+        self.uploaded_files.append((filename, container, url))
         return url
+
+    def create_empty_article(
+        self, front: Front, container: str, create_media_container: bool = False
+    ) -> tuple[str, str | None]:
+        title = front.title or "article"
+        article_path = f"/jats-file/{title.lower().replace(' ', '-')}"
+        media_path = f"{article_path}/articlemedia" if create_media_container else None
+        return article_path, media_path
+
+    def create_article_content(
+        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        self.saved_docs.append((document, container))
+        title = document.article.front.title or "article"
+        return f"/jats-file/{title.lower().replace(' ', '-')}"
 
     def get_jats_document(self, path: str, options: GetJATSDocumentOptions | None = None) -> JATSDocument:
         if path == "nonexistent":
@@ -123,10 +135,6 @@ class MockStorageAdapter(StorageAdapter):
     def get_path_from_url(self, url: str) -> str:
         return url.replace("http://mockstore", "")
 
-    def save_jats_document(self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
-        self.saved_docs.append((document, container))
-        title = document.article.front.title or "article"
-        return f"http://mockstore/jats-file/{title.lower().replace(' ', '-')}"
 
     def get_path_from_webcode(self, webcode: str) -> str:
         return f"/articles/{webcode}.xml"
@@ -293,7 +301,7 @@ def test_upload_xml_multipart_success(mock_adapter):
     assert response.status_code == 200
     response_urls = response.json()["urls"]
     assert len(response_urls) == 1
-    assert response_urls[0] == "http://mockstore/jats-file/api-test-article"
+    assert response_urls[0] == "/jats-file/api-test-article"
     assert len(mock_adapter.saved_docs) == 1
 
 
@@ -321,7 +329,7 @@ def test_upload_xml_json_data_uri_success(mock_adapter):
     assert response.status_code == 200
     response_urls = response.json()["urls"]
     assert len(response_urls) == 1
-    assert response_urls[0] == "http://mockstore/jats-file/api-test-article"
+    assert response_urls[0] == "/jats-file/api-test-article"
 
 
 def test_upload_xml_json_data_uri_malformed_header(mock_adapter):
@@ -426,13 +434,13 @@ def test_upload_zip_success(mock_adapter):
     assert response.status_code == 200
     response_urls = response.json()["urls"]
     assert len(response_urls) == 1
-    assert response_urls[0] == "http://mockstore/jats-file/image-reference-article"
+    assert response_urls[0] == "/jats-file/image-reference-article"
 
     # Verify that the image file was successfully uploaded to assets container
     assert len(mock_adapter.uploaded_files) == 1
     uploaded_name, container, url = mock_adapter.uploaded_files[0]
     assert uploaded_name == "pic.png"
-    assert container == "jats-assets"
+    assert container == "/jats-file/image-reference-article/articlemedia"
     assert url == "http://mockstore/assets/pic.png"
 
     # Verify that the saved JATSDocument was updated to point to the uploaded image URL!
