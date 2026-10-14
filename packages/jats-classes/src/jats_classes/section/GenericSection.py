@@ -7,10 +7,19 @@ Section and Appendix nodes.
 from __future__ import annotations
 
 import abc
+import logging
 import re
+from collections.abc import Callable
 from typing import cast
 
 from lxml import etree
+
+logger = logging.getLogger(__name__)
+
+XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
+XLINK_HREF_ATTRIBUTE = f"{{{XLINK_NAMESPACE}}}href"
+XLINK_HREF_LITERAL = "xlink:href"
+ASSET_ELEMENT_TAGS = frozenset({"graphic", "inline-graphic", "media"})
 
 
 def clean_string(string: str) -> str:
@@ -69,11 +78,20 @@ class GenericSection(metaclass=abc.ABCMeta):
 
         return clean_string(label.text) if label.text else None
 
-    def __init__(self, sec_type: str | None, label_title_raw: str, content_raw: str | None):
+    def __init__(
+        self,
+        sec_type: str | None,
+        label_title_raw: str,
+        content_raw: str | None,
+        media_link_conversion: Callable[[str], str] | None = None,
+    ):
         """Initialize the GenericSection base properties."""
         self.sec_type = sec_type
         self.label_title_raw = label_title_raw
-        self.content_raw = content_raw
+        if content_raw and media_link_conversion:
+            self.content_raw = self._replace_media_links_in_content(content_raw, media_link_conversion)
+        else:
+            self.content_raw = content_raw
 
     @property
     @abc.abstractmethod
@@ -103,6 +121,47 @@ class GenericSection(metaclass=abc.ABCMeta):
         if content:
             content = f"{content}\n"
         return f"<{self._tag_name}{sec_type}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+
+    def _replace_media_links_in_content(self, content: str, media_link_conversion: Callable[[str], str]) -> str:
+        """Replace the media links in the section's content using the provided conversion function.
+
+        The content is parsed as XML and only the elements of ``ASSET_ELEMENT_TAGS`` are taken into
+        account, so hrefs of link elements (``ext-link``, ``uri``, ``related-article``, ...) — which
+        may reference other articles of the same Plone site — are not mistaken for assets.
+
+        Args:
+            media_link_conversion: A callable that takes a media link and returns the converted link.
+
+        Returns:
+            str: The content with media links replaced.
+        """
+        if not content:
+            return ""
+
+        try:
+            root = etree.fromstring(
+                f"<root>{content}</root>",
+                parser=etree.XMLParser(recover=True, resolve_entities=False),
+            )
+        except etree.XMLSyntaxError as e:
+            logger.warning(f"Could not parse content to replace media links: {e}")
+            return content
+        if root is None:
+            return content
+
+        for element in root.iter(tag=etree.Element):
+            tag = etree.QName(element).localname.lower() if isinstance(element.tag, str) else ""
+            if tag not in ASSET_ELEMENT_TAGS:
+                continue
+            for attr in [XLINK_HREF_ATTRIBUTE, XLINK_HREF_LITERAL]:
+                href_value = element.get(attr)
+                if not href_value or not isinstance(href_value, str) or href_value.startswith("#"):
+                    continue
+                element.set(attr, media_link_conversion(href_value))
+
+        return (root.text or "") + "".join(
+            [etree.tostring(child, encoding="unicode", with_tail=True, pretty_print=True) for child in root]
+        )
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:

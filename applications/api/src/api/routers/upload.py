@@ -79,7 +79,7 @@ def _upload_file_from_data_uri(data_uri: str, filename: str) -> UploadFile:
     ),
     openapi_extra=_request_body_extra("zip_file"),
 )
-async def upload_zip(request: Request, container: str | None = None, assets_container: str | None = None):
+async def upload_zip(request: Request, container: str | None = None):
     content_type = request.headers.get("content-type", "")
     if content_type.startswith("multipart/"):
         form = await request.form()
@@ -94,7 +94,7 @@ async def upload_zip(request: Request, container: str | None = None, assets_cont
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'zip_file' field in JSON body.")
         zip_file = _upload_file_from_data_uri(data_uri, "upload.zip")
-    articles = await upload_zip_service(cast(UploadFile, zip_file), container, assets_container)
+    articles = await upload_zip_service(cast(UploadFile, zip_file), container)
     for url in articles.urls:
         await EXPORT_CACHE.delete(url, None)
     return articles
@@ -169,9 +169,7 @@ async def upload_xml(request: Request, container: str | None = None):
     ),
     openapi_extra=_request_body_extra("docx_file"),
 )
-async def upload_docx(
-    request: Request, container: str | None = None, assets_container: str | None = None, use_html_sections: bool = False
-):
+async def upload_docx(request: Request, container: str | None = None, use_html_sections: bool = False):
     content_type = request.headers.get("content-type", "")
     if content_type.startswith("multipart/"):
         form = await request.form()
@@ -186,7 +184,7 @@ async def upload_docx(
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'docx_file' field in JSON body.")
         docx_file = _upload_file_from_data_uri(data_uri, "upload.docx")
-    articles = await upload_docx_service(cast(UploadFile, docx_file), container, assets_container, use_html_sections)
+    articles = await upload_docx_service(cast(UploadFile, docx_file), container, use_html_sections)
     for url in articles.urls:
         await EXPORT_CACHE.delete(url, None)
     return articles

@@ -7,9 +7,8 @@ import base64
 import json
 import logging
 import mimetypes
-import os
 import re
-from typing import BinaryIO, cast
+from typing import cast
 from urllib.parse import urlparse
 
 import httpx
@@ -18,6 +17,7 @@ from jats_classes import (
     Article,
     Back,
     Body,
+    Front,
     GenericSection,
     Section,
 )
@@ -89,25 +89,21 @@ class PloneUploadService:
         for transition in self.__jats_status_to_plone_transitions(jats_status):
             self._apply_workflow_transition(object_url, transition)
 
-    def upload_file(self, file: BinaryIO, container: str, status: str | None = None) -> str:
-        new_container = self.__create_container(container)
-
-        filename = os.path.basename(getattr(file, "name", "") or "upload")
-
+    def upload_file(self, file: bytes, filename: str, container: str, status: str | None = None) -> str:
         content_type, _ = mimetypes.guess_type(filename)
         if content_type is None:
             content_type = "application/octet-stream"
 
-        encoded = base64.b64encode(file.read()).decode("ascii")
-
-        url = f"{self.base_url}/{new_container.strip('/')}"
+        encoded = base64.b64encode(file).decode("ascii")
 
         is_image = content_type.startswith("image/")
         portal_type = "Image" if is_image else "File"
         field_name = "image" if is_image else "file"
 
+        container_url = f"{self.base_url}/{container.strip('/')}"
+
         response = self.httpx_client.post(
-            url,
+            container_url,
             json={
                 "@type": portal_type,
                 "title": filename,
@@ -121,36 +117,50 @@ class PloneUploadService:
         )
         response.raise_for_status()
 
-        object_url = response.json().get("@id", url)
+        object_url = response.json().get("@id")
         # TODO Once clear whether workflow will be enabled for images, this might need to be changed
         try:
             self.__change_workflow_status(object_url, status)
         except Exception:
             logger.warning(f"Failed to change workflow status for {object_url}")
-        return object_url
+        return object_url.replace(container_url, "")
 
-    def create_article(self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None) -> str:
-        """Create an Article root node and Front, Body, Back children in Plone."""
+    def create_empty_article(
+        self, front: Front, container: str, create_media_container: bool = False
+    ) -> tuple[str, str | None]:
+        """Create an empty Article in the specified container."""
         new_container = self.__create_container(container)
         url = f"{self.base_url}/{new_container.strip('/')}"
-        metadata = article.front.to_dict()
+        metadata = front.to_dict()
         if not metadata.get("title"):
-            metadata["title"] = "Artikel"
+            metadata["title"] = "Empty Article"
         logger.debug(f"Creating article node in container: {url}")
         response = self.httpx_client.post(
             url,
             json={"@type": "Article", **metadata},
         )
         response.raise_for_status()
-
         result_url: str = response.json().get("@id")
-        self.__create_body(article.body, result_url, options)
-        self.__create_back(article.back, result_url)
+
+        media_container_path: str | None = None
+        if create_media_container:
+            media_container_path = self.__get_path_from_url(self.__create_article_media_container(result_url))
+
+        self.__change_workflow_status(result_url, front.veroeffentlichungsstatus)
+        return (self.__get_path_from_url(result_url), media_container_path)
+
+    def create_article_content(
+        self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None
+    ) -> str:
+        """Create Body and Back children in Plone."""
+        url = f"{self.base_url}/{container.strip('/')}"
+        self.__create_body(article.body, url, options)
+        self.__create_back(article.back, url)
 
         # set to workflow state derived from veroeffentlichungsstatus
-        self.__change_workflow_status(result_url, article.front.veroeffentlichungsstatus)
+        self.__change_workflow_status(url, article.front.veroeffentlichungsstatus)
 
-        return result_url
+        return container
 
     def __make_path_part_id_safe(self, part: str) -> str:
         """Make a path safe for use as a Plone object ID"""
@@ -190,6 +200,20 @@ class PloneUploadService:
 
         return self.__get_path_from_url(object_url)
 
+    def __create_article_media_container(self, container_url: str) -> str:
+        """Create a media container inside a Plone Article for storing media files."""
+        logger.debug(f"Creating article media container for article: {container_url}")
+        response = self.httpx_client.post(
+            container_url,
+            json={
+                "@type": "ArticleMedia",
+                "title": "Medien",
+                "id": "articlemedia",
+            },
+        )
+        response.raise_for_status()
+        return response.json().get("@id")
+
     def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
         logger.debug(f"Creating body node for article: {container_url}")
@@ -213,7 +237,7 @@ class PloneUploadService:
                     self.__create_section(first_section, response_url)
                     sections_start_index = 1
             for section in body.sections[sections_start_index:]:
-                self.__create_easy_section(section, response_url)
+                self.__create_easy_section(section, response_url, container_url)
         else:
             for section in body.sections:
                 self.__create_section(section, response_url)
@@ -272,12 +296,14 @@ class PloneUploadService:
             self.__create_section(sub_section, response_url)
         return response_url
 
-    def __create_easy_section(self, section: GenericSection, container_url: str) -> str:
+    def __create_easy_section(self, section: GenericSection, container_url: str, article_container_url: str) -> str:
         """Create an EasySection node in Plone with HTML content.
         Uses the HTML exporter to convert JATS content to HTML for storage in Plone.
         """
         html_exporter = HtmlExporter()
-        label, title, html_content = self.__transform_section_to_easy_section(section, html_exporter)
+        label, title, html_content = self.__transform_section_to_easy_section(
+            section, html_exporter, article_container_url
+        )
         if title is None:
             title = "HTML-Abschnitt"
 
@@ -297,7 +323,7 @@ class PloneUploadService:
         return response_url
 
     def __transform_section_to_easy_section(
-        self, section: GenericSection, html_exporter: HtmlExporter, level: int = 3
+        self, section: GenericSection, html_exporter: HtmlExporter, article_container_url: str, level: int = 3
     ) -> tuple[str | None, str | None, str]:
         """Recursively transform a Section instance to an EasySection representation."""
         label = section.label
@@ -305,11 +331,11 @@ class PloneUploadService:
         xml_content = section.content_raw
         html_content = html_exporter.transform_xml(xml_content) if xml_content else ""
         if html_content:
-            html_content = self.__sanitize_html_for_richtext(html_content)
+            html_content = self.__sanitize_html_for_richtext(html_content, article_container_url)
 
         for child in section.sections:
             child_label, child_title, child_content = self.__transform_section_to_easy_section(
-                child, html_exporter, level + 1
+                child, html_exporter, article_container_url, level + 1
             )
             heading_tag = f"h{min(level, 6)}"
             if child_title:
@@ -322,7 +348,7 @@ class PloneUploadService:
 
         return label, title, html_content
 
-    def __sanitize_html_for_richtext(self, html_content: str) -> str:
+    def __sanitize_html_for_richtext(self, html_content: str, article_container_url: str) -> str:
         """Sanitize HTML content of an easy section for Plone richtext fields."""
         tree = html.fromstring(html_content, parser=html.HTMLParser(recover=True, remove_comments=True))
         tree = cast(HtmlElement, tree)
@@ -346,6 +372,11 @@ class PloneUploadService:
                 title = None
                 title_element = None
 
+                old_src = img.get("src") or ""
+                if old_src.startswith("/") and not old_src.startswith("//"):
+                    old_src = f"{article_container_url}/articlemedia{old_src}"
+                new_src = old_src
+
                 # Look at preceding siblings for optional caption elements
                 prev = img.getprevious()
                 if prev is not None and prev.tag == "h3" and "title" in prev.get("class", "").split():
@@ -366,7 +397,7 @@ class PloneUploadService:
 
                     picture = etree.SubElement(figure, "picture", attrib={"class": "captioned"})
 
-                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": img.get("src", "")})
+                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": new_src})
 
                     caption = etree.SubElement(figure, "figcaption", attrib={"class": "image-caption"})
                     caption.text = f"{label or ''} {title or ''}".strip()
@@ -380,7 +411,7 @@ class PloneUploadService:
                         attrib={
                             "alt": img.get("alt", ""),
                             "class": "image-richtext picture-variant-medium",
-                            "src": img.get("src", ""),
+                            "src": new_src,
                         },
                     )
 

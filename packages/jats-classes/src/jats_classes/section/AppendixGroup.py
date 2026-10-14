@@ -5,6 +5,8 @@ Represents a JATS <app-group> container wrapping multiple Appendix sections.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from lxml import etree
 
 from .Appendix import Appendix
@@ -22,12 +24,14 @@ class AppendixGroup(GenericSection):
         label_title_raw: str,
         content_raw: str | None,
         appendixes: list[Appendix],
+        media_link_conversion: Callable[[str], str] | None = None,
     ):
         """Initialize AppendixGroup containing child appendixes."""
         super().__init__(
             sec_type=sec_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            media_link_conversion=media_link_conversion,
         )
         self._appendixes = appendixes
 

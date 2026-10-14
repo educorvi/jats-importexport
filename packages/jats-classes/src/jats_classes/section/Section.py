@@ -5,6 +5,8 @@ Defines a basic JATS <sec> (Section) element and its parser/converter logic.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from lxml import etree
 
 from .GenericSection import GenericSection
@@ -25,12 +27,14 @@ class Section(GenericSection):
         label_title_raw: str,
         content_raw: str | None,
         sections: list[Section],
+        media_link_conversion: Callable[[str], str] | None = None,
     ):
         """Initialize Section with type, title, label, contents, and nested sections."""
         super().__init__(
             sec_type=sec_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            media_link_conversion=media_link_conversion,
         )
         self._sections = sections
 

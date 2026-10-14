@@ -146,13 +146,11 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
 
     # Perform file upload
     file_content = b"fake-png-binary-data"
-    file_stream = io.BytesIO(file_content)
-    file_stream.name = "image.png"
 
-    url = adapter.upload_file(file_stream, "jats-assets")
+    url = adapter.upload_file(file_content, "image.png", "jats-assets")
 
     # Assert returned path is extracted from Plone URL @id
-    assert url == "http://localhost:8080/Plone/jats-assets/image.png"
+    assert url == "/image.png"
 
     # Verify httpx payload. Authentication and default headers are configured
     # on adapter.httpx_client rather than passed to every request.
@@ -180,10 +178,9 @@ def test_plone_storage_adapter_upload_file_default_mimetype(clean_env, mocker):
     )
 
     # Upload file with no extension/unknown mimetype
-    file_stream = io.BytesIO(b"data")
-    file_stream.name = "unknown_file_type"
+    file_content = b"data"
 
-    adapter.upload_file(file_stream, "jats-assets")
+    adapter.upload_file(file_content, "unknown_file_type", "jats-assets")
     _, kwargs = mock_post.call_args
     assert kwargs["json"]["file"]["content-type"] == "application/octet-stream"
 
@@ -197,6 +194,7 @@ def test_plone_storage_adapter_download_file_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     object_url = "http://localhost:8080/Plone/jats-assets/image.png"
@@ -226,6 +224,7 @@ def test_plone_storage_adapter_download_file_rejects_external_urls(clean_env):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     with pytest.raises(ValueError, match="Refusing to download file"):
@@ -241,6 +240,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     # We mock various Plone content nodes responses.
@@ -393,6 +393,7 @@ def test_plone_storage_adapter_get_jats_document_relations_failure_is_internal_e
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     mocker.patch.object(
@@ -417,6 +418,7 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     # Return incomplete article structure (missing Front/Body/Back)
@@ -484,10 +486,12 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     document = JATSDocument(article=article)
 
     # Save document to Plone
-    path = adapter.save_jats_document(document, "jats-file")
+    article_path = adapter.create_empty_article(front, "jats-file")[0]
+    path = adapter.create_article_content(document, article_path)
 
     # Verify return value is path of created article
-    assert path == "/jats-file/save test".lower()
+    assert article_path == "/jats-file/save test".lower()
+    assert article_path == path
 
     # Check that Folders, Article, Front, Body, Sections were recursively posted
     post_types = [p[1].get("@type") for p in created_posts]

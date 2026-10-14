@@ -15,6 +15,8 @@ Reads and writes JATS documents to a [Plone CMS](https://plone.org/) instance vi
 | `PLONE_BASE_URL` | Root URL of the Plone instance (e.g. `http://localhost:8080/Plone`) |
 | `PLONE_USERNAME` | Plone username |
 | `PLONE_PASSWORD` | Plone password |
+| `IEH_BASE_URL` | Public base URL of the Import Export Hub API, used to create media links (e.g. `http://localhost:8000`) |
+| `LINK_SIGNING_KEY` | Secret key used to sign media links; keep it stable across API instances |
 
 **Optional environment variables:**
 
