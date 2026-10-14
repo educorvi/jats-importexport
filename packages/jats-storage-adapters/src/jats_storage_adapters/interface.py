@@ -65,7 +65,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
                 may use this status to set the initial state of the uploaded object.
 
         Returns:
-            The path of the uploaded file.
+            The path of the uploaded file, relative to the container, starting with "/".
         """
         raise NotImplementedError
 
@@ -113,6 +113,20 @@ class StorageAdapter(metaclass=abc.ABCMeta):
 
         Args:
             url: The absolute URL of the file, as found e.g. in JATS content.
+
+        Returns:
+            A tuple of (file content bytes, content-type string).
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
+        """Retrieve the binary content of a media file from the storage system.
+
+        Args:
+            path: The path to the JATS document containing the media file in the storage system.
+            filename: The name of the media file.
+            signature: A signature for accessing the media file.
 
         Returns:
             A tuple of (file content bytes, content-type string).

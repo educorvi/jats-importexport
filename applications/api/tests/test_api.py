@@ -158,6 +158,9 @@ class MockStorageAdapter(StorageAdapter):
     def download_file(self, url: str) -> tuple[bytes, str]:
         return b"", "application/octet-stream"
 
+    def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
+        return b"", "application/octet-stream"
+
 
 @pytest.fixture
 def mock_adapter(mocker):

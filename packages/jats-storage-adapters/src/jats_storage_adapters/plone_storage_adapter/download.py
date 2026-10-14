@@ -27,6 +27,7 @@ from lxml import etree
 from ..errors import DuplicateException, InternalError, PathNotFoundExpection
 from ..interface import EDIT_PI
 from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
+from .utils import sign_media, verify_media_signature
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +137,30 @@ class PloneDownloadService:
         else:
             raise InternalError(f"Unsupported content-type for {url}: {content_type}")
 
+    def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
+        """Retrieve the binary content of a media file from the Plone storage system."""
+        if not verify_media_signature(path, filename, signature):
+            raise ValueError("Invalid path, filename or signature.")
+        url = f"{self.base_url}/{path.strip('/')}/articlemedia/{filename.lstrip('/')}"
+        response_1 = self.httpx_client.get(url, headers={"Accept": "*/*"})
+        response_1.raise_for_status()
+        content_type_1 = response_1.headers.get("content-type")
+        if not content_type_1 or not isinstance(content_type_1, str):
+            raise InternalError(f"Could not determine content-type for media file {filename} at {path}")
+        if content_type_1 == "application/json":
+            plone_type = response_1.json().get("@type")
+            if plone_type == "Image" or plone_type == "File":
+                field = response_1.json().get("image") or response_1.json().get("file")
+                download_url = field.get("download") if field else None
+                if not download_url:
+                    raise InternalError(f"No downloadable media file found for {filename} at {path}")
+                response_2 = self.httpx_client.get(download_url, headers={"Accept": "*/*"})
+                response_2.raise_for_status()
+                content_type_2_field = field.get("content-type")
+                content_type_2_header = response_2.headers.get("content-type", "application/octet-stream")
+                return response_2.content, content_type_2_field or content_type_2_header
+        return response_1.content, content_type_1
+
     def __is_url_within_base(self, url: str) -> bool:
         """Check whether a URL points into this adapter's configured Plone instance."""
         base = urlparse(self.base_url)
@@ -148,6 +173,7 @@ class PloneDownloadService:
 
     def fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
+        self.current_article_path = self.__get_path_from_url(url)
         data = self.__get_json(url, options)
         pre_request = self.httpx_client.get(url + "/@all_descendents")
         if pre_request.status_code == 200:
@@ -177,13 +203,21 @@ class PloneDownloadService:
     def _get_replace_media_links_callback(self) -> Callable[[str], str]:
         """Return a callback function that replaces media links for a given URL."""
 
+        article_path = self.current_article_path
+        ARTICLEMEDIA = "/articlemedia/"
+
         def replace_media_link(url: str) -> str:
             if url.startswith(self.base_url):
-                url = url.replace(self.base_url, "")
+                if ARTICLEMEDIA not in url:
+                    return url
+                url = url.split("/articlemedia/", 1)[-1]
                 if not url.startswith("/"):
                     url = f"/{url}"
             if url.startswith("/"):
-                return f"{self.ieh_base_url}/public/media?{urlencode({'path': url})}"
+                filename = url[1:]
+                signature = sign_media(article_path, filename)
+                query = urlencode({"path": article_path, "filename": filename, "signature": signature})
+                return f"{self.ieh_base_url}/media/?{query}"
             return url
 
         return replace_media_link

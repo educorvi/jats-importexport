@@ -8,15 +8,12 @@ from api.services.common import get_adapter_instance
 logger = logging.getLogger(__name__)
 
 
-async def get_media(path: str) -> tuple[bytes, str]:
+async def get_media(path: str, filename: str, signature: str) -> tuple[bytes, str]:
     try:
         adapter = get_adapter_instance()
-        url = adapter.get_url_from_path(path)
-        return await asyncio.to_thread(adapter.download_file, url)
-    except HTTPException:
-        raise
+        return await asyncio.to_thread(adapter.get_media, path, filename, signature)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Invalid media path.") from e
+        raise HTTPException(status_code=400, detail="Invalid path, filename or signature.") from e
     except Exception as e:
         logger.exception("Could not download media file.")
-        raise HTTPException(status_code=500, detail="Could not download media file.") from e
+        raise HTTPException(status_code=500, detail="An error occurred while downloading the media file.") from e

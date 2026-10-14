@@ -23,6 +23,6 @@ version = APIConfig.API_VERSION
         500: {"model": HTTP500InternalServerError},
     },
 )
-async def get_media(path: str):
-    content, content_type = await download_media(path)
+async def get_media(path: str, filename: str, signature: str):
+    content, content_type = await download_media(path, filename, signature)
     return Response(content=content, media_type=content_type)

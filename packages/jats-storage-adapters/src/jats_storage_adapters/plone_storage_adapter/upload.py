@@ -100,8 +100,10 @@ class PloneUploadService:
         portal_type = "Image" if is_image else "File"
         field_name = "image" if is_image else "file"
 
+        container_url = f"{self.base_url}/{container.strip('/')}"
+
         response = self.httpx_client.post(
-            f"{self.base_url}/{container.strip('/')}",
+            container_url,
             json={
                 "@type": portal_type,
                 "title": filename,
@@ -121,7 +123,7 @@ class PloneUploadService:
             self.__change_workflow_status(object_url, status)
         except Exception:
             logger.warning(f"Failed to change workflow status for {object_url}")
-        return self.__get_path_from_url(object_url)
+        return object_url.replace(container_url, "")
 
     def create_empty_article(
         self, front: Front, container: str, create_media_container: bool = False
@@ -235,7 +237,7 @@ class PloneUploadService:
                     self.__create_section(first_section, response_url)
                     sections_start_index = 1
             for section in body.sections[sections_start_index:]:
-                self.__create_easy_section(section, response_url)
+                self.__create_easy_section(section, response_url, container_url)
         else:
             for section in body.sections:
                 self.__create_section(section, response_url)
@@ -294,12 +296,14 @@ class PloneUploadService:
             self.__create_section(sub_section, response_url)
         return response_url
 
-    def __create_easy_section(self, section: GenericSection, container_url: str) -> str:
+    def __create_easy_section(self, section: GenericSection, container_url: str, article_container_url: str) -> str:
         """Create an EasySection node in Plone with HTML content.
         Uses the HTML exporter to convert JATS content to HTML for storage in Plone.
         """
         html_exporter = HtmlExporter()
-        label, title, html_content = self.__transform_section_to_easy_section(section, html_exporter)
+        label, title, html_content = self.__transform_section_to_easy_section(
+            section, html_exporter, article_container_url
+        )
         if title is None:
             title = "HTML-Abschnitt"
 
@@ -319,7 +323,7 @@ class PloneUploadService:
         return response_url
 
     def __transform_section_to_easy_section(
-        self, section: GenericSection, html_exporter: HtmlExporter, level: int = 3
+        self, section: GenericSection, html_exporter: HtmlExporter, article_container_url: str, level: int = 3
     ) -> tuple[str | None, str | None, str]:
         """Recursively transform a Section instance to an EasySection representation."""
         label = section.label
@@ -327,11 +331,11 @@ class PloneUploadService:
         xml_content = section.content_raw
         html_content = html_exporter.transform_xml(xml_content) if xml_content else ""
         if html_content:
-            html_content = self.__sanitize_html_for_richtext(html_content)
+            html_content = self.__sanitize_html_for_richtext(html_content, article_container_url)
 
         for child in section.sections:
             child_label, child_title, child_content = self.__transform_section_to_easy_section(
-                child, html_exporter, level + 1
+                child, html_exporter, article_container_url, level + 1
             )
             heading_tag = f"h{min(level, 6)}"
             if child_title:
@@ -344,7 +348,7 @@ class PloneUploadService:
 
         return label, title, html_content
 
-    def __sanitize_html_for_richtext(self, html_content: str) -> str:
+    def __sanitize_html_for_richtext(self, html_content: str, article_container_url: str) -> str:
         """Sanitize HTML content of an easy section for Plone richtext fields."""
         tree = html.fromstring(html_content, parser=html.HTMLParser(recover=True, remove_comments=True))
         tree = cast(HtmlElement, tree)
@@ -368,7 +372,7 @@ class PloneUploadService:
                 title = None
                 title_element = None
 
-                new_src = f"{self.base_url}{img.get('src', '')}"
+                new_src = f"{article_container_url}/articlemedia{img.get('src', '')}"
 
                 # Look at preceding siblings for optional caption elements
                 prev = img.getprevious()

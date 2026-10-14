@@ -150,7 +150,7 @@ def test_plone_storage_adapter_upload_file(clean_env, mocker):
     url = adapter.upload_file(file_content, "image.png", "jats-assets")
 
     # Assert returned path is extracted from Plone URL @id
-    assert url == "/jats-assets/image.png"
+    assert url == "/image.png"
 
     # Verify httpx payload. Authentication and default headers are configured
     # on adapter.httpx_client rather than passed to every request.
