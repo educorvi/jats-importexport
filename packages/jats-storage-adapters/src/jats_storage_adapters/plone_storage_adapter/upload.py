@@ -372,7 +372,10 @@ class PloneUploadService:
                 title = None
                 title_element = None
 
-                new_src = f"{article_container_url}/articlemedia{img.get('src', '')}"
+                old_src = img.get("src") or ""
+                if old_src.startswith("/") and not old_src.startswith("//"):
+                    old_src = f"{article_container_url}/articlemedia{old_src}"
+                new_src = old_src
 
                 # Look at preceding siblings for optional caption elements
                 prev = img.getprevious()

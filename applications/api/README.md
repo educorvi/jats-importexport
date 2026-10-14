@@ -37,8 +37,12 @@ docker run -p 8000:8000 \
   -e PLONE_EXTERNAL_URL=http://localhost:8080/Plone \
   -e PLONE_USERNAME=admin \
   -e PLONE_PASSWORD=admin \
+  -e IEH_BASE_URL=http://localhost:8000 \
+  -e LINK_SIGNING_KEY=replace-with-a-stable-secret \
   ghcr.io/educorvi/jats-importexport:latest
 ```
+
+Set `IEH_BASE_URL` to the public URL used by clients to reach this API. Generate a strong `LINK_SIGNING_KEY` and keep it stable across restarts and API instances.
 
 ## Authentication
 

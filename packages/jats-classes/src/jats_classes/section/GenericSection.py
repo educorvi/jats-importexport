@@ -159,7 +159,9 @@ class GenericSection(metaclass=abc.ABCMeta):
                     continue
                 element.set(attr, media_link_conversion(href_value))
 
-        return etree.tostring(root, encoding="unicode", pretty_print=True)
+        return (root.text or "") + "".join(
+            [etree.tostring(child, encoding="unicode", with_tail=True, pretty_print=True) for child in root]
+        )
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:

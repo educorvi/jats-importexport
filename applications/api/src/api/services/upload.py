@@ -453,13 +453,12 @@ def _get_files(
     xml_file: Path,
     extraction_root: Path,
     skip_path_validation: bool = False,
-) -> list[tuple[etree._Element, str, bytes]]:
-    """Return each local referenced file as (XML element, filename, contents)."""
+) -> list[tuple[str, bytes, list[etree._Element]]]:
+    """Return each local referenced file as (filename, contents, referencing XML elements)."""
     href_attr = f"{{{XLINK_NAMESPACE}}}href"
     xml_directory = xml_file.parent.resolve()
     archive_root = extraction_root.resolve()
-    file_contents: dict[Path, bytes] = {}
-    files: list[tuple[etree._Element, str, bytes]] = []
+    files: dict[Path, tuple[str, bytes, list[etree._Element]]] = {}
 
     for element in xml_root.iterfind(".//*[@xlink:href]", namespaces={"xlink": XLINK_NAMESPACE}):
         href_value_raw = element.get(href_attr)
@@ -493,22 +492,22 @@ def _get_files(
             logger.warning(f"Referenced file '{referenced_path}' does not exist or is not a file. Skipping upload.")
             continue
 
-        if referenced_path not in file_contents:
+        if referenced_path in files:
+            files[referenced_path][2].append(element)
+        if referenced_path not in files:
             try:
-                file_contents[referenced_path] = referenced_path.read_bytes()
+                filename = os.path.basename(getattr(referenced_path, "name", "") or "upload")
+                files[referenced_path] = (filename, referenced_path.read_bytes(), [element])
             except OSError as e:
                 logger.error(f"Failed to read referenced file '{referenced_path.name}': {e}")
                 raise HTTPException(status_code=500, detail=f"Failed to read referenced file '{referenced_path.name}'.")
 
-        filename = os.path.basename(getattr(referenced_path, "name", "") or "upload")
-        files.append((element, filename, file_contents[referenced_path]))
-
-    return files
+    return list(files.values())
 
 
 def _upload_files_and_update_references(
     adapter_instance: StorageAdapter,
-    local_files: list[tuple[etree._Element, str, bytes]],
+    local_files: list[tuple[str, bytes, list[etree._Element]]],
     container: str,
     status: str | None = None,
 ) -> None:
@@ -519,6 +518,7 @@ def _upload_files_and_update_references(
         container: The storage container to upload the files to.
         status: Optional status to associate with the uploaded files.
     """
-    for element, filename, content in local_files:
+    for filename, content, elements in local_files:
         uploaded_path = adapter_instance.upload_file(content, filename, container, status)
-        element.set(f"{{{XLINK_NAMESPACE}}}href", uploaded_path)
+        for element in elements:
+            element.set(f"{{{XLINK_NAMESPACE}}}href", uploaded_path)
