@@ -2,16 +2,16 @@ from fastapi import APIRouter, Response
 
 from api.config import APIConfig
 from api.models import HTTP400BadRequest, HTTP500InternalServerError
-from api.services.public import get_media as download_media
+from api.services.media import get_media as download_media
 
-router = APIRouter(prefix="/public", tags=["Public Endpoints"])
+router = APIRouter(prefix="/media", tags=["Media"])
 
 
 version = APIConfig.API_VERSION
 
 
 @router.get(
-    "/media",
+    "/",
     operation_id="get_media",
     response_class=Response,
     responses={

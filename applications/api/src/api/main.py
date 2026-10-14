@@ -16,7 +16,7 @@ from api.services.keyval_implementations import close_caches, init_caches
 from .auth import require_permission
 from .config import APIConfig
 from .logging import setup_logging
-from .routers import cache_management, export, export_async, list, modify, public, status, upload
+from .routers import cache_management, export, export_async, list, media, modify, status, upload
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(status.router)
-    app.include_router(public.router)
+    app.include_router(media.router)
     app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export_async.router, dependencies=[Depends(require_permission("read"))])
