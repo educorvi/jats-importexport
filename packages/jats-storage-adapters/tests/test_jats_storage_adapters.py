@@ -194,6 +194,7 @@ def test_plone_storage_adapter_download_file_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     object_url = "http://localhost:8080/Plone/jats-assets/image.png"
@@ -223,6 +224,7 @@ def test_plone_storage_adapter_download_file_rejects_external_urls(clean_env):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     with pytest.raises(ValueError, match="Refusing to download file"):
@@ -238,6 +240,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     # We mock various Plone content nodes responses.
@@ -390,6 +393,7 @@ def test_plone_storage_adapter_get_jats_document_relations_failure_is_internal_e
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     mocker.patch.object(
@@ -414,6 +418,7 @@ def test_plone_storage_adapter_get_jats_document_missing_parts(clean_env, mocker
     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
     os.environ["PLONE_USERNAME"] = "admin"
     os.environ["PLONE_PASSWORD"] = "secret"
+    os.environ["IEH_BASE_URL"] = "http://localhost:8000"
     adapter = PloneStorageAdapter()
 
     # Return incomplete article structure (missing Front/Body/Back)
