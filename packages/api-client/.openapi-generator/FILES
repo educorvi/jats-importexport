@@ -31,6 +31,7 @@ docs/ListFachbereicheTreeResponse.md
 docs/ListSachgebieteResponse.md
 docs/LocationInner.md
 docs/MarkdownDocumentResponse.md
+docs/MediaApi.md
 docs/MetadataResponse.md
 docs/ModifyApi.md
 docs/StatusApi.md
@@ -48,6 +49,7 @@ jats_importexport_client/api/cache_management_api.py
 jats_importexport_client/api/export_api.py
 jats_importexport_client/api/export_async_api.py
 jats_importexport_client/api/list_api.py
+jats_importexport_client/api/media_api.py
 jats_importexport_client/api/modify_api.py
 jats_importexport_client/api/status_api.py
 jats_importexport_client/api/upload_api.py
@@ -95,4 +97,5 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
+test/test_media_api.py
 tox.ini

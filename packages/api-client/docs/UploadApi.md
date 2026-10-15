@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **upload_docx**
-> UploadFileResponse upload_docx(docx_file, container=container, assets_container=assets_container, use_html_sections=use_html_sections)
+> UploadFileResponse upload_docx(docx_file, container=container, use_html_sections=use_html_sections)
 
 Upload a DOCX file, convert it to JATS XML, and upload to the storage
 
@@ -49,12 +49,11 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     api_instance = jats_importexport_client.UploadApi(api_client)
     docx_file = None # bytes | 
     container = 'container_example' # str |  (optional)
-    assets_container = 'assets_container_example' # str |  (optional)
     use_html_sections = False # bool |  (optional) (default to False)
 
     try:
         # Upload a DOCX file, convert it to JATS XML, and upload to the storage
-        api_response = api_instance.upload_docx(docx_file, container=container, assets_container=assets_container, use_html_sections=use_html_sections)
+        api_response = api_instance.upload_docx(docx_file, container=container, use_html_sections=use_html_sections)
         print("The response of UploadApi->upload_docx:\n")
         pprint(api_response)
     except Exception as e:
@@ -70,7 +69,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **docx_file** | **bytes**|  | 
  **container** | **str**|  | [optional] 
- **assets_container** | **str**|  | [optional] 
  **use_html_sections** | **bool**|  | [optional] [default to False]
 
 ### Return type
@@ -186,7 +184,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **upload_zip**
-> UploadFileResponse upload_zip(zip_file, container=container, assets_container=assets_container)
+> UploadFileResponse upload_zip(zip_file, container=container)
 
 Upload a JATS Document (ZIP-file) to the storage
 
@@ -225,11 +223,10 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
     api_instance = jats_importexport_client.UploadApi(api_client)
     zip_file = None # bytes | 
     container = 'container_example' # str |  (optional)
-    assets_container = 'assets_container_example' # str |  (optional)
 
     try:
         # Upload a JATS Document (ZIP-file) to the storage
-        api_response = api_instance.upload_zip(zip_file, container=container, assets_container=assets_container)
+        api_response = api_instance.upload_zip(zip_file, container=container)
         print("The response of UploadApi->upload_zip:\n")
         pprint(api_response)
     except Exception as e:
@@ -245,7 +242,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **zip_file** | **bytes**|  | 
  **container** | **str**|  | [optional] 
- **assets_container** | **str**|  | [optional] 
 
 ### Return type
 

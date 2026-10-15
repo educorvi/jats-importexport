@@ -45,7 +45,7 @@ class ListApi:
     @validate_call
     def list_articles(
         self,
-        fachbereiche: Optional[List[StrictStr]] = None,
+        fachbereiche: Optional[List[Optional[StrictStr]]] = None,
         sachgebiete: Optional[List[StrictStr]] = None,
         organisationseinheiten: Optional[List[StrictStr]] = None,
         rubriken: Optional[List[StrictStr]] = None,
@@ -71,7 +71,7 @@ class ListApi:
         List articles in the storage system. Filtering and batching are supported.
 
         :param fachbereiche:
-        :type fachbereiche: List[str]
+        :type fachbereiche: List[Optional[str]]
         :param sachgebiete:
         :type sachgebiete: List[str]
         :param organisationseinheiten:
@@ -142,7 +142,7 @@ class ListApi:
     @validate_call
     def list_articles_with_http_info(
         self,
-        fachbereiche: Optional[List[StrictStr]] = None,
+        fachbereiche: Optional[List[Optional[StrictStr]]] = None,
         sachgebiete: Optional[List[StrictStr]] = None,
         organisationseinheiten: Optional[List[StrictStr]] = None,
         rubriken: Optional[List[StrictStr]] = None,
@@ -168,7 +168,7 @@ class ListApi:
         List articles in the storage system. Filtering and batching are supported.
 
         :param fachbereiche:
-        :type fachbereiche: List[str]
+        :type fachbereiche: List[Optional[str]]
         :param sachgebiete:
         :type sachgebiete: List[str]
         :param organisationseinheiten:
@@ -239,7 +239,7 @@ class ListApi:
     @validate_call
     def list_articles_without_preload_content(
         self,
-        fachbereiche: Optional[List[StrictStr]] = None,
+        fachbereiche: Optional[List[Optional[StrictStr]]] = None,
         sachgebiete: Optional[List[StrictStr]] = None,
         organisationseinheiten: Optional[List[StrictStr]] = None,
         rubriken: Optional[List[StrictStr]] = None,
@@ -265,7 +265,7 @@ class ListApi:
         List articles in the storage system. Filtering and batching are supported.
 
         :param fachbereiche:
-        :type fachbereiche: List[str]
+        :type fachbereiche: List[Optional[str]]
         :param sachgebiete:
         :type sachgebiete: List[str]
         :param organisationseinheiten:

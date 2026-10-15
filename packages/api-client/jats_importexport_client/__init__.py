@@ -22,6 +22,7 @@ __all__ = [
     "ExportApi",
     "ExportAsyncApi",
     "ListApi",
+    "MediaApi",
     "ModifyApi",
     "StatusApi",
     "UploadApi",
@@ -72,6 +73,7 @@ from jats_importexport_client.api.cache_management_api import CacheManagementApi
 from jats_importexport_client.api.export_api import ExportApi as ExportApi
 from jats_importexport_client.api.export_async_api import ExportAsyncApi as ExportAsyncApi
 from jats_importexport_client.api.list_api import ListApi as ListApi
+from jats_importexport_client.api.media_api import MediaApi as MediaApi
 from jats_importexport_client.api.modify_api import ModifyApi as ModifyApi
 from jats_importexport_client.api.status_api import StatusApi as StatusApi
 from jats_importexport_client.api.upload_api import UploadApi as UploadApi

@@ -115,6 +115,7 @@ Class | Method | HTTP request | Description
 *ListApi* | [**list_fachbereiche_list_fachbereiche_get**](docs/ListApi.md#list_fachbereiche_list_fachbereiche_get) | **GET** /list/fachbereiche | List Fachbereiche
 *ListApi* | [**list_fachbereiche_tree_list_fachbereiche_tree_get**](docs/ListApi.md#list_fachbereiche_tree_list_fachbereiche_tree_get) | **GET** /list/fachbereiche/tree | List Fachbereiche Tree
 *ListApi* | [**list_sachgebiete_list_sachgebiete_get**](docs/ListApi.md#list_sachgebiete_list_sachgebiete_get) | **GET** /list/sachgebiete | List Sachgebiete
+*MediaApi* | [**get_media**](docs/MediaApi.md#get_media) | **GET** /media/ | Get Media
 *ModifyApi* | [**delete_article**](docs/ModifyApi.md#delete_article) | **DELETE** /modify/article | Delete an article from the storage
 *ModifyApi* | [**link_related_articles**](docs/ModifyApi.md#link_related_articles) | **POST** /modify/link-related-articles | Link related articles IDs to the real articles in the storage
 *StatusApi* | [**get_status**](docs/StatusApi.md#get_status) | **GET** / | Health Status

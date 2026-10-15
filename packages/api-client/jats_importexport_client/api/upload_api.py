@@ -42,7 +42,6 @@ class UploadApi:
         self,
         docx_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         use_html_sections: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
@@ -65,8 +64,6 @@ class UploadApi:
         :type docx_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param use_html_sections:
         :type use_html_sections: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -94,7 +91,6 @@ class UploadApi:
         _param = self._upload_docx_serialize(
             docx_file=docx_file,
             container=container,
-            assets_container=assets_container,
             use_html_sections=use_html_sections,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -126,7 +122,6 @@ class UploadApi:
         self,
         docx_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         use_html_sections: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
@@ -149,8 +144,6 @@ class UploadApi:
         :type docx_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param use_html_sections:
         :type use_html_sections: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -178,7 +171,6 @@ class UploadApi:
         _param = self._upload_docx_serialize(
             docx_file=docx_file,
             container=container,
-            assets_container=assets_container,
             use_html_sections=use_html_sections,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -210,7 +202,6 @@ class UploadApi:
         self,
         docx_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         use_html_sections: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
@@ -233,8 +224,6 @@ class UploadApi:
         :type docx_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param use_html_sections:
         :type use_html_sections: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -262,7 +251,6 @@ class UploadApi:
         _param = self._upload_docx_serialize(
             docx_file=docx_file,
             container=container,
-            assets_container=assets_container,
             use_html_sections=use_html_sections,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -289,7 +277,6 @@ class UploadApi:
         self,
         docx_file,
         container,
-        assets_container,
         use_html_sections,
         _request_auth,
         _content_type,
@@ -316,10 +303,6 @@ class UploadApi:
         if container is not None:
             
             _query_params.append(('container', container))
-            
-        if assets_container is not None:
-            
-            _query_params.append(('assets_container', assets_container))
             
         if use_html_sections is not None:
             
@@ -690,7 +673,6 @@ class UploadApi:
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -712,8 +694,6 @@ class UploadApi:
         :type zip_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -739,7 +719,6 @@ class UploadApi:
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
             container=container,
-            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -770,7 +749,6 @@ class UploadApi:
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -792,8 +770,6 @@ class UploadApi:
         :type zip_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -819,7 +795,6 @@ class UploadApi:
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
             container=container,
-            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -850,7 +825,6 @@ class UploadApi:
         self,
         zip_file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
         container: Optional[StrictStr] = None,
-        assets_container: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -872,8 +846,6 @@ class UploadApi:
         :type zip_file: bytes
         :param container:
         :type container: str
-        :param assets_container:
-        :type assets_container: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -899,7 +871,6 @@ class UploadApi:
         _param = self._upload_zip_serialize(
             zip_file=zip_file,
             container=container,
-            assets_container=assets_container,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -925,7 +896,6 @@ class UploadApi:
         self,
         zip_file,
         container,
-        assets_container,
         _request_auth,
         _content_type,
         _headers,
@@ -951,10 +921,6 @@ class UploadApi:
         if container is not None:
             
             _query_params.append(('container', container))
-            
-        if assets_container is not None:
-            
-            _query_params.append(('assets_container', assets_container))
             
         # process the header parameters
         # process the form parameters
