@@ -24,6 +24,7 @@ class APIConfig:
         "An API for uploading JATS documents, importing them to different storage backends"
         " (e.g. Plone), and converting them to various formats."
     )
+    LOG_LEVEL: str = os.environ.get("API_LOG_LEVEL", "INFO")
     API_VERSION: str = "1.0.0a49"
 
 
