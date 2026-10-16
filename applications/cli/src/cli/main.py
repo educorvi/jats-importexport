@@ -67,7 +67,6 @@ def _upload_single_file(
     configuration: Configuration,
     host: str,
     container: str | None,
-    assets_container: str | None,
 ) -> int:
     exit_code = 0
     temp_file_to_upload: Path | None = None
@@ -99,7 +98,6 @@ def _upload_single_file(
                     zip_file=file_bytes,
                     _content_type="multipart/form-data",
                     container=container,
-                    assets_container=assets_container,
                 )
 
         console.print(f"[bold green]✔ Upload successful for '{file_to_process.name}'![/bold green]")
@@ -136,13 +134,6 @@ def upload_command(
         help="Optional: Target container for the uploaded JATS file(s).",
         rich_help_panel="Advanced",
     ),
-    assets_container: str = typer.Option(
-        None,
-        "--assets-container",
-        "-a",
-        help="Optional: Target container for the uploaded asset files (ZIP uploads only).",
-        rich_help_panel="Advanced",
-    ),
     workers: int = typer.Option(1, "--workers", "-w", min=1, help="Number of concurrent upload workers."),
 ):
     """
@@ -155,13 +146,7 @@ def upload_command(
         configuration.api_key["APIKeyHeader"] = api_key
 
     overall_exit_code = 0
-    func = partial(
-        _upload_single_file,
-        configuration=configuration,
-        host=host,
-        container=container,
-        assets_container=assets_container,
-    )
+    func = partial(_upload_single_file, configuration=configuration, host=host, container=container)
     if workers > 1:
         with ThreadPoolExecutor(max_workers=workers) as executor:
             results = list(executor.map(func, files))
