@@ -17,6 +17,7 @@ from jats_exporters import (
     HtmlExporter,
     HtmlExporterStandalone,
     JatsExporter,
+    MarkdownExporter,
     PdfExporter,
 )
 from lxml import etree
@@ -194,6 +195,22 @@ def test_html_exporter_only_renders_non_empty_permissions():
 
     assert html_output.count('class="permissions"') == 1
     assert "Example GmbH" in html_output
+
+
+@pytest.mark.parametrize("display", ["inline", "block"])
+def test_markdown_exporter_preserves_mathml(display, monkeypatch):
+    math = (
+        f"<math xmlns='http://www.w3.org/1998/Math/MathML' display='{display}'>\n"
+        '  <mrow><mi>x_y</mi><mo>&lt;</mo><mn>2</mn></mrow>\n'
+        '</math>'
+    )
+    second_math = '<math><mi>a*b</mi><mo>&amp;</mo><mi>c</mi></math>'
+    html = f'<p><strong>Before</strong> {math} between {second_math} after.</p>'
+    monkeypatch.setattr(HtmlExporter, "export", lambda self, document: html)
+
+    result = MarkdownExporter().export(create_mock_document())
+
+    assert result == f'**Before** {math} between {second_math} after.'
 
 
 # ----------------------------------------------------
