@@ -1,6 +1,6 @@
 # JATS Import/Export CLI
 
-Command-line client for uploading JATS documents to the JATS Import/Export API.
+Command-line client for uploading and validating JATS documents with the JATS Import/Export API.
 It accepts JATS XML files, ZIP archives, and directories. Directories are zipped
 temporarily before upload.
 
@@ -27,16 +27,16 @@ uv run jats-cli --help
 To validate JATS files locally without uploading them:
 
 ```sh
-uv run jats-validate article.xml
-uv run jats-validate article.zip
-uv run jats-validate article-with-assets
-uv run jats-validate 'documents/**/*.xml' --workers 4
+uv run jats-cli validate article.xml
+uv run jats-cli validate article.zip
+uv run jats-cli validate article-with-assets
+uv run jats-cli validate 'documents/**/*.xml' --workers 4
 ```
 
 To validate JATS returned by the API export endpoint:
 
 ```sh
-uv run jats-validate-remote storage/path/article.xml \
+uv run jats-cli validate-remote storage/path/article.xml \
   --host https://jats.example.org \
   --api-key YOUR_API_KEY
 ```
@@ -48,7 +48,7 @@ document.
 To validate all articles:
 
 ```sh
-uv run jats-validate-all ./validation-results \
+uv run jats-cli validate-all ./validation-results \
   --host https://jats.example.org \
   --api-key YOUR_API_KEY
 ```
@@ -68,40 +68,56 @@ non-zero if any document fails.
 ## Usage
 
 ```text
-jats-cli [OPTIONS] FILE_PATTERNS...
+jats-cli [OPTIONS] COMMAND [ARGS]...
+jats-cli upload [OPTIONS] FILE_PATTERNS...
 ```
 
 The API is expected at `http://localhost:8000` by default.
 
+### Export
+
+Export a stored document to a local file, specifying the required format with
+`--type` (`-t`):
+
+```sh
+uv run jats-cli export storage/path/article article.md --type md
+uv run jats-cli export storage/path/article article.pdf --type pdf \
+  --host https://jats.example.org --api-key YOUR_API_KEY
+```
+
+Supported types are `jats`, `html`, `md`, `pdf`, and `metadata`.
+
+### Upload
+
 Upload a JATS XML document:
 
 ```sh
-uv run jats-cli article.xml
+uv run jats-cli upload article.xml
 ```
 
 Upload a ZIP archive to a different API host:
 
 ```sh
-uv run jats-cli article.zip --host https://jats.example.org
+uv run jats-cli upload article.zip --host https://jats.example.org
 ```
 
 Upload a directory. Its contents are recursively packaged into a temporary ZIP
 archive; the directory itself is not included as a top-level folder:
 
 ```sh
-uv run jats-cli ./article-with-assets
+uv run jats-cli upload ./article-with-assets
 ```
 
 Upload several files using a quoted glob pattern:
 
 ```sh
-uv run jats-cli 'documents/**/*.xml'
+uv run jats-cli upload 'documents/**/*.xml'
 ```
 
 Multiple paths and patterns can be supplied in one invocation:
 
 ```sh
-uv run jats-cli article.xml issue.zip 'documents/*.xml'
+uv run jats-cli upload article.xml issue.zip 'documents/*.xml'
 ```
 
 ### Authentication
@@ -110,7 +126,7 @@ Pass an API key with `--api-key` or `-k`. It is sent in the `X-API-Key`
 request header:
 
 ```sh
-uv run jats-cli article.xml --api-key YOUR_API_KEY
+uv run jats-cli upload article.xml --api-key YOUR_API_KEY
 ```
 
 Be aware that command-line arguments may be visible in shell history and process
@@ -122,14 +138,14 @@ Use `--container` (`-c`) to select the target container for the uploaded JATS
 document:
 
 ```sh
-uv run jats-cli article.xml --container articles
+uv run jats-cli upload article.xml --container articles
 ```
 
 For ZIP uploads, `--assets-container` (`-a`) can select a separate target for
 assets:
 
 ```sh
-uv run jats-cli article.zip \
+uv run jats-cli upload article.zip \
   --container articles \
   --assets-container article-assets
 ```
@@ -140,7 +156,7 @@ Uploads are sequential by default. Increase `--workers` (`-w`) to upload
 multiple inputs concurrently:
 
 ```sh
-uv run jats-cli 'documents/*.xml' --workers 4
+uv run jats-cli upload 'documents/*.xml' --workers 4
 ```
 
 `--workers` must be at least `1`. Output from concurrent uploads may be
@@ -148,14 +164,14 @@ interleaved.
 
 ## Options
 
-| Option | Default | Description |
-|---|---:|---|
-| `--host HOST` | `http://localhost:8000` | JATS Import/Export API base URL |
-| `--api-key`, `-k KEY` | none | API key sent using the `X-API-Key` header |
-| `--container`, `-c NAME` | none | Target container for JATS documents |
-| `--assets-container`, `-a NAME` | none | Target asset container for ZIP uploads |
-| `--workers`, `-w COUNT` | `1` | Number of concurrent upload workers |
-| `--help` | | Show command help |
+| Option                          |                 Default | Description                               |
+|---------------------------------|------------------------:|-------------------------------------------|
+| `--host HOST`                   | `http://localhost:8000` | JATS Import/Export API base URL           |
+| `--api-key`, `-k KEY`           |                    none | API key sent using the `X-API-Key` header |
+| `--container`, `-c NAME`        |                    none | Target container for JATS documents       |
+| `--assets-container`, `-a NAME` |                    none | Target asset container for ZIP uploads    |
+| `--workers`, `-w COUNT`         |                     `1` | Number of concurrent upload workers       |
+| `--help`                        |                         | Show command help                         |
 
 ## Input behavior
 

@@ -1,7 +1,7 @@
 [project]
 name = "cli"
 version = "0.1.0"
-description = "CLI Application for uploading JATS documents"
+description = "CLI Application for uploading and validating JATS documents"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -14,9 +14,6 @@ dependencies = [
 
 [project.scripts]
 jats-cli = "cli.main:main"
-jats-validate = "cli.main:validate_main"
-jats-validate-remote = "cli.main:validate_remote_main"
-jats-validate-all = "cli.main:validate_all_main"
 
 [dependency-groups]
 dev = [

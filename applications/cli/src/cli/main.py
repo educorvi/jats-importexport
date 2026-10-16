@@ -2,6 +2,7 @@ import glob
 import tempfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
+from enum import StrEnum
 from functools import partial
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 console = Console()
+app = typer.Typer(help="Upload and validate JATS documents.", no_args_is_help=True)
 
 
 # General utility functions for the CLI application
@@ -117,6 +119,7 @@ def _upload_single_file(
     return exit_code
 
 
+@app.command("upload")
 def upload_command(
     file_patterns: list[str] = typer.Argument(
         ...,
@@ -163,7 +166,54 @@ def upload_command(
 
 
 def main():
-    typer.run(upload_command)
+    app()
+
+
+class ExportType(StrEnum):
+    JATS = "jats"
+    HTML = "html"
+    MD = "md"
+    PDF = "pdf"
+    METADATA = "metadata"
+
+
+@app.command("export")
+def export_command(
+    path: str = typer.Argument(..., help="Path of the document in the API storage."),
+    output_file: Path = typer.Argument(..., help="File to write the exported document to."),
+    export_type: ExportType = typer.Option(..., "--type", "-t", help="Required export format."),
+    host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
+    api_key: str = typer.Option(None, "--api-key", "-k", help="Optional API key for authentication (X-API-Key header)"),
+):
+    """Export a stored document and save it to a file."""
+    configuration = Configuration(host=host)
+    if api_key:
+        configuration.api_key["APIKeyHeader"] = api_key
+
+    try:
+        with ApiClient(configuration) as api_client:
+            api = ExportApi(api_client)
+            if export_type == ExportType.PDF:
+                output_file.write_bytes(api.export_pdf(path=path))
+            else:
+                if export_type == ExportType.JATS:
+                    content = api.export_jats(path=path).jats
+                elif export_type == ExportType.HTML:
+                    response = api.export_html(path=path)
+                    content = response.front + "\n" + response.html
+                elif export_type == ExportType.MD:
+                    content = api.export_md(path=path).md
+                else:
+                    content = api.export_metadata(path=path).metadata.model_dump_json(indent=2)
+                output_file.write_text(content, encoding="utf-8")
+    except ApiException as error:
+        console.print(f"[bold red]✖ API export failed for '{path}':[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+    except OSError as error:
+        console.print(f"[bold red]✖ Could not write '{output_file}':[/bold red]\n{error}")
+        raise typer.Exit(code=1) from error
+
+    console.print(f"[bold green]✔ Exported {export_type.value} to {output_file}[/bold green]")
 
 
 # JATS / XML schema validation
@@ -224,6 +274,7 @@ def _validate_single_file(file: Path, xsd_path: str) -> int:
     return 0
 
 
+@app.command("validate")
 def validate_command(
     file_patterns: list[str] = typer.Argument(
         ...,
@@ -248,10 +299,6 @@ def validate_command(
         raise typer.Exit(code=1)
 
 
-def validate_main():
-    typer.run(validate_command)
-
-
 def _reformat_and_save_jats_xml(jats: str, output_path: str = "exported_jats.xml") -> None:
     """Reformat and save JATS XML to a file."""
     from lxml import etree
@@ -263,6 +310,7 @@ def _reformat_and_save_jats_xml(jats: str, output_path: str = "exported_jats.xml
         f.write(pretty_jats)
 
 
+@app.command("validate-remote")
 def validate_remote_command(
     path: str = typer.Argument(..., help="Path of the JATS document in the API storage."),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
@@ -288,10 +336,6 @@ def validate_remote_command(
     console.print(f"[bold green]✔ VALID[/bold green] Exported JATS for '{path}'")
 
 
-def validate_remote_main():
-    typer.run(validate_remote_command)
-
-
 def _safe_filename(value: str) -> str:
     return "_".join(part for part in value.replace("\\", "/").split("/") if part) or "article"
 
@@ -309,6 +353,7 @@ def _list_all_articles(api: ListApi) -> list[str]:
         batch_start += len(response.articles)
 
 
+@app.command("validate-all")
 def validate_all_command(
     output_folder: Path = typer.Argument(..., help="Folder where article XML and result files are written."),
     host: str = typer.Option("http://localhost:8000", "--host", help="API host URL"),
@@ -354,10 +399,6 @@ def validate_all_command(
         raise typer.Exit(code=1) from error
 
     console.print(f"[bold green]✔ Results written to {output_folder}[/bold green]")
-
-
-def validate_all_main():
-    typer.run(validate_all_command)
 
 
 if __name__ == "__main__":
