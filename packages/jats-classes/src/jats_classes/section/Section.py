@@ -9,6 +9,8 @@ from collections.abc import Callable
 
 from lxml import etree
 
+from jats_classes.common import element_attribute
+
 from .GenericSection import GenericSection
 
 _DUMMY_TITLE = (
@@ -150,7 +152,7 @@ class Section(GenericSection):
         cls._split_on_durchfuehrungsanweisung(section)
         cls._split_on_vorbemerkungen(section)
         cls._split_on_inhaltsverzeichnis(section)
-        sec_type = section.attrib.get("sec-type")
+        sec_type = element_attribute(section, ".", "sec-type")
         label_title_raw = cls._get_raw_label_title(section)
         content_raw = cls._get_raw_content(section)
         sections = [cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")]

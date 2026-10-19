@@ -7,118 +7,26 @@ from __future__ import annotations
 
 import datetime
 import logging
-import re
 from dataclasses import dataclass, fields
 from typing import Any
 
 from lxml import etree
+
+from jats_classes.common import (
+    element_attribute,
+    element_date,
+    element_dict,
+    element_itertext,
+    element_itertext_list,
+    element_text,
+    element_text_list,
+)
 
 logger = logging.getLogger(__name__)
 
 _XLINK_NS = "http://www.w3.org/1999/xlink"
 _XLINK_HREF = f"{{{_XLINK_NS}}}href"
 _XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
-
-
-def _clean_string(string: str | None) -> str | None:
-    """Remove leading and trailing whitespace and newlines from a string."""
-    return re.sub(r"[\s]+", " ", string).strip() if string else None
-
-
-def _text(element: etree._Element | None, xpath: str) -> str | None:
-    """Return stripped text of the first matching element, or None."""
-    if element is None:
-        return None
-    found = element.find(xpath)
-    if found is None or found.text is None:
-        return None
-    return _clean_string(found.text) or None
-
-
-def _itertext(element: etree._Element | None, xpath: str) -> str | None:
-    """Return concatenated text of all matching elements, or None."""
-    if element is None:
-        return None
-    found = element.find(xpath)
-    if found is None:
-        return None
-    return _clean_string("".join(str(t) for t in found.itertext())) or None
-
-
-def _date(element: etree._Element | None, xpath: str) -> datetime.date | None:
-    """Parse a JATS date element (day/month/year children) into a datetime.date object,
-    or return None if not found or invalid.
-    """
-    if element is None:
-        return None
-    date_elem = element.find(xpath)
-    if date_elem is None:
-        return None
-    try:
-        year_text = _text(date_elem, "year")
-        if year_text is None:
-            return None
-        year = int(year_text)
-        month = int(_text(date_elem, "month") or 1)
-        day = int(_text(date_elem, "day") or 1)
-        return datetime.date(year, month, day)
-    except ValueError:
-        return None
-
-
-def _xlink_href(element: etree._Element | None, xpath: str) -> str | None:
-    """Return the xlink:href attribute of the first matching element, or None."""
-    if element is None:
-        return None
-    found = element.find(xpath)
-    if found is None:
-        return None
-    return _clean_string(found.get(_XLINK_HREF)) or None
-
-
-def _text_list(element: etree._Element | None, xpath: str) -> list[str]:
-    """Return a list of stripped text from all matching elements."""
-    if element is None:
-        return []
-    found = element.findall(xpath)
-    result = []
-    for f in found:
-        if f.text and (cleaned := _clean_string(f.text)):
-            result.append(cleaned)
-    return result
-
-
-def _itertext_list(element: etree._Element | None, xpath: str) -> list[str]:
-    """Return normalized text from every matching element."""
-    if element is None:
-        return []
-    found = element.findall(xpath)
-    result = []
-    for f in found:
-        if cleaned := _clean_string("".join(str(t) for t in f.itertext())):
-            result.append(cleaned)
-    return result
-
-
-def _dict(element: etree._Element | None, xpath: str, key_xpath: str, value_xpath: str) -> dict[str, str]:
-    """Return a dictionary of key-value pairs from matching elements."""
-    if element is None:
-        return {}
-    found = element.findall(xpath)
-    result: dict[str, str] = {}
-    for f in found:
-        key = _text(f, key_xpath)
-        value = _text(f, value_xpath)
-        if key is not None and value is not None:
-            result[key] = value
-    return result
-
-
-# def _create_tag(parent: etree._Element, tag: str, text: str | None = None) -> etree._Element:
-#     """Create subelement with the given tag and text."""
-#     elem = etree.SubElement(parent, tag)
-#     elem.text = text
-#     return elem
 
 
 def _create_tag(
@@ -276,29 +184,29 @@ class Front:
             raise ValueError("Front element must contain 'article-meta' element")
 
         # Journal Metadata
-        journal_id = _text(journal_meta, "journal-id")
-        journal_title = _text(journal_meta, "journal-title-group/journal-title")
-        journal_subtitle = _text(journal_meta, "journal-title-group/journal-subtitle")
-        issn = _text(journal_meta, "issn")
-        publisher_name = _text(journal_meta, "publisher/publisher-name")
+        journal_id = element_text(journal_meta, "journal-id")
+        journal_title = element_text(journal_meta, "journal-title-group/journal-title")
+        journal_subtitle = element_text(journal_meta, "journal-title-group/journal-subtitle")
+        issn = element_text(journal_meta, "issn")
+        publisher_name = element_text(journal_meta, "publisher/publisher-name")
 
         _publisher_loc = journal_meta.find("publisher/publisher-loc")
-        publisher_institution = _text(_publisher_loc, "institution")
-        publisher_addr_line = _text(_publisher_loc, "addr-line")
-        publisher_postal_code = _text(_publisher_loc, "postal-code")
-        publisher_city = _text(_publisher_loc, "city")
-        publisher_phone = _text(_publisher_loc, "phone")
-        publisher_email = _text(_publisher_loc, "email")
-        publisher_uri = _text(_publisher_loc, "uri")
+        publisher_institution = element_text(_publisher_loc, "institution")
+        publisher_addr_line = element_text(_publisher_loc, "addr-line")
+        publisher_postal_code = element_text(_publisher_loc, "postal-code")
+        publisher_city = element_text(_publisher_loc, "city")
+        publisher_phone = element_text(_publisher_loc, "phone")
+        publisher_email = element_text(_publisher_loc, "email")
+        publisher_uri = element_text(_publisher_loc, "uri")
 
         # Article Metadata
-        article_id = _text(article_meta, "article-id[@pub-id-type='publisher-id']")
-        title = _itertext(article_meta, "title-group/article-title")
-        article_subtitle = _itertext_list(article_meta, "title-group/subtitle")
-        author_surname = _text(article_meta, "contrib-group/contrib[@contrib-type='Autor']/name/surname")
-        co_author_surname = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/name/surname")
-        co_author_aff = _text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/aff")
-        self_uri = _xlink_href(article_meta, "self-uri")
+        article_id = element_text(article_meta, "article-id[@pub-id-type='publisher-id']")
+        title = element_itertext(article_meta, "title-group/article-title")
+        article_subtitle = element_itertext_list(article_meta, "title-group/subtitle")
+        author_surname = element_text(article_meta, "contrib-group/contrib[@contrib-type='Autor']/name/surname")
+        co_author_surname = element_text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/name/surname")
+        co_author_aff = element_text(article_meta, "contrib-group/contrib[@contrib-type='Co-Autor']/aff")
+        self_uri = element_attribute(article_meta, "self-uri", _XLINK_HREF)
         _article_categories = article_meta.find("article-categories")
         article_categories = (
             etree.tostring(_article_categories, encoding="unicode", with_tail=False)
@@ -309,10 +217,10 @@ class Front:
         related_articles_map = {}
         related_articles_translations_map = {}
         for ra in _related_articles:
-            _href = _xlink_href(ra, ".")
-            _title = _text(ra, "title")
-            _lang = ra.get(_XML_LANG)
-            related_article_type = ra.get("related-article-type")
+            _href = element_attribute(ra, ".", _XLINK_HREF)
+            _title = element_text(ra, "title")
+            _lang = element_attribute(ra, ".", _XML_LANG)
+            related_article_type = element_attribute(ra, ".", "related-article-type")
             if _href is not None:
                 if related_article_type == "translated-article":
                     related_articles_translations_map[_href] = (_title or "", _lang or "")
@@ -320,25 +228,25 @@ class Front:
                     related_articles_map[_href] = _title or ""
 
         # Publication Dates
-        pub_date_ausgabedatum = _date(article_meta, "pub-date[@date-type='Ausgabedatum']")
-        pub_date_aktualisierte_fassung = _date(article_meta, "pub-date[@date-type='AktualisierteFassung']")
-        history_initial_publication = _text(article_meta, "history/date[@date-type='initial-publication']/year")
-        history_correction = _text(article_meta, "history/date[@date-type='correction']/year")
-        history_latest_version = _text(article_meta, "history/date[@date-type='latest-version']/year")
+        pub_date_ausgabedatum = element_date(article_meta, "pub-date[@date-type='Ausgabedatum']")
+        pub_date_aktualisierte_fassung = element_date(article_meta, "pub-date[@date-type='AktualisierteFassung']")
+        history_initial_publication = element_text(article_meta, "history/date[@date-type='initial-publication']/year")
+        history_correction = element_text(article_meta, "history/date[@date-type='correction']/year")
+        history_latest_version = element_text(article_meta, "history/date[@date-type='latest-version']/year")
 
         # Copyright
-        copyright_statement = _text(article_meta, "permissions/copyright-statement")
-        copyright_holder = _text(article_meta, "permissions/copyright-holder")
+        copyright_statement = element_text(article_meta, "permissions/copyright-statement")
+        copyright_holder = element_text(article_meta, "permissions/copyright-holder")
 
         # Abstracts & Keywords
-        abstract_short_title = _text(article_meta, "abstract[@abstract-type='short']/title")
-        abstract_short = _itertext(article_meta, "abstract[@abstract-type='short']/p")
-        abstract_summary_title = _text(article_meta, "abstract[@abstract-type='summary']/title")
-        abstract_summary = _itertext(article_meta, "abstract[@abstract-type='summary']/p")
-        subjects = _text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd")
+        abstract_short_title = element_text(article_meta, "abstract[@abstract-type='short']/title")
+        abstract_short = element_itertext(article_meta, "abstract[@abstract-type='short']/p")
+        abstract_summary_title = element_text(article_meta, "abstract[@abstract-type='summary']/title")
+        abstract_summary = element_itertext(article_meta, "abstract[@abstract-type='summary']/p")
+        subjects = element_text_list(article_meta, "kwd-group[@kwd-group-type='author-generated']/kwd")
 
         # DGUV Metadata
-        _custom_meta_dict = _dict(article_meta, "custom-meta-group/custom-meta", "meta-name", "meta-value")
+        _custom_meta_dict = element_dict(article_meta, "custom-meta-group/custom-meta", "meta-name", "meta-value")
         beschreibender_typ = _custom_meta_dict.get("Beschreibender Typ")
         bisherige_bestellnummer = _custom_meta_dict.get("Bisherige Bestellnummer")
         webcode = _custom_meta_dict.get("Webcode")
