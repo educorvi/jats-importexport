@@ -5,12 +5,17 @@ ccyellow=\033[0;33m
 ccend=\033[0m
 ccgreen=\033[0;32m
 
+ifeq ($(shell uname -s),Darwin)
+MACOS_LIB_ENV = DYLD_LIBRARY_PATH="$$(brew --prefix)/lib" DYLD_FALLBACK_LIBRARY_PATH="$$(brew --prefix)/lib"
+else
+MACOS_LIB_ENV =
+endif
+
 .PHONY: install lint lint-fix format format-check typecheck test build clean build-image push-image generate-client get-api-version
 
 check_dependency_%:
 	@printf '$(ccyellow)%-40s' "Checking dependency $*... "
 	@command -v $* >/dev/null 2>&1 && echo -e "$(ccgreen)found$(ccend)" || (echo -e "$(ccred)$* is not in PATH, please install it$(ccend)" && exit 1)
-
 
 # Install all workspace dependencies
 install: check_dependency_uv
@@ -38,7 +43,7 @@ typecheck: check_dependency_uv
 
 # Run tests in all packages
 test: check_dependency_uv
-	uv run pytest
+	$(MACOS_LIB_ENV) uv run pytest
 
 # Build all workspace packages
 build: check_dependency_uv
@@ -46,13 +51,13 @@ build: check_dependency_uv
 
 # Export API OpenAPI schema to JSON
 applications/api/openapi.json: check_dependency_uv $(shell find applications/api/src -type f)
-	uv run --package api export-openapi applications/api/openapi.json
+	$(MACOS_LIB_ENV) uv run --package api export-openapi applications/api/openapi.json
 
 update-client: generate-client
 
 generate-client: check_dependency_jq check_dependency_uvx applications/api/openapi.json
 	@VERSION=$$(jq -r .info.version applications/api/openapi.json) && \
-	uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=setuptools --additional-properties packageVersion=$$VERSION
+	$(MACOS_LIB_ENV) uvx openapi-generator-cli generate -g python -i applications/api/openapi.json -o packages/api-client --additional-properties generateSourceCodeOnly=false --additional-properties packageName=jats_importexport_client --additional-properties use_path_prefixes_for_title_model_names=false --additional-properties buildSystem=setuptools --additional-properties packageVersion=$$VERSION
 
 # Remove build artefacts
 clean:

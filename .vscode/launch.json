@@ -23,7 +23,10 @@
       "module": "pytest",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "justMyCode": true
+      "justMyCode": true,
+      "env": {
+        "DYLD_LIBRARY_PATH": "/opt/homebrew/lib"
+      },
     },
     {
       "name": "Pytest (selection)",
@@ -33,7 +36,10 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["${file}", "-x", "-s"]
+      "args": ["${file}", "-x", "-s"],
+      "env": {
+        "DYLD_LIBRARY_PATH": "/opt/homebrew/lib"
+      },
     }
   ]
 }
