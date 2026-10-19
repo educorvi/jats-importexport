@@ -1939,12 +1939,20 @@ or pipeline) parameterized.
 
     <xsl:template match="graphic | inline-graphic">
         <xsl:apply-templates/>
-        <img alt="{@xlink:href}">
-            <xsl:for-each select="alt-text">
-                <xsl:attribute name="alt">
-                    <xsl:value-of select="normalize-space(string(.))"/>
-                </xsl:attribute>
-            </xsl:for-each>
+        <img>
+            <xsl:attribute name="alt">
+                <xsl:choose>
+                    <xsl:when test="alt-text">
+                        <xsl:value-of select="normalize-space(string(alt-text[1]))"/>
+                    </xsl:when>
+                    <xsl:when test="ancestor::fig/alt-text">
+                        <xsl:value-of select="normalize-space(string((ancestor::fig/alt-text)[1]))"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@xlink:href"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
             <xsl:if test="@specific-use">
                 <xsl:choose>
                     <xsl:when test="@specific-use='image-size:icon'">
