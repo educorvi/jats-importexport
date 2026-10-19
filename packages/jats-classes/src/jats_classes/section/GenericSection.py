@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import abc
 import logging
-import re
 from collections.abc import Callable
 from typing import cast
 
 from lxml import etree
+
+from jats_classes.common import clean_string, clean_string_and_repair, try_repair_mojibake, try_repair_mojibake_element
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +21,6 @@ XLINK_NAMESPACE = "http://www.w3.org/1999/xlink"
 XLINK_HREF_ATTRIBUTE = f"{{{XLINK_NAMESPACE}}}href"
 XLINK_HREF_LITERAL = "xlink:href"
 ASSET_ELEMENT_TAGS = frozenset({"graphic", "inline-graphic", "media"})
-
-
-def clean_string(string: str) -> str:
-    """Remove leading and trailing whitespace and newlines from a string."""
-    return re.sub(r"[\s]+", " ", string).strip()
 
 
 class GenericSection(metaclass=abc.ABCMeta):
@@ -166,9 +162,9 @@ class GenericSection(metaclass=abc.ABCMeta):
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:
         """Extract raw label and title xml."""
-        label_element = section.find("label")
+        label_element = try_repair_mojibake_element(section.find("label"))
         label_string = etree.tostring(label_element, encoding="unicode") if label_element is not None else ""
-        title_element = section.find("title")
+        title_element = try_repair_mojibake_element(section.find("title"))
         title_string = etree.tostring(title_element, encoding="unicode") if title_element is not None else ""
         return label_string + title_string
 
@@ -176,28 +172,29 @@ class GenericSection(metaclass=abc.ABCMeta):
     def _get_raw_content(cls, section: etree._Element) -> str | None:
         """Extract inner raw XML content, ignoring label, title, and nested sections."""
         result = ""
-        nodes = cast(list[etree._Element | str], section.xpath("./node()"))
+        nodes = section.xpath("./node()")
+        if not isinstance(nodes, list):
+            return None
+
         for node in nodes:
             if isinstance(node, str):
-                result += node
+                result += try_repair_mojibake(node)
                 continue
 
             if not isinstance(node, etree._Element):
-                result += etree.tostring(node, encoding="unicode")
-                continue
-
-            if not isinstance(node.tag, str):
-                result += etree.tostring(node, encoding="unicode")
                 continue
 
             if node.tag in ["label", "title"]:
                 if node.tail:
-                    result += node.tail
+                    result += try_repair_mojibake(node.tail)
                 continue
             if node.tag in ["sec", "app"]:
                 break
 
-            result += etree.tostring(node, encoding="unicode")
+            repaired = try_repair_mojibake_element(node)
+            if repaired is None:
+                continue
+            result += etree.tostring(repaired, encoding="unicode")
 
         if result.strip() == "":
             return None
@@ -213,9 +210,9 @@ class GenericSection(metaclass=abc.ABCMeta):
         try:
             root = etree.fromstring(f"<root>{self.label_title_raw}{self.content_raw or ''}</root>")
             for element in cast(list[etree._Element], root.xpath('.//named-content[@specific-use="keyword"]')):
-                if element.text:
-                    if (k := clean_string(element.text)) not in keywords and k != "":
-                        keywords.append(k)
+                keyword = clean_string_and_repair(element.text)
+                if keyword and keyword != "" and keyword not in keywords:
+                    keywords.append(keyword)
         except etree.XMLSyntaxError:
             pass
 
