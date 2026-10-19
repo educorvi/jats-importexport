@@ -185,7 +185,10 @@ def test_html_exporter_only_renders_non_empty_permissions():
                 <fig id="empty"><graphic xlink:href="empty.png"/><permissions/></fig>
                 <fig id="set">
                     <graphic xlink:href="set.png"/>
-                    <permissions><copyright-holder>Example GmbH</copyright-holder></permissions>
+                    <permissions>
+                        <copyright-statement>Example Copyright</copyright-statement>
+                        <copyright-holder>Example GmbH</copyright-holder>
+                    </permissions>
                 </fig>
             </body>
         </article>"""
@@ -194,7 +197,8 @@ def test_html_exporter_only_renders_non_empty_permissions():
     html_output = str(exporter.transform(xml))
 
     assert html_output.count('class="permissions"') == 1
-    assert "Example GmbH" in html_output
+    assert "Example Copyright" in html_output
+    assert "Example GmbH" not in html_output
 
 
 @pytest.mark.parametrize("display", ["inline", "block"])

@@ -2082,7 +2082,7 @@ or pipeline) parameterized.
         <xsl:if test="normalize-space(string(.)) or descendant-or-self::*/@*[normalize-space(.)]">
             <div class="permissions">
                 <xsl:apply-templates select="copyright-statement"/>
-                <xsl:if test="copyright-year | copyright-holder">
+                <!-- <xsl:if test="copyright-year | copyright-holder">
                     <p class="copyright">
                         <span class="generated">Urheberrecht: </span>
                         <xsl:for-each select="copyright-year | copyright-holder">
@@ -2092,7 +2092,7 @@ or pipeline) parameterized.
                             </xsl:if>
                         </xsl:for-each>
                     </p>
-                </xsl:if>
+                </xsl:if> -->
                 <xsl:apply-templates select="license"/>
             </div>
         </xsl:if>
