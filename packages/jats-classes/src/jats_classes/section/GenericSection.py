@@ -210,7 +210,7 @@ class GenericSection(metaclass=abc.ABCMeta):
             for element in cast(list[etree._Element], root.xpath('.//named-content[@specific-use="keyword"]')):
                 keyword = clean_string_and_repair(element.text)
                 if keyword and keyword != "" and keyword not in keywords:
-                        keywords.append(keyword)
+                    keywords.append(keyword)
         except etree.XMLSyntaxError:
             pass
 

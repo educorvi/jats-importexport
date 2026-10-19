@@ -10,9 +10,11 @@ logger = logging.getLogger(__name__)
 
 _XLINK_HREF = "{http://www.w3.org/1999/xlink}href"
 
+
 def clean_string(string: str) -> str:
     """Remove leading and trailing whitespace and newlines from a string."""
     return re.sub(r"[\s]+", " ", string).strip()
+
 
 def clean_string_and_repair(string: str | None) -> str | None:
     """Remove leading and trailing whitespace and newlines from a string."""
@@ -20,6 +22,7 @@ def clean_string_and_repair(string: str | None) -> str | None:
         return None
     repaired = try_repair_mojibake(string)
     return clean_string(repaired)
+
 
 def element_text(element: etree._Element | None, xpath: str) -> str | None:
     """Return stripped text of the first matching element, or None."""
@@ -30,6 +33,7 @@ def element_text(element: etree._Element | None, xpath: str) -> str | None:
         return None
     return clean_string_and_repair(found.text) or None
 
+
 def element_itertext(element: etree._Element | None, xpath: str) -> str | None:
     """Return concatenated text of the first matching element, or None."""
     if element is None:
@@ -38,6 +42,7 @@ def element_itertext(element: etree._Element | None, xpath: str) -> str | None:
     if found is None:
         return None
     return clean_string_and_repair("".join(str(t) for t in found.itertext())) or None
+
 
 def element_date(element: etree._Element | None, xpath: str) -> datetime.date | None:
     """Parse a JATS date element (day/month/year children) into a datetime.date object,
@@ -59,6 +64,7 @@ def element_date(element: etree._Element | None, xpath: str) -> datetime.date | 
     except ValueError:
         return None
 
+
 def element_text_list(element: etree._Element | None, xpath: str) -> list[str]:
     """Return a list of stripped text from all matching elements."""
     if element is None:
@@ -70,6 +76,7 @@ def element_text_list(element: etree._Element | None, xpath: str) -> list[str]:
             result.append(cleaned)
     return result
 
+
 def element_itertext_list(element: etree._Element | None, xpath: str) -> list[str]:
     """Return normalized text from every matching element."""
     if element is None:
@@ -80,6 +87,7 @@ def element_itertext_list(element: etree._Element | None, xpath: str) -> list[st
         if cleaned := clean_string_and_repair("".join(str(t) for t in f.itertext())):
             result.append(cleaned)
     return result
+
 
 def element_dict(element: etree._Element | None, xpath: str, key_xpath: str, value_xpath: str) -> dict[str, str]:
     """Return a dictionary of key-value pairs from matching elements."""
@@ -94,6 +102,7 @@ def element_dict(element: etree._Element | None, xpath: str, key_xpath: str, val
             result[key] = value
     return result
 
+
 def element_attribute(element: etree._Element | None, xpath: str, attribute_name: str) -> str | None:
     """Return the specified attribute of the first matching element, or None."""
     if element is None:
@@ -105,6 +114,7 @@ def element_attribute(element: etree._Element | None, xpath: str, attribute_name
 
 
 # Utilities for detecting and repairing typical CP1252 mojibake in text.
+
 
 def _mojibake_score(text: str) -> int:
     """
@@ -138,6 +148,7 @@ def _mojibake_score(text: str) -> int:
         score += text.count(sequence) * 3
 
     return score
+
 
 def _repair_once(text: str):
     """
@@ -196,6 +207,7 @@ def try_repair_mojibake(text: str, max_rounds: int = 3):
         current = repaired
 
     return current
+
 
 def try_repair_mojibake_element(element: etree._Element | None, max_rounds: int = 3) -> etree._Element | None:
     """Try to repair typical CP1252 mojibake in the text content of the given element."""
