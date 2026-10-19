@@ -203,7 +203,7 @@ def try_repair_mojibake(text: str, max_rounds: int = 3):
         if _mojibake_score(repaired) >= _mojibake_score(current):
             break
 
-        logger.info(f"Repaired mojibake text:\n\tfrom: {current}\n\tto:  {repaired}")
+        logger.debug(f"Repaired mojibake text:\n\tfrom: {current}\n\tto:  {repaired}")
         current = repaired
 
     return current

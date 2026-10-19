@@ -177,12 +177,11 @@ class GenericSection(metaclass=abc.ABCMeta):
             return None
 
         for node in nodes:
-            if not isinstance(node, etree._Element) and not isinstance(node, str):
-                result += etree.tostring(node, encoding="unicode")
-                continue
-
             if isinstance(node, str):
                 result += try_repair_mojibake(node)
+                continue
+
+            if not isinstance(node, etree._Element):
                 continue
 
             if node.tag in ["label", "title"]:
@@ -192,7 +191,10 @@ class GenericSection(metaclass=abc.ABCMeta):
             if node.tag in ["sec", "app"]:
                 break
 
-            result += etree.tostring(try_repair_mojibake_element(node), encoding="unicode")
+            repaired = try_repair_mojibake_element(node)
+            if repaired is None:
+                continue
+            result += etree.tostring(repaired, encoding="unicode")
 
         if result.strip() == "":
             return None
