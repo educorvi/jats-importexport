@@ -1,4 +1,5 @@
 import glob
+import shutil
 import tempfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
@@ -16,11 +17,12 @@ from jats_importexport_client.api.export_api import ExportApi
 from jats_importexport_client.api.list_api import ListApi
 from jats_importexport_client.api.upload_api import UploadApi
 from jats_importexport_client.exceptions import ApiException
+from lxml import etree
 from rich.console import Console
 from rich.panel import Panel
 
 console = Console()
-app = typer.Typer(help="Upload and validate JATS documents.", no_args_is_help=True)
+app = typer.Typer(help="Sort, upload, validate and export JATS documents.", no_args_is_help=True)
 
 
 # General utility functions for the CLI application
@@ -165,8 +167,111 @@ def upload_command(
         raise typer.Exit(code=overall_exit_code)
 
 
-def main():
-    app()
+# Sort JATS files by journal title into separate directories
+
+
+JOURNAL_TITLE_DIRECTORY_MAP = {
+    "Muster-DGUV Vorschrift": "vorschriften",
+    "DGUV Information": "informationen",
+    "DGUV Regel": "regeln",
+    "DGUV Grundsatz": "grundsaetze",
+}
+DEFAULT_SORT_DIRECTORY = "sonstige"
+
+
+def _get_journal_title(xml_content: bytes) -> str | None:
+    parser = etree.XMLParser(resolve_entities=False, no_network=True)
+    article = etree.fromstring(xml_content, parser=parser)
+    titles = article.xpath(
+        "./*[local-name()='front']/*[local-name()='journal-meta']"
+        "/*[local-name()='journal-title-group']/*[local-name()='journal-title']"
+    )
+    if not isinstance(titles, list) or not titles:
+        return None
+    title = titles[0]
+    if not isinstance(title, etree._Element):
+        return None
+    return "".join(text for text in title.itertext() if isinstance(text, str)).strip() or None
+
+
+def _get_ocf_journal_title(ocf_file: Path) -> tuple[str | None, bool]:
+    with zipfile.ZipFile(ocf_file) as archive:
+        xml_entries = [
+            entry
+            for entry in archive.infolist()
+            if not entry.is_dir() and Path(entry.filename).suffix.lower() == ".xml"
+        ]
+        if not xml_entries:
+            raise ValueError("Archive contains no XML files")
+        titles = {_get_journal_title(archive.read(entry)) for entry in xml_entries}
+
+    if len(titles) > 1:
+        return None, True
+    return next(iter(titles)), False
+
+
+@app.command("sort-local")
+def sort_local_command(
+    input_dir: Path = typer.Argument(..., help="Flat directory containing only .ocf documents."),
+    output_dir: Path = typer.Argument(..., help="Directory to store the sorted JATS files."),
+):
+    """Sort unchanged OCF documents by the journal titles of their XML files."""
+    if not input_dir.is_dir():
+        console.print(f"[bold red]✖ Input directory does not exist or is not a directory:[/bold red] {input_dir}")
+        raise typer.Exit(code=1)
+
+    entries = sorted(input_dir.iterdir())
+    invalid_entries = [entry for entry in entries if not entry.is_file() or entry.suffix.lower() != ".ocf"]
+    if invalid_entries:
+        for entry in invalid_entries:
+            console.print(
+                f"[bold red]✖ Expected a flat directory containing only .ocf files; found:[/bold red] {entry}"
+            )
+        raise typer.Exit(code=1)
+    if not entries:
+        console.print(f"[bold red]✖ No .ocf files found in '{input_dir}'.[/bold red]")
+        raise typer.Exit(code=1)
+
+    input_dir_resolved = input_dir.resolve()
+    output_dir_resolved = output_dir.resolve()
+    if output_dir_resolved == input_dir_resolved or input_dir_resolved in output_dir_resolved.parents:
+        console.print("[bold red]✖ Output directory must be outside the input directory.[/bold red]")
+        raise typer.Exit(code=1)
+
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        console.print(f"[bold red]✖ Could not create output directory '{output_dir}':[/bold red] {error}")
+        raise typer.Exit(code=1) from error
+
+    exit_code = 0
+    for ocf_file in entries:
+        try:
+            journal_title, has_mixed_titles = _get_ocf_journal_title(ocf_file)
+            if has_mixed_titles:
+                destination_directory = DEFAULT_SORT_DIRECTORY
+                console.print(
+                    f"[bold yellow]⚠ '{ocf_file.name}' contains XML files with different journal titles; "
+                    f"sorting it into '{DEFAULT_SORT_DIRECTORY}'.[/bold yellow]"
+                )
+            else:
+                destination_directory = JOURNAL_TITLE_DIRECTORY_MAP.get(journal_title or "", DEFAULT_SORT_DIRECTORY)
+
+            destination = output_dir / destination_directory / ocf_file.name
+            if destination.exists():
+                raise FileExistsError(f"Output file already exists: {destination}")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(ocf_file, destination)
+            # console.print(f"[bold green]✔ Sorted[/bold green] {ocf_file} → {destination}")
+        except Exception as error:
+            console.print(f"[bold red]✖ Could not sort '{ocf_file}':[/bold red] {error}")
+            exit_code = 1
+
+    if exit_code:
+        raise typer.Exit(code=exit_code)
+
+
+# Exporting documents and saving them to files
 
 
 class ExportType(StrEnum):
@@ -399,6 +504,10 @@ def validate_all_command(
         raise typer.Exit(code=1) from error
 
     console.print(f"[bold green]✔ Results written to {output_folder}[/bold green]")
+
+
+def main():
+    app()
 
 
 if __name__ == "__main__":

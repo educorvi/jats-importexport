@@ -65,6 +65,23 @@ into `JATSDocument`, validated against the packaged XSD, exported with
 validation stage, schema location, and schema reason for invalid input, and exits
 non-zero if any document fails.
 
+### Sort local OCF files by journal
+
+Sort unchanged OCF archives into subdirectories based on the journal title
+without uploading them. The input directory must be flat and contain only OCF
+documents:
+
+```sh
+uv run jats-cli sort-local ./ocf-input ./sorted
+```
+
+The command reads XML files inside each OCF archive to determine its journal
+title, then moves the original OCF without unpacking or modifying it. Missing or
+unmapped titles go to `sonstige`. If an archive contains multiple XML files
+with different journal titles, it is sorted into `sonstige` and a warning is
+printed. Existing destination files are not overwritten, and any processing
+error produces a non-zero exit status.
+
 ## Usage
 
 ```text
