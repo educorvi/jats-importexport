@@ -9,3 +9,4 @@ from .interface import Exporter as Exporter
 from .jats import JatsExporter as JatsExporter
 from .markdown import MarkdownExporter as MarkdownExporter
 from .pdf import PdfExporter as PdfExporter
+from .zip import ZipExporter as ZipExporter

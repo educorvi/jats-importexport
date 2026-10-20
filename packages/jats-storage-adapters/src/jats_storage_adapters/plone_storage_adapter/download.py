@@ -200,7 +200,7 @@ class PloneDownloadService:
         self.__find_and_replace_link_candidates(article)
         return article
 
-    def _get_replace_media_links_callback(self, article_url: int) -> Callable[[str, tuple[bytes, str] | None], str]:
+    def _get_replace_media_links_callback(self, article_url: str) -> Callable[[str, tuple[bytes, str] | None], str]:
         """Return a callback function that replaces media links for a given URL."""
 
         article_path = self.__get_path_from_url(article_url)

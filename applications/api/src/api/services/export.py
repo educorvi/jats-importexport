@@ -1,7 +1,9 @@
 import asyncio
 import base64
+import copy
 import logging
 import os
+import pathlib
 from collections.abc import Callable
 from enum import Enum
 from urllib.parse import parse_qs, urlparse
@@ -9,7 +11,7 @@ from urllib.parse import parse_qs, urlparse
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
 from jats_classes import Front, JATSDocument
-from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
+from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter, ZipExporter
 from jats_storage_adapters.errors import (
     DuplicateException,
     PathNotFoundExpection,
@@ -25,6 +27,7 @@ JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()
 MARKDOWN_EXPORTER = MarkdownExporter()
 PDF_EXPORTER = PdfExporter()
+ZIP_EXPORTER = ZipExporter()
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +85,8 @@ def _get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tu
 
     def downloader(url: str) -> tuple[bytes, str]:
         parsed_url = urlparse(url)
-        if (parsed_url.scheme == parsed_base_url.scheme
+        if (
+            parsed_url.scheme == parsed_base_url.scheme
             and parsed_url.netloc == parsed_base_url.netloc
             and parsed_url.path.startswith(parsed_base_url.path)
         ):
@@ -101,12 +105,25 @@ def _get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tu
 
     return downloader
 
+
 def _pdf_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
     if media is None:
+        logging.warning(f"No media content available for URL: {url}")
         return url
     content, content_type = media
     encoded = base64.b64encode(content).decode("utf-8")
     return f"data:{content_type};base64,{encoded}"
+
+
+def _jats_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
+    if media is None:
+        logging.warning(f"No media content available for URL: {url}")
+        return url
+    parsed_url = urlparse(url)
+    query = parse_qs(parsed_url.query)
+    query_filename = query.get("filename", [None])[0]
+    filename = query_filename or pathlib.PurePosixPath(urlparse(url).path).name
+    return f"media/{filename}"
 
 
 exp_metric = Histogram(
@@ -182,6 +199,18 @@ async def pdf_export(path: str):
         document.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
         pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
         return pdf_content, filename
+
+
+async def zip_export(path: str):
+    with exp_metric.labels("zip").time(), exp_document_metric.labels("zip", path).time():
+        adapter = get_adapter_instance()
+        document = await __load_document(path, adapter=adapter)
+        document_for_pdf = copy.deepcopy(document)
+        media_downloader = _get_media_downloader(adapter)
+        media = document.replace_media_links(_jats_replace_media_links_callback, media_downloader, True)
+        document_for_pdf.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
+        zip_content, filename = await asyncio.to_thread(ZIP_EXPORTER.export, document, document_for_pdf, media)
+        return zip_content, filename
 
 
 async def metadata_export(path: str):
