@@ -1688,17 +1688,13 @@ or pipeline) parameterized.
                 </h3>
             </xsl:if>
             <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label | self::title)]"/>
-            <xsl:apply-templates select="." mode="ref-list-items"/>
+            <xsl:if test="ref">
+                <ul>
+                    <xsl:apply-templates select="ref"/>
+                </ul>
+            </xsl:if>
             <xsl:apply-templates select="ref-list"/>
         </div>
-    </xsl:template>
-
-    <xsl:template match="ref-list" mode="ref-list-items">
-        <xsl:if test="ref or ref-list">
-            <ul>
-                <xsl:apply-templates select="ref"/>
-            </ul>
-        </xsl:if>
     </xsl:template>
 
 
@@ -1931,23 +1927,14 @@ or pipeline) parameterized.
                             </xsl:if>
                         </div>
                     </xsl:if>
-                    <xsl:apply-templates
-                        select="*[not(self::label or self::caption)]"/>
+                    <div class="table-responsive">
+                        <xsl:apply-templates select="*[not(self::label or self::caption)]"/>
+                    </div>
+                    <xsl:apply-templates mode="footnote" select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:apply-templates select="." mode="label"/>
-                    <xsl:if test="self::table-wrap">
-                        <div class="table-responsive">
-                            <xsl:apply-templates/>
-                        </div>
-                        <xsl:apply-templates mode="footnote"
-                                             select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-                    </xsl:if>
-                    <xsl:if test="not(self::table-wrap)">
-                        <xsl:apply-templates/>
-                        <xsl:apply-templates mode="footnote"
-                                             select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-                    </xsl:if>
+                    <xsl:apply-templates/>
                 </xsl:otherwise>
             </xsl:choose>
         </div>
@@ -2154,7 +2141,7 @@ or pipeline) parameterized.
 
 
     <xsl:template match="permissions">
-        <xsl:if test="normalize-space(string(.)) or descendant-or-self::*/@*[normalize-space(.)]">
+        <xsl:if test="normalize-space(string(copyright-statement)) or license[normalize-space(string(.))] or descendant-or-self::*/@*[normalize-space(.)]">
             <div class="permissions">
                 <xsl:apply-templates select="copyright-statement"/>
                 <!-- <xsl:if test="copyright-year | copyright-holder">
@@ -2258,15 +2245,16 @@ or pipeline) parameterized.
 
     <xsl:template match="ref">
         <li>
-            <xsl:if test="label">
+            <xsl:variable name="ref-label">
+                <xsl:apply-templates select="." mode="label"/>
+            </xsl:variable>
+            <xsl:if test="normalize-space(string($ref-label))">
                 <span>
-                    <xsl:apply-templates select="." mode="label"/>
+                    <xsl:copy-of select="$ref-label"/>
                     <xsl:text> </xsl:text>
                 </span>
             </xsl:if>
-            <span>
-                <xsl:apply-templates/>
-            </span>
+            <xsl:apply-templates/>
         </li>
     </xsl:template>
 
@@ -3022,8 +3010,8 @@ or pipeline) parameterized.
     <xsl:variable name="auto-label-chem-struct-wrap" select="false()"/>
     <xsl:variable name="auto-label-disp-formula" select="false()"/>
     <xsl:variable name="auto-label-fig" select="false()"/>
-    <xsl:variable name="auto-label-ref" select="not(//ref[label])"/>
-    <!-- ref elements are labeled unless any ref already has a label -->
+    <xsl:variable name="auto-label-ref" select="false()"/>
+    <!-- References use supplied labels; numbering is not generated automatically. -->
 
     <xsl:variable name="auto-label-statement" select="false()"/>
     <xsl:variable name="auto-label-supplementary"
@@ -3069,7 +3057,10 @@ or pipeline) parameterized.
 
     <xsl:template mode="label" match="ref">
         <xsl:param name="contents">
-            <xsl:apply-templates select="." mode="label-text"/>
+            <xsl:apply-templates select="." mode="label-text">
+                <xsl:with-param name="warning"
+                                select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+            </xsl:apply-templates>
         </xsl:param>
         <xsl:if test="normalize-space(string($contents))">
             <!-- we're already in a p -->
