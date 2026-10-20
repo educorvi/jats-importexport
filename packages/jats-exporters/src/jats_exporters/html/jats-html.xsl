@@ -1870,19 +1870,82 @@ or pipeline) parameterized.
                 <xsl:attribute name="style">display: float; clear: both</xsl:attribute>
             </xsl:if>
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="." mode="label"/>
-            <xsl:if test="self::table-wrap">
-                <div class="table-responsive">
-                    <xsl:apply-templates/>
-                </div>
-                <xsl:apply-templates mode="footnote"
-                                     select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-            </xsl:if>
-            <xsl:if test="not(self::table-wrap)">
-                <xsl:apply-templates/>
-                <xsl:apply-templates mode="footnote"
-                                     select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-            </xsl:if>
+            <xsl:choose>
+                <xsl:when test="self::fig and graphic">
+                    <xsl:apply-templates select="graphic"/>
+                    <xsl:if test="label or caption">
+                        <div class="caption">
+                            <xsl:variable name="label-text">
+                                <xsl:apply-templates select="." mode="label-text">
+                                    <xsl:with-param name="warning"
+                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+                                </xsl:apply-templates>
+                            </xsl:variable>
+                            <xsl:if test="normalize-space(string($label-text))">
+                                <span class="label">
+                                    <xsl:copy-of select="$label-text"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/title">
+                                <span class="title">
+                                    <xsl:apply-templates select="caption/title/node()"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/p">
+                                <span class="caption-text">
+                                    <xsl:apply-templates select="caption/p/node()"/>
+                                </span>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                    <xsl:apply-templates
+                        select="*[not(self::graphic or self::label or self::caption or self::alt-text)]"/>
+                </xsl:when>
+                <xsl:when test="self::table-wrap">
+                    <xsl:if test="label or caption">
+                        <div class="caption">
+                            <xsl:variable name="label-text">
+                                <xsl:apply-templates select="." mode="label-text">
+                                    <xsl:with-param name="warning"
+                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+                                </xsl:apply-templates>
+                            </xsl:variable>
+                            <xsl:if test="normalize-space(string($label-text))">
+                                <span class="label">
+                                    <xsl:copy-of select="$label-text"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/title">
+                                <span class="title">
+                                    <xsl:apply-templates select="caption/title/node()"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/p">
+                                <span class="caption-text">
+                                    <xsl:apply-templates select="caption/p/node()"/>
+                                </span>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                    <xsl:apply-templates
+                        select="*[not(self::label or self::caption)]"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates select="." mode="label"/>
+                    <xsl:if test="self::table-wrap">
+                        <div class="table-responsive">
+                            <xsl:apply-templates/>
+                        </div>
+                        <xsl:apply-templates mode="footnote"
+                                             select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
+                    </xsl:if>
+                    <xsl:if test="not(self::table-wrap)">
+                        <xsl:apply-templates/>
+                        <xsl:apply-templates mode="footnote"
+                                             select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
+                    </xsl:if>
+                </xsl:otherwise>
+            </xsl:choose>
         </div>
     </xsl:template>
 
