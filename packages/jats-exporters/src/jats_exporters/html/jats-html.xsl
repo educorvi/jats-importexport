@@ -1688,13 +1688,17 @@ or pipeline) parameterized.
                 </h3>
             </xsl:if>
             <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label | self::title)]"/>
-            <xsl:if test="ref">
-                <div class="ref-list table">
-                    <xsl:apply-templates select="ref"/>
-                </div>
-            </xsl:if>
+            <xsl:apply-templates select="." mode="ref-list-items"/>
             <xsl:apply-templates select="ref-list"/>
         </div>
+    </xsl:template>
+
+    <xsl:template match="ref-list" mode="ref-list-items">
+        <xsl:if test="ref or ref-list">
+            <ul>
+                <xsl:apply-templates select="ref"/>
+            </ul>
+        </xsl:if>
     </xsl:template>
 
 
@@ -2253,19 +2257,17 @@ or pipeline) parameterized.
 
 
     <xsl:template match="ref">
-        <div class="row">
-            <div class="col-2 ref-label">
-                <p class="ref-label">
+        <li>
+            <xsl:if test="label">
+                <span>
                     <xsl:apply-templates select="." mode="label"/>
-                    <xsl:text>&#xA0;</xsl:text>
-                    <!-- space forces vertical alignment of the paragraph -->
-                    <xsl:call-template name="named-anchor"/>
-                </p>
-            </div>
-            <div class="col ref-content">
+                    <xsl:text> </xsl:text>
+                </span>
+            </xsl:if>
+            <span>
                 <xsl:apply-templates/>
-            </div>
-        </div>
+            </span>
+        </li>
     </xsl:template>
 
 
