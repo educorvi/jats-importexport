@@ -29,19 +29,10 @@ class PdfExporter(Exporter[tuple[bytes, str]]):
     STYLE = ROOT / "style.css"
 
     html_exporter: HtmlExporter
-    image_downloader: ImageDownloader | None
 
-    def __init__(self, image_downloader: ImageDownloader | None = None):
-        """Initialize the PDF exporter with an HTML exporter.
-
-        Args:
-            image_downloader: Optional callable used to fetch remote images
-                (e.g. hosted in a storage backend like Plone) so they can be
-                embedded as data URIs. WeasyPrint runs without access to the
-                storage backend, so images can't be resolved by URL alone.
-        """
+    def __init__(self):
+        """Initialize the PDF exporter with an HTML exporter."""
         self.html_exporter = HtmlExporter()
-        self.image_downloader = image_downloader
 
     def export(self, document: JATSDocument) -> tuple[bytes, str]:
         """Export the JATSDocument to a PDF file using WeasyPrint.
@@ -103,7 +94,6 @@ class PdfExporter(Exporter[tuple[bytes, str]]):
         )
 
         html_content = self.html_exporter.export(document)
-        html_content = self._embed_remote_images(html_content)
         css = self._get_css()
 
         toc_html = self._get_toc_html(html_content)
@@ -122,30 +112,6 @@ class PdfExporter(Exporter[tuple[bytes, str]]):
         """Load the CSS for PDF generation."""
         with open(self.STYLE, encoding="utf-8") as css_file:
             return css_file.read()
-
-    def _embed_remote_images(self, html_content: str) -> str:
-        """Replace <img> sources pointing to remote http(s) URLs with data URIs.
-
-        WeasyPrint has no access to the storage backend (e.g. Plone), so images
-        referenced by absolute URL must be fetched via the configured
-        `image_downloader` and inlined instead.
-        """
-        if self.image_downloader is None:
-            return html_content
-
-        soup = BeautifulSoup(html_content, "html.parser")
-        for img in soup.find_all("img"):
-            src = img.get("src")
-            if not isinstance(src, str) or not src.startswith(("http://", "https://")):
-                continue
-            try:
-                content, content_type = self.image_downloader(src)
-            except Exception:
-                logger.warning("Could not download image %s for PDF export, skipping embedding", src, exc_info=True)
-                continue
-            encoded = base64.b64encode(content).decode("ascii")
-            img["src"] = f"data:{content_type};base64,{encoded}"
-        return str(soup)
 
     def _get_toc_html(self, html_content: str) -> str:
         """Extract the table of contents from the HTML content."""

@@ -231,7 +231,11 @@ class GenericSection(metaclass=abc.ABCMeta):
                     new_href, _ = replaced_links[href_value]
                 else:
                     if media_downloader:
-                        media_content = media_downloader(href_value)
+                        try:
+                            media_content = media_downloader(href_value)
+                        except Exception as e:
+                            logger.warning(f"Failed to download media from {href_value}: {e}")
+                            media_content = None
                     else:
                         media_content = None
                     new_href = media_link_conversion(href_value, media_content)
