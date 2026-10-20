@@ -25,7 +25,7 @@ class APIConfig:
         " (e.g. Plone), and converting them to various formats."
     )
     LOG_LEVEL: str = os.environ.get("API_LOG_LEVEL", "INFO")
-    API_VERSION: str = "1.0.0a50"
+    API_VERSION: str = "1.0.0a51"
 
 
 if os.environ.get("REDIS_HOST") is not None:
