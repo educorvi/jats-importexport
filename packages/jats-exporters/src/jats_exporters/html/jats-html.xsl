@@ -1689,9 +1689,9 @@ or pipeline) parameterized.
             </xsl:if>
             <xsl:apply-templates select="*[not(self::ref | self::ref-list | self::label | self::title)]"/>
             <xsl:if test="ref">
-                <div class="ref-list table">
+                <ul>
                     <xsl:apply-templates select="ref"/>
-                </div>
+                </ul>
             </xsl:if>
             <xsl:apply-templates select="ref-list"/>
         </div>
@@ -1870,19 +1870,73 @@ or pipeline) parameterized.
                 <xsl:attribute name="style">display: float; clear: both</xsl:attribute>
             </xsl:if>
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="." mode="label"/>
-            <xsl:if test="self::table-wrap">
-                <div class="table-responsive">
+            <xsl:choose>
+                <xsl:when test="self::fig and graphic">
+                    <xsl:apply-templates select="graphic"/>
+                    <xsl:if test="label or caption">
+                        <div class="caption">
+                            <xsl:variable name="label-text">
+                                <xsl:apply-templates select="." mode="label-text">
+                                    <xsl:with-param name="warning"
+                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+                                </xsl:apply-templates>
+                            </xsl:variable>
+                            <xsl:if test="normalize-space(string($label-text))">
+                                <span class="label">
+                                    <xsl:copy-of select="$label-text"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/title">
+                                <span class="title">
+                                    <xsl:apply-templates select="caption/title/node()"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/p">
+                                <span class="caption-text">
+                                    <xsl:apply-templates select="caption/p/node()"/>
+                                </span>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                    <xsl:apply-templates
+                        select="*[not(self::graphic or self::label or self::caption or self::alt-text)]"/>
+                </xsl:when>
+                <xsl:when test="self::table-wrap">
+                    <xsl:if test="label or caption">
+                        <div class="caption">
+                            <xsl:variable name="label-text">
+                                <xsl:apply-templates select="." mode="label-text">
+                                    <xsl:with-param name="warning"
+                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+                                </xsl:apply-templates>
+                            </xsl:variable>
+                            <xsl:if test="normalize-space(string($label-text))">
+                                <span class="label">
+                                    <xsl:copy-of select="$label-text"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/title">
+                                <span class="title">
+                                    <xsl:apply-templates select="caption/title/node()"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/p">
+                                <span class="caption-text">
+                                    <xsl:apply-templates select="caption/p/node()"/>
+                                </span>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                    <div class="table-responsive">
+                        <xsl:apply-templates select="*[not(self::label or self::caption)]"/>
+                    </div>
+                    <xsl:apply-templates mode="footnote" select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates select="." mode="label"/>
                     <xsl:apply-templates/>
-                </div>
-                <xsl:apply-templates mode="footnote"
-                                     select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-            </xsl:if>
-            <xsl:if test="not(self::table-wrap)">
-                <xsl:apply-templates/>
-                <xsl:apply-templates mode="footnote"
-                                     select="self::table-wrap//fn[not(ancestor::table-wrap-foot)]"/>
-            </xsl:if>
+                </xsl:otherwise>
+            </xsl:choose>
         </div>
     </xsl:template>
 
@@ -1939,12 +1993,20 @@ or pipeline) parameterized.
 
     <xsl:template match="graphic | inline-graphic">
         <xsl:apply-templates/>
-        <img alt="{@xlink:href}">
-            <xsl:for-each select="alt-text">
-                <xsl:attribute name="alt">
-                    <xsl:value-of select="normalize-space(string(.))"/>
-                </xsl:attribute>
-            </xsl:for-each>
+        <img>
+            <xsl:attribute name="alt">
+                <xsl:choose>
+                    <xsl:when test="alt-text">
+                        <xsl:value-of select="normalize-space(string(alt-text[1]))"/>
+                    </xsl:when>
+                    <xsl:when test="ancestor::fig/alt-text">
+                        <xsl:value-of select="normalize-space(string((ancestor::fig/alt-text)[1]))"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@xlink:href"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
             <xsl:if test="@specific-use">
                 <xsl:choose>
                     <xsl:when test="@specific-use='image-size:icon'">
@@ -2079,10 +2141,10 @@ or pipeline) parameterized.
 
 
     <xsl:template match="permissions">
-        <xsl:if test="normalize-space(string(.)) or descendant-or-self::*/@*[normalize-space(.)]">
+        <xsl:if test="normalize-space(string(copyright-statement)) or license[normalize-space(string(.))] or descendant-or-self::*/@*[normalize-space(.)]">
             <div class="permissions">
                 <xsl:apply-templates select="copyright-statement"/>
-                <xsl:if test="copyright-year | copyright-holder">
+                <!-- <xsl:if test="copyright-year | copyright-holder">
                     <p class="copyright">
                         <span class="generated">Urheberrecht: </span>
                         <xsl:for-each select="copyright-year | copyright-holder">
@@ -2092,7 +2154,7 @@ or pipeline) parameterized.
                             </xsl:if>
                         </xsl:for-each>
                     </p>
-                </xsl:if>
+                </xsl:if> -->
                 <xsl:apply-templates select="license"/>
             </div>
         </xsl:if>
@@ -2182,19 +2244,18 @@ or pipeline) parameterized.
 
 
     <xsl:template match="ref">
-        <div class="row">
-            <div class="col-2 ref-label">
-                <p class="ref-label">
-                    <xsl:apply-templates select="." mode="label"/>
-                    <xsl:text>&#xA0;</xsl:text>
-                    <!-- space forces vertical alignment of the paragraph -->
-                    <xsl:call-template name="named-anchor"/>
-                </p>
-            </div>
-            <div class="col ref-content">
-                <xsl:apply-templates/>
-            </div>
-        </div>
+        <li>
+            <xsl:variable name="ref-label">
+                <xsl:apply-templates select="." mode="label"/>
+            </xsl:variable>
+            <xsl:if test="normalize-space(string($ref-label))">
+                <span>
+                    <xsl:copy-of select="$ref-label"/>
+                    <xsl:text> </xsl:text>
+                </span>
+            </xsl:if>
+            <xsl:apply-templates/>
+        </li>
     </xsl:template>
 
 
@@ -2949,8 +3010,8 @@ or pipeline) parameterized.
     <xsl:variable name="auto-label-chem-struct-wrap" select="false()"/>
     <xsl:variable name="auto-label-disp-formula" select="false()"/>
     <xsl:variable name="auto-label-fig" select="false()"/>
-    <xsl:variable name="auto-label-ref" select="not(//ref[label])"/>
-    <!-- ref elements are labeled unless any ref already has a label -->
+    <xsl:variable name="auto-label-ref" select="false()"/>
+    <!-- References use supplied labels; numbering is not generated automatically. -->
 
     <xsl:variable name="auto-label-statement" select="false()"/>
     <xsl:variable name="auto-label-supplementary"
@@ -2996,7 +3057,10 @@ or pipeline) parameterized.
 
     <xsl:template mode="label" match="ref">
         <xsl:param name="contents">
-            <xsl:apply-templates select="." mode="label-text"/>
+            <xsl:apply-templates select="." mode="label-text">
+                <xsl:with-param name="warning"
+                                select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
+            </xsl:apply-templates>
         </xsl:param>
         <xsl:if test="normalize-space(string($contents))">
             <!-- we're already in a p -->
