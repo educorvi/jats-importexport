@@ -6,6 +6,7 @@ Provides the primary wrapper and parser/validator for whole JATS XML documents.
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from io import BytesIO
 
 import xmlschema
@@ -125,3 +126,28 @@ class JATSDocument:
                 if k not in old_keywords:
                     old_keywords.append(k)
             self.article.front.subjects = old_keywords or None
+
+    def replace_media_links(
+        self,
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+        return_media_info: bool = False,
+    ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
+        """Replace media links in the document using the provided conversion function.
+
+        Args:
+            media_link_conversion: A callable that takes the original media URL and an optional
+                tuple of (bytes, str) representing the downloaded media content and mimetype,
+                and returns the new media URL.
+            media_downloader: An optional callable to download media content given a URL.
+            return_media_info: If True, return a dictionary of media URLs to their downloaded content.
+
+        Returns:
+            A dictionary mapping old media links to a tuple of (new media link, downloaded content as bytes and
+            mimetype) or None if no media_downloader is provided or return_media_info is False.
+        """
+        return self.article.replace_media_links(
+            media_link_conversion=media_link_conversion,
+            media_downloader=media_downloader,
+            return_media_info=return_media_info,
+        )

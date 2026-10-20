@@ -5,6 +5,8 @@ Defines the structure of a JATS <back> element containing appendix groups.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from lxml import etree
 
 from .section import AppendixGroup
@@ -45,3 +47,16 @@ class Back:
             group_keywords = appendix_group.extract_keywords()
             keywords.extend(k for k in group_keywords if k not in keywords)
         return keywords
+
+    def replace_media_links(
+        self,
+        replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> None:
+        for appendix_group in self.appendix_groups:
+            appendix_group.replace_media_links(
+                replaced_links,
+                media_link_conversion=media_link_conversion,
+                media_downloader=media_downloader,
+            )

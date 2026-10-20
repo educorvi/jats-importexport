@@ -5,6 +5,8 @@ Defines the structure of a complete JATS Article composed of Front, Body, and Ba
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from lxml import etree
 
 from .Back import Back
@@ -73,3 +75,23 @@ class Article:
             back_keywords = self.back.extract_keywords()
             keywords.extend(k for k in back_keywords if k not in keywords)
         return keywords
+
+    def replace_media_links(
+        self,
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+        return_media_info: bool = False,
+    ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
+        replaced_links = {}
+        self.body.replace_media_links(
+            replaced_links,
+            media_link_conversion=media_link_conversion,
+            media_downloader=media_downloader,
+        )
+        if self.back is not None:
+            self.back.replace_media_links(
+                replaced_links,
+                media_link_conversion=media_link_conversion,
+                media_downloader=media_downloader,
+            )
+        return replaced_links
