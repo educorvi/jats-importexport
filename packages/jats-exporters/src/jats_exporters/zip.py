@@ -5,7 +5,7 @@ import zipfile
 
 from jats_classes import JATSDocument
 
-from .html import HtmlExporter
+from .html import HtmlExporterStandalone
 from .jats import JatsExporter
 from .markdown import MarkdownExporter
 from .pdf import PdfExporter
@@ -16,7 +16,7 @@ class ZipExporter:  # (Exporter[tuple[bytes, str]]):
 
     def __init__(self):
         self.jats_exporter = JatsExporter()
-        self.html_exporter = HtmlExporter()
+        self.html_exporter = HtmlExporterStandalone()
         self.markdown_exporter = MarkdownExporter()
         self.pdf_exporter = PdfExporter()
 
@@ -35,9 +35,9 @@ class ZipExporter:  # (Exporter[tuple[bytes, str]]):
 
         archive = io.BytesIO()
         with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr(f"{base_name}.xml", jats_content)
-            zip_file.writestr(f"{base_name}.html", html_content)
-            zip_file.writestr(f"{base_name}.md", markdown_content)
+            zip_file.writestr(f"{base_name}.xml", jats_content.encode("utf-8"))
+            zip_file.writestr(f"{base_name}.html", html_content.encode("utf-8"))
+            zip_file.writestr(f"{base_name}.md", markdown_content.encode("utf-8"))
             zip_file.writestr(f"{base_name}.pdf", pdf_content)
             for filename, media_content in media.values():
                 if media_content is not None:

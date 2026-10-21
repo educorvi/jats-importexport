@@ -193,6 +193,7 @@ or pipeline) parameterized.
 
     <xsl:template name="make-html-header">
         <head>
+            <meta charset="UTF-8"/>
             <title>
                 <xsl:variable name="authors">
                     <xsl:call-template name="author-string"/>
