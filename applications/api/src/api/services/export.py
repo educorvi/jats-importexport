@@ -192,16 +192,23 @@ async def md_export(path: str, include_edit_links: bool = False):
 
 
 async def pdf_export(path: str):
+    cached = await EXPORT_CACHE.get_pdf(path)
+    if cached is not None:
+        return cached
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
         media_downloader = _get_media_downloader(adapter)
         document.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
         pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
+        await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
         return pdf_content, filename
 
 
 async def zip_export(path: str):
+    cached = await EXPORT_CACHE.get_zip(path)
+    if cached is not None:
+        return cached
     with exp_metric.labels("zip").time(), exp_document_metric.labels("zip", path).time():
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
@@ -210,11 +217,16 @@ async def zip_export(path: str):
         media = document.replace_media_links(_jats_replace_media_links_callback, media_downloader, True)
         document_for_pdf.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
         zip_content, filename = await asyncio.to_thread(ZIP_EXPORTER.export, document, document_for_pdf, media)
+        await EXPORT_CACHE.set_zip(path, zip_content, filename)
         return zip_content, filename
 
 
 async def metadata_export(path: str):
+    cached = await EXPORT_CACHE.get_metadata(path)
+    if cached is not None:
+        return cached
     with exp_metric.labels("metadata").time(), exp_document_metric.labels("metadata", path).time():
         adapter = get_adapter_instance()
         front = await __load_metadata(path, adapter=adapter)
+        await EXPORT_CACHE.set_metadata(path, front)
         return front
