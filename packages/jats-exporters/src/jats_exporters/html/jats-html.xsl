@@ -4046,8 +4046,8 @@ or pipeline) parameterized.
     <!--  DGUV processing instructions                                 -->
     <!-- ============================================================= -->
 
-    <!-- <?dguv toc?> — inserts a table of contents linking to all
-         section headings (sec elements with a non-empty title) in the document. -->
+    <!-- <?dguv toc?> — inserts a table of contents linking to sections with
+         a non-empty title or label. -->
         <xsl:template match="processing-instruction('dguv')[normalize-space(.) = 'toc']">
             <xsl:call-template name="metadata-and-toc">
                 <xsl:with-param name="front-node" select="//front"/>
@@ -4177,7 +4177,8 @@ or pipeline) parameterized.
             <nav class="jats-html-export-toc">
                 <xsl:call-template name="toc-sections">
                     <xsl:with-param name="sections"
-                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | //back/app-group[title[normalize-space(string(.))]] | //back/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | //back/app[title[normalize-space(string(.))]] | //back/ref-list[title[normalize-space(string(.))]]"/>
+                        select="//body/sec[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @sec-type != 'toc']
+                        | //back/app-group[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @content-type != 'toc']"/>
                     <xsl:with-param name="depth" select="0"/>
                 </xsl:call-template>
             </nav>
@@ -4205,19 +4206,33 @@ or pipeline) parameterized.
                             <xsl:attribute name="data-toc-level">
                                 <xsl:value-of select="$depth + 1"/>
                             </xsl:attribute>
-                            <xsl:if test="label">
-                                <span class="toc-label">
-                                    <xsl:apply-templates select="label/node()"/>
-                                </span>
-                                <xsl:text> </xsl:text>
-                            </xsl:if>
-                            <a href="#{$anchor-id}" class="toc-title">
-                                <xsl:apply-templates select="title/node()"/>
-                            </a>
+                            <xsl:choose>
+                                <xsl:when test="title[normalize-space(string(.))]">
+                                    <xsl:if test="label">
+                                        <span class="toc-label">
+                                            <xsl:apply-templates select="label/node()"/>
+                                        </span>
+                                        <xsl:text> </xsl:text>
+                                    </xsl:if>
+                                    <a href="#{$anchor-id}" class="toc-title">
+                                        <xsl:apply-templates select="title/node()"/>
+                                    </a>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <span class="toc-label">
+                                        <a href="#{$anchor-id}" class="toc-title">
+                                            <xsl:apply-templates select="label/node()"/>
+                                        </a>
+                                    </span>
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </span>
-                        <xsl:if test="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] or app[title[normalize-space(string(.))]]">
+                        <xsl:if test="sec[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @sec-type != 'toc']
+                            or app[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @content-type != 'toc']">
                             <xsl:call-template name="toc-sections">
-                                <xsl:with-param name="sections" select="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] | app[title[normalize-space(string(.))]]"/>
+                                <xsl:with-param name="sections"
+                                    select="sec[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @sec-type != 'toc']
+                                    | app[(title[normalize-space(string(.))] or label[normalize-space(string(.))]) and @content-type != 'toc']"/>
                                 <xsl:with-param name="depth" select="$depth + 1"/>
                             </xsl:call-template>
                         </xsl:if>
