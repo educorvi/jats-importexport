@@ -3,7 +3,12 @@ from fastapi.responses import JSONResponse
 
 from api.models import AsyncExportAccepted, HtmlDocumentResponse
 from api.services.common import resolve_path
-from api.services.export_async.export_async import async_export_status, html_export_async, pdf_export_async
+from api.services.export_async.export_async import (
+    async_export_status,
+    html_export_async,
+    pdf_export_async,
+    zip_export_async,
+)
 from api.services.keyval_implementations import ExportState, ExportType
 
 router = APIRouter(prefix="/export/async", tags=["Export Async"])
@@ -80,6 +85,33 @@ async def export_pdf(background_tasks: BackgroundTasks, path: str = Depends(reso
             content=content,
             headers={"Content-Disposition": f'attachment; filename="{filename}"'},
             media_type="application/pdf",
+        )
+    return JSONResponse(
+        status_code=202,
+        content=AsyncExportAccepted(status="In Progress").model_dump(mode="json"),
+    )
+
+
+@router.get(
+    "/zip",
+    operation_id="export_zip_async",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+            "description": "ZIP file",
+        },
+        202: {"model": AsyncExportAccepted, "description": "In Progress"},
+    },
+)
+async def export_zip(background_tasks: BackgroundTasks, path: str = Depends(resolve_path)):
+    result = await zip_export_async(path, background_tasks)
+    if result is not None:
+        content, filename = result
+        return Response(
+            content=content,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+            media_type="application/zip",
         )
     return JSONResponse(
         status_code=202,
