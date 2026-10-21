@@ -8,10 +8,8 @@ from functools import lru_cache
 
 from jats_classes import JATSDocument
 
-from .interface import Exporter
 
-
-class JatsExporter(Exporter[str]):
+class JatsExporter:
     """Exporter that converts a JATSDocument to its JATS XML string representation."""
 
     @lru_cache(maxsize=128)

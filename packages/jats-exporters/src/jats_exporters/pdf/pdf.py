@@ -14,14 +14,14 @@ from jinja2 import Template
 from weasyprint import HTML
 from ziamath import Math
 
-from jats_exporters import Exporter, HtmlExporter
+from jats_exporters import HtmlExporter
 
 logger = logging.getLogger(__name__)
 
 ImageDownloader = Callable[[str], tuple[bytes, str]]
 
 
-class PdfExporter(Exporter[tuple[bytes, str]]):
+class PdfExporter:
     """Exporter that converts a JATSDocument to a PDF using WeasyPrint."""
 
     ROOT = pathlib.Path(__file__).parent.resolve()

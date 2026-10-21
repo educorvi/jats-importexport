@@ -37,17 +37,6 @@ Packages the JATS XML, HTML, Markdown, and PDF exports together with referenced
 media files in a `media/` directory. Media references in the JATS, HTML, and
 Markdown outputs use paths relative to that directory; PDF images are embedded.
 
-## Extending
-
-Implement the abstract `Exporter[T]` base class to add new output formats:
-
-```python
-from jats_exporters.interface import Exporter
-
-class MyExporter(Exporter[bytes]):
-    def export(self, document) -> bytes: ...
-```
-
 ## Requirements
 
 - Python ≥ 3.13

@@ -11,7 +11,7 @@ from .markdown import MarkdownExporter
 from .pdf import PdfExporter
 
 
-class ZipExporter:  # (Exporter[tuple[bytes, str]]):
+class ZipExporter:
     """Export a JATS document, its other formats, and its referenced media."""
 
     def __init__(self):
