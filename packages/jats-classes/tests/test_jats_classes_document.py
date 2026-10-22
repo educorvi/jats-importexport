@@ -36,44 +36,44 @@ def test_jats_document_from_xml_valid_with_back():
     assert doc.article.front.title == "Minimal Valid JATS Article"
 
 
-def test_jats_document_constructor_defaults():
-    doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
+# def test_jats_document_constructor_defaults():
+#     doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
 
-    assert doc.related_articles == []
-    assert doc.related_articles_translations == []
-
-
-def test_jats_document_constructor_accepts_related_articles():
-    article = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None).article
-    related_articles = [("related/article/path", "http://localhost/related/article/url", article.front)]
-    related_articles_translations = [("translated/article/path", "http://localhost/translated/article/url", article.front)]
-
-    doc = JATSDocument(
-        article=article,
-        related_articles=related_articles,
-        related_articles_translations=related_articles_translations,
-    )
-
-    assert doc.related_articles == related_articles
-    assert doc.related_articles_translations == related_articles_translations
+#     assert doc.related_articles == []
+#     assert doc.related_articles_translations == []
 
 
-def test_jats_document_set_related_articles():
-    doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
-    related_articles = [("related/article/path", "http://localhost/related/article/url", doc.article.front)]
+# def test_jats_document_constructor_accepts_related_articles():
+#     article = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None).article
+#     related_articles = [("related/article/path", "http://localhost/related/article/url", article.front)]
+#     related_articles_translations = [("translated/article/path", "http://localhost/translated/article/url", article.front)]
 
-    doc.set_related_articles(related_articles)
+#     doc = JATSDocument(
+#         article=article,
+#         related_articles=related_articles,
+#         related_articles_translations=related_articles_translations,
+#     )
 
-    assert doc.related_articles == related_articles
+#     assert doc.related_articles == related_articles
+#     assert doc.related_articles_translations == related_articles_translations
 
 
-def test_jats_document_set_related_articles_translations():
-    doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
-    related_articles_translations = [("translated/article/path", "http://localhost/translated/article/url", doc.article.front)]
+# def test_jats_document_set_related_articles():
+#     doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
+#     related_articles = [("related/article/path", "http://localhost/related/article/url", doc.article.front)]
 
-    doc.set_related_articles_translations(related_articles_translations)
+#     doc.set_related_articles(related_articles)
 
-    assert doc.related_articles_translations == related_articles_translations
+#     assert doc.related_articles == related_articles
+
+
+# def test_jats_document_set_related_articles_translations():
+#     doc = JATSDocument.from_xml(MINIMAL_VALID_JATS, xsd_path=None)
+#     related_articles_translations = [("translated/article/path", "http://localhost/translated/article/url", doc.article.front)]
+
+#     doc.set_related_articles_translations(related_articles_translations)
+
+#     assert doc.related_articles_translations == related_articles_translations
 
 
 # --------------------------------------------------

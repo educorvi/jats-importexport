@@ -170,31 +170,6 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    def get_related_articles_with_metadata(
-        self, path: str
-    ) -> tuple[list[tuple[str, str, Front]], list[tuple[str, str, Front]]]:
-        """Retrieve a list of related articles along with their metadata for a JatsDocument from the storage system.
-
-        Args:
-            path: The path to the file in the storage system.
-
-        Returns:
-             A tuple containing two lists of tuples:
-             the first list contains (path, url, Front metadata) for each related article,
-             and the second list contains (path, url, Front metadata) for each translated article.
-        """
-        related_articles, related_articles_translations = self.get_related_articles(path)
-        return (
-            [
-                (article_path, self.get_url_from_path(article_path), self.get_metadata(article_path))
-                for article_path in related_articles
-            ],
-            [
-                (article_path, self.get_url_from_path(article_path), self.get_metadata(article_path))
-                for article_path in related_articles_translations
-            ],
-        )
-
     @abc.abstractmethod
     def get_path_from_webcode(self, webcode: str) -> str:
         """Retrieve a path to an article by its webcode from the storage system.

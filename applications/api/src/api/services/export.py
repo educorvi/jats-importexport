@@ -19,7 +19,7 @@ from jats_storage_adapters.errors import (
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 from prometheus_client import Histogram, Summary
 
-from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse
+from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse, MetadataResponse
 from api.services.common import get_adapter_instance
 from api.services.keyval_implementations import EXPORT_CACHE, ExportType
 
@@ -74,6 +74,30 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
         raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
+
+
+async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter: StorageAdapter) -> None:
+    related_articles_webcode = doc.article.front.related_articles_map
+    if related_articles_webcode:
+        related_articles_url = {}
+        for webcode, title in related_articles_webcode.items():
+            try:
+                url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
+                related_articles_url[url] = title
+            except Exception:
+                continue
+        doc.article.front.related_articles_map = related_articles_url
+
+    related_articles_translations_webcode = doc.article.front.related_articles_translations_map
+    if related_articles_translations_webcode:
+        related_articles_translations_url = {}
+        for webcode, title_lang in related_articles_translations_webcode.items():
+            try:
+                url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
+                related_articles_translations_url[url] = title_lang
+            except Exception:
+                continue
+        doc.article.front.related_articles_translations_map = related_articles_translations_url
 
 
 def _get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tuple[bytes, str]]:
@@ -160,6 +184,7 @@ async def html_export(path: str, include_edit_links: bool = False):
         return HtmlDocumentResponse(**cached)
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
+        await _replace_related_articles_webcode_with_url(document, get_adapter_instance())
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
 
         soup = BeautifulSoup(html_content, "html.parser")
@@ -186,6 +211,7 @@ async def md_export(path: str, include_edit_links: bool = False):
         return MarkdownDocumentResponse(md=cached)
     with exp_metric.labels("md").time(), exp_document_metric.labels("md", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
+        await _replace_related_articles_webcode_with_url(document, get_adapter_instance())
         md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export, document)
         if include_edit_links:
             await EXPORT_CACHE.set(path, ExportType.MD_EDIT_LINKS, md_content)
@@ -214,16 +240,25 @@ async def zip_export(path: str):
         return cached
     with exp_metric.labels("zip").time(), exp_document_metric.labels("zip", path).time():
         adapter = get_adapter_instance()
-        document = await __load_document(path, adapter=adapter)
-        document_for_pdf = copy.deepcopy(document)
+        document_for_jats = await __load_document(path, adapter=adapter)
+        document_for_pdf = copy.deepcopy(document_for_jats)
         media_downloader = _get_media_downloader(adapter)
+
         media = await asyncio.to_thread(
-            document.replace_media_links, _jats_replace_media_links_callback, media_downloader
+            document_for_jats.replace_media_links, _jats_replace_media_links_callback, media_downloader
         )
+
+        document_for_html = copy.deepcopy(document_for_jats)
+        await _replace_related_articles_webcode_with_url(document_for_html, adapter)
+
         await asyncio.to_thread(
             document_for_pdf.replace_media_links, _pdf_replace_media_links_callback, media_downloader
         )
-        zip_content, filename = await asyncio.to_thread(ZIP_EXPORTER.export, document, document_for_pdf, media)
+
+        metadata = MetadataResponse(metadata=document_for_jats.article.front).model_dump(mode="json")
+        zip_content, filename = await asyncio.to_thread(
+            ZIP_EXPORTER.export, document_for_jats, document_for_html, document_for_pdf, media, metadata
+        )
         await EXPORT_CACHE.set_zip(path, zip_content, filename)
         return zip_content, filename
 

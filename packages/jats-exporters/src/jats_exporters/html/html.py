@@ -38,30 +38,6 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
         self.jats_exporter = JatsExporter()
         self.transform = etree.XSLT(self.xsl_doc)
 
-    def _replace_related_article_links(self, doc: JATSDocument) -> None:
-        old_related_articles = doc.article.front.related_articles_map
-        if old_related_articles:
-            new_related_articles = {}
-            for old_related_article in old_related_articles.keys():
-                for related_article in doc.related_articles:
-                    if old_related_article == related_article[2].webcode:
-                        new_related_articles[related_article[1]] = related_article[2].title or ""
-                        break
-            doc.article.front.related_articles_map = new_related_articles
-
-        old_related_articles_translations = doc.article.front.related_articles_translations_map
-        if old_related_articles_translations:
-            new_related_articles_translations = {}
-            for old_related_article_translation in old_related_articles_translations.keys():
-                for related_article_translation in doc.related_articles_translations:
-                    if old_related_article_translation == related_article_translation[2].webcode:
-                        new_related_articles_translations[related_article_translation[1]] = (
-                            related_article_translation[2].title or "",
-                            related_article_translation[2].xml_lang or "",
-                        )
-                        break
-            doc.article.front.related_articles_translations_map = new_related_articles_translations
-
     def _transform(self, xml_doc: str) -> str:
         """Apply XSLT transformation to the JATS XML string and return the HTML."""
         parsed_xml_doc = etree.fromstring(xml_doc)
@@ -79,7 +55,6 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
     @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
-        self._replace_related_article_links(document)
         return self._transform(self.jats_exporter.export(document))
 
 

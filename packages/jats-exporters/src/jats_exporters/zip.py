@@ -3,6 +3,7 @@
 import io
 import json
 import zipfile
+from typing import Any
 
 from jats_classes import JATSDocument
 
@@ -23,15 +24,17 @@ class ZipExporter:
 
     def export(
         self,
-        document: JATSDocument,
+        document_for_jats: JATSDocument,
+        document_for_html: JATSDocument,
         document_for_pdf: JATSDocument,
         media: dict[str, tuple[str, tuple[bytes, str] | None]],
+        metadata: dict[str, Any],
     ) -> tuple[bytes, str]:
         """Return a ZIP archive and its suggested filename."""
-        base_name = self._get_base_name(document)
-        jats_content = self.jats_exporter.export(document)
-        html_content = self.html_exporter.export(document)
-        markdown_content = self.markdown_exporter.export(document)
+        base_name = self._get_base_name(document_for_jats)
+        jats_content = self.jats_exporter.export(document_for_jats)
+        html_content = self.html_exporter.export(document_for_html)
+        markdown_content = self.markdown_exporter.export(document_for_html)
         pdf_content, _ = self.pdf_exporter.export(document_for_pdf)
 
         archive = io.BytesIO()
@@ -42,11 +45,7 @@ class ZipExporter:
             zip_file.writestr(f"{base_name}.pdf", pdf_content)
             zip_file.writestr(
                 f"{base_name}_metadata.json",
-                json.dumps(
-                    {"metadata": document.article.front.to_dict()},
-                    ensure_ascii=False,
-                    indent=2,
-                ).encode("utf-8"),
+                json.dumps(metadata, ensure_ascii=False, indent=2).encode("utf-8"),
             )
             for filename, media_content in media.values():
                 if media_content is not None:

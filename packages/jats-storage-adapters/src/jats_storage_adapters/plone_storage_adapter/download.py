@@ -239,14 +239,14 @@ class PloneDownloadService:
                     item_url = f"{self.base_url}/{item.strip('/')}"
                     metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
-                        related_articles[metadata.webcode] = metadata.title or ""
+                        related_articles[metadata.webcode] = metadata.article_id or ""
             if related_items_translations:
                 for item in related_items_translations:
                     item_url = f"{self.base_url}/{item.strip('/')}"
                     metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
                         related_articles_translations[metadata.webcode] = (
-                            metadata.title or "",
+                            metadata.article_id or "",
                             metadata.xml_lang or "",
                         )
 
