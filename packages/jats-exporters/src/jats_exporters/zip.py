@@ -1,6 +1,7 @@
 """ZIP exporter for JATS documents and their referenced media."""
 
 import io
+import json
 import zipfile
 
 from jats_classes import JATSDocument
@@ -39,6 +40,14 @@ class ZipExporter:
             zip_file.writestr(f"{base_name}.html", html_content.encode("utf-8"))
             zip_file.writestr(f"{base_name}.md", markdown_content.encode("utf-8"))
             zip_file.writestr(f"{base_name}.pdf", pdf_content)
+            zip_file.writestr(
+                f"{base_name}_metadata.json",
+                json.dumps(
+                    {"metadata": document.article.front.to_dict()},
+                    ensure_ascii=False,
+                    indent=2,
+                ).encode("utf-8"),
+            )
             for filename, media_content in media.values():
                 if media_content is not None:
                     content, _ = media_content
