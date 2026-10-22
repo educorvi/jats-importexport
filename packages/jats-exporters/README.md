@@ -31,16 +31,11 @@ Renders documents with WeasyPrint. MathML formulas are typeset locally as
 embedded SVG images using Ziamath, including its bundled STIX math font.
 Both inline and block formulas are supported; no browser or JavaScript is needed.
 
-## Extending
+### ZIP — `ZipExporter`
 
-Implement the abstract `Exporter[T]` base class to add new output formats:
-
-```python
-from jats_exporters.interface import Exporter
-
-class MyExporter(Exporter[bytes]):
-    def export(self, document) -> bytes: ...
-```
+Packages the JATS XML, HTML, Markdown, and PDF exports together with referenced
+media files in a `media/` directory. Media references in the JATS, HTML, and
+Markdown outputs use paths relative to that directory; PDF images are embedded.
 
 ## Requirements
 

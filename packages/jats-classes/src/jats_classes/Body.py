@@ -6,6 +6,7 @@ Represents the article body containing nested Section structures.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 from lxml import etree
 
@@ -67,3 +68,16 @@ class Body:
             section_keywords = section.extract_keywords()
             keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords
+
+    def replace_media_links(
+        self,
+        replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> None:
+        for section in self.sections:
+            section.replace_media_links(
+                replaced_links,
+                media_link_conversion=media_link_conversion,
+                media_downloader=media_downloader,
+            )

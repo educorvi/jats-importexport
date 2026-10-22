@@ -6,10 +6,9 @@ from jats_classes import JATSDocument
 from markdownify import markdownify as md
 
 from .html import HtmlExporter
-from .interface import Exporter
 
 
-class MarkdownExporter(Exporter):
+class MarkdownExporter:
     @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         html = HtmlExporter().export(document)

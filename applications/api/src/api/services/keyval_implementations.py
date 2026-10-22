@@ -35,6 +35,7 @@ class ExportType(Enum):
     MD_EDIT_LINKS = "md_edit_links"
     JATS = "jats"
     PDF = "pdf"
+    ZIP = "zip"
     METADATA = "metadata"
 
 
@@ -127,6 +128,17 @@ class CacheImplementation(abc.ABC):
 
     async def get_pdf(self, path: str) -> tuple[bytes, str] | None:
         value = await self.get(path, ExportType.PDF)
+        if value is None:
+            return None
+        data = json.loads(value)
+        return base64.b64decode(data["content"]), data["filename"]
+
+    async def set_zip(self, path: str, content: bytes, filename: str) -> None:
+        value = json.dumps({"content": base64.b64encode(content).decode("ascii"), "filename": filename})
+        await self.set(path, ExportType.ZIP, value)
+
+    async def get_zip(self, path: str) -> tuple[bytes, str] | None:
+        value = await self.get(path, ExportType.ZIP)
         if value is None:
             return None
         data = json.loads(value)

@@ -4,7 +4,7 @@ import prometheus_client
 from fastapi import BackgroundTasks
 
 from api.models import HtmlDocumentResponse
-from api.services.export import html_export, pdf_export
+from api.services.export import html_export, pdf_export, zip_export
 from api.services.keyval_implementations import EXPORT_CACHE, EXPORT_STATE_CACHE, ExportState, ExportType
 
 logger = logging.getLogger(__name__)
@@ -65,6 +65,30 @@ async def pdf_export_async(path: str, bt: BackgroundTasks) -> tuple[bytes, str] 
         return None
     await EXPORT_STATE_CACHE.set(path, ExportType.PDF, ExportState.RUNNING.value)
     bt.add_task(_export_and_write_pdf, path)
+    return None
+
+
+async def _export_and_write_zip(path: str):
+    try:
+        content, filename = await zip_export(path)
+        await EXPORT_CACHE.set_zip(path, content, filename)
+        await EXPORT_STATE_CACHE.set(path, ExportType.ZIP, ExportState.COMPLETE.value)
+        logger.info(f"ZIP exported and written to {path}")
+    except Exception as e:
+        await EXPORT_STATE_CACHE.set(path, ExportType.ZIP, ExportState.FAILED.value)
+        FAILED_ASYNC_EXPORTS.labels(export_type=ExportType.ZIP.value).inc()
+        logger.error(f"An error occurred while exporting ZIP: {e}")
+
+
+async def zip_export_async(path: str, bt: BackgroundTasks) -> tuple[bytes, str] | None:
+    cached_zip = await EXPORT_CACHE.get_zip(path)
+    if cached_zip is not None:
+        return cached_zip
+    state = await EXPORT_STATE_CACHE.get(path, ExportType.ZIP)
+    if state == ExportState.RUNNING.value:
+        return None
+    await EXPORT_STATE_CACHE.set(path, ExportType.ZIP, ExportState.RUNNING.value)
+    bt.add_task(_export_and_write_zip, path)
     return None
 
 

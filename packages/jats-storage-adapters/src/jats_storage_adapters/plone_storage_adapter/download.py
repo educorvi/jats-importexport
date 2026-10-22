@@ -173,7 +173,6 @@ class PloneDownloadService:
 
     def fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
-        self.current_article_path = self.__get_path_from_url(url)
         data = self.__get_json(url, options)
         pre_request = self.httpx_client.get(url + "/@all_descendents")
         if pre_request.status_code == 200:
@@ -197,16 +196,17 @@ class PloneDownloadService:
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
         article = Article(front=front, body=body, back=back)
+        article.replace_media_links(self._get_replace_media_links_callback(url))
         self.__find_and_replace_link_candidates(article)
         return article
 
-    def _get_replace_media_links_callback(self) -> Callable[[str], str]:
+    def _get_replace_media_links_callback(self, article_url: str) -> Callable[[str, tuple[bytes, str] | None], str]:
         """Return a callback function that replaces media links for a given URL."""
 
-        article_path = self.current_article_path
+        article_path = self.__get_path_from_url(article_url)
         ARTICLEMEDIA = "/articlemedia/"
 
-        def replace_media_link(url: str) -> str:
+        def replace_media_link(url: str, _: tuple[bytes, str] | None = None) -> str:
             if url.startswith(self.base_url):
                 if ARTICLEMEDIA not in url:
                     return url
@@ -292,7 +292,6 @@ class PloneDownloadService:
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             appendixes=appendixes,
-            media_link_conversion=self._get_replace_media_links_callback(),
         )
 
     def __fetch_appendix(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Appendix:
@@ -308,7 +307,6 @@ class PloneDownloadService:
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
             sections=sections,
-            media_link_conversion=self._get_replace_media_links_callback(),
         )
 
     def __fetch_section(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Section:
@@ -326,7 +324,6 @@ class PloneDownloadService:
                 label_title_raw=label_title_raw,
                 content_raw=data.get("content_raw"),
                 sections=sections,
-                media_link_conversion=self._get_replace_media_links_callback(),
             )
         elif data.get("@type") == "EasySection":
             content = data.get("content", {}).get("data", "")
@@ -346,7 +343,6 @@ class PloneDownloadService:
                 label_title_raw=label_title_raw,
                 content_raw=jats_content,
                 sections=sections,
-                media_link_conversion=self._get_replace_media_links_callback(),
             )
         else:
             raise ValueError(f"Unsupported section type: {data.get('@type')}")

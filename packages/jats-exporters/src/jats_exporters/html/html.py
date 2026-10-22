@@ -11,11 +11,10 @@ from functools import lru_cache
 from jats_classes import JATSDocument
 from lxml import etree
 
-from jats_exporters.interface import Exporter
 from jats_exporters.jats import JatsExporter
 
 
-class HtmlExporterGeneric(Exporter[str], metaclass=abc.ABCMeta):
+class HtmlExporterGeneric(metaclass=abc.ABCMeta):
     """Generic base class for XSLT-based HTML exporters.
 
     Provides core transformation logic and caching for sub-classes which define

@@ -1,11 +1,17 @@
 import asyncio
+import base64
+import copy
 import logging
+import os
+import pathlib
+from collections.abc import Callable
 from enum import Enum
+from urllib.parse import parse_qs, urlparse
 
 from bs4 import BeautifulSoup
 from fastapi import HTTPException, Request
 from jats_classes import Front, JATSDocument
-from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter
+from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter, ZipExporter
 from jats_storage_adapters.errors import (
     DuplicateException,
     PathNotFoundExpection,
@@ -20,6 +26,8 @@ from api.services.keyval_implementations import EXPORT_CACHE, ExportType
 JATS_EXPORTER = JatsExporter()
 HTML_EXPORTER = HtmlExporter()
 MARKDOWN_EXPORTER = MarkdownExporter()
+PDF_EXPORTER = PdfExporter()
+ZIP_EXPORTER = ZipExporter()
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +74,59 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
         raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
+
+
+def _get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tuple[bytes, str]]:
+    """Returns a callable that downloads media from the signed API URL or a StorageAdapter URL."""
+    IEH_BASE_URL = os.environ.get("IEH_BASE_URL")
+    if IEH_BASE_URL is None:
+        raise OSError("IEH_BASE_URL environment variable is not set.")
+    parsed_base_url = urlparse(IEH_BASE_URL)
+
+    def downloader(url: str) -> tuple[bytes, str]:
+        parsed_url = urlparse(url)
+        if (
+            parsed_url.scheme == parsed_base_url.scheme
+            and parsed_url.netloc == parsed_base_url.netloc
+            and parsed_url.path.startswith(parsed_base_url.path)
+        ):
+            query = parse_qs(parsed_url.query)
+            required = ("path", "filename", "signature")
+            values = {key: query.get(key, []) for key in required}
+            if any(len(value) != 1 or not value[0] for value in values.values()):
+                raise ValueError(f"Media URL is missing required signed parameters: {url}")
+            return storage_adapter.get_media(
+                values["path"][0],
+                values["filename"][0],
+                values["signature"][0],
+            )
+        else:
+            return storage_adapter.download_file(url)
+
+    return downloader
+
+
+def _pdf_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
+    if media is None:
+        logging.warning(f"No media content available for URL: {url}")
+        return url
+    content, content_type = media
+    encoded = base64.b64encode(content).decode("utf-8")
+    return f"data:{content_type};base64,{encoded}"
+
+
+def _jats_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
+    if media is None:
+        logging.warning(f"No media content available for URL: {url}")
+        return url
+    parsed_url = urlparse(url)
+    query = parse_qs(parsed_url.query)
+    query_filename = query.get("filename", [None])[0]
+    if query_filename is not None:
+        filename = pathlib.PurePosixPath(query_filename)
+    else:
+        filename = (pathlib.PurePosixPath(urlparse(url).path).name).replace("\\", "/")
+    return f"media/{filename}"
 
 
 exp_metric = Histogram(
@@ -134,17 +195,45 @@ async def md_export(path: str, include_edit_links: bool = False):
 
 
 async def pdf_export(path: str):
+    cached = await EXPORT_CACHE.get_pdf(path)
+    if cached is not None:
+        return cached
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
-        pdf_content, filename = await asyncio.to_thread(
-            PdfExporter(image_downloader=adapter.download_file).export, document
-        )
+        media_downloader = _get_media_downloader(adapter)
+        await asyncio.to_thread(document.replace_media_links, _pdf_replace_media_links_callback, media_downloader)
+        pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
+        await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
         return pdf_content, filename
 
 
+async def zip_export(path: str):
+    cached = await EXPORT_CACHE.get_zip(path)
+    if cached is not None:
+        return cached
+    with exp_metric.labels("zip").time(), exp_document_metric.labels("zip", path).time():
+        adapter = get_adapter_instance()
+        document = await __load_document(path, adapter=adapter)
+        document_for_pdf = copy.deepcopy(document)
+        media_downloader = _get_media_downloader(adapter)
+        media = await asyncio.to_thread(
+            document.replace_media_links, _jats_replace_media_links_callback, media_downloader
+        )
+        await asyncio.to_thread(
+            document_for_pdf.replace_media_links, _pdf_replace_media_links_callback, media_downloader
+        )
+        zip_content, filename = await asyncio.to_thread(ZIP_EXPORTER.export, document, document_for_pdf, media)
+        await EXPORT_CACHE.set_zip(path, zip_content, filename)
+        return zip_content, filename
+
+
 async def metadata_export(path: str):
+    cached = await EXPORT_CACHE.get_metadata(path)
+    if cached is not None:
+        return cached
     with exp_metric.labels("metadata").time(), exp_document_metric.labels("metadata", path).time():
         adapter = get_adapter_instance()
         front = await __load_metadata(path, adapter=adapter)
+        await EXPORT_CACHE.set_metadata(path, front)
         return front

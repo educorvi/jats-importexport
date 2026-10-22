@@ -12,7 +12,7 @@ from api.models import (
     MetadataResponse,
 )
 from api.services.common import resolve_path
-from api.services.export import html_export, jats_export, md_export, metadata_export, pdf_export
+from api.services.export import html_export, jats_export, md_export, metadata_export, pdf_export, zip_export
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -81,6 +81,36 @@ async def export_pdf(path: str = Depends(resolve_path)):
         content=pdf_content,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         media_type="application/pdf",
+    )
+
+
+@router.get(
+    "/zip",
+    operation_id="export_zip",
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+            "description": "ZIP file",
+        },
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
+    summary="Export a ZIP file containing the assets (if present) and all export formats",
+    description=(
+        "The assets (media files) are exported to a media directory (if present)."
+        " In the exported JATS, HTML and Markdown files, the links to media files are replaced"
+        " with the corresponding paths in the media directory."
+        " In the PDF file, the media files are embedded directly."
+    ),
+)
+async def export_zip(path: str = Depends(resolve_path)):
+    zip_content, filename = await zip_export(path)
+    return Response(
+        content=zip_content,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        media_type="application/zip",
     )
 
 
