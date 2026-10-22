@@ -82,9 +82,9 @@ async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter:
         related_articles_url = {}
         for webcode, title in related_articles_webcode.items():
             try:
-                path = adapter.get_url_from_path(adapter.get_path_from_webcode(webcode))
-                related_articles_url[path] = title
-            except PathNotFoundExpection:
+                url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
+                related_articles_url[url] = title
+            except Exception:
                 continue
         doc.article.front.related_articles_map = related_articles_url
 
@@ -93,9 +93,9 @@ async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter:
         related_articles_translations_url = {}
         for webcode, title_lang in related_articles_translations_webcode.items():
             try:
-                path = adapter.get_url_from_path(adapter.get_path_from_webcode(webcode))
-                related_articles_translations_url[path] = title_lang
-            except PathNotFoundExpection:
+                url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
+                related_articles_translations_url[url] = title_lang
+            except Exception:
                 continue
         doc.article.front.related_articles_translations_map = related_articles_translations_url
 
