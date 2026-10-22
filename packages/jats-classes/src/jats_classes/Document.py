@@ -131,7 +131,6 @@ class JATSDocument:
         self,
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
-        return_media_info: bool = False,
     ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
         """Replace media links in the document using the provided conversion function.
 
@@ -149,5 +148,4 @@ class JATSDocument:
         return self.article.replace_media_links(
             media_link_conversion=media_link_conversion,
             media_downloader=media_downloader,
-            return_media_info=return_media_info,
         )

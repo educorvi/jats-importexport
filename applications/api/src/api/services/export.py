@@ -122,7 +122,10 @@ def _jats_replace_media_links_callback(url: str, media: tuple[bytes, str] | None
     parsed_url = urlparse(url)
     query = parse_qs(parsed_url.query)
     query_filename = query.get("filename", [None])[0]
-    filename = query_filename or pathlib.PurePosixPath(urlparse(url).path).name
+    if query_filename is not None:
+        filename = pathlib.PurePosixPath(query_filename)
+    else:
+        filename = (pathlib.PurePosixPath(urlparse(url).path).name).replace("\\", "/")
     return f"media/{filename}"
 
 
@@ -199,7 +202,7 @@ async def pdf_export(path: str):
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
         media_downloader = _get_media_downloader(adapter)
-        document.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
+        await asyncio.to_thread(document.replace_media_links, _pdf_replace_media_links_callback, media_downloader)
         pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
         await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
         return pdf_content, filename
@@ -214,8 +217,12 @@ async def zip_export(path: str):
         document = await __load_document(path, adapter=adapter)
         document_for_pdf = copy.deepcopy(document)
         media_downloader = _get_media_downloader(adapter)
-        media = document.replace_media_links(_jats_replace_media_links_callback, media_downloader, True)
-        document_for_pdf.replace_media_links(_pdf_replace_media_links_callback, media_downloader)
+        media = await asyncio.to_thread(
+            document.replace_media_links, _jats_replace_media_links_callback, media_downloader
+        )
+        await asyncio.to_thread(
+            document_for_pdf.replace_media_links, _pdf_replace_media_links_callback, media_downloader
+        )
         zip_content, filename = await asyncio.to_thread(ZIP_EXPORTER.export, document, document_for_pdf, media)
         await EXPORT_CACHE.set_zip(path, zip_content, filename)
         return zip_content, filename

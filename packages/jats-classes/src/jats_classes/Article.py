@@ -80,7 +80,6 @@ class Article:
         self,
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
-        return_media_info: bool = False,
     ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
         replaced_links = {}
         self.body.replace_media_links(
