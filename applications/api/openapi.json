@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a51"
+    "version": "1.0.0a52"
   },
   "paths": {
     "/": {
@@ -852,6 +852,98 @@
         }
       }
     },
+    "/export/zip": {
+      "get": {
+        "tags": [
+          "Export"
+        ],
+        "summary": "Export a ZIP file containing the assets (if present) and all export formats",
+        "description": "The assets (media files) are exported to a media directory (if present). In the exported JATS, HTML and Markdown files, the links to media files are replaced with the corresponding paths in the media directory. In the PDF file, the media files are embedded directly.",
+        "operationId": "export_zip",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ZIP file",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP404NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP409Conflict"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTP422UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
     "/export/metadata": {
       "get": {
         "tags": [
@@ -1177,6 +1269,87 @@
             "description": "PDF file",
             "content": {
               "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "In Progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncExportAccepted"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/export/async/zip": {
+      "get": {
+        "tags": [
+          "Export Async"
+        ],
+        "summary": "Export Zip",
+        "operationId": "export_zip_async",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Path"
+            }
+          },
+          {
+            "name": "webcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Webcode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ZIP file",
+            "content": {
+              "application/zip": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -1944,6 +2117,7 @@
           "md_edit_links",
           "jats",
           "pdf",
+          "zip",
           "metadata"
         ],
         "title": "ExportType"
