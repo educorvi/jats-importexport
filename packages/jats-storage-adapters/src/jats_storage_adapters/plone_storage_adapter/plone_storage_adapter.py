@@ -179,14 +179,7 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error fetching article at {url}") from e
 
-        try:
-            relations, related_articles_translations = self.get_related_articles_with_metadata(path)
-        except Exception as e:
-            raise InternalError(f"Error fetching related articles for {path}") from e
-
-        return JATSDocument(
-            article=article, related_articles=relations, related_articles_translations=related_articles_translations
-        )
+        return JATSDocument(article=article)
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
