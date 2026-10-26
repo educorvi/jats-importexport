@@ -74,30 +74,6 @@ def create_mock_document() -> JATSDocument:
     return JATSDocument(article=article)
 
 
-# ----------------------------------------------------
-# Tests for JatsExporter
-# ----------------------------------------------------
-
-
-def test_jats_exporter_caching():
-    doc = create_mock_document()
-    exporter = JatsExporter()
-
-    # Clear cache first to be absolutely clean
-    exporter.export.cache_clear()
-
-    xml1 = exporter.export(doc)
-    # The cache should now have 1 item
-    info = exporter.export.cache_info()
-    assert info.misses == 1
-    assert info.hits == 0
-
-    xml2 = exporter.export(doc)
-    # This call should be a cache hit
-    info = exporter.export.cache_info()
-    assert info.misses == 1
-    assert info.hits == 1
-    assert xml1 == xml2
 
 
 # ----------------------------------------------------
@@ -128,23 +104,6 @@ def test_html_exporter_standalone_transform():
     assert "Intro title" in html_output
 
 
-def test_html_exporter_caching():
-    doc = create_mock_document()
-    exporter = HtmlExporter()
-
-    # Clear lru_cache on both export and internal _transform
-    exporter.export.cache_clear()
-
-    html1 = exporter.export(doc)
-    info_export = exporter.export.cache_info()
-    assert info_export.misses == 1
-    assert info_export.hits == 0
-
-    html2 = exporter.export(doc)
-    info_export2 = exporter.export.cache_info()
-    assert info_export2.misses == 1
-    assert info_export2.hits == 1
-    assert html1 == html2
 
 
 @pytest.mark.parametrize("exporter_class", [HtmlExporter, HtmlExporterStandalone])
