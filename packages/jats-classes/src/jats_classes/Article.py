@@ -6,6 +6,7 @@ Defines the structure of a complete JATS Article composed of Front, Body, and Ba
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import override
 
 from lxml import etree
 
@@ -58,6 +59,7 @@ class Article(JATSClassInterface):
             back = None
         return cls(front=front, body=body, back=back)
 
+    @override
     def to_xml(self) -> str:
         """Serialize the Article instance back to XML."""
         front_xml = self.front.to_xml()
@@ -77,21 +79,14 @@ class Article(JATSClassInterface):
             keywords.extend(k for k in back_keywords if k not in keywords)
         return keywords
 
+    @override
     def replace_media_links(
         self,
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
     ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
         replaced_links = {}
-        self.body.replace_media_links(
-            replaced_links,
-            media_link_conversion=media_link_conversion,
-            media_downloader=media_downloader,
-        )
+        self.body._replace_media_links(replaced_links, media_link_conversion, media_downloader)
         if self.back is not None:
-            self.back.replace_media_links(
-                replaced_links,
-                media_link_conversion=media_link_conversion,
-                media_downloader=media_downloader,
-            )
+            self.back._replace_media_links(replaced_links, media_link_conversion, media_downloader)
         return replaced_links
