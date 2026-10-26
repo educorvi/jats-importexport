@@ -9,10 +9,11 @@ from collections.abc import Callable
 
 from lxml import etree
 
+from .JATSClassInterface import JATSClassInterface
 from .section import AppendixGroup
 
 
-class Back:
+class Back(JATSClassInterface):
     """Represents a JATS <back> element containing a list of appendix groups."""
 
     appendix_groups: list[AppendixGroup]

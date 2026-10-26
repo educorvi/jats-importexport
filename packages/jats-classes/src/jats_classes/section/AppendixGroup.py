@@ -7,11 +7,12 @@ from __future__ import annotations
 
 from lxml import etree
 
+from ..JATSClassInterface import JATSClassInterface
 from .Appendix import Appendix
 from .GenericSection import GenericSection
 
 
-class AppendixGroup(GenericSection):
+class AppendixGroup(GenericSection, JATSClassInterface):
     """Represents a JATS <app-group> container wrapping Appendix elements."""
 
     _appendixes: list[Appendix]

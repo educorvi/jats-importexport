@@ -10,6 +10,7 @@ from collections.abc import Callable
 
 from lxml import etree
 
+from .JATSClassInterface import JATSClassInterface
 from .section import Section
 from .section.GenericSection import GenericSection
 
@@ -21,7 +22,7 @@ _DUMMY_TITLE = (
 )
 
 
-class Body:
+class Body(JATSClassInterface):
     """Represents a JATS <body> element containing nested Section structures."""
 
     sections: list[Section]

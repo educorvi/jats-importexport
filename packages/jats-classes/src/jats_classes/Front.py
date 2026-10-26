@@ -12,7 +12,7 @@ from typing import Any
 
 from lxml import etree
 
-from jats_classes.common import (
+from .common import (
     element_attribute,
     element_date,
     element_dict,
@@ -21,6 +21,7 @@ from jats_classes.common import (
     element_text,
     element_text_list,
 )
+from .JATSClassInterface import JATSClassInterface
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ def _create_tag(
 
 
 @dataclass
-class Front:
+class Front(JATSClassInterface):
     """Represents a JATS <front> element containing article metadata."""
 
     # XML language attribute (xml:lang)

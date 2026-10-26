@@ -13,9 +13,10 @@ import xmlschema
 from lxml import etree
 
 from .Article import Article
+from .JATSClassInterface import JATSClassInterface
 
 
-class JATSDocument:
+class JATSDocument(JATSClassInterface):
     """Wrapper class representing a complete JATS document.
 
     Main entry point for loading JATS from XML content or Plone.

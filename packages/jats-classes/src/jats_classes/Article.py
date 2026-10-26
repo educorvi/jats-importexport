@@ -12,9 +12,10 @@ from lxml import etree
 from .Back import Back
 from .Body import Body
 from .Front import Front
+from .JATSClassInterface import JATSClassInterface
 
 
-class Article:
+class Article(JATSClassInterface):
     """Represents a complete JATS article element.
 
     An Article contains a Front (metadata), a Body (main text sections),

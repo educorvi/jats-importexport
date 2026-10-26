@@ -8,10 +8,12 @@ from .Back import Back
 from .Body import Body
 from .Document import JATSDocument
 from .Front import Front
+from .JATSClassInterface import JATSClassInterface
 from .SchemaValidator import SchemaValidator
 from .section import Appendix, AppendixGroup, GenericSection, Section
 
 __all__ = [
+    "JATSClassInterface",
     "JATSDocument",
     "Article",
     "Front",

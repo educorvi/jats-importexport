@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from lxml import etree
 
-from jats_classes.common import element_attribute
-
+from ..common import element_attribute
+from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection
 
 _DUMMY_TITLE = (
@@ -16,7 +16,7 @@ _DUMMY_TITLE = (
 )
 
 
-class Section(GenericSection):
+class Section(GenericSection, JATSClassInterface):
     """Represents a basic JATS <sec> element which can recursively nest subsections."""
 
     _sections: list[Section]

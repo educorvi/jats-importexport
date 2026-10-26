@@ -7,11 +7,12 @@ from __future__ import annotations
 
 from lxml import etree
 
+from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection
 from .Section import Section
 
 
-class Appendix(GenericSection):
+class Appendix(GenericSection, JATSClassInterface):
     """Represents a JATS <app> (Appendix) element containing nested Sections."""
 
     _sections: list[Section]
