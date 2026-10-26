@@ -1,5 +1,4 @@
 import re
-from functools import lru_cache
 from uuid import uuid4
 
 from jats_classes import JATSDocument
@@ -9,7 +8,6 @@ from .html import HtmlExporter
 
 
 class MarkdownExporter:
-    @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         html = HtmlExporter().export(document)
         # Protect raw MathML from markdownify's tag stripping and text escaping.

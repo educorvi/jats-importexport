@@ -6,7 +6,6 @@ Defines exporters that process a JATSDocument into an HTML structure.
 import abc
 import os
 import re
-from functools import lru_cache
 
 from jats_classes import JATSDocument
 from lxml import etree
@@ -52,7 +51,6 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
         html_content = self._transform(wrapped_xml)
         return re.sub(r"<!DOCTYPE[^>]*>\s*", "", html_content, flags=re.IGNORECASE)
 
-    @lru_cache(maxsize=128)
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
         return self._transform(self.jats_exporter.export(document))
