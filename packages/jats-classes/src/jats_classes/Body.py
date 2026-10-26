@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from typing import override
 
 from lxml import etree
 
@@ -56,6 +57,7 @@ class Body(JATSClassInterface):
 
         return cls(sections=sections)
 
+    @override
     def to_xml(self) -> str:
         """Serialize the Body instance back to XML."""
         content = "\n".join(sec.to_xml() for sec in self.sections)
@@ -70,15 +72,21 @@ class Body(JATSClassInterface):
             keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords
 
+    @override
     def replace_media_links(
+        self,
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
+        replaced_links = {}
+        self._replace_media_links(replaced_links, media_link_conversion, media_downloader)
+        return replaced_links
+
+    def _replace_media_links(
         self,
         replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
     ) -> None:
         for section in self.sections:
-            section.replace_media_links(
-                replaced_links,
-                media_link_conversion=media_link_conversion,
-                media_downloader=media_downloader,
-            )
+            section._replace_media_links(replaced_links, media_link_conversion, media_downloader)

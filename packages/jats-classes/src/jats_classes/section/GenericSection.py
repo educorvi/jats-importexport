@@ -9,11 +9,12 @@ from __future__ import annotations
 import abc
 import logging
 from collections.abc import Callable
-from typing import cast
+from typing import cast, override
 
 from lxml import etree
 
 from jats_classes.common import clean_string, clean_string_and_repair, try_repair_mojibake, try_repair_mojibake_element
+from jats_classes.JATSClassInterface import JATSClassInterface
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ XLINK_HREF_LITERAL = "xlink:href"
 ASSET_ELEMENT_TAGS = frozenset({"graphic", "inline-graphic", "media"})
 
 
-class GenericSection(metaclass=abc.ABCMeta):
+class GenericSection(JATSClassInterface, metaclass=abc.ABCMeta):
     """Base class for JATS Section, Appendix and AppendixGroup components.
 
     Holds common fields such as label, title, section type, and raw markup content,
@@ -103,6 +104,7 @@ class GenericSection(metaclass=abc.ABCMeta):
         """Return the name of the XML attribute that specifies the section type."""
         raise NotImplementedError
 
+    @override
     def to_xml(self) -> str:
         """Serialize the GenericSection back to XML."""
         sec_type = f' {self._sec_type_attr_name}="{self.sec_type}"' if self.sec_type else ""
@@ -173,25 +175,27 @@ class GenericSection(metaclass=abc.ABCMeta):
 
         return keywords
 
+    @override
     def replace_media_links(
+        self,
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
+        replaced_links = {}
+        self._replace_media_links(replaced_links, media_link_conversion, media_downloader)
+        return replaced_links
+
+    def _replace_media_links(
         self,
         replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
     ) -> None:
-        self._replace_media_links(
-            replaced_links,
-            media_link_conversion=media_link_conversion,
-            media_downloader=media_downloader,
-        )
+        self._replace_media_links_in_content(replaced_links, media_link_conversion, media_downloader)
         for section in self.sections:
-            section.replace_media_links(
-                replaced_links,
-                media_link_conversion=media_link_conversion,
-                media_downloader=media_downloader,
-            )
+            section._replace_media_links(replaced_links, media_link_conversion, media_downloader)
 
-    def _replace_media_links(
+    def _replace_media_links_in_content(
         self,
         replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],

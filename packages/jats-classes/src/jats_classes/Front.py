@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import datetime
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import Any, override
 
 from lxml import etree
 
@@ -309,6 +310,7 @@ class Front(JATSClassInterface):
         )
 
     # fmt: off
+    @override
     def to_xml(self) -> str:
         """Serialize the Front instance to a JATS <front> XML string."""
         front = _create_tag("front", children=[
@@ -646,3 +648,12 @@ class Front(JATSClassInterface):
             front.ueberschriften_mit_nummerierung = ueberschriften_mit_nummerierung
 
         return front
+
+    @override
+    def replace_media_links(
+        self,
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> dict[str, tuple[str, tuple[bytes, str] | None]]:
+        """The Front has no media links to replace."""
+        return {}
