@@ -21,10 +21,9 @@ class JATSClassInterface(metaclass=abc.ABCMeta):
                 tuple of (bytes, str) representing the downloaded media content and mimetype,
                 and returns the new media URL.
             media_downloader: An optional callable to download media content given a URL.
-            return_media_info: If True, return a dictionary of media URLs to their downloaded content.
 
         Returns:
             A dictionary mapping old media links to a tuple of (new media link, downloaded content as bytes and
-            mimetype) or None if no media_downloader is provided or return_media_info is False.
+            mimetype) or None if no media_downloader is provided or the download failed.
         """
         raise NotImplementedError

@@ -79,6 +79,7 @@ class Article(JATSClassInterface):
             keywords.extend(k for k in back_keywords if k not in keywords)
         return keywords
 
+    @override
     def replace_media_links(
         self,
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
