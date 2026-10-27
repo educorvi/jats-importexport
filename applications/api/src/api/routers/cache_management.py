@@ -47,6 +47,7 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
         raise RequestValidationError("Provide either path or webcode, not both")
     if path is None and webcode is None:
         await EXPORT_CACHE.delete_all()
+        await PARTIAL_EXPORT_CACHE.delete_all()
     else:
         if path is None:
             path = await get_path_from_webcode(webcode or "")
