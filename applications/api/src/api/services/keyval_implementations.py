@@ -37,6 +37,7 @@ class ExportType(Enum):
     PDF = "pdf"
     ZIP = "zip"
     METADATA = "metadata"
+    STRUCTURE_TREE = "structure_tree"
 
 
 class HtmlData(TypedDict):
@@ -157,6 +158,16 @@ class CacheImplementation(abc.ABC):
     async def set_metadata(self, path: str, metadata: Front) -> None:
         value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
         await self.set(path, ExportType.METADATA, value)
+
+    async def get_structure_tree(self, path: str, max_level: int | None = None) -> list[dict] | None:
+        value = await self.get(path, ExportType.STRUCTURE_TREE, str(max_level or ""))
+        if value is None:
+            return None
+        return json.loads(value)
+
+    async def set_structure_tree(self, path: str, max_level: int | None, tree: list[dict]) -> None:
+        value = json.dumps(tree)
+        await self.set(path, ExportType.STRUCTURE_TREE, value, str(max_level or ""))
 
 
 logger = logging.getLogger(__name__)

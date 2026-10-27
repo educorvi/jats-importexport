@@ -10,9 +10,18 @@ from api.models import (
     JatsDocumentResponse,
     MarkdownDocumentResponse,
     MetadataResponse,
+    StructureTreeResponse,
 )
 from api.services.common import resolve_path
-from api.services.export import html_export, jats_export, md_export, metadata_export, pdf_export, zip_export
+from api.services.export import (
+    html_export,
+    jats_export,
+    md_export,
+    metadata_export,
+    pdf_export,
+    structure_tree_export,
+    zip_export,
+)
 
 router = APIRouter(prefix="/export", tags=["Export"])
 
@@ -127,3 +136,18 @@ async def export_zip(path: str = Depends(resolve_path)):
 async def export_metadata(path: str = Depends(resolve_path)):
     front = await metadata_export(path)
     return MetadataResponse(metadata=front)
+
+
+@router.get(
+    "/structure-tree",
+    operation_id="structure_tree",
+    response_model=StructureTreeResponse,
+    responses={
+        404: {"model": HTTP404NotFound},
+        409: {"model": HTTP409Conflict},
+        422: {"model": HTTP422UnprocessableEntity},
+    },
+)
+async def structure_tree(path: str = Depends(resolve_path), max_level: int | None = None):
+    toc_entries = await structure_tree_export(path, max_level)
+    return StructureTreeResponse.model_validate({"tree": toc_entries})

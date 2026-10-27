@@ -129,6 +129,9 @@ class MockStorageAdapter(StorageAdapter):
     def get_jats_document_part(self, path: str, sub_path: str, options: GetJATSDocumentOptions | None = None) -> tuple[JATSClassInterface, Front]:
         raise NotImplementedError("get_jats_document_part is not implemented in MockStorageAdapter")
 
+    def get_structure_tree(self, path: str, max_level: int | None = None) -> list[dict]:
+        raise NotImplementedError("get_structure_tree is not implemented in MockStorageAdapter")
+
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return [], []
 

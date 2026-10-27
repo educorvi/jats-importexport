@@ -210,6 +210,42 @@ class PloneDownloadService:
 
         return part, front
 
+    def get_structure_tree(self, url: str, max_level: int | None = None) -> list[dict]:
+        """Retrieve the structure tree for a JATS document from Plone."""
+        options = self.__try_prefetch_descendents(url)
+        data = self.__get_json(url, options)
+        return self.__get_structure_tree(data, options, max_level, current_level=1, current_path="")
+
+    def __get_structure_tree(
+        self,
+        data: dict,
+        options: PloneGetJATSDocumentOptions | None,
+        max_level: int | None,
+        current_level: int,
+        current_path: str,
+    ) -> list[dict]:
+        if max_level is not None and current_level > max_level:
+            return []
+        items = data.get("items", [])
+        tree = []
+        for item in items:
+            item_data = self.__get_json(item.get("@id"), options)
+            item_id = item_data.get("id", "")
+            item_path = current_path + "/" + item_id if current_path else item_id
+            item_type = item_data.get("@type")
+            if item_type is None or item_type == "ArticleMedia":
+                continue
+            tree.append(
+                {
+                    "id": item_id,
+                    "path": item_path,
+                    "level": current_level,
+                    "type": item_type,
+                    "children": self.__get_structure_tree(item_data, options, max_level, current_level + 1, item_path),
+                }
+            )
+        return tree
+
     def __try_prefetch_descendents(
         self, url: str, options: PloneGetJATSDocumentOptions | None = None
     ) -> PloneGetJATSDocumentOptions | None:

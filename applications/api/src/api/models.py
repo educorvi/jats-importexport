@@ -99,6 +99,18 @@ class MetadataResponse(BaseModel):
     metadata: Front = Field(description="The metadata")
 
 
+class StructureTreeEntry(BaseModel):
+    id: str = Field(description="The ID of the article part")
+    path: str = Field(description="The path of the article part, relative to the article base path")
+    level: int = Field(description="The level of the article part")
+    type: str = Field(description="The type of the article part")
+    children: list["StructureTreeEntry"] = Field(description="The child entries of the article part, if any")
+
+
+class StructureTreeResponse(BaseModel):
+    tree: list[StructureTreeEntry] = Field(description="The list of structure tree entries")
+
+
 class CacheClearedResponse(BaseModel):
     message: str = Field(description="Confirmation message for cache clearance")
 

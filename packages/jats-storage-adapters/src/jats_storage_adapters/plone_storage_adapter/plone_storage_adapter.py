@@ -211,6 +211,12 @@ class PloneStorageAdapter(StorageAdapter):
         url = self.get_url_from_path(path)
         return download_service.get_metadata(url)
 
+    def get_structure_tree(self, path: str, max_level: int | None = None) -> list[dict]:
+        """Retrieve the structure tree for a JATS document from Plone."""
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
+        url = self.get_url_from_path(path)
+        return download_service.get_structure_tree(url, max_level)
+
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return PloneDownloadService(self.base_url, self.httpx_client).get_related_articles(path)
 

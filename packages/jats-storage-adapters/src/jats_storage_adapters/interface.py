@@ -176,6 +176,19 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         return self.get_jats_document(path).article.front
 
     @abc.abstractmethod
+    def get_structure_tree(self, path: str, max_level: int | None = None) -> list[dict]:
+        """Retrieve the structure tree for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+            max_level: The maximum depth of the structure tree to retrieve.
+
+        Returns:
+            A list of dictionaries representing the structure tree entries.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         """Retrieve a list of related articles and translated articles for a JatsDocument from the storage system.
 
