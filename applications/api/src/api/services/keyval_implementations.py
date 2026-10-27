@@ -66,21 +66,21 @@ class CacheImplementation(abc.ABC):
     def __clean_path(path: str):
         return path.strip("/")
 
-    async def get(self, path: str, export_type: ExportType) -> str | None:
-        data = await self._get(self.__clean_path(path), export_type)
+    async def get(self, path: str, export_type: ExportType, sub_path: str = "") -> str | None:
+        data = await self._get(self.__clean_path(path), export_type, self.__clean_path(sub_path))
         result = "hit" if data is not None else "miss"
         EXPORT_CACHE_REQUESTS.labels(type=export_type.value, result=result, cache=self.cache_name).inc()
         return data
 
     @abc.abstractmethod
-    async def _get(self, path: str, export_type: ExportType) -> str | None:
+    async def _get(self, path: str, export_type: ExportType, sub_path: str = "") -> str | None:
         raise NotImplementedError
 
-    async def set(self, path: str, export_type: ExportType, value: str) -> None:
-        await self._set(self.__clean_path(path), export_type, value)
+    async def set(self, path: str, export_type: ExportType, value: str, sub_path: str = "") -> None:
+        await self._set(self.__clean_path(path), export_type, value, self.__clean_path(sub_path))
 
     @abc.abstractmethod
-    async def _set(self, path: str, export_type: ExportType, value: str) -> None:
+    async def _set(self, path: str, export_type: ExportType, value: str, sub_path: str = "") -> None:
         raise NotImplementedError
 
     async def delete(self, path: str, export_type: ExportType | None) -> None:
@@ -107,27 +107,38 @@ class CacheImplementation(abc.ABC):
     async def close(self) -> None:
         pass
 
-    async def get_html(self, path: str, edit_links: bool) -> HtmlData | None:
+    async def get_html(self, path: str, edit_links: bool, sub_path: str = "") -> HtmlData | None:
         export_type = ExportType.HTML_EDIT_LINKS if edit_links else ExportType.HTML
-        cache_string = await self._get(self.__clean_path(path), export_type)
-        if cache_string:
-            return json.loads(cache_string)
-        return None
+        cache_string = await self.get(path, export_type, sub_path)
+        if cache_string is None:
+            return None
+        return json.loads(cache_string)
 
-    async def set_html(self, path: str, edit_links: bool, html: str, front: str) -> None:
+    async def set_html(self, path: str, edit_links: bool, html: str, front: str, sub_path: str = "") -> None:
         export_type = ExportType.HTML_EDIT_LINKS if edit_links else ExportType.HTML
-        await self._set(self.__clean_path(path), export_type, json.dumps({"html": html, "front": front}))
+        await self.set(path, export_type, json.dumps({"html": html, "front": front}), sub_path)
 
-    async def set_metadata(self, path: str, metadata: Front) -> None:
-        value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
-        await self.set(path, ExportType.METADATA, value)
+    async def get_md(self, path: str, edit_links: bool, sub_path: str = "") -> str | None:
+        export_type = ExportType.MD_EDIT_LINKS if edit_links else ExportType.MD
+        return await self.get(path, export_type, sub_path)
 
-    async def set_pdf(self, path: str, content: bytes, filename: str) -> None:
+    async def set_md(self, path: str, edit_links: bool, md: str, sub_path: str = "") -> None:
+        export_type = ExportType.MD_EDIT_LINKS if edit_links else ExportType.MD
+        await self.set(path, export_type, md, sub_path)
+
+    async def get_pdf(self, path: str, sub_path: str = "") -> tuple[bytes, str] | None:
+        value = await self.get(path, ExportType.PDF, sub_path)
+        if value is None:
+            return None
+        data = json.loads(value)
+        return base64.b64decode(data["content"]), data["filename"]
+
+    async def set_pdf(self, path: str, content: bytes, filename: str, sub_path: str = "") -> None:
         value = json.dumps({"content": base64.b64encode(content).decode("ascii"), "filename": filename})
-        await self.set(path, ExportType.PDF, value)
+        await self.set(path, ExportType.PDF, value, sub_path)
 
-    async def get_pdf(self, path: str) -> tuple[bytes, str] | None:
-        value = await self.get(path, ExportType.PDF)
+    async def get_zip(self, path: str) -> tuple[bytes, str] | None:
+        value = await self.get(path, ExportType.ZIP)
         if value is None:
             return None
         data = json.loads(value)
@@ -137,18 +148,15 @@ class CacheImplementation(abc.ABC):
         value = json.dumps({"content": base64.b64encode(content).decode("ascii"), "filename": filename})
         await self.set(path, ExportType.ZIP, value)
 
-    async def get_zip(self, path: str) -> tuple[bytes, str] | None:
-        value = await self.get(path, ExportType.ZIP)
-        if value is None:
-            return None
-        data = json.loads(value)
-        return base64.b64decode(data["content"]), data["filename"]
-
     async def get_metadata(self, path: str) -> Front | None:
         value = await self.get(path, ExportType.METADATA)
         if value is None:
             return None
         return _FRONT_ADAPTER.validate_json(value)
+
+    async def set_metadata(self, path: str, metadata: Front) -> None:
+        value = _FRONT_ADAPTER.dump_json(metadata).decode("utf-8")
+        await self.set(path, ExportType.METADATA, value)
 
 
 logger = logging.getLogger(__name__)
@@ -159,16 +167,16 @@ class InMemoryCache(CacheImplementation):
     def implementation_name(self) -> str:
         return "InMemory"
 
-    _data: dict[tuple[str, ExportType], str]
+    _data: dict[tuple[str, ExportType, str], str]
 
     async def init(self) -> None:
         self._data = {}
 
-    async def _get(self, path: str, export_type: ExportType) -> str | None:
-        return self._data.get((path, export_type))
+    async def _get(self, path: str, export_type: ExportType, sub_path: str = "") -> str | None:
+        return self._data.get((path, export_type, sub_path))
 
-    async def _set(self, path: str, export_type: ExportType, value: str):
-        self._data[(path, export_type)] = value
+    async def _set(self, path: str, export_type: ExportType, value: str, sub_path: str = ""):
+        self._data[(path, export_type, sub_path)] = value
 
     async def _delete(self, path: str, export_type: ExportType | None):
         if export_type is None:
@@ -176,8 +184,9 @@ class InMemoryCache(CacheImplementation):
             for key in keys_to_delete:
                 del self._data[key]
         else:
-            if (path, export_type) in self._data:
-                del self._data[(path, export_type)]
+            keys_to_delete = [key for key in self._data if key[0] == path and key[1] == export_type]
+            for key in keys_to_delete:
+                del self._data[key]
 
     async def _delete_all(self) -> None:
         self._data.clear()
@@ -198,31 +207,36 @@ class ValKeyCache(CacheImplementation):
         await self.client.close()
 
     @staticmethod
-    def __build_key(path: str, export_type: ExportType) -> str:
-        return f"{path}:{export_type}"
+    def __build_key(path: str, export_type: ExportType, sub_path: str = "") -> str:
+        return f"{path}:{export_type}:{sub_path}"
+
+    @staticmethod
+    def __build_key_pattern(path: str, export_type: ExportType) -> str:
+        return f"{path}:{export_type}:*"
 
     def __check_client(self):
         if not self.client:
             raise SystemError("Valkey client is not initialized")
 
-    async def _get(self, path: str, export_type: ExportType) -> str | None:
+    async def _get(self, path: str, export_type: ExportType, sub_path: str = "") -> str | None:
         self.__check_client()
-        key = self.__build_key(path, export_type)
+        key = self.__build_key(path, export_type, sub_path)
         return await self.client.get(key)
 
-    async def _set(self, path: str, export_type: ExportType, value: str) -> None:
+    async def _set(self, path: str, export_type: ExportType, value: str, sub_path: str = "") -> None:
         self.__check_client()
-        key = self.__build_key(path, export_type)
+        key = self.__build_key(path, export_type, sub_path)
         await self.client.set(key, value)
 
     async def _delete(self, path: str, export_type: ExportType | None) -> None:
         self.__check_client()
         if export_type is None:
             for export_type in ExportType:
-                await self.client.delete(self.__build_key(path, export_type))
+                async for key in self.client.scan_iter(self.__build_key_pattern(path, export_type)):
+                    await self.client.delete(key)
         else:
-            key = self.__build_key(path, export_type)
-            await self.client.delete(key)
+            async for key in self.client.scan_iter(self.__build_key_pattern(path, export_type)):
+                await self.client.delete(key)
 
     async def _delete_all(self) -> None:
         self.__check_client()
