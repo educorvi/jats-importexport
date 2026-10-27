@@ -1,15 +1,11 @@
 import asyncio
-import base64
 import copy
 import logging
-import os
 import pathlib
-from collections.abc import Callable
-from enum import Enum
 from urllib.parse import parse_qs, urlparse
 
 from bs4 import BeautifulSoup
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter, ZipExporter
 from jats_storage_adapters.errors import (
@@ -20,7 +16,7 @@ from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapt
 from prometheus_client import Histogram, Summary
 
 from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse, MetadataResponse
-from api.services.common import get_adapter_instance
+from api.services.common import get_adapter_instance, get_media_downloader, pdf_replace_media_links_callback
 from api.services.keyval_implementations import EXPORT_CACHE, ExportType
 
 JATS_EXPORTER = JatsExporter()
@@ -30,24 +26,6 @@ PDF_EXPORTER = PdfExporter()
 ZIP_EXPORTER = ZipExporter()
 
 logger = logging.getLogger(__name__)
-
-
-class ReturnType(Enum):
-    XML = "application/xml"
-    JSON = "application/json"
-    HTML = "text/html"
-
-
-def get_return_type(request: Request) -> ReturnType:
-    match request.headers.get("Accept"):
-        case "application/xml":
-            return ReturnType.XML
-        case "application/json":
-            return ReturnType.JSON
-        case "text/html":
-            return ReturnType.HTML
-        case _:
-            return ReturnType.JSON
 
 
 async def __load_document(
@@ -76,6 +54,32 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
 
+async def __load_structure_tree(path: str, adapter: StorageAdapter | None = None) -> list[dict]:
+    try:
+        adapter = adapter or get_adapter_instance()
+        return await asyncio.to_thread(adapter.get_structure_tree, path)
+    except PathNotFoundExpection as e:
+        raise HTTPException(status_code=404, detail=f"Document not found: {e}")
+    except DuplicateException as e:
+        raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
+
+
+def _crop_structure_tree(tree_entries: list[dict], max_level: int | None, current_level: int = 1) -> list[dict]:
+    if max_level is None:
+        return tree_entries
+    if current_level > max_level:
+        return []
+    return [
+        {
+            **entry,
+            "children": _crop_structure_tree(entry.get("children", []), max_level, current_level + 1),
+        }
+        for entry in tree_entries
+    ]
+
+
 async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter: StorageAdapter) -> None:
     related_articles_webcode = doc.article.front.related_articles_map
     if related_articles_webcode:
@@ -100,48 +104,9 @@ async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter:
         doc.article.front.related_articles_translations_map = related_articles_translations_url
 
 
-def _get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tuple[bytes, str]]:
-    """Returns a callable that downloads media from the signed API URL or a StorageAdapter URL."""
-    IEH_BASE_URL = os.environ.get("IEH_BASE_URL")
-    if IEH_BASE_URL is None:
-        raise OSError("IEH_BASE_URL environment variable is not set.")
-    parsed_base_url = urlparse(IEH_BASE_URL)
-
-    def downloader(url: str) -> tuple[bytes, str]:
-        parsed_url = urlparse(url)
-        if (
-            parsed_url.scheme == parsed_base_url.scheme
-            and parsed_url.netloc == parsed_base_url.netloc
-            and parsed_url.path.startswith(parsed_base_url.path)
-        ):
-            query = parse_qs(parsed_url.query)
-            required = ("path", "filename", "signature")
-            values = {key: query.get(key, []) for key in required}
-            if any(len(value) != 1 or not value[0] for value in values.values()):
-                raise ValueError(f"Media URL is missing required signed parameters: {url}")
-            return storage_adapter.get_media(
-                values["path"][0],
-                values["filename"][0],
-                values["signature"][0],
-            )
-        else:
-            return storage_adapter.download_file(url)
-
-    return downloader
-
-
-def _pdf_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
-    if media is None:
-        logging.warning(f"No media content available for URL: {url}")
-        return url
-    content, content_type = media
-    encoded = base64.b64encode(content).decode("utf-8")
-    return f"data:{content_type};base64,{encoded}"
-
-
 def _jats_replace_media_links_callback(url: str, media: tuple[bytes, str] | None = None) -> str:
     if media is None:
-        logging.warning(f"No media content available for URL: {url}")
+        logger.warning(f"No media content available for URL: {url}")
         return url
     parsed_url = urlparse(url)
     query = parse_qs(parsed_url.query)
@@ -227,8 +192,8 @@ async def pdf_export(path: str):
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
-        media_downloader = _get_media_downloader(adapter)
-        await asyncio.to_thread(document.replace_media_links, _pdf_replace_media_links_callback, media_downloader)
+        media_downloader = get_media_downloader(adapter)
+        await asyncio.to_thread(document.replace_media_links, pdf_replace_media_links_callback, media_downloader)
         pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
         await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
         return pdf_content, filename
@@ -242,7 +207,7 @@ async def zip_export(path: str):
         adapter = get_adapter_instance()
         document_for_jats = await __load_document(path, adapter=adapter)
         document_for_pdf = copy.deepcopy(document_for_jats)
-        media_downloader = _get_media_downloader(adapter)
+        media_downloader = get_media_downloader(adapter)
 
         media = await asyncio.to_thread(
             document_for_jats.replace_media_links, _jats_replace_media_links_callback, media_downloader
@@ -252,7 +217,7 @@ async def zip_export(path: str):
         await _replace_related_articles_webcode_with_url(document_for_html, adapter)
 
         await asyncio.to_thread(
-            document_for_pdf.replace_media_links, _pdf_replace_media_links_callback, media_downloader
+            document_for_pdf.replace_media_links, pdf_replace_media_links_callback, media_downloader
         )
 
         metadata = MetadataResponse(metadata=document_for_jats.article.front).model_dump(mode="json")
@@ -272,3 +237,13 @@ async def metadata_export(path: str):
         front = await __load_metadata(path, adapter=adapter)
         await EXPORT_CACHE.set_metadata(path, front)
         return front
+
+
+async def structure_tree_export(path: str, max_level: int | None = None):
+    cached = await EXPORT_CACHE.get_structure_tree(path)
+    if cached is not None:
+        return _crop_structure_tree(cached, max_level)
+    with exp_metric.labels("structure_tree").time(), exp_document_metric.labels("structure_tree", path).time():
+        tree_entries = await __load_structure_tree(path)
+        await EXPORT_CACHE.set_structure_tree(path, tree_entries)
+        return _crop_structure_tree(tree_entries, max_level)

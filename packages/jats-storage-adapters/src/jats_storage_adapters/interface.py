@@ -9,7 +9,7 @@ import enum
 from datetime import datetime
 from typing import TypedDict
 
-from jats_classes import Front, JATSDocument
+from jats_classes import Front, JATSClassInterface, JATSDocument
 
 EDIT_PI = "<?section-edit-link {url}?>"
 
@@ -146,6 +146,24 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_jats_document_part(
+        self, path: str, sub_path: str, options: GetJATSDocumentOptions | None = None
+    ) -> tuple[JATSClassInterface, Front]:
+        """Retrieve a part of a JATSDocument from the storage system.
+
+        Args:
+            path: The path to the document in the storage system.
+            sub_path: The sub-path within the JATS document.
+            options: Additional options for retrieving the JATS document part.
+
+        Returns:
+            A tuple containing:
+                - A JATSClassInterface instance representing the requested part of the document.
+                - The Front of the article associated with the requested part of the document.
+        """
+        raise NotImplementedError
+
     def get_metadata(self, path: str) -> Front:
         """Retrieve metadata for a JatsDocument from the storage system.
 
@@ -156,6 +174,19 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             A Front instance containing metadata for the file.
         """
         return self.get_jats_document(path).article.front
+
+    @abc.abstractmethod
+    def get_structure_tree(self, path: str, max_level: int | None = None) -> list[dict]:
+        """Retrieve the structure tree for a JatsDocument from the storage system.
+
+        Args:
+            path: The path to the file in the storage system.
+            max_level: The maximum depth of the structure tree to retrieve.
+
+        Returns:
+            A list of dictionaries representing the structure tree entries.
+        """
+        raise NotImplementedError
 
     @abc.abstractmethod
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:

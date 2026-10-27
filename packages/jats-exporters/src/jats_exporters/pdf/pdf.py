@@ -9,7 +9,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from bs4 import BeautifulSoup
-from jats_classes import JATSDocument
+from jats_classes import Front, JATSClassInterface, JATSDocument
 from jinja2 import Template
 from weasyprint import HTML
 from ziamath import Math
@@ -39,17 +39,31 @@ class PdfExporter:
         Returns:
             A tuple containing the PDF bytes and the suggested filename.
         """
-        html = HTML(string=self._get_html(document), base_url=f"{self.ROOT.as_uri()}/")
+        front = document.article.front
+        html = HTML(string=self._get_html(document, front), base_url=f"{self.ROOT.as_uri()}/")
         pdf_bytes = html.write_pdf()
 
-        title_escaped = "".join(c if c.isalnum() else "_" for c in document.article.front.title or "Dokument")
+        title_escaped = "".join(c if c.isalnum() else "_" for c in front.title or "Dokument")
         filename = f"{title_escaped}.pdf"
 
         return pdf_bytes, filename
 
-    def _get_html(self, document: JATSDocument) -> str:
+    def export_partial(self, part: JATSClassInterface, front: Front) -> tuple[bytes, str]:
+        """Export a part of the JATSDocument to a PDF file using WeasyPrint.
+        Returns:
+            A tuple containing the PDF bytes and the suggested filename.
+        """
+        html = HTML(string=self._get_html(part, front), base_url=f"{self.ROOT.as_uri()}/")
+        pdf_bytes = html.write_pdf()
+
+        title_escaped = "".join(c if c.isalnum() else "_" for c in front.title or "Dokument")
+        filename = f"{title_escaped}.pdf"
+
+        return pdf_bytes, filename
+
+    def _get_html(self, part: JATSClassInterface, front: Front) -> str:
         """Load and render the HTML for PDF generation."""
-        context = self._get_template_context(document)
+        context = self._get_template_context(part, front)
         with open(self.TEMPLATE, encoding="utf-8") as template_file:
             template: Template = Template(template_file.read())
             return self._render_mathml(template.render(**context))
@@ -84,19 +98,23 @@ class PdfExporter:
             formula.replace_with(image)
         return str(soup)
 
-    def _get_template_context(self, document: JATSDocument) -> dict[str, Any]:
+    def _get_template_context(self, part: JATSClassInterface, front: Front) -> dict[str, Any]:
         """Prepare the context for rendering the PDF template."""
-        front = document.article.front
         article_metadata = front.to_dict()
         article_metadata["pub_date_ausgabedatum_german"] = self._to_german_date(front.pub_date_ausgabedatum)
         article_metadata["pub_date_aktualisierte_fassung_german"] = self._to_german_date(
             front.pub_date_aktualisierte_fassung
         )
 
-        html_content = self.html_exporter.export(document)
+        if isinstance(part, JATSDocument):
+            html_content = self.html_exporter.export(part)
+            toc_html = self._get_toc_html(html_content)
+            isPartial = False
+        else:
+            html_content = self.html_exporter.export_partial(part)
+            toc_html = None
+            isPartial = True
         css = self._get_css()
-
-        toc_html = self._get_toc_html(html_content)
 
         generated_at = self._to_german_date(datetime.datetime.now())
 
@@ -105,6 +123,7 @@ class PdfExporter:
             "css_content": css,
             "html_content": html_content,
             "tocHtml": toc_html,
+            "isPartial": isPartial,
             "generated_at": generated_at,
         }
 

@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from api.auth import require_permission
 from api.models import CacheClearedResponse, CacheStatus, CacheStatusResponse
 from api.services.common import get_path_from_webcode
-from api.services.keyval_implementations import EXPORT_CACHE, EXPORT_STATE_CACHE
+from api.services.keyval_implementations import EXPORT_CACHE, EXPORT_STATE_CACHE, PARTIAL_EXPORT_CACHE
 
 router = APIRouter(prefix="/cache", tags=["Cache Management"])
 logger = logging.getLogger(__name__)
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 async def get_cache_status():
     export_data = await EXPORT_CACHE.get_cache_status()
     export_state_data = await EXPORT_STATE_CACHE.get_cache_status()
+    partial_export_data = await PARTIAL_EXPORT_CACHE.get_cache_status()
     return CacheStatusResponse.model_validate(
         {
             EXPORT_CACHE.cache_name: CacheStatus(
@@ -23,6 +24,9 @@ async def get_cache_status():
             ),
             EXPORT_STATE_CACHE.cache_name: CacheStatus(
                 implementation=export_state_data.implementation, items_in_cache=export_state_data.items_in_cache
+            ),
+            PARTIAL_EXPORT_CACHE.cache_name: CacheStatus(
+                implementation=partial_export_data.implementation, items_in_cache=partial_export_data.items_in_cache
             ),
         }
     )
@@ -43,8 +47,10 @@ async def clear_export_cache(path: str | None = None, webcode: str | None = None
         raise RequestValidationError("Provide either path or webcode, not both")
     if path is None and webcode is None:
         await EXPORT_CACHE.delete_all()
+        await PARTIAL_EXPORT_CACHE.delete_all()
     else:
         if path is None:
             path = await get_path_from_webcode(webcode or "")
         await EXPORT_CACHE.delete(path, None)
+        await PARTIAL_EXPORT_CACHE.delete(path, None)
     return CacheClearedResponse(message="Cache cleared")

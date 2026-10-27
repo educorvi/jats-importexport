@@ -388,6 +388,19 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert app.sections[0].title == "App Sec Title"
 
 
+def test_plone_storage_adapter_get_jats_document_part_rejects_traversal(clean_env, mocker):
+    os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
+    os.environ["PLONE_USERNAME"] = "admin"
+    os.environ["PLONE_PASSWORD"] = "secret"
+    adapter = PloneStorageAdapter()
+    fetch_part = mocker.patch.object(PloneDownloadService, "fetch_article_part")
+
+    with pytest.raises(ValueError, match="parent directory segments"):
+        adapter.get_jats_document_part("/my-doc", "body/%2e%2e/other")
+
+    fetch_part.assert_not_called()
+
+
 # def test_plone_storage_adapter_get_jats_document_relations_failure_is_internal_error(clean_env, mocker):
 #     os.environ["PLONE_BASE_URL"] = "http://localhost:8080/Plone"
 #     os.environ["PLONE_USERNAME"] = "admin"

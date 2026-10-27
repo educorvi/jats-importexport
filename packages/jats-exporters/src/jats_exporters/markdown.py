@@ -1,7 +1,7 @@
 import re
 from uuid import uuid4
 
-from jats_classes import JATSDocument
+from jats_classes import JATSClassInterface, JATSDocument
 from markdownify import markdownify as md
 
 from .html import HtmlExporter
@@ -10,6 +10,13 @@ from .html import HtmlExporter
 class MarkdownExporter:
     def export(self, document: JATSDocument) -> str:
         html = HtmlExporter().export(document)
+        return self._export_html(html)
+
+    def export_partial(self, part: JATSClassInterface) -> str:
+        html = HtmlExporter().export_partial(part)
+        return self._export_html(html)
+
+    def _export_html(self, html: str) -> str:
         # Protect raw MathML from markdownify's tag stripping and text escaping.
         math_blocks = {}
         prefix = uuid4().hex

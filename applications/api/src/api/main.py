@@ -16,7 +16,7 @@ from api.services.keyval_implementations import close_caches, init_caches
 from .auth import require_permission
 from .config import APIConfig
 from .logging import setup_logging
-from .routers import cache_management, export, export_async, list, media, modify, status, upload
+from .routers import cache_management, export, export_async, export_partial, list, media, modify, status, upload
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,10 @@ def create_app() -> FastAPI:
             {
                 "name": "Export",
                 "description": "Export articles as JATS, HTML, Markdown, or PDF, or retrieve their metadata.",
+            },
+            {
+                "name": "Partial Export",
+                "description": "Export parts of articles as JATS, HTML, Markdown, or PDF.",
             },
             {
                 "name": "Export Async",
@@ -94,6 +98,7 @@ def create_app() -> FastAPI:
     app.include_router(media.router)
     app.include_router(list.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export.router, dependencies=[Depends(require_permission("read"))])
+    app.include_router(export_partial.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(export_async.router, dependencies=[Depends(require_permission("read"))])
     app.include_router(upload.router, dependencies=[Depends(require_permission("write"))])
     app.include_router(modify.router, dependencies=[Depends(require_permission("write"))])
