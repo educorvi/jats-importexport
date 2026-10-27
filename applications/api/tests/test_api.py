@@ -11,7 +11,7 @@ import pytest
 from api.config import APIConfig
 from api.main import app
 from fastapi.testclient import TestClient
-from jats_classes import Front, JATSDocument
+from jats_classes import Front, JATSClassInterface, JATSDocument
 
 client = TestClient(app)
 
@@ -125,6 +125,9 @@ class MockStorageAdapter(StorageAdapter):
             raise PathNotFoundExpection(path)
         # Return a valid JATSDocument
         return JATSDocument.from_xml(VALID_JATS_XML, xsd_path=None)
+
+    def get_jats_document_part(self, path: str, sub_path: str, options: GetJATSDocumentOptions | None = None) -> tuple[JATSClassInterface, Front]:
+        raise NotImplementedError("get_jats_document_part is not implemented in MockStorageAdapter")
 
     def get_related_articles(self, path: str) -> tuple[list[str], list[str]]:
         return [], []

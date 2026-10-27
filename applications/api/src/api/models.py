@@ -87,6 +87,10 @@ class HtmlDocumentResponse(BaseModel):
     front: str = Field(description="The HTML of the front matter / metadata section")
 
 
+class HtmlDocumentPartialResponse(BaseModel):
+    html: str = Field(description="The HTML document (main content)")
+
+
 class MarkdownDocumentResponse(BaseModel):
     md: str = Field(description="The Markdown document")
 

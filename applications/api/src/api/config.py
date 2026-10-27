@@ -45,3 +45,4 @@ class StorageConfig:
     VALKEY_HOST: str = os.environ.get("VALKEY_HOST") or os.environ.get("REDIS_HOST", "localhost")
     VALKEY_DB_EXPORT: int = int(os.environ.get("VALKEY_DB_EXPORT", 0))
     VALKEY_DB_EXPORT_STATE: int = int(os.environ.get("VALKEY_DB_EXPORT_STATE", 1))
+    VALKEY_DB_EXPORT_PARTIAL: int = int(os.environ.get("VALKEY_DB_EXPORT_PARTIAL", 2))

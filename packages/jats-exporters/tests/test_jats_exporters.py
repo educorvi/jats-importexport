@@ -221,7 +221,7 @@ def test_pdf_exporter_renders_mathml_document(mathml_equation, monkeypatch, capl
     fragment = exporter.html_exporter.transform_xml(f"<disp-formula>{mathml_equation}</disp-formula>")
     monkeypatch.setattr(exporter.html_exporter, "export", lambda document: fragment)
 
-    html = exporter._get_html(doc)
+    html = exporter._get_html(doc, doc.article.front)
     assert "<math" not in html
     assert "data:image/svg+xml;base64," in html
     pdf, filename = exporter.export(doc)

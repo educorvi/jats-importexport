@@ -64,18 +64,22 @@
 
     <nav class="pdf-toc" aria-labelledby="pdf-toc-title">
       <h2 id="pdf-toc-title">Inhalt</h2>
-      {% if tocItems and tocItems.length %}
-        <ol class="pdf-toc__list">
-          {% for item in tocItems %}
-            <li class="pdf-toc__item pdf-toc__item--level-{{ item.level or 1 }}">
-              <a href="#{{ item.id }}">{{ item.title }}</a>
-            </li>
-          {% endfor %}
-        </ol>
-      {% elif tocHtml %}
-        <div class="pdf-toc__imported">{{ tocHtml | safe }}</div>
+      {% if isPartial %}
+        <p class="pdf-toc__empty">Bei diesem Dokument handelt es sich um einen Auszug des gesamten Dokuments, daher ist keine Inhaltsübersicht verfügbar.</p>
       {% else %}
-        <p class="pdf-toc__empty">Die Inhaltsübersicht ist im Quelldokument nicht ausgezeichnet.</p>
+        {% if tocItems and tocItems.length %}
+          <ol class="pdf-toc__list">
+            {% for item in tocItems %}
+              <li class="pdf-toc__item pdf-toc__item--level-{{ item.level or 1 }}">
+                <a href="#{{ item.id }}">{{ item.title }}</a>
+              </li>
+            {% endfor %}
+          </ol>
+        {% elif tocHtml %}
+          <div class="pdf-toc__imported">{{ tocHtml | safe }}</div>
+        {% else %}
+          <p class="pdf-toc__empty">Die Inhaltsübersicht ist im Quelldokument nicht ausgezeichnet.</p>
+        {% endif %}
       {% endif %}
     </nav>
 

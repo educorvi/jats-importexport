@@ -7,7 +7,7 @@ import abc
 import os
 import re
 
-from jats_classes import JATSDocument
+from jats_classes import JATSClassInterface, JATSDocument
 from lxml import etree
 
 from jats_exporters.jats import JatsExporter
@@ -54,6 +54,10 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
         return self._transform(self.jats_exporter.export(document))
+
+    def export_partial(self, part: JATSClassInterface) -> str:
+        """Export a partial JATS class instance into an HTML string representation."""
+        return self.transform_xml(self.jats_exporter.export_partial(part))
 
 
 class HtmlExporter(HtmlExporterGeneric):

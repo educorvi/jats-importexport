@@ -11,10 +11,7 @@ from urllib.parse import urlparse
 
 import httpx
 from httpx import HTTPStatusError
-from jats_classes import (
-    Front,
-    JATSDocument,
-)
+from jats_classes import Front, JATSClassInterface, JATSDocument
 
 from ..errors import InternalError, PathNotFoundExpection
 from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
@@ -180,6 +177,33 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error fetching article at {url}") from e
 
         return JATSDocument(article=article)
+
+    def get_jats_document_part(
+        self, path: str, sub_path: str, options: BaseGetJATSDocumentOptions | None = None
+    ) -> tuple[JATSClassInterface, Front]:
+        """Retrieve a part of a JATSDocument from Plone."""
+        plone_options = cast(PloneGetJATSDocumentOptions | None, options)
+        download_service = PloneDownloadService(self.base_url, self.httpx_client)
+
+        article_url = self.get_url_from_path(path)
+        part_path = f"{path.strip('/')}/{sub_path.lstrip('/')}"
+        part_url = self.get_url_from_path(part_path)
+
+        try:
+            part, front = download_service.fetch_article_part(article_url, part_url, plone_options)
+        except HTTPStatusError as e:
+            if e.response.status_code == 404:
+                if str(e.request.url) == part_url:
+                    raise PathNotFoundExpection(part_path) from e
+                if str(e.request.url) == article_url:
+                    raise PathNotFoundExpection(path) from e
+            raise InternalError(f"Error fetching article part at {part_url}") from e
+        except ValueError:
+            raise
+        except Exception as e:
+            raise InternalError(f"Error fetching article part at {part_url}") from e
+
+        return part, front
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""

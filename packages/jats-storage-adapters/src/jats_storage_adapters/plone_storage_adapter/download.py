@@ -19,6 +19,7 @@ from jats_classes import (
     Body,
     Front,
     GenericSection,
+    JATSClassInterface,
     SchemaValidator,
     Section,
 )
@@ -174,15 +175,53 @@ class PloneDownloadService:
     def fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
         data = self.__get_json(url, options)
+        options = self.__try_prefetch_descendents(url, options)
+        article = self.__fetch_article(data, options)
+        article.replace_media_links(self.__get_replace_media_links_callback(url))
+        self.__find_and_replace_link_candidates(article, article.front)
+        return article
+
+    def fetch_article_part(
+        self, article_url: str, part_url: str, options: PloneGetJATSDocumentOptions | None = None
+    ) -> tuple[JATSClassInterface, Front]:
+        """Fetch a part of an article and the front (metadata) from Plone."""
+        data = self.__get_json(part_url, options)
+        front = self.__fetch_front(self.__get_json(article_url, options))
+        options = self.__try_prefetch_descendents(part_url, options)
+        pt = data.get("@type")
+        match pt:
+            case "Article":
+                part = self.__fetch_article(data, options)
+            case "Body":
+                part = self.__fetch_body(part_url, options)
+            case "Back":
+                part = self.__fetch_back(part_url, options)
+            case "AppendixGroup":
+                part = self.__fetch_appendix_group(part_url, options)
+            case "Appendix":
+                part = self.__fetch_appendix(part_url, options)
+            case "Section" | "EasySection":
+                part = self.__fetch_section(part_url, options)
+            case _:
+                raise ValueError(f"Unsupported type for partial export: {pt}")
+
+        part.replace_media_links(self.__get_replace_media_links_callback(article_url))
+        self.__find_and_replace_link_candidates(part, front)
+
+        return part, front
+
+    def __try_prefetch_descendents(
+        self, url: str, options: PloneGetJATSDocumentOptions | None = None
+    ) -> PloneGetJATSDocumentOptions | None:
         pre_request = self.httpx_client.get(url + "/@all_descendents")
         if pre_request.status_code == 200:
             if options is None:
                 options = PloneGetJATSDocumentOptions(include_edit_links=False, pre_requested_sections=None)
-            pre_request_res = pre_request.json()
-            pre_request_data = {}
-            for item in pre_request_res.get("items", []):
-                pre_request_data[item["@id"]] = item
-                options["pre_requested_sections"] = pre_request_data
+            options["pre_requested_sections"] = {item["@id"]: item for item in pre_request.json().get("items", [])}
+        return options
+
+    def __fetch_article(self, data: dict, options: PloneGetJATSDocumentOptions | None = None) -> Article:
+        """Fetch and build an Article node with Front, Body, and Back from Plone."""
         front = body = back = None
         for item in data.get("items", []):
             pt = item.get("@type")
@@ -196,31 +235,7 @@ class PloneDownloadService:
             raise ValueError("Article must contain Front and Body")
         assert front is not None and body is not None
         article = Article(front=front, body=body, back=back)
-        article.replace_media_links(self._get_replace_media_links_callback(url))
-        self.__find_and_replace_link_candidates(article)
         return article
-
-    def _get_replace_media_links_callback(self, article_url: str) -> Callable[[str, tuple[bytes, str] | None], str]:
-        """Return a callback function that replaces media links for a given URL."""
-
-        article_path = self.__get_path_from_url(article_url)
-        ARTICLEMEDIA = "/articlemedia/"
-
-        def replace_media_link(url: str, _: tuple[bytes, str] | None = None) -> str:
-            if url.startswith(self.base_url):
-                if ARTICLEMEDIA not in url:
-                    return url
-                url = url.split("/articlemedia/", 1)[-1]
-                if not url.startswith("/"):
-                    url = f"/{url}"
-            if url.startswith("/"):
-                filename = url[1:]
-                signature = sign_media(article_path, filename)
-                query = urlencode({"path": article_path, "filename": filename, "signature": signature})
-                return f"{self.ieh_base_url}/media/?{query}"
-            return url
-
-        return replace_media_link
 
     def __fetch_front(self, data: dict, resolve_related_items: bool = True) -> Front:
         """Convert Plone front node data into a Front domain model."""
@@ -396,6 +411,28 @@ class PloneDownloadService:
             return False
         return normalized_match == normalized_article_id
 
+    def __get_replace_media_links_callback(self, article_url: str) -> Callable[[str, tuple[bytes, str] | None], str]:
+        """Return a callback function that replaces media links for a given URL."""
+
+        article_path = self.__get_path_from_url(article_url)
+        ARTICLEMEDIA = "/articlemedia/"
+
+        def replace_media_link(url: str, _: tuple[bytes, str] | None = None) -> str:
+            if url.startswith(self.base_url):
+                if ARTICLEMEDIA not in url:
+                    return url
+                url = url.split("/articlemedia/", 1)[-1]
+                if not url.startswith("/"):
+                    url = f"/{url}"
+            if url.startswith("/"):
+                filename = url[1:]
+                signature = sign_media(article_path, filename)
+                query = urlencode({"path": article_path, "filename": filename, "signature": signature})
+                return f"{self.ieh_base_url}/media/?{query}"
+            return url
+
+        return replace_media_link
+
     def __find_and_replace_links_in_section(self, article_id: str | None, language: str, section: GenericSection):
         """Wrap mentions of other DGUV articles in the section content with <ext-link> tags.
 
@@ -476,13 +513,23 @@ class PloneDownloadService:
         # Strip the wrapping <root ...> ... </root> that was only added for parsing.
         section.content_raw = re.sub(r"^<root\b[^>]*>|</root>$", "", rendered)
 
-    def __find_and_replace_link_candidates(self, article: Article):
-        article_id = article.front.article_id
-        language = article.front.xml_lang
-        for section in article.body.sections:
-            self.__find_and_replace_links_in_section(article_id, language, section)
-        if article.back is not None:
-            for section in article.back.appendix_groups:
+    def __find_and_replace_link_candidates(self, part: Article | Body | Back | GenericSection, front: Front):
+        article_id = front.article_id
+        language = front.xml_lang
+        if isinstance(part, Article):
+            for section in part.body.sections:
+                self.__find_and_replace_links_in_section(article_id, language, section)
+            if part.back is not None:
+                for section in part.back.appendix_groups:
+                    self.__find_and_replace_links_in_section(article_id, language, section)
+        elif isinstance(part, Body):
+            for section in part.sections:
+                self.__find_and_replace_links_in_section(article_id, language, section)
+        elif isinstance(part, Back):
+            for section in part.appendix_groups:
+                self.__find_and_replace_links_in_section(article_id, language, section)
+        else:
+            for section in part.sections:
                 self.__find_and_replace_links_in_section(article_id, language, section)
 
     def get_metadata(self, url: str, resolve_related_items: bool = True) -> Front:
