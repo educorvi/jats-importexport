@@ -55,17 +55,31 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
 
 
 async def __load_structure_tree(
-    path: str, max_level: int | None = None, adapter: StorageAdapter | None = None
+    path: str, adapter: StorageAdapter | None = None
 ) -> list[dict]:
     try:
         adapter = adapter or get_adapter_instance()
-        return await asyncio.to_thread(adapter.get_structure_tree, path, max_level)
+        return await asyncio.to_thread(adapter.get_structure_tree, path)
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except DuplicateException as e:
         raise HTTPException(status_code=409, detail=f"More than one document found for {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
+
+
+def _crop_structure_tree(tree_entries: list[dict], max_level: int | None, current_level: int = 1) -> list[dict]:
+    if max_level is None:
+        return tree_entries
+    if current_level > max_level:
+        return []
+    return [
+        {
+            **entry,
+            "children": _crop_structure_tree(entry.get("children", []), max_level, current_level + 1),
+        }
+        for entry in tree_entries
+    ]
 
 
 async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter: StorageAdapter) -> None:
@@ -228,10 +242,10 @@ async def metadata_export(path: str):
 
 
 async def structure_tree_export(path: str, max_level: int | None = None):
-    cached = await EXPORT_CACHE.get_structure_tree(path, max_level)
+    cached = await EXPORT_CACHE.get_structure_tree(path)
     if cached is not None:
-        return cached
+        return _crop_structure_tree(cached, max_level)
     with exp_metric.labels("structure_tree").time(), exp_document_metric.labels("structure_tree", path).time():
-        tree_entries = await __load_structure_tree(path, max_level)
-        await EXPORT_CACHE.set_structure_tree(path, max_level, tree_entries)
-        return tree_entries
+        tree_entries = await __load_structure_tree(path)
+        await EXPORT_CACHE.set_structure_tree(path, tree_entries)
+        return _crop_structure_tree(tree_entries, max_level)
