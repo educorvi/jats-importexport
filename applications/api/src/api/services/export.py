@@ -54,9 +54,7 @@ async def __load_metadata(path: str, adapter: StorageAdapter | None = None) -> F
         raise HTTPException(status_code=500, detail=f"Error loading document: {e}")
 
 
-async def __load_structure_tree(
-    path: str, adapter: StorageAdapter | None = None
-) -> list[dict]:
+async def __load_structure_tree(path: str, adapter: StorageAdapter | None = None) -> list[dict]:
     try:
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_structure_tree, path)

@@ -7,7 +7,7 @@ import logging
 import os
 from datetime import datetime
 from typing import cast, overload
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import httpx
 from httpx import HTTPStatusError
@@ -182,6 +182,10 @@ class PloneStorageAdapter(StorageAdapter):
         self, path: str, sub_path: str, options: BaseGetJATSDocumentOptions | None = None
     ) -> tuple[JATSClassInterface, Front]:
         """Retrieve a part of a JATSDocument from Plone."""
+        decoded_sub_path = unquote(sub_path).replace("\\", "/")
+        if ".." in decoded_sub_path.split("/"):
+            raise ValueError("Sub-path must not contain parent directory segments")
+
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
 

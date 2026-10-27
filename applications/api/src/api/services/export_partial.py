@@ -28,6 +28,8 @@ async def __load_document_part(
     try:
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_jats_document_part, path, sub_path, options)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Bad request: {e}")
     except PathNotFoundExpection as e:
         raise HTTPException(status_code=404, detail=f"Document not found: {e}")
     except DuplicateException as e:
