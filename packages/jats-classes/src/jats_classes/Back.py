@@ -11,17 +11,21 @@ from typing import override
 from lxml import etree
 
 from .JATSClassInterface import JATSClassInterface
-from .section import AppendixGroup
+from .section import AppendixGroup, GenericSection, Glossary, RefList
 
 
 class Back(JATSClassInterface):
     """Represents a JATS <back> element containing a list of appendix groups."""
 
-    appendix_groups: list[AppendixGroup]
+    _sections: list[AppendixGroup | Glossary | RefList]
 
-    def __init__(self, appendix_groups: list[AppendixGroup]):
+    def __init__(self, sections: list[AppendixGroup | Glossary | RefList]):
         """Initialize the Back model with a list of child appendix groups."""
-        self.appendix_groups = appendix_groups
+        self._sections = sections
+
+    @property
+    def sections(self) -> list[GenericSection]:
+        return list(self._sections)
 
     @classmethod
     def from_xml_element(cls, element: etree._Element) -> Back:
@@ -33,22 +37,29 @@ class Back(JATSClassInterface):
         Returns:
             A Back instance.
         """
-        appendix_groups = [AppendixGroup.from_xml_element(app_group) for app_group in element.findall("app-group")]
-        return cls(appendix_groups=appendix_groups)
+        sections = []
+        for child in element:
+            if child.tag == "app-group":
+                sections.append(AppendixGroup.from_xml_element(child))
+            elif child.tag == "glossary":
+                sections.append(Glossary.from_xml_element(child))
+            elif child.tag == "ref-list":
+                sections.append(RefList.from_xml_element(child))
+        return cls(sections=sections)
 
     @override
     def to_xml(self) -> str:
         """Serialize the Back instance back to XML."""
-        content = "\n".join(ag.to_xml() for ag in self.appendix_groups)
+        content = "\n".join(section.to_xml() for section in self.sections)
         if content:
             content = f"{content}\n"
         return f"<back>\n{content}</back>"
 
     def extract_keywords(self) -> list[str]:
         keywords = []
-        for appendix_group in self.appendix_groups:
-            group_keywords = appendix_group.extract_keywords()
-            keywords.extend(k for k in group_keywords if k not in keywords)
+        for section in self.sections:
+            section_keywords = section.extract_keywords()
+            keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords
 
     @override
@@ -67,5 +78,5 @@ class Back(JATSClassInterface):
         media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
         media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
     ) -> None:
-        for appendix_group in self.appendix_groups:
-            appendix_group._replace_media_links(replaced_links, media_link_conversion, media_downloader)
+        for section in self.sections:
+            section._replace_media_links(replaced_links, media_link_conversion, media_downloader)

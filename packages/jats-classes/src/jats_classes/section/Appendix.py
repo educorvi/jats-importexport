@@ -9,20 +9,22 @@ from lxml import etree
 
 from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection
+from .Glossary import Glossary
+from .RefList import RefList
 from .Section import Section
 
 
 class Appendix(GenericSection, JATSClassInterface):
     """Represents a JATS <app> (Appendix) element containing nested Sections."""
 
-    _sections: list[Section]
+    _sections: list[Section | RefList | Glossary]
 
     def __init__(
         self,
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
-        sections: list[Section],
+        sections: list[Section | RefList | Glossary],
     ):
         """Initialize Appendix with metadata and nested sections."""
         super().__init__(
@@ -57,7 +59,16 @@ class Appendix(GenericSection, JATSClassInterface):
         app_type = app.attrib.get("app-type")
         label_title_raw = cls._get_raw_label_title(app)
         content_raw = cls._get_raw_content(app)
-        sections = [Section.from_xml_element(sec_elem) for sec_elem in app.findall("sec")]
+
+        sections: list[Section | RefList | Glossary] = []
+        for child in app:
+            if child.tag == "sec":
+                sections.append(Section.from_xml_element(child))
+            if child.tag == "ref-list":
+                sections.append(RefList.from_xml_element(child))
+            elif child.tag == "glossary":
+                sections.append(Glossary.from_xml_element(child))
+
         return cls(
             sec_type=app_type,
             label_title_raw=label_title_raw,
