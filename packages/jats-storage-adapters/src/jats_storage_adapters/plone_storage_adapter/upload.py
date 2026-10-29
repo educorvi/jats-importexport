@@ -19,6 +19,8 @@ from jats_classes import (
     Body,
     Front,
     GenericSection,
+    Glossary,
+    RefList,
     Section,
 )
 from jats_classes.section import Appendix
@@ -257,12 +259,12 @@ class PloneUploadService:
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
-        for app in back.appendix_groups:
-            self.__create_section(app, response_url)
+        for section in back.sections:
+            self.__create_section(section, response_url)
         return response_url
 
     def __create_section(self, section: GenericSection, container_url: str) -> str:
-        """Recursively create a Section/Appendix/AppendixGroup node structure in a Plone container."""
+        """Recursively create a Section/Appendix/AppendixGroup/Glossary/RefList node structure in a Plone container."""
         portal_type: str
         if isinstance(section, Section):
             portal_type = "Section"
@@ -273,6 +275,12 @@ class PloneUploadService:
         elif isinstance(section, AppendixGroup):
             portal_type = "AppendixGroup"
             generic_title = "Anhanggruppe"
+        elif isinstance(section, Glossary):
+            portal_type = "Glossary"
+            generic_title = "Glossar"
+        elif isinstance(section, RefList):
+            portal_type = "RefList"
+            generic_title = "Literaturverzeichnis"
         else:
             raise ValueError(f"Unsupported section type: {type(section)}")
 
@@ -285,7 +293,7 @@ class PloneUploadService:
             json={
                 "@type": portal_type,
                 "title": title,
-                "sec_type": section.sec_type,
+                "sec_type": section.sec_type or None,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
             },

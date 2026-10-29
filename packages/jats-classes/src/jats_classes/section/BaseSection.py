@@ -93,7 +93,7 @@ class BaseSection(JATSClassInterface, metaclass=abc.ABCMeta):
                 if node.tail:
                     result += try_repair_mojibake(node.tail)
                 continue
-            if node.tag in ["sec", "app"]:
+            if node.tag in ["sec", "app", "glossary", "ref-list"]:
                 break
 
             repaired = try_repair_mojibake_element(node)

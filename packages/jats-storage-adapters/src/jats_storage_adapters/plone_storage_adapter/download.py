@@ -23,6 +23,7 @@ from jats_classes import (
     SchemaValidator,
     Section,
 )
+from jats_classes.section import Glossary, RefList
 from lxml import etree
 
 from ..errors import DuplicateException, InternalError, PathNotFoundExpection
@@ -202,6 +203,10 @@ class PloneDownloadService:
                 part = self.__fetch_appendix(part_url, options)
             case "Section" | "EasySection":
                 part = self.__fetch_section(part_url, options)
+            case "Glossary":
+                part = self.__fetch_glossary(part_url, options)
+            case "RefList":
+                part = self.__fetch_ref_list(part_url, options)
             case _:
                 raise ValueError(f"Unsupported type for partial export: {pt}")
 
@@ -323,36 +328,48 @@ class PloneDownloadService:
     def __fetch_back(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Back:
         """Fetch and reconstruct the Back node and its appendix groups from Plone."""
         data = self.__get_json(url, options)
-        appendix_groups = [
-            self.__fetch_appendix_group(item["@id"], options)
-            for item in data.get("items", [])
-            if item.get("@type") == "AppendixGroup"
-        ]
-        return Back(appendix_groups=appendix_groups)
+        sections: list[AppendixGroup | RefList | Glossary] = []
+        for item in data.get("items", []):
+            if item.get("@type") == "AppendixGroup":
+                sections.append(self.__fetch_appendix_group(item["@id"], options))
+            elif item.get("@type") == "RefList":
+                sections.append(self.__fetch_ref_list(item["@id"], options))
+            elif item.get("@type") == "Glossary":
+                sections.append(self.__fetch_glossary(item["@id"], options))
+
+        return Back(sections=sections)
 
     def __fetch_appendix_group(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> AppendixGroup:
         """Fetch and reconstruct an AppendixGroup from Plone REST endpoints."""
         data = self.__get_json(url, options)
-        appendixes = [
-            self.__fetch_appendix(item["@id"], options)
-            for item in data.get("items", [])
-            if item.get("@type") == "Appendix"
-        ]
+        sections: list[Appendix | RefList] = []
+        for item in data.get("items", []):
+            if item.get("@type") == "Appendix":
+                sections.append(self.__fetch_appendix(item["@id"], options))
+            elif item.get("@type") == "RefList":
+                sections.append(self.__fetch_ref_list(item["@id"], options))
+
         return AppendixGroup(
             sec_type=data.get("sec_type"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
-            appendixes=appendixes,
+            sections=sections,
         )
 
     def __fetch_appendix(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Appendix:
         """Fetch and reconstruct an Appendix and subsections from Plone."""
         data = self.__get_json(url, options)
-        sections = [
-            self.__fetch_section(item["@id"], options)
-            for item in data.get("items", [])
-            if item.get("@type") == "Section"
-        ]
+        sections: list[Section | RefList | Glossary] = []
+        last_sections: list[RefList | Glossary] = []
+        for item in data.get("items", []):
+            if item.get("@type") == "Section":
+                sections.append(self.__fetch_section(item["@id"], options))
+            elif item.get("@type") == "RefList":
+                last_sections.append(self.__fetch_ref_list(item["@id"], options))
+            elif item.get("@type") == "Glossary":
+                last_sections.append(self.__fetch_glossary(item["@id"], options))
+        sections.extend(last_sections)
+
         return Appendix(
             sec_type=data.get("sec_type"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
@@ -360,14 +377,37 @@ class PloneDownloadService:
             sections=sections,
         )
 
+    def __fetch_glossary(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Glossary:
+        """Fetch and reconstruct a Glossary from Plone REST endpoints."""
+        data = self.__get_json(url, options)
+        return Glossary(
+            label_title_raw=self.__get_label_title_raw(data, url, options),
+            content_raw=data.get("content_raw"),
+        )
+
+    def __fetch_ref_list(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> RefList:
+        """Fetch and reconstruct a RefList from Plone REST endpoints."""
+        data = self.__get_json(url, options)
+        return RefList(
+            label_title_raw=self.__get_label_title_raw(data, url, options),
+            content_raw=data.get("content_raw"),
+        )
+
     def __fetch_section(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Section:
         """Fetch and reconstruct a Section and subsections from Plone REST endpoints."""
         data = self.__get_json(url, options)
-        sections = [
-            self.__fetch_section(item["@id"], options)
-            for item in data.get("items", [])
-            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
-        ]
+
+        sections: list[Section | RefList | Glossary] = []
+        last_sections: list[RefList | Glossary] = []
+        for item in data.get("items", []):
+            if item.get("@type") in ["Section", "EasySection"]:
+                sections.append(self.__fetch_section(item["@id"], options))
+            elif item.get("@type") == "RefList":
+                last_sections.append(self.__fetch_ref_list(item["@id"], options))
+            elif item.get("@type") == "Glossary":
+                last_sections.append(self.__fetch_glossary(item["@id"], options))
+        sections.extend(last_sections) # append glossaries and ref lists at the end of the section's subsections list
+
         label_title_raw = self.__get_label_title_raw(data, url, options)
         if data.get("@type") == "Section":
             return Section(
@@ -416,7 +456,7 @@ class PloneDownloadService:
     def __get_label_title_raw(self, data: dict, url: str, options: PloneGetJATSDocumentOptions | None = None) -> str:
         """Construct the label_title_raw string for a section, including edit link if requested."""
         section_type = data.get("@type")
-        if section_type in ["Section", "AppendixGroup", "Appendix"]:
+        if section_type in ["Section", "AppendixGroup", "Appendix", "RefList", "Glossary"]:
             label_title_raw = data.get("label_title_raw") or ""
         elif section_type == "EasySection":
             label = data.get("label") or ""
@@ -556,13 +596,13 @@ class PloneDownloadService:
             for section in part.body.sections:
                 self.__find_and_replace_links_in_section(article_id, language, section)
             if part.back is not None:
-                for section in part.back.appendix_groups:
+                for section in part.back.sections:
                     self.__find_and_replace_links_in_section(article_id, language, section)
         elif isinstance(part, Body):
             for section in part.sections:
                 self.__find_and_replace_links_in_section(article_id, language, section)
         elif isinstance(part, Back):
-            for section in part.appendix_groups:
+            for section in part.sections:
                 self.__find_and_replace_links_in_section(article_id, language, section)
         else:
             for section in part.sections:
