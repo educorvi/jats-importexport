@@ -65,10 +65,10 @@ def create_mock_document() -> JATSDocument:
         sec_type="appendices",
         label_title_raw="<label>Group Label</label><title>Group Title</title>",
         content_raw="<p>Group content.</p>",
-        appendixes=[appendix],
+        sections=[appendix],
     )
 
-    back = Back(appendix_groups=[app_group])
+    back = Back(sections=[app_group])
 
     article = Article(front=front, body=body, back=back)
     return JATSDocument(article=article)

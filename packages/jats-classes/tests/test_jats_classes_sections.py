@@ -67,9 +67,9 @@ def test_back_appendix_parsing():
 	doc = JATSDocument.from_xml(SECTION_DOCUMENT, xsd_path=None)
 	back = doc.article.back
 	assert isinstance(back, Back)
-	assert len(back.appendix_groups) == 1
+	assert len(back.sections) == 1
 
-	app_group = back.appendix_groups[0]
+	app_group = back.sections[0]
 	assert isinstance(app_group, AppendixGroup)
 	assert app_group.sec_type == "appendices"  # maps to content-type attribute
 	assert app_group.label == "Appendix Group Label"
@@ -176,17 +176,17 @@ def test_body_without_stray_content_has_no_extra_section():
 def test_back_without_app_group_has_no_appendix_groups():
 	back_elem = etree.fromstring(f"<back>{BACK_NO_APP_GROUP}</back>")
 	back = Back.from_xml_element(back_elem)
-	assert back.appendix_groups == []
+	assert back.sections == []
 
 
 def test_back_multiple_appendix_groups():
 	back_elem = etree.fromstring(f"<back>{BACK_MULTIPLE_APPENDIX_GROUPS}</back>")
 	back = Back.from_xml_element(back_elem)
-	assert len(back.appendix_groups) == 2
-	assert back.appendix_groups[0].title == "First Group"
-	assert back.appendix_groups[1].title == "Second Group"
-	assert back.appendix_groups[0].sections[0].title == "First Group Appendix"
-	assert back.appendix_groups[1].sections[0].title == "Second Group Appendix"
+	assert len(back.sections) == 2
+	assert back.sections[0].title == "First Group"
+	assert back.sections[1].title == "Second Group"
+	assert back.sections[0].sections[0].title == "First Group Appendix"
+	assert back.sections[1].sections[0].title == "Second Group Appendix"
 
 
 def test_appendix_group_with_multiple_appendixes():
@@ -258,4 +258,4 @@ def test_jats_document_accepts_section_document_against_schema():
 	doc = JATSDocument.from_xml(SCHEMA_VALID_SECTION_DOCUMENT, xsd_path=XSD_PATH)
 	assert doc.article.body.sections[0].title == "Introduction"
 	assert doc.article.back is not None
-	assert doc.article.back.appendix_groups[0].sections[0].title == "First Appendix"
+	assert doc.article.back.sections[0].sections[0].title == "First Appendix"

@@ -377,8 +377,8 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     sub = sec.sections[0]
     assert sub.title == "Sub Title"
 
-    assert len(doc.article.back.appendix_groups) == 1
-    app_group = doc.article.back.appendix_groups[0]
+    assert len(doc.article.back.sections) == 1
+    app_group = doc.article.back.sections[0]
     assert app_group.label == "G1"
     assert len(app_group.sections) == 1
 
@@ -493,7 +493,7 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
         sec_type="main", label_title_raw="<title>Main</title>", content_raw="Maincontent", sections=[sub_sec]
     )
     body = Body(sections=[body_sec])
-    back = Back(appendix_groups=[])
+    back = Back(sections=[])
     article = Article(front=front, body=body, back=back)
     document = JATSDocument(article=article)
 
