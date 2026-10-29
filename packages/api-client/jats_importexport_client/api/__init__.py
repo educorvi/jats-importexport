@@ -7,6 +7,7 @@ from jats_importexport_client.api.export_async_api import ExportAsyncApi
 from jats_importexport_client.api.list_api import ListApi
 from jats_importexport_client.api.media_api import MediaApi
 from jats_importexport_client.api.modify_api import ModifyApi
+from jats_importexport_client.api.partial_export_api import PartialExportApi
 from jats_importexport_client.api.status_api import StatusApi
 from jats_importexport_client.api.upload_api import UploadApi
 
