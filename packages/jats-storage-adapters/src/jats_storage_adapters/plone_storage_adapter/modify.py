@@ -98,12 +98,3 @@ class PloneModifyService:
                 related_articles_ids.remove(related_id)
                 modified = True
         return related_articles_ids, related_articles_items, modified
-
-    def delete_article(self, url: str):
-        """Deletes an Article including all child items (which also include assets).
-
-        Args:
-            url (str): The URL of the article to delete.
-        """
-        response = self.httpx_client.delete(url)
-        response.raise_for_status()

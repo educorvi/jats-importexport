@@ -524,17 +524,6 @@ def test_link_related_articles_success(mock_adapter, mocker):
     ]
 
 
-def test_delete_article_invalidates_cache_after_partial_asset_errors(mock_adapter, mocker):
-    mocker.patch.object(mock_adapter, "delete_article", return_value=["asset deletion failed"])
-    cache_delete = mocker.patch("api.services.modify.EXPORT_CACHE.delete", new_callable=AsyncMock)
-
-    response = client.delete("/modify/article", params={"path": "articles/article1.xml"})
-
-    assert response.status_code == 200
-    assert response.json()["errors"] == ["asset deletion failed"]
-    cache_delete.assert_awaited_once_with("articles/article1.xml", None)
-
-
 def test_link_related_articles_error(mock_adapter, mocker):
     mocker.patch.object(mock_adapter, "link_related_articles", side_effect=Exception("boom"))
     response = client.post("/modify/link-related-articles")
