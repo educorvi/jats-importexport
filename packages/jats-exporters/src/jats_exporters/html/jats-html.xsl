@@ -176,10 +176,8 @@ or pipeline) parameterized.
 
     <!-- To reduce dependency on a DTD for processing, we declare
          a key to use instead of the id() function. -->
-    <xsl:key name="element-by-id" match="*[@id]" use="@id"/>
 
     <!-- Enabling retrieval of cross-references to objects -->
-    <xsl:key name="xref-by-rid" match="xref" use="@rid"/>
 
 
     <!-- ============================================================= -->
@@ -498,13 +496,8 @@ or pipeline) parameterized.
                     <xsl:apply-templates select="graphic"/>
                     <xsl:if test="label or caption">
                         <div class="caption">
-                            <xsl:variable name="label-text">
-                                <xsl:apply-templates select="." mode="label-text">
-                                    <xsl:with-param name="warning"
-                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
-                                </xsl:apply-templates>
-                            </xsl:variable>
-                            <xsl:if test="normalize-space(string($label-text))">
+                            <xsl:variable name="label-text" select="normalize-space(string(label))"/>
+                            <xsl:if test="$label-text">
                                 <span class="label">
                                     <xsl:copy-of select="$label-text"/>
                                 </span>
@@ -527,13 +520,8 @@ or pipeline) parameterized.
                 <xsl:when test="self::table-wrap">
                     <xsl:if test="label or caption">
                         <div class="caption">
-                            <xsl:variable name="label-text">
-                                <xsl:apply-templates select="." mode="label-text">
-                                    <xsl:with-param name="warning"
-                                                    select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
-                                </xsl:apply-templates>
-                            </xsl:variable>
-                            <xsl:if test="normalize-space(string($label-text))">
+                            <xsl:variable name="label-text" select="normalize-space(string(label))" />
+                            <xsl:if test="$label-text">
                                 <span class="label">
                                     <xsl:copy-of select="$label-text"/>
                                 </span>
@@ -556,8 +544,28 @@ or pipeline) parameterized.
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:apply-templates select="." mode="label"/>
-                    <xsl:apply-templates/>
+                    <xsl:if test="label or caption">
+                        <div class="caption">
+                            <xsl:variable name="label-text" select="normalize-space(string(label))" />
+                            <xsl:if test="$label-text">
+                                <span class="label">
+                                    <xsl:copy-of select="$label-text"/>
+                                    <xsl:text> </xsl:text>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/title">
+                                <span class="title">
+                                    <xsl:apply-templates select="caption/title/node()"/>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="caption/p">
+                                <span class="caption-text">
+                                    <xsl:apply-templates select="caption/p/node()"/>
+                                </span>
+                            </xsl:if>
+                        </div>
+                    </xsl:if>
+                    <xsl:apply-templates select="*[not(self::label or self::caption)]"/>
                 </xsl:otherwise>
             </xsl:choose>
         </div>
@@ -574,7 +582,6 @@ or pipeline) parameterized.
     <xsl:template match="disp-formula">
         <div class="{local-name()} panel">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="." mode="label"/>
             <xsl:apply-templates/>
         </div>
     </xsl:template>
@@ -805,10 +812,8 @@ or pipeline) parameterized.
 
     <xsl:template match="ref">
         <li>
-            <xsl:variable name="ref-label">
-                <xsl:apply-templates select="." mode="label"/>
-            </xsl:variable>
-            <xsl:if test="normalize-space(string($ref-label))">
+            <xsl:variable name="ref-label" select="normalize-space(string(label))" />
+            <xsl:if test="$ref-label">
                 <span>
                     <xsl:copy-of select="$ref-label"/>
                     <xsl:text> </xsl:text>
@@ -1001,16 +1006,6 @@ or pipeline) parameterized.
     </xsl:template>
 
 
-    <xsl:template match="xref[not(normalize-space(string(.)))]">
-        <a href="#{@rid}">
-            <xsl:apply-templates select="key('element-by-id',@rid)"
-                                 mode="label-text">
-                <xsl:with-param name="warning" select="true()"/>
-            </xsl:apply-templates>
-        </a>
-    </xsl:template>
-
-
     <xsl:template match="xref">
         <a href="#{@rid}">
             <xsl:apply-templates/>
@@ -1199,17 +1194,11 @@ or pipeline) parameterized.
         <!-- Footnotes appearing outside fn-group
              generate cross-references to the footnote,
              which is displayed elsewhere -->
-        <!-- Note the rules for displayed content: if any fn elements
-             not inside an fn-group (the matched fn or any other) includes
-             a label child, all footnotes are expected to have a label
-             child. -->
         <xsl:variable name="id">
             <xsl:apply-templates select="." mode="id"/>
         </xsl:variable>
         <a href="#{$id}">
-            <xsl:apply-templates select="." mode="label-text">
-                <xsl:with-param name="warning" select="true()"/>
-            </xsl:apply-templates>
+            <xsl:apply-templates select="." mode="label-text"/>
         </a>
     </xsl:template>
 
@@ -1235,295 +1224,28 @@ or pipeline) parameterized.
     </xsl:template>
 
 
-    <!-- ============================================================= -->
-    <!--  MODE 'label-text'
-            Generates label text for elements and their cross-references -->
-    <!-- ============================================================= -->
-    <!--  This mode is to support auto-numbering and generating of
-          labels for certain elements by the stylesheet.
-
-          The logic is as follows: for any such element type, if a
-          'label' element is ever present, it is expected always to be
-          present; automatic numbering is not performed on any elements
-          of that type. For example, the presence of a 'label' element
-          in any 'fig' is taken to indicate that all figs should likewise
-          be labeled, and any 'fig' without a label is supposed to be
-          unlabelled (and unnumbered). But if no 'fig' elements have
-          'label' children, labels with numbers are generated for all
-          figs in display.
-
-          This logic applies to:
-            app, boxed-text, chem-struct-wrap, disp-formula, fig, fn,
-            note, ref, statement, table-wrap.
-
-          There is one exception in the case of fn elements, where
-          the checking for labels (or for @symbol attributes in the
-          case of this element) is performed only within its parent
-          fn-group, or in the scope of all fn elements not in an
-          fn-group, for fn elements appearing outside fn-group.
-
-          In all cases, this logic can be altered simply by overwriting
-          templates in "label" mode for any of these elements.
-
-          For other elements, a label is simply displayed if present,
-          and auto-numbering is never performed.
-          These elements include:
-            (label appearing in line) aff, corresp, chem-struct,
-            element-citation, mixed-citation
-
-            (label appearing as a block) abstract, ack, app-group,
-            author-notes, back, bio, def-list, disp-formula-group,
-            disp-quote, fn-group, glossary, graphic, kwd-group,
-            list, list-item, media, notes, ref-list, sec,
-            supplementary-material, table-wrap-group,
-            trans-abstract, verse-group -->
-
-
-    <xsl:template mode="label" match="*" name="block-label">
-        <xsl:param name="contents">
-            <xsl:apply-templates select="." mode="label-text">
-                <!-- we place a warning for missing labels if this element is ever
-                     cross-referenced with an empty xref -->
-                <xsl:with-param name="warning"
-                                select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
-            </xsl:apply-templates>
-        </xsl:param>
-        <xsl:if test="normalize-space(string($contents))">
-            <!-- not to create an h5 for nothing -->
-            <h5 class="label">
-                <xsl:copy-of select="$contents"/>
-            </h5>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template mode="label" match="ref">
-        <xsl:param name="contents">
-            <xsl:apply-templates select="." mode="label-text">
-                <xsl:with-param name="warning"
-                                select="boolean(key('xref-by-rid',@id)[not(normalize-space(string(.)))])"/>
-            </xsl:apply-templates>
-        </xsl:param>
-        <xsl:if test="normalize-space(string($contents))">
-            <!-- we're already in a p -->
-            <span class="label">
-                <xsl:copy-of select="$contents"/>
-            </span>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="app" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <!--
-            Pass in the desired label if a label is to be autogenerated
-            <xsl:with-param name="auto-text">
-              <xsl:text>Appendix </xsl:text>
-              <xsl:number format="A"/>
-            </xsl:with-param>-->
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="boxed-text" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>Box </xsl:text>
-                <xsl:number level="any"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="disp-formula" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>Formel </xsl:text>
-                <xsl:number level="any"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="fig" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>Abbildung </xsl:text>
-                <xsl:number level="any"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="front//fn" mode="label-text">
-        <xsl:param name="warning" select="boolean(key('xref-by-rid',@id))"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels);
-             by default, we get a warning only if we need a label for
-             a cross-reference -->
-        <!-- auto-number-fn is true only if (1) this fn is cross-referenced, and
-             (2) there exists inside the front matter any fn elements with
-             cross-references, but not labels or @symbols. -->
-        <xsl:param name="auto-number-fn"
-                   select="boolean(key('xref-by-rid',parent::fn/@id)) and
-      boolean(ancestor::front//fn[key('xref-by-rid',@id)][not(label|@symbol)])"/>
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="auto" select="$auto-number-fn"/>
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:number level="any" count="fn" from="front" format="a"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="table-wrap//fn" mode="label-text">
-        <xsl:param name="warning" select="boolean(key('xref-by-rid',@id))"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels);
-             by default, we get a warning only if we need a label for
-             a cross-reference -->
-        <xsl:param name="auto-number-fn"
-                   select="not(ancestor::table-wrap//fn/label | ancestor::table-wrap//fn/@symbol)"/>
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="auto" select="$auto-number-fn"/>
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>[</xsl:text>
-                <xsl:number level="any" count="fn" from="table-wrap" format="i"/>
-                <xsl:text>]</xsl:text>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
     <xsl:template match="fn" mode="label-text">
-        <xsl:param name="warning" select="boolean(key('xref-by-rid',@id))"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels);
-             by default, we get a warning only if we need a label for
-             a cross-reference -->
-        <!-- autonumber all fn elements outside fn-group,
-             front matter and table-wrap only if none of them
-             have labels or @symbols (to keep numbering
-             orderly) -->
-        <xsl:variable name="in-scope-notes"
-                      select="ancestor::article//fn[not(ancestor::front | ancestor::table-wrap)]"/>
-        <xsl:variable name="auto-number-fn"
-                      select="not($in-scope-notes/label |
-      $in-scope-notes/@symbol)"/>
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="auto" select="$auto-number-fn"/>
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>[</xsl:text>
-                <xsl:number level="any" count="fn[not(ancestor::front)]"
-                            from="article"/>
-                <xsl:text>]</xsl:text>
-                <xsl:apply-templates select="@fn-type"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="ref" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:number level="any"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="table-wrap" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-            <xsl:with-param name="auto-text">
-                <xsl:text>Tabelle </xsl:text>
-                <xsl:number level="any" format="I"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="*" mode="label-text">
-        <xsl:param name="warning" select="true()"/>
-        <!-- pass $warning in as false() if a warning string is not wanted
-             (for example, if generating autonumbered labels) -->
-        <xsl:call-template name="make-label-text">
-            <xsl:with-param name="warning" select="$warning"/>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="label" mode="label-text">
-        <xsl:apply-templates mode="inline-label-text"/>
-    </xsl:template>
-
-
-    <xsl:template match="text()" mode="inline-label-text">
-        <!-- when displaying labels, space characters become non-breaking spaces -->
-        <xsl:value-of select="translate(normalize-space(string(.)),' &#xA;&#x9;','&#xA0;&#xA0;&#xA0;')"/>
+        <xsl:choose>
+            <xsl:when test="not(label or @symbol)">
+                <span class="generated">
+                    <xsl:text>[</xsl:text>
+                    <xsl:number level="any" count="fn[not(ancestor::front)]"
+                                from="article"/>
+                    <xsl:text>]</xsl:text>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="@symbol"/>
+                <xsl:value-of
+                    select="translate(normalize-space(string(label)), ' &#xA;&#x9;', '&#xA0;&#xA0;&#xA0;')"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 
     <!-- ============================================================= -->
     <!--  UTILITY TEMPLATES                                           -->
     <!-- ============================================================= -->
-
-    <xsl:template name="make-label-text">
-        <xsl:param name="auto" select="false()"/>
-        <xsl:param name="warning" select="false()"/>
-        <xsl:param name="auto-text"/>
-        <xsl:choose>
-            <xsl:when test="$auto">
-                <span class="generated">
-                    <xsl:copy-of select="$auto-text"/>
-                </span>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:apply-templates mode="label-text"
-                                     select="label | @symbol"/>
-                <xsl:if test="$warning and not(label|@symbol)">
-                    <span class="warning">
-                        <xsl:text>{ label</xsl:text>
-                        <xsl:if test="self::fn">(or @symbol)</xsl:if>
-                        <xsl:text> needed for </xsl:text>
-                        <xsl:value-of select="local-name()"/>
-                        <xsl:for-each select="@id">
-                            <xsl:text>[@id='</xsl:text>
-                            <xsl:value-of select="."/>
-                            <xsl:text>']</xsl:text>
-                        </xsl:for-each>
-                        <xsl:text> }</xsl:text>
-                    </span>
-                </xsl:if>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
 
 
     <xsl:template name="assign-id">
