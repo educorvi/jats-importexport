@@ -12,8 +12,12 @@
 
     <xsl:template match="/">
         <html>
-            <!-- HTML header -->
-            <xsl:call-template name="make-html-header"/>
+            <head>
+                <meta charset="UTF-8"/>
+                <title>
+                    <xsl:value-of select="/article/front/article-meta/title-group/article-title[1]"/>
+                </title>
+            </head>
             <body>
                 <xsl:apply-templates/>
             </body>

@@ -146,10 +146,6 @@ def test_html_exporter_styles_glossary_titles_like_section_titles():
                 <glossary id="body-glossary">
                     <label>B</label><title>Body glossary</title>
                 </glossary>
-                <gloss-group id="gloss-group">
-                    <label>G</label><title>Glossary group</title>
-                    <glossary id="grouped-glossary"><title>Grouped glossary</title></glossary>
-                </gloss-group>
             </body>
             <back>
                 <title>Back title</title>
@@ -174,14 +170,12 @@ def test_html_exporter_styles_glossary_titles_like_section_titles():
     assert heading.get_text(" ", strip=True) == "Section title"
     assert glossary_titles == {
         "N Nested glossary": "h3",
-        "B Body glossary": "h2",
-        "G Glossary group": "h2",
-        "Grouped glossary": "h3",
+        "B Body glossary": "h2"
     }
     heading = soup.select_one("#article-back > .section > h3.title")
     assert heading is not None
     assert heading.get_text(" ", strip=True) == "R Back glossary"
-    assert [label.get_text(strip=True) for label in glossary_labels] == ["N", "B", "G", "R"]
+    assert [label.get_text(strip=True) for label in glossary_labels] == ["N", "B", "R"]
     assert all(
         label.parent is not None and label.parent.name in {"h2", "h3"}
         for label in glossary_labels
