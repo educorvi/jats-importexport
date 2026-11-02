@@ -10,19 +10,20 @@ from lxml import etree
 from ..JATSClassInterface import JATSClassInterface
 from .Appendix import Appendix
 from .GenericSection import GenericSection
+from .RefList import RefList
 
 
 class AppendixGroup(GenericSection, JATSClassInterface):
     """Represents a JATS <app-group> container wrapping Appendix elements."""
 
-    _appendixes: list[Appendix]
+    _sections: list[Appendix | RefList]
 
     def __init__(
         self,
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
-        appendixes: list[Appendix],
+        sections: list[Appendix | RefList],
     ):
         """Initialize AppendixGroup containing child appendixes."""
         super().__init__(
@@ -30,11 +31,11 @@ class AppendixGroup(GenericSection, JATSClassInterface):
             label_title_raw=label_title_raw,
             content_raw=content_raw,
         )
-        self._appendixes = appendixes
+        self._sections = sections
 
     @property
     def sections(self) -> list[GenericSection]:
-        return list(self._appendixes)
+        return list(self._sections)
 
     @property
     def _tag_name(self) -> str:
@@ -57,17 +58,24 @@ class AppendixGroup(GenericSection, JATSClassInterface):
         content_type = app_group.attrib.get("content-type")
         label_title_raw = cls._get_raw_label_title(app_group)
         content_raw = cls._get_raw_content(app_group)
-        appendixes = [Appendix.from_xml_element(app_elem) for app_elem in app_group.findall("app")]
+
+        sections: list[Appendix | RefList] = []
+        for child in app_group:
+            if child.tag == "app":
+                sections.append(Appendix.from_xml_element(child))
+            elif child.tag == "ref-list":
+                sections.append(RefList.from_xml_element(child))
+
         return cls(
             sec_type=content_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
-            appendixes=appendixes,
+            sections=sections,
         )
 
     def extract_keywords(self) -> list[str]:
         keywords = super().extract_keywords()
-        for appendix in self._appendixes:
-            appendix_keywords = appendix.extract_keywords()
-            keywords.extend(k for k in appendix_keywords if k not in keywords)
+        for section in self._sections:
+            section_keywords = section.extract_keywords()
+            keywords.extend(k for k in section_keywords if k not in keywords)
         return keywords

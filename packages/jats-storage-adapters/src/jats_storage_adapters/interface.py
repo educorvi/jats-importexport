@@ -220,8 +220,8 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete_article(self, path: str) -> list[str]:
-        """Delete an article from the storage system and return a list of any errors encountered."""
+    def delete_article(self, path: str):
+        """Delete an article from the storage system."""
         raise NotImplementedError
 
     # Listing / querying related methods

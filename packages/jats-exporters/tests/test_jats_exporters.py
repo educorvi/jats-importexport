@@ -12,6 +12,8 @@ from jats_classes import (
     Front,
     JATSDocument,
     Section,
+    Glossary,
+    RefList,
 )
 from jats_exporters import (
     HtmlExporter,
@@ -61,14 +63,24 @@ def create_mock_document() -> JATSDocument:
         sections=[app_sec],
     )
 
+    glossary = Glossary(
+        label_title_raw="<label>G</label><title>Glossary Title</title>",
+        content_raw="<p>Glossary content.</p>",
+    )
+
+    ref_list = RefList(
+        label_title_raw="<label>R</label><title>References</title>",
+        content_raw="<p>Reference content.</p>",
+    )
+
     app_group = AppendixGroup(
         sec_type="appendices",
         label_title_raw="<label>Group Label</label><title>Group Title</title>",
         content_raw="<p>Group content.</p>",
-        appendixes=[appendix],
+        sections=[appendix, ref_list],
     )
 
-    back = Back(appendix_groups=[app_group])
+    back = Back(sections=[app_group, glossary])
 
     article = Article(front=front, body=body, back=back)
     return JATSDocument(article=article)
@@ -91,6 +103,134 @@ def test_html_exporter_transform():
     # The XSL stylesheet typically converts body, sections, titles, and paragraphs.
     assert "Intro title" in html_output
     assert "Annex Title" in html_output
+
+
+def test_html_exporter_renders_nested_toc_sections():
+    xml = etree.fromstring(
+        b"""<article>
+            <front/>
+            <body>
+                <sec id="parent" sec-type="intro">
+                    <title>Parent section</title>
+                    <sec id="child" sec-type="subsection"><title>Child section</title></sec>
+                </sec>
+            </body>
+        </article>"""
+    )
+
+    html_output = str(HtmlExporter().transform(xml))
+    soup = BeautifulSoup(html_output, "html.parser")
+    toc = soup.select_one(".jats-html-export-toc")
+    assert toc is not None
+    parent = toc.find("a", href="#parent")
+    assert parent is not None
+    assert parent.get_text() == "Parent section"
+    li = parent.find_parent("li")
+    assert li is not None
+    ul = li.select_one("ul a[href='#child']")
+    assert ul is not None
+    assert ul.get_text() == "Child section"
+
+
+def test_html_exporter_styles_glossary_titles_like_section_titles():
+    xml = etree.fromstring(
+        b"""<article>
+            <front/>
+            <body>
+                <sec id="section" sec-type="intro">
+                    <title>Section title</title>
+                    <glossary id="nested-glossary">
+                        <label>N</label><title>Nested glossary</title>
+                    </glossary>
+                </sec>
+                <glossary id="body-glossary">
+                    <label>B</label><title>Body glossary</title>
+                </glossary>
+                <gloss-group id="gloss-group">
+                    <label>G</label><title>Glossary group</title>
+                    <glossary id="grouped-glossary"><title>Grouped glossary</title></glossary>
+                </gloss-group>
+            </body>
+            <back>
+                <title>Back title</title>
+                <glossary id="back-glossary">
+                    <label>R</label><title>Back glossary</title>
+                </glossary>
+            </back>
+        </article>"""
+    )
+
+    soup = BeautifulSoup(str(HtmlExporter().transform(xml)), "html.parser")
+    glossary_titles = {
+        heading.get_text(" ", strip=True): heading.name
+        for heading in soup.select("#article-body .glossary > .title")
+    }
+    glossary_labels = soup.select(
+        "#article-body .glossary .label, #article-back > .section > .title .label"
+    )
+
+    heading = soup.select_one("#article-body > .section > h2.title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "Section title"
+    assert glossary_titles == {
+        "N Nested glossary": "h3",
+        "B Body glossary": "h2",
+        "G Glossary group": "h2",
+        "Grouped glossary": "h3",
+    }
+    heading = soup.select_one("#article-back > .section > h3.title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "R Back glossary"
+    assert [label.get_text(strip=True) for label in glossary_labels] == ["N", "B", "G", "R"]
+    assert all(
+        label.parent is not None and label.parent.name in {"h2", "h3"}
+        for label in glossary_labels
+    )
+
+
+def test_html_exporter_renders_back_ref_list_and_nested_ref_list():
+    xml = etree.fromstring(
+        b"""<article>
+            <front/>
+            <body/>
+            <back>
+                <ref-list id="references">
+                    <ref id="ref-one">
+                        <label>1</label>
+                        <mixed-citation>First citation.</mixed-citation>
+                    </ref>
+                    <ref-list id="online-references">
+                        <title>Online references</title>
+                        <ref id="ref-two">
+                            <label>2</label>
+                            <mixed-citation>Second citation.</mixed-citation>
+                        </ref>
+                    </ref-list>
+                </ref-list>
+            </back>
+        </article>"""
+    )
+
+    soup = BeautifulSoup(str(HtmlExporter().transform(xml)), "html.parser")
+    back = soup.select_one("#article-back")
+    assert back is not None
+    ref_list = back.select_one(".section.ref-list")
+    assert ref_list is not None
+    nested_ref_list = ref_list.select_one(".ref-list")
+    assert nested_ref_list is not None
+
+    heading = back.select_one("h2.main-title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "Literaturverzeichnis"
+    assert [item.get_text(" ", strip=True) for item in ref_list.select(":scope > ul > li")] == [
+        "1 First citation."
+    ]
+    heading_nested = nested_ref_list.select_one(":scope > h3.title")
+    assert heading_nested is not None
+    assert heading_nested.get_text(" ", strip=True) == "Online references"
+    assert [item.get_text(" ", strip=True) for item in nested_ref_list.select(":scope > ul > li")] == [
+        "2 Second citation."
+    ]
 
 
 def test_html_exporter_standalone_transform():
@@ -202,16 +342,20 @@ def test_pdf_exporter_typesets_mathml_as_svg(mathml_equation, display):
     soup = BeautifulSoup(result, "html.parser")
 
     assert soup.find("math") is None
+    assert soup.p is not None
     assert soup.p.get_text() == "Before  after."
     image = soup.find("img", class_="pdf-math")
+    assert image is not None
     assert f"pdf-math--{display or 'inline'}" in image["class"]
     assert image["id"] == "equation-1"
     assert image["alt"] == "Sum of squared field ratios is at most one"
     assert "vertical-align: -" in image["style"]
-    svg = etree.fromstring(base64.b64decode(image["src"].split(",", 1)[1]))
+    svg = etree.fromstring(base64.b64decode(str(image["src"]).split(",", 1)[1]))
     assert svg.tag == "{http://www.w3.org/2000/svg}svg"
-    assert float(svg.get("width")) > 0
-    assert float(svg.get("height")) > 0
+    width = svg.get("width")
+    height = svg.get("height")
+    assert width is not None and float(width) > 0
+    assert height is not None and float(height) > 0
     assert svg.findall(".//{http://www.w3.org/2000/svg}path")
 
 

@@ -10,7 +10,7 @@ from .Document import JATSDocument
 from .Front import Front
 from .JATSClassInterface import JATSClassInterface
 from .SchemaValidator import SchemaValidator
-from .section import Appendix, AppendixGroup, GenericSection, Section
+from .section import Appendix, AppendixGroup, GenericSection, Glossary, RefList, Section
 
 __all__ = [
     "JATSClassInterface",
@@ -23,5 +23,7 @@ __all__ = [
     "Section",
     "GenericSection",
     "Appendix",
+    "Glossary",
+    "RefList",
     "SchemaValidator",
 ]

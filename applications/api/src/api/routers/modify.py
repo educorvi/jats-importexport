@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
 from api.models import (
-    DeleteArticleResponse,
     HTTP400BadRequest,
     HTTP404NotFound,
     HTTP409Conflict,
@@ -33,8 +32,8 @@ async def link_related_articles(request: Request):
 @router.delete(
     "/article",
     operation_id="delete_article",
+    status_code=204,
     responses={
-        200: {"model": DeleteArticleResponse},
         204: {},
         404: {"model": HTTP404NotFound},
         409: {"model": HTTP409Conflict},

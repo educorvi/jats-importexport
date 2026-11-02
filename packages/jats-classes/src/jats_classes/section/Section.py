@@ -10,6 +10,8 @@ from lxml import etree
 from ..common import element_attribute
 from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection
+from .Glossary import Glossary
+from .RefList import RefList
 
 _DUMMY_TITLE = (
     """<title xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink"></title>"""
@@ -19,14 +21,14 @@ _DUMMY_TITLE = (
 class Section(GenericSection, JATSClassInterface):
     """Represents a basic JATS <sec> element which can recursively nest subsections."""
 
-    _sections: list[Section]
+    _sections: list[Section | Glossary | RefList]
 
     def __init__(
         self,
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
-        sections: list[Section],
+        sections: list[Section | Glossary | RefList],
     ):
         """Initialize Section with type, title, label, contents, and nested sections."""
         super().__init__(
@@ -151,7 +153,15 @@ class Section(GenericSection, JATSClassInterface):
         sec_type = element_attribute(section, ".", "sec-type")
         label_title_raw = cls._get_raw_label_title(section)
         content_raw = cls._get_raw_content(section)
-        sections = [cls.from_xml_element(sec_elem) for sec_elem in section.findall("sec")]
+
+        sections: list[Section | Glossary | RefList] = []
+        for child in section:
+            if child.tag == "sec":
+                sections.append(cls.from_xml_element(child))
+            elif child.tag == "ref-list":
+                sections.append(RefList.from_xml_element(child))
+            elif child.tag == "glossary":
+                sections.append(Glossary.from_xml_element(child))
 
         return cls(
             sec_type=sec_type,

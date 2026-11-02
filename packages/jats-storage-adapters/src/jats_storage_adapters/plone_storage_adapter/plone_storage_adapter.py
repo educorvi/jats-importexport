@@ -247,25 +247,20 @@ class PloneStorageAdapter(StorageAdapter):
                 updated_articles.append(article)
         return updated_articles
 
-    def delete_article(self, path: str) -> list[str]:
-        """Delete an article from Plone."""
-        download_service = PloneDownloadService(self.base_url, self.httpx_client)
-
+    def delete_article(self, path: str):
+        """Deletes an Article from Plone including all child items (which also include assets)."""
         url = self.get_url_from_path(path)
-
         try:
-            article = download_service.fetch_article(url)
+            response = self.httpx_client.delete(url)
+            response.raise_for_status()
         except HTTPStatusError as e:
             if e.response.status_code == 404 and str(e.request.url) == url:
                 raise PathNotFoundExpection(path) from e
-            raise InternalError(f"Error fetching article at {url}") from e
+            raise InternalError(f"Error deleting article at {url}") from e
         except ValueError:
             raise
         except Exception as e:
-            raise InternalError(f"Error fetching article at {url}") from e
-
-        modify_service = PloneModifyService(self.base_url, self.httpx_client)
-        return modify_service.delete_article(url, article)
+            raise InternalError(f"Error deleting article at {url}") from e
 
     # Listing / querying related methods
 
