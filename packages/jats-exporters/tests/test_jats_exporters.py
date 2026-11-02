@@ -121,11 +121,15 @@ def test_html_exporter_renders_nested_toc_sections():
     html_output = str(HtmlExporter().transform(xml))
     soup = BeautifulSoup(html_output, "html.parser")
     toc = soup.select_one(".jats-html-export-toc")
+    assert toc is not None
     parent = toc.find("a", href="#parent")
-
     assert parent is not None
     assert parent.get_text() == "Parent section"
-    assert parent.find_parent("li").select_one("ul a[href='#child']").get_text() == "Child section"
+    li = parent.find_parent("li")
+    assert li is not None
+    ul = li.select_one("ul a[href='#child']")
+    assert ul is not None
+    assert ul.get_text() == "Child section"
 
 
 def test_html_exporter_styles_glossary_titles_like_section_titles():
@@ -165,16 +169,23 @@ def test_html_exporter_styles_glossary_titles_like_section_titles():
         "#article-body .glossary .label, #article-back > .section > .title .label"
     )
 
-    assert soup.select_one("#article-body > .section > h2.title").get_text(" ", strip=True) == "Section title"
+    heading = soup.select_one("#article-body > .section > h2.title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "Section title"
     assert glossary_titles == {
         "N Nested glossary": "h3",
         "B Body glossary": "h2",
         "G Glossary group": "h2",
         "Grouped glossary": "h3",
     }
-    assert soup.select_one("#article-back > .section > h3.title").get_text(" ", strip=True) == "R Back glossary"
+    heading = soup.select_one("#article-back > .section > h3.title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "R Back glossary"
     assert [label.get_text(strip=True) for label in glossary_labels] == ["N", "B", "G", "R"]
-    assert all(label.parent.name in {"h2", "h3"} for label in glossary_labels)
+    assert all(
+        label.parent is not None and label.parent.name in {"h2", "h3"}
+        for label in glossary_labels
+    )
 
 
 def test_html_exporter_renders_back_ref_list_and_nested_ref_list():
@@ -208,11 +219,15 @@ def test_html_exporter_renders_back_ref_list_and_nested_ref_list():
     nested_ref_list = ref_list.select_one(".ref-list")
     assert nested_ref_list is not None
 
-    assert back.select_one("h2.main-title").get_text(" ", strip=True) == "Literaturverzeichnis"
+    heading = back.select_one("h2.main-title")
+    assert heading is not None
+    assert heading.get_text(" ", strip=True) == "Literaturverzeichnis"
     assert [item.get_text(" ", strip=True) for item in ref_list.select(":scope > ul > li")] == [
         "1 First citation."
     ]
-    assert nested_ref_list.select_one(":scope > h3.title").get_text(" ", strip=True) == "Online references"
+    heading_nested = nested_ref_list.select_one(":scope > h3.title")
+    assert heading_nested is not None
+    assert heading_nested.get_text(" ", strip=True) == "Online references"
     assert [item.get_text(" ", strip=True) for item in nested_ref_list.select(":scope > ul > li")] == [
         "2 Second citation."
     ]
@@ -327,16 +342,20 @@ def test_pdf_exporter_typesets_mathml_as_svg(mathml_equation, display):
     soup = BeautifulSoup(result, "html.parser")
 
     assert soup.find("math") is None
+    assert soup.p is not None
     assert soup.p.get_text() == "Before  after."
     image = soup.find("img", class_="pdf-math")
+    assert image is not None
     assert f"pdf-math--{display or 'inline'}" in image["class"]
     assert image["id"] == "equation-1"
     assert image["alt"] == "Sum of squared field ratios is at most one"
     assert "vertical-align: -" in image["style"]
-    svg = etree.fromstring(base64.b64decode(image["src"].split(",", 1)[1]))
+    svg = etree.fromstring(base64.b64decode(str(image["src"]).split(",", 1)[1]))
     assert svg.tag == "{http://www.w3.org/2000/svg}svg"
-    assert float(svg.get("width")) > 0
-    assert float(svg.get("height")) > 0
+    width = svg.get("width")
+    height = svg.get("height")
+    assert width is not None and float(width) > 0
+    assert height is not None and float(height) > 0
     assert svg.findall(".//{http://www.w3.org/2000/svg}path")
 
 
