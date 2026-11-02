@@ -406,7 +406,7 @@ class PloneDownloadService:
                 last_sections.append(self.__fetch_ref_list(item["@id"], options))
             elif item.get("@type") == "Glossary":
                 last_sections.append(self.__fetch_glossary(item["@id"], options))
-        sections.extend(last_sections) # append glossaries and ref lists at the end of the section's subsections list
+        sections.extend(last_sections)  # append glossaries and ref lists at the end of the section's subsections list
 
         label_title_raw = self.__get_label_title_raw(data, url, options)
         if data.get("@type") == "Section":

@@ -74,7 +74,7 @@ class BaseSection(JATSClassInterface, metaclass=abc.ABCMeta):
         return label_string + title_string
 
     @classmethod
-    def _get_raw_content(cls, section: etree._Element) -> str | None:
+    def _get_raw_content(cls, section: etree._Element, not_break_tags: list[str] = []) -> str | None:
         """Extract inner raw XML content, ignoring label, title, and nested sections."""
         result = ""
         nodes = section.xpath("./node()")
@@ -93,7 +93,9 @@ class BaseSection(JATSClassInterface, metaclass=abc.ABCMeta):
                 if node.tail:
                     result += try_repair_mojibake(node.tail)
                 continue
-            if node.tag in ["sec", "app", "glossary", "ref-list"]:
+
+            break_tags = ["sec", "app", "glossary", "ref-list"]
+            if node.tag in break_tags and node.tag not in not_break_tags:
                 break
 
             repaired = try_repair_mojibake_element(node)
@@ -134,12 +136,12 @@ class BaseSection(JATSClassInterface, metaclass=abc.ABCMeta):
         return replaced_links
 
     def _replace_media_links(
-            self,
-            replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
-            media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
-            media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
-        ) -> None:
-            self._replace_media_links_in_content(replaced_links, media_link_conversion, media_downloader)
+        self,
+        replaced_links: dict[str, tuple[str, tuple[bytes, str] | None]],
+        media_link_conversion: Callable[[str, tuple[bytes, str] | None], str],
+        media_downloader: Callable[[str], tuple[bytes, str]] | None = None,
+    ) -> None:
+        self._replace_media_links_in_content(replaced_links, media_link_conversion, media_downloader)
 
     def _replace_media_links_in_content(
         self,

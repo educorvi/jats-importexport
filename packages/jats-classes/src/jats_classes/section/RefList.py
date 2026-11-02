@@ -52,7 +52,7 @@ class RefList(GenericSection, JATSClassInterface):
             A RefList instance.
         """
         label_title_raw = cls._get_raw_label_title(ref_list)
-        content_raw = cls._get_raw_content(ref_list)
+        content_raw = cls._get_raw_content(ref_list, not_break_tags=["ref-list"])
 
         return cls(
             label_title_raw=label_title_raw,
