@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a53"
+    "version": "1.0.0a54"
   },
   "paths": {
     "/": {
@@ -2435,18 +2435,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteArticleResponse"
-                }
-              }
-            }
-          },
           "204": {
-            "description": "No Content"
+            "description": "Successful Response"
           },
           "404": {
             "content": {
@@ -2643,37 +2633,6 @@
         },
         "type": "object",
         "title": "CacheStatusResponse"
-      },
-      "DeleteArticleResponse": {
-        "properties": {
-          "detail": {
-            "type": "string",
-            "title": "Detail",
-            "default": "Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details.",
-            "examples": [
-              "Errors occurred during the deletion of the referenced assets. The article was successfully deleted but some associated files could not be removed. Check the errors list for details."
-            ]
-          },
-          "errors": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Errors",
-            "description": "A list of errors encountered during the deletion process",
-            "examples": [
-              [
-                "Error deleting image1.png",
-                "Error deleting image2.png"
-              ]
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "errors"
-        ],
-        "title": "DeleteArticleResponse"
       },
       "ExportType": {
         "type": "string",

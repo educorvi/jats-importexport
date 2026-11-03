@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **delete_article**
-> DeleteArticleResponse delete_article(path=path, webcode=webcode)
+> delete_article(path=path, webcode=webcode)
 
 Delete an article from the storage
 
@@ -21,7 +21,6 @@ Deletes an article and all its associated data from the storage
 
 ```python
 import jats_importexport_client
-from jats_importexport_client.models.delete_article_response import DeleteArticleResponse
 from jats_importexport_client.rest import ApiException
 from pprint import pprint
 
@@ -51,9 +50,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
     try:
         # Delete an article from the storage
-        api_response = api_instance.delete_article(path=path, webcode=webcode)
-        print("The response of ModifyApi->delete_article:\n")
-        pprint(api_response)
+        api_instance.delete_article(path=path, webcode=webcode)
     except Exception as e:
         print("Exception when calling ModifyApi->delete_article: %s\n" % e)
 ```
@@ -70,7 +67,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**DeleteArticleResponse**](DeleteArticleResponse.md)
+void (empty response body)
 
 ### Authorization
 
@@ -85,8 +82,7 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Successful Response |  -  |
-**204** | No Content |  -  |
+**204** | Successful Response |  -  |
 **404** | Not Found |  -  |
 **409** | Conflict |  -  |
 **422** | Unprocessable Content |  -  |

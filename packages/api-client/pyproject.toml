@@ -1,13 +1,13 @@
 [project]
 name = "jats_importexport_client"
-version = "1.0.0a53"
+version = "1.0.0a54"
 description = "JATS Import/Export API"
 authors = [
   {name = "OpenAPI Generator Community",email = "team@openapitools.org"},
 ]
 readme = "README.md"
 keywords = ["OpenAPI", "OpenAPI-Generator", "JATS Import/Export API"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 dependencies = [
   "urllib3 (>=2.7.0,<3.0.0)",
