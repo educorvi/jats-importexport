@@ -57,8 +57,10 @@
                         <xsl:if test="$document-uri">
                             <tr data-meta-field="document-uri">
                                 <td>
-                                    <a href="{@xlink:href}">
-                                        <xsl:call-template name="assign-href" select="$document-uri[1]"/>
+                                    <a>
+                                        <xsl:for-each select="$document-uri[1]">
+                                            <xsl:call-template name="assign-href"/>
+                                        </xsl:for-each>
                                         Publikation
                                     </a>
                                 </td>
