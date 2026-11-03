@@ -153,16 +153,18 @@ async def html_export(path: str, include_edit_links: bool = False):
         html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
 
         soup = BeautifulSoup(html_content, "html.parser")
-        content = soup.find(id="article-content")
-        if content is None:
+        content = soup.find_all("div", class_="article-content")
+        if content is None or len(content) == 0:
             raise HTTPException(
                 status_code=500, detail="HTML export failed: 'article-content' not found in the output."
             )
-        content.attrs["class"] = "content"
-        front = soup.find(id="article-front")
-        if front is None:
+        content = content[0]
+        # content.attrs["class"] = "content"
+        front = soup.find_all("div", class_="article-front")
+        if front is None or len(front) == 0:
             raise HTTPException(status_code=500, detail="HTML export failed: 'article-front' not found in the output.")
-        front.attrs["class"] = "front"
+        front = front[0]
+        # front.attrs["class"] = "front"
         await EXPORT_CACHE.set_html(path, include_edit_links, str(content), str(front))
         return HtmlDocumentResponse(html=str(content), front=str(front))
 

@@ -135,7 +135,7 @@ class PdfExporter:
     def _get_toc_html(self, html_content: str) -> str:
         """Extract the table of contents from the HTML content."""
         soup = BeautifulSoup(html_content, "html.parser")
-        toc_div = soup.find("nav", class_="jats-html-export-toc")
+        toc_div = soup.find("nav", class_="toc")
         return str(toc_div) if toc_div else ""
 
     def _to_german_date(self, date_obj: datetime.date | datetime.datetime | None) -> str | None:

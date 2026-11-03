@@ -64,6 +64,9 @@
                 xmlns:mml="http://www.w3.org/1998/Math/MathML"
                 exclude-result-prefixes="xlink mml">
 
+    <xsl:import href="xsl/utils.xsl"/>
+    <xsl:import href="xsl/metadata-toc.xsl"/>
+
     <xsl:output method="html"
                 doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
                 doctype-system="http://www.w3.org/TR/html4/loose.dtd"
@@ -96,34 +99,22 @@
 
 
     <xsl:template name="make-article">
-        <xsl:variable name="this-article">
-            <xsl:apply-templates select="." mode="id"/>
-        </xsl:variable>
-        <div id="article-all" class="row">
-            <div id="article-front" class="front col-3">
-                <xsl:apply-templates select="front | front-stub"/>
+        <div class="article-all row">
+            <div class="article-front">
+                <xsl:call-template name="metadata-and-toc"/>
             </div>
-            <div id="article-content" class="content col-9">
-                <!-- body -->
-                <xsl:for-each select="body">
-                    <div id="article-body" class="body">
-                        <xsl:apply-templates/>
-                    </div>
-                </xsl:for-each>
-                <!-- appendix-->
+            <div class="article-content">
+                <div class="article-body">
+                    <xsl:apply-templates select="body"/>
+                </div>
                 <xsl:if test="back | $loose-footnotes">
-                    <!-- $loose-footnotes is defined below as any footnotes outside front matter or fn-group -->
-                    <div id="article-back" class="back">
+                    <!-- $loose-footnotes is defined below -->
+                    <div class="article-back">
                         <xsl:call-template name="make-back"/>
                     </div>
                 </xsl:if>
             </div>
         </div>
-    </xsl:template>
-
-
-    <xsl:template match="front | front-stub">
-        <xsl:call-template name="metadata-and-toc"/>
     </xsl:template>
 
 
@@ -149,7 +140,7 @@
 
 
     <!-- ============================================================= -->
-    <!--  REGULAR (DEFAULT) MODE                                       -->
+    <!--  BODY, BACK AND SECTIONS                                      -->
     <!-- ============================================================= -->
 
 
@@ -250,8 +241,128 @@
     </xsl:template>
 
 
+
     <!-- ============================================================= -->
-    <!--  Titles                                                       -->
+    <!--  BACK MATTER                                                  -->
+    <!-- ============================================================= -->
+
+
+    <xsl:variable name="loose-footnotes"
+                  select="//fn[not(ancestor::front|ancestor::table-wrap)]"/>
+
+
+    <xsl:template name="make-back">
+        <xsl:apply-templates select="back"/>
+        <xsl:if test="$loose-footnotes and not(back)">
+            <!-- autogenerating a section for footnotes only if there is no
+                 back element, and if footnotes exist for it -->
+            <xsl:call-template name="footnotes"/>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template match="back">
+        <!-- content model for back:
+              (label?, title*,
+              (app-group | glossary | ref-list)*) -->
+        <xsl:if test="$loose-footnotes">
+            <xsl:call-template name="footnotes"/>
+        </xsl:if>
+        <xsl:apply-templates/>
+    </xsl:template>
+
+
+    <xsl:template name="footnotes">
+        <xsl:call-template name="backmatter-section">
+            <xsl:with-param name="generated-title">Anmerkungen</xsl:with-param>
+            <xsl:with-param name="contents">
+                <xsl:apply-templates select="$loose-footnotes" mode="footnote"/>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template match="app-group">
+        <xsl:call-template name="backmatter-section">
+            <xsl:with-param name="generated-title">Anhänge</xsl:with-param>
+            <xsl:with-param name="is-app-group" select="true()"/>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template match="back/glossary">
+        <xsl:call-template name="backmatter-section">
+            <xsl:with-param name="generated-title">Glossar</xsl:with-param>
+            <xsl:with-param name="is-glossary" select="true()"/>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template match="back/ref-list">
+        <xsl:call-template name="backmatter-section">
+            <xsl:with-param name="generated-title">Literaturverzeichnis</xsl:with-param>
+            <xsl:with-param name="contents">
+                <xsl:call-template name="ref-list"/>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template name="backmatter-section">
+        <xsl:param name="generated-title"/>
+        <xsl:param name="is-app-group" select="false()"/>
+        <xsl:param name="is-glossary" select="false()"/>
+        <xsl:param name="contents">
+            <xsl:if test="($is-app-group or $is-glossary) and title">
+                <xsl:apply-templates mode="drop-title"/>
+            </xsl:if>
+            <xsl:if test="not($is-app-group or $is-glossary) or not(title)">
+                <xsl:apply-templates/>
+            </xsl:if>
+        </xsl:param>
+        <div class="section">
+            <xsl:call-template name="named-anchor"/>
+            <xsl:if test="$is-app-group and title">
+                <h2 class="title">
+                    <xsl:if test="label">
+                        <span class="label">
+                            <xsl:apply-templates select="label/node()"/>
+                        </span>
+                        <xsl:text> </xsl:text>
+                    </xsl:if>
+                    <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="processing-instruction('section-edit-link')">
+                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
+                            <i class="bi bi-pen-fill"></i>
+                        </a>
+                    </xsl:if>
+                </h2>
+            </xsl:if>
+            <xsl:if test="$is-glossary and title">
+                <xsl:apply-templates select="title"/>
+            </xsl:if>
+            <xsl:if test="not(title) and $generated-title">
+                <xsl:choose>
+                    <!-- The level of title depends on whether the back matter itself
+                         has a title -->
+                    <xsl:when test="ancestor::back/title">
+                        <xsl:call-template name="section-title">
+                            <xsl:with-param name="contents" select="$generated-title"/>
+                        </xsl:call-template>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:call-template name="main-title">
+                            <xsl:with-param name="contents" select="$generated-title"/>
+                        </xsl:call-template>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:if>
+            <xsl:copy-of select="$contents"/>
+        </div>
+    </xsl:template>
+
+
+    <!-- ============================================================= -->
+    <!--  TITLES                                                       -->
     <!-- ============================================================= -->
 
 
@@ -367,7 +478,7 @@
 
 
     <!-- ============================================================= -->
-    <!--  Figures, lists and block-level objectS                       -->
+    <!--  BLOCK-LEVEL OBJECTS                                          -->
     <!-- ============================================================= -->
 
 
@@ -376,6 +487,7 @@
             <xsl:apply-templates/>
         </div>
     </xsl:template>
+
 
     <xsl:template match="attrib">
         <p class="attrib">
@@ -778,7 +890,7 @@
 
 
     <!-- ============================================================= -->
-    <!--  TABLES                                                       -->
+    <!--  Tables                                                       -->
     <!-- ============================================================= -->
     <!--  Tables are already in XHTML, and can simply be copied
           through                                                      -->
@@ -969,127 +1081,9 @@
 
 
     <!-- ============================================================= -->
-    <!--  BACK MATTER                                                  -->
-    <!-- ============================================================= -->
-
-
-    <xsl:variable name="loose-footnotes"
-                  select="//fn[not(ancestor::front|ancestor::table-wrap)]"/>
-
-
-    <xsl:template name="make-back">
-        <xsl:apply-templates select="back"/>
-        <xsl:if test="$loose-footnotes and not(back)">
-            <!-- autogenerating a section for footnotes only if there is no
-                 back element, and if footnotes exist for it -->
-            <xsl:call-template name="footnotes"/>
-        </xsl:if>
-    </xsl:template>
-
-    <xsl:template match="back">
-        <!-- content model for back:
-              (label?, title*,
-              (app-group | glossary | ref-list)*) -->
-        <xsl:if test="$loose-footnotes">
-            <xsl:call-template name="footnotes"/>
-        </xsl:if>
-        <xsl:apply-templates/>
-    </xsl:template>
-
-
-    <xsl:template name="footnotes">
-        <xsl:call-template name="backmatter-section">
-            <xsl:with-param name="generated-title">Anmerkungen</xsl:with-param>
-            <xsl:with-param name="contents">
-                <xsl:apply-templates select="$loose-footnotes" mode="footnote"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="app-group">
-        <xsl:call-template name="backmatter-section">
-            <xsl:with-param name="generated-title">Anhänge</xsl:with-param>
-            <xsl:with-param name="is-app-group" select="true()"/>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="back/glossary">
-        <xsl:call-template name="backmatter-section">
-            <xsl:with-param name="generated-title">Glossar</xsl:with-param>
-            <xsl:with-param name="is-glossary" select="true()"/>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template match="back/ref-list">
-        <xsl:call-template name="backmatter-section">
-            <xsl:with-param name="generated-title">Literaturverzeichnis</xsl:with-param>
-            <xsl:with-param name="contents">
-                <xsl:call-template name="ref-list"/>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template name="backmatter-section">
-        <xsl:param name="generated-title"/>
-        <xsl:param name="is-app-group" select="false()"/>
-        <xsl:param name="is-glossary" select="false()"/>
-        <xsl:param name="contents">
-            <xsl:if test="($is-app-group or $is-glossary) and title">
-                <xsl:apply-templates mode="drop-title"/>
-            </xsl:if>
-            <xsl:if test="not($is-app-group or $is-glossary) or not(title)">
-                <xsl:apply-templates/>
-            </xsl:if>
-        </xsl:param>
-        <div class="section">
-            <xsl:call-template name="named-anchor"/>
-            <xsl:if test="$is-app-group and title">
-                <h2 class="title">
-                    <xsl:if test="label">
-                        <span class="label">
-                            <xsl:apply-templates select="label/node()"/>
-                        </span>
-                        <xsl:text> </xsl:text>
-                    </xsl:if>
-                    <xsl:apply-templates select="title/node()"/>
-                    <xsl:if test="processing-instruction('section-edit-link')">
-                        <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
-                            <i class="bi bi-pen-fill"></i>
-                        </a>
-                    </xsl:if>
-                </h2>
-            </xsl:if>
-            <xsl:if test="$is-glossary and title">
-                <xsl:apply-templates select="title"/>
-            </xsl:if>
-            <xsl:if test="not(title) and $generated-title">
-                <xsl:choose>
-                    <!-- The level of title depends on whether the back matter itself
-                         has a title -->
-                    <xsl:when test="ancestor::back/title">
-                        <xsl:call-template name="section-title">
-                            <xsl:with-param name="contents" select="$generated-title"/>
-                        </xsl:call-template>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:call-template name="main-title">
-                            <xsl:with-param name="contents" select="$generated-title"/>
-                        </xsl:call-template>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:if>
-            <xsl:copy-of select="$contents"/>
-        </div>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
     <!--  FOOTNOTES                                                    -->
     <!-- ============================================================= -->
+
 
     <xsl:template match="fn">
         <!-- Footnotes appearing outside fn-group
@@ -1145,172 +1139,9 @@
 
 
     <!-- ============================================================= -->
-    <!--  UTILITY TEMPLATES                                           -->
-    <!-- ============================================================= -->
-
-
-    <xsl:template name="assign-id">
-        <xsl:variable name="id">
-            <xsl:apply-templates select="." mode="id"/>
-        </xsl:variable>
-        <xsl:attribute name="id">
-            <xsl:value-of select="$id"/>
-        </xsl:attribute>
-    </xsl:template>
-
-
-    <xsl:template name="assign-src">
-        <xsl:for-each select="@xlink:href">
-            <xsl:attribute name="src">
-                <xsl:value-of select="."/>
-            </xsl:attribute>
-        </xsl:for-each>
-    </xsl:template>
-
-
-    <xsl:template name="assign-href">
-        <xsl:for-each select="@xlink:href">
-            <xsl:attribute name="href">
-                <xsl:value-of select="."/>
-            </xsl:attribute>
-        </xsl:for-each>
-    </xsl:template>
-
-
-    <xsl:template name="named-anchor">
-        <!-- generates an HTML named anchor -->
-        <xsl:variable name="id">
-            <xsl:choose>
-                <xsl:when test="@id">
-                    <!-- if we have an @id, we use it -->
-                    <xsl:value-of select="@id"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <!-- otherwise we simply generate an ID -->
-                    <xsl:value-of select="generate-id(.)"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
-        <a id="{$id}">
-            <xsl:comment>named anchor</xsl:comment>
-        </a>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
-    <!--  id mode                                                      -->
-    <!-- ============================================================= -->
-    <!-- An id can be derived for any element. If an @id is given,
-         it is presumed unique and copied. If not, one is generated.   -->
-
-    <xsl:template match="*" mode="id">
-        <xsl:value-of select="@id"/>
-        <xsl:if test="not(@id)">
-            <xsl:value-of select="generate-id(.)"/>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="article" mode="id">
-        <xsl:value-of select="@id"/>
-        <xsl:if test="not(@id)">
-            <xsl:value-of select="local-name()"/>
-            <xsl:number from="article" level="multiple"
-                        count="article" format="1-1"/>
-        </xsl:if>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
-    <!--  "format-date"                                                -->
-    <!-- ============================================================= -->
-    <!-- Maps a structured date element to a string -->
-
-    <xsl:template name="format-date">
-        <!-- formats date in DD Month YYYY format -->
-        <!-- context must be 'date', with content model:
-             (((day?, month?) | season)?, year) -->
-        <xsl:for-each select="day">
-            <xsl:apply-templates select="." mode="map"/>
-            <xsl:text>. </xsl:text>
-        </xsl:for-each>
-        <xsl:for-each select="month|season">
-            <xsl:apply-templates select="." mode="map"/>
-            <xsl:text> </xsl:text>
-        </xsl:for-each>
-        <xsl:apply-templates select="year" mode="map"/>
-    </xsl:template>
-
-
-    <xsl:template match="day | season | year" mode="map">
-        <xsl:apply-templates/>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
-    <!--  "language-name-de" maps a language code to a German name     -->
-    <!-- ============================================================= -->
-
-    <xsl:template name="language-name-de">
-        <xsl:param name="lang"/>
-        <!-- the primary subtag is everything before '-', '_' or space -->
-        <xsl:variable name="code"
-                      select="translate(substring-before(concat($lang, '-'), '-'),
-                                        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                                        'abcdefghijklmnopqrstuvwxyz')"/>
-        <xsl:choose>
-            <xsl:when test="$code = 'de'">Deutsch</xsl:when>
-            <xsl:when test="$code = 'en'">Englisch</xsl:when>
-            <xsl:when test="$code = 'fr'">Franz&#246;sisch</xsl:when>
-            <xsl:when test="$code = 'es'">Spanisch</xsl:when>
-            <xsl:when test="$code = 'it'">Italienisch</xsl:when>
-            <xsl:when test="$code = 'nl'">Niederl&#228;ndisch</xsl:when>
-            <xsl:when test="$code = 'pl'">Polnisch</xsl:when>
-            <xsl:when test="$code = 'cs'">Tschechisch</xsl:when>
-            <xsl:when test="$code = 'da'">D&#228;nisch</xsl:when>
-            <xsl:when test="$code = 'sv'">Schwedisch</xsl:when>
-            <xsl:when test="$code = 'no'">Norwegisch</xsl:when>
-            <xsl:when test="$code = 'fi'">Finnisch</xsl:when>
-            <xsl:when test="$code = 'tr'">T&#252;rkisch</xsl:when>
-            <xsl:when test="$code = 'ru'">Russisch</xsl:when>
-            <xsl:when test="$code = 'uk'">Ukrainisch</xsl:when>
-            <xsl:when test="$code = 'zh'">Chinesisch</xsl:when>
-            <xsl:when test="$code = 'ja'">Japanisch</xsl:when>
-            <xsl:when test="$code = 'ar'">Arabisch</xsl:when>
-            <xsl:when test="$code = 'pt'">Portugiesisch</xsl:when>
-            <xsl:otherwise>
-                <!-- fall back to the raw code when unknown -->
-                <xsl:value-of select="$lang"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-
-
-    <xsl:template match="month" mode="map">
-        <!-- maps numeric values to German months -->
-        <xsl:choose>
-            <xsl:when test="number() = 1">Januar</xsl:when>
-            <xsl:when test="number() = 2">Februar</xsl:when>
-            <xsl:when test="number() = 3">März</xsl:when>
-            <xsl:when test="number() = 4">April</xsl:when>
-            <xsl:when test="number() = 5">Mai</xsl:when>
-            <xsl:when test="number() = 6">Juni</xsl:when>
-            <xsl:when test="number() = 7">Juli</xsl:when>
-            <xsl:when test="number() = 8">August</xsl:when>
-            <xsl:when test="number() = 9">September</xsl:when>
-            <xsl:when test="number() = 10">Oktober</xsl:when>
-            <xsl:when test="number() = 11">November</xsl:when>
-            <xsl:when test="number() = 12">Dezember</xsl:when>
-            <xsl:otherwise>
-                <xsl:apply-templates/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
     <!--  DGUV Freie Listen                                            -->
     <!-- ============================================================= -->
+
 
     <xsl:template match="p[@content-type='_4octextpara_ListeFrei']">
         <xsl:variable name="level">
@@ -1397,206 +1228,5 @@
             <xsl:apply-templates select="$marker/node()"/>
         </xsl:if>
     </xsl:template>
-
-
-    <!-- ============================================================= -->
-    <!--  DGUV processing instructions                                 -->
-    <!-- ============================================================= -->
-
-    <!-- <?dguv toc?> — inserts a table of contents linking to all
-         section headings (sec elements with a non-empty title) in the document. -->
-        <xsl:template match="processing-instruction('dguv')[normalize-space(.) = 'toc']">
-            <xsl:call-template name="metadata-and-toc">
-                <xsl:with-param name="front-node" select="//front"/>
-            </xsl:call-template>
-        </xsl:template>
-
-    <xsl:template name="metadata-and-toc">
-        <xsl:param name="front-node" select="."/>
-        <div class="metadata-and-toc">
-            <div class="metadata-small">
-                <table>
-                    <!-- Journal Title -->
-                    <xsl:variable name="journal-title" select="$front-node/journal-meta/journal-title-group/journal-title" />
-                    <xsl:if test="normalize-space(string($journal-title))">
-                        <tr data-meta-field="journal-title">
-                            <td>
-                                <xsl:apply-templates select="$journal-title"/>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- Journal Subtitle -->
-                    <xsl:variable name="journal-subtitle" select="$front-node/journal-meta/journal-title-group/journal-subtitle" />
-                    <xsl:if test="normalize-space(string($journal-subtitle))">
-                        <tr data-meta-field="journal-subtitle">
-                            <td>
-                                <xsl:apply-templates select="$journal-subtitle"/>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- Vom -->
-                    <xsl:variable name="issue-date" select="$front-node/article-meta/pub-date[@date-type='Ausgabedatum'][1] | $front-node/article-meta/pub-date[not(@date-type) and not(../pub-date[@date-type='Ausgabedatum'])][1]" />
-                    <xsl:if test="$issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                        <tr data-meta-field="issue-date">
-                            <td>
-                                Vom
-                                <xsl:for-each select="$issue-date">
-                                    <xsl:call-template name="format-date"/>
-                                </xsl:for-each>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- In der Fassung vom -->
-                    <xsl:variable name="revision-date" select="$front-node/article-meta/pub-date[@date-type='AktualisierteFassung'][1]" />
-                    <xsl:if test="$revision-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                        <tr data-meta-field="revision-date">
-                            <td>
-                                In der Fassung vom
-                                <xsl:for-each select="$revision-date">
-                                    <xsl:call-template name="format-date"/>
-                                </xsl:for-each>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- Dokument-URI -->
-                    <xsl:variable name="document-uri" select="$front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri" />
-                    <xsl:if test="$document-uri">
-                        <tr data-meta-field="document-uri">
-                            <td>
-                                <xsl:for-each select="($front-node/article-meta/ext-link | $front-node/article-meta/uri | $front-node/article-meta/self-uri)[1]">
-                                    <a href="{@xlink:href}">Publikation</a>
-                                </xsl:for-each>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- Related articles -->
-                    <xsl:variable name="related-articles"
-                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='companion']" />
-                    <xsl:if test="$related-articles">
-                        <tr data-meta-field="related-articles">
-                            <td>
-                                <p class="metadata-title">Verwandte Artikel</p>
-                                <ul>
-                                    <xsl:for-each select="$related-articles">
-                                        <li>
-                                            <a>
-                                                <xsl:call-template name="assign-href"/>
-                                                <xsl:choose>
-                                                    <xsl:when test="normalize-space(string(.))">
-                                                        <xsl:apply-templates/>
-                                                    </xsl:when>
-                                                    <xsl:otherwise>
-                                                        <xsl:value-of select="@xlink:href"/>
-                                                    </xsl:otherwise>
-                                                </xsl:choose>
-                                            </a>
-                                        </li>
-                                    </xsl:for-each>
-                                </ul>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                    <!-- Translations -->
-                    <xsl:variable name="related-articles-translations"
-                                  select="$front-node/article-meta/related-article[normalize-space(string(@xlink:href))][@related-article-type='translated-article']" />
-                    <xsl:if test="$related-articles-translations">
-                        <tr data-meta-field="related-articles">
-                            <td>
-                                <p class="metadata-title">Sprachvarianten</p>
-                                <ul>
-                                    <xsl:for-each select="$related-articles-translations">
-                                        <li>
-                                            <a>
-                                                <xsl:call-template name="assign-href"/>
-                                                <xsl:choose>
-                                                    <xsl:when test="normalize-space(string(@xml:lang))">
-                                                        <xsl:call-template name="language-name-de">
-                                                            <xsl:with-param name="lang"
-                                                                            select="@xml:lang"/>
-                                                        </xsl:call-template>
-                                                    </xsl:when>
-                                                    <xsl:when test="normalize-space(string(.))">
-                                                        <xsl:apply-templates/>
-                                                    </xsl:when>
-                                                    <xsl:otherwise>
-                                                        <xsl:value-of select="@xlink:href"/>
-                                                    </xsl:otherwise>
-                                                </xsl:choose>
-                                            </a>
-                                        </li>
-                                    </xsl:for-each>
-                                </ul>
-                            </td>
-                        </tr>
-                    </xsl:if>
-                </table>
-            </div>
-            <nav class="jats-html-export-toc">
-                <xsl:call-template name="toc-sections">
-                    <xsl:with-param name="sections"
-                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
-                 //back/app-group[title[normalize-space(string(.))]] |
-                 //back/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
-                 //back/app[title[normalize-space(string(.))]] |
-                 //back/ref-list[title[normalize-space(string(.))]] |
-                 //back/glossary[title[normalize-space(string(.))]]"/>
-                    <xsl:with-param name="depth" select="0"/>
-                </xsl:call-template>
-            </nav>
-        </div>
-    </xsl:template>
-
-    <xsl:template name="toc-sections">
-        <xsl:param name="sections"/>
-        <xsl:param name="depth"/>
-        <xsl:if test="$sections">
-            <ul>
-                <xsl:for-each select="$sections">
-                    <li>
-                        <xsl:variable name="anchor-id">
-                            <xsl:choose>
-                                <xsl:when test="@id">
-                                    <xsl:value-of select="@id"/>
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:value-of select="generate-id(.)"/>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </xsl:variable>
-                        <span class="toc-entry">
-                            <xsl:attribute name="data-toc-level">
-                                <xsl:value-of select="$depth + 1"/>
-                            </xsl:attribute>
-                            <xsl:if test="label">
-                                <span class="toc-label">
-                                    <xsl:apply-templates select="label/node()"/>
-                                </span>
-                                <xsl:text> </xsl:text>
-                            </xsl:if>
-                            <a href="#{$anchor-id}" class="toc-title">
-                                <xsl:apply-templates select="title/node()"/>
-                            </a>
-                        </span>
-                        <xsl:variable name="subsections"
-                                      select="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
-                            app[title[normalize-space(string(.))]] |
-                            ref-list[title[normalize-space(string(.))]] |
-                            glossary[title[normalize-space(string(.))]]"/>
-                        <xsl:if test="$subsections">
-                            <xsl:call-template name="toc-sections">
-                                <xsl:with-param name="sections" select="$subsections"/>
-                                <xsl:with-param name="depth" select="$depth + 1"/>
-                            </xsl:call-template>
-                        </xsl:if>
-                    </li>
-                </xsl:for-each>
-            </ul>
-        </xsl:if>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
-    <!--  End stylesheet                                               -->
-    <!-- ============================================================= -->
 
 </xsl:stylesheet>
