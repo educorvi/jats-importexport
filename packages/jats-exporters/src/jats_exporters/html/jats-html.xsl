@@ -58,66 +58,11 @@
 -->
 <!-- ============================================================= -->
 
-<!-- Change history                                                -->
-
-<!-- From jpub3-html.xsl v3.0 to jats-html.xsl v1.0:
-
-Calls to 'normalize-space($node)' where $node is not a string are
-expressed as 'normalize-space(string($node)) in order to provide
-type safety in some XSLT 2.0 processors.
-
-Support for certain elements in NLM Blue v2.3 is added to provide
-backward compatibility:
-  floats-wrap (same as floats-group)
-  chem-struct-wrapper (same as chem-struct-wrap)
-  custom-meta-wrap (same as custom-meta-group)
-  floats-wrap (same as floats-group)
-  gloss-group (same as glossary)
-  citation
-  contract-num
-  contract-sponsor
-  grant-num
-  grant-sponsor
-
-Support is added for looser structures for title-group elements
-in 2.3 (title, trans-title, trans-subtitle etc.) Same for 2.3
-tagging of permissions info (copyright-statement, copyright-year,
-license) and funding/contract info (contract-num, contract-sponsor,
-grant-num, grant-sponsor).
-
-Elements newly permitted in JATS journal-meta
-(contrib-group, aff, aff-alternatives) are supported.
-
-New elements in NISO JATS v1.0 are supported:
-  aff-alternatives
-  citation-alternatives
-  collab-alternatives
-  trans-title-group (with @xml:lang)
-  contrib-id
-  count>
-  issn-l
-  nested-kwd
-
-Added support for @pub-id-type='arXiv'
-
-Named anchor logic extended to support "alternatives" wrappers
-for aff, contrib, citation etc.
-
-Footer text is emended, with name of transformation (stylesheet
-or pipeline) parameterized.
-
--->
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 xmlns:mml="http://www.w3.org/1998/Math/MathML"
                 exclude-result-prefixes="xlink mml">
-
-
-    <!--<xsl:output method="xml" indent="no" encoding="UTF-8"
-      doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN"
-      doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/>-->
-
 
     <xsl:output method="html"
                 doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
@@ -128,80 +73,27 @@ or pipeline) parameterized.
 
     <!-- Space is preserved in all elements allowing #PCDATA -->
     <xsl:preserve-space
-            elements="abbrev abbrev-journal-title access-date addr-line
-              aff alt-text alt-title article-id article-title
-              attrib award-id bold chapter-title chem-struct
-              collab comment compound-kwd-part compound-subject-part
-              conf-acronym conf-date conf-loc conf-name conf-num
-              conf-sponsor conf-theme contrib-id copyright-holder
-              copyright-statement copyright-year corresp country
-              date-in-citation day def-head degrees disp-formula
-              edition elocation-id email etal ext-link fax fpage
-              funding-source funding-statement given-names glyph-data
-              gov inline-formula inline-supplementary-material
-              institution isbn issn-l issn issue issue-id issue-part
-              issue-sponsor issue-title italic journal-id
-              journal-subtitle journal-title kwd label license-p
-              long-desc lpage meta-name meta-value mixed-citation
-              monospace month named-content object-id on-behalf-of
-              overline p page-range part-title patent person-group
-              phone prefix preformat price principal-award-recipient
-              principal-investigator product pub-id publisher-loc
-              publisher-name related-article related-object role
-              roman sans-serif sc season self-uri series series-text
-              series-title sig sig-block size source speaker std
-              strike string-name styled-content std-organization
-              sub subject subtitle suffix sup supplement surname
-              target td term term-head tex-math textual-form th
-              time-stamp title trans-source trans-subtitle trans-title
-              underline uri verse-line volume volume-id volume-series
-              xref year
-
-              mml:annotation mml:ci mml:cn mml:csymbol mml:mi mml:mn
-              mml:mo mml:ms mml:mtext"/>
-
-
-    <xsl:param name="transform" select="'jats-html.xsl'"/>
-
-    <xsl:param name="document-uri" select="''"/>
-
-    <!--  <xsl:param name="css" select="'jats-preview.css'"/>-->
-    <!--  <xsl:param name="css" select="'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css'"/>-->
-
-    <xsl:param name="report-warnings" select="'no'"/>
-
-    <xsl:variable name="verbose" select="$report-warnings='yes'"/>
-
-    <!-- Keys -->
-
-    <!-- To reduce dependency on a DTD for processing, we declare
-         a key to use instead of the id() function. -->
-
-    <!-- Enabling retrieval of cross-references to objects -->
-
-
-    <!-- ============================================================= -->
-    <!--  ROOT TEMPLATE - HANDLES HTML FRAMEWORK                       -->
-    <!-- ============================================================= -->
-
-    <xsl:template match="/">
-        <xsl:apply-templates/>
-    </xsl:template>
-
+            elements="addr-line aff alt-text article-id article-title attrib bold
+              comment contrib-id copyright-holder copyright-statement copyright-year
+              day def-head disp-formula email ext-link fax fpage given-names
+              inline-formula institution issn issue italic journal-id journal-subtitle journal-title
+              kwd label lpage meta-name meta-value mixed-citation month named-content object-id
+              p person-group phone prefix preformat publisher-loc publisher-name
+              related-article related-object role sc self-uri source strike styled-content
+              sub subject subtitle sup surname td term term-head th title trans-title
+              underline uri volume xref year
+              mml:annotation mml:ci mml:cn mml:csymbol mml:mi mml:mn mml:mo mml:ms mml:mtext"/>
 
 
     <!-- ============================================================= -->
     <!--  TOP LEVEL                                                    -->
     <!-- ============================================================= -->
 
+
     <xsl:template match="article">
         <xsl:call-template name="make-article"/>
     </xsl:template>
 
-
-    <!-- ============================================================= -->
-    <!--  "make-article" for the document architecture                 -->
-    <!-- ============================================================= -->
 
     <xsl:template name="make-article">
         <xsl:variable name="this-article">
@@ -229,13 +121,16 @@ or pipeline) parameterized.
         </div>
     </xsl:template>
 
+
     <xsl:template match="front | front-stub">
         <xsl:call-template name="metadata-and-toc"/>
     </xsl:template>
 
+
     <!-- ============================================================= -->
     <!--  HTML / EasySection spefific (no valid JATS)                  -->
     <!-- ============================================================= -->
+
 
     <xsl:template match="heading">
         <xsl:variable name="tag">
@@ -252,9 +147,11 @@ or pipeline) parameterized.
         </xsl:element>
     </xsl:template>
 
+
     <!-- ============================================================= -->
     <!--  REGULAR (DEFAULT) MODE                                       -->
     <!-- ============================================================= -->
+
 
     <xsl:template match="sec">
         <xsl:variable name="level" select="count(ancestor::sec | ancestor::app-group | ancestor::app) + 2"/>
@@ -352,9 +249,11 @@ or pipeline) parameterized.
         </div>
     </xsl:template>
 
+
     <!-- ============================================================= -->
     <!--  Titles                                                       -->
     <!-- ============================================================= -->
+
 
     <xsl:template name="main-title"
                   match="abstract/title | body/*/title |
@@ -399,6 +298,7 @@ or pipeline) parameterized.
             </h4>
         </xsl:if>
     </xsl:template>
+
 
     <xsl:template match="glossary/title" priority="3">
         <xsl:if test="normalize-space(string(.))">
@@ -469,6 +369,7 @@ or pipeline) parameterized.
     <!-- ============================================================= -->
     <!--  Figures, lists and block-level objectS                       -->
     <!-- ============================================================= -->
+
 
     <xsl:template match="fig-group">
         <div class="{local-name()}">
