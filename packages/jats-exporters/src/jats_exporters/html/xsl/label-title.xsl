@@ -45,9 +45,33 @@
         </xsl:choose>
     </xsl:template>
 
+    <!-- template for making a caption -->
+    <xsl:template name="make-caption">
+        <xsl:if test="label or caption">
+            <div class="caption">
+                <xsl:variable name="label-text" select="normalize-space(string(label))" />
+                <xsl:if test="$label-text">
+                    <span class="label">
+                        <xsl:copy-of select="$label-text"/>
+                    </span>
+                </xsl:if>
+                <xsl:if test="caption/title">
+                    <span class="title">
+                        <xsl:apply-templates select="caption/title/node()"/>
+                    </span>
+                </xsl:if>
+                <xsl:if test="caption/p">
+                    <span class="caption-text">
+                        <xsl:apply-templates select="caption/p/node()"/>
+                    </span>
+                </xsl:if>
+            </div>
+        </xsl:if>
+    </xsl:template>
+
 
     <!-- ============================================================= -->
-    <!--  Drop titles and labels in certain contexts                   -->
+    <!--  Drop labels, titles and captions in certain contexts         -->
     <!-- ============================================================= -->
 
 
@@ -56,7 +80,7 @@
     </xsl:template>
 
 
-    <xsl:template match="title | label" mode="drop-title"/>
+    <xsl:template match="title | label | caption" mode="drop-title"/>
 
 
     <!-- ============================================================= -->

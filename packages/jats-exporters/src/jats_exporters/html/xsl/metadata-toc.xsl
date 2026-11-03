@@ -4,7 +4,6 @@
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 exclude-result-prefixes="xlink">
 
-
     <xsl:template name="metadata-and-toc">
         <xsl:param name="front-node" select="front"/>
         <div class="metadata-and-toc">

@@ -10,6 +10,11 @@
     <!-- ============================================================= -->
 
 
+    <!-- ============================================================= -->
+    <!--  figures, boxes, table wrappers, etc.                         -->
+    <!-- ============================================================= -->
+
+
     <xsl:template match="fig-group">
         <div class="{local-name()}">
             <xsl:apply-templates/>
@@ -35,78 +40,19 @@
             <xsl:choose>
                 <xsl:when test="self::fig and graphic">
                     <xsl:apply-templates select="graphic"/>
-                    <xsl:if test="label or caption">
-                        <div class="caption">
-                            <xsl:variable name="label-text" select="normalize-space(string(label))"/>
-                            <xsl:if test="$label-text">
-                                <span class="label">
-                                    <xsl:copy-of select="$label-text"/>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/title">
-                                <span class="title">
-                                    <xsl:apply-templates select="caption/title/node()"/>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/p">
-                                <span class="caption-text">
-                                    <xsl:apply-templates select="caption/p/node()"/>
-                                </span>
-                            </xsl:if>
-                        </div>
-                    </xsl:if>
-                    <xsl:apply-templates
-                        select="*[not(self::graphic or self::label or self::caption or self::alt-text)]"/>
+                    <xsl:call-template name="make-caption"/>
+                    <xsl:apply-templates select="*[not(self::graphic or self::alt-text)]" mode="drop-title"/>
                 </xsl:when>
                 <xsl:when test="self::table-wrap">
-                    <xsl:if test="label or caption">
-                        <div class="caption">
-                            <xsl:variable name="label-text" select="normalize-space(string(label))" />
-                            <xsl:if test="$label-text">
-                                <span class="label">
-                                    <xsl:copy-of select="$label-text"/>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/title">
-                                <span class="title">
-                                    <xsl:apply-templates select="caption/title/node()"/>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/p">
-                                <span class="caption-text">
-                                    <xsl:apply-templates select="caption/p/node()"/>
-                                </span>
-                            </xsl:if>
-                        </div>
-                    </xsl:if>
+                    <xsl:call-template name="make-caption"/>
                     <div class="table-responsive">
-                        <xsl:apply-templates select="*[not(self::label or self::caption)]"/>
+                        <xsl:apply-templates mode="drop-title"/>
                     </div>
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:if test="label or caption">
-                        <div class="caption">
-                            <xsl:variable name="label-text" select="normalize-space(string(label))" />
-                            <xsl:if test="$label-text">
-                                <span class="label">
-                                    <xsl:copy-of select="$label-text"/>
-                                    <xsl:text> </xsl:text>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/title">
-                                <span class="title">
-                                    <xsl:apply-templates select="caption/title/node()"/>
-                                </span>
-                            </xsl:if>
-                            <xsl:if test="caption/p">
-                                <span class="caption-text">
-                                    <xsl:apply-templates select="caption/p/node()"/>
-                                </span>
-                            </xsl:if>
-                        </div>
-                    </xsl:if>
-                    <xsl:apply-templates select="*[not(self::label or self::caption)]"/>
+                    <xsl:call-template name="make-caption"/>
+                    <xsl:apply-templates mode="drop-title"/>
                 </xsl:otherwise>
             </xsl:choose>
         </div>
@@ -170,6 +116,96 @@
     </xsl:template>
 
 
+    <xsl:template match="media">
+        <a>
+            <xsl:call-template name="assign-id"/>
+            <xsl:call-template name="assign-href"/>
+            <xsl:apply-templates/>
+        </a>
+    </xsl:template>
+
+
+    <xsl:template match="p">
+        <p>
+            <xsl:if test="not(preceding-sibling::*)">
+                <xsl:attribute name="class">first</xsl:attribute>
+            </xsl:if>
+            <xsl:call-template name="assign-id"/>
+            <xsl:apply-templates/>
+        </p>
+    </xsl:template>
+
+
+    <xsl:template match="permissions">
+        <xsl:if test="normalize-space(string(copyright-statement)) or descendant-or-self::*/@*[normalize-space(.)]">
+            <div class="permissions">
+                <xsl:apply-templates select="copyright-statement"/>
+            </div>
+        </xsl:if>
+    </xsl:template>
+
+
+    <xsl:template match="copyright-statement">
+        <p class="copyright">
+            <xsl:apply-templates></xsl:apply-templates>
+        </p>
+    </xsl:template>
+
+
+    <!-- ============================================================= -->
+    <!--  Tables                                                       -->
+    <!-- ============================================================= -->
+    <!--  Tables are already in XHTML, and can simply be copied
+          through                                                      -->
+
+
+    <xsl:template match="table">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="table-copy"/>
+            <xsl:attribute name="class">
+                <xsl:choose>
+                    <xsl:when test="@class">table table-bordered
+                        <xsl:value-of select="@class"/>
+                    </xsl:when>
+                    <xsl:otherwise>table table-bordered</xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
+            <xsl:call-template name="named-anchor"/>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+
+
+    <xsl:template match="thead | tbody | tfoot | col | colgroup | tr">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="table-copy"/>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+
+
+    <xsl:template match="th | td">
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="table-copy"/>
+            <xsl:call-template name="named-anchor"/>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+
+
+    <xsl:template match="@*" mode="table-copy">
+        <xsl:copy-of select="."/>
+    </xsl:template>
+
+
+    <xsl:template match="@content-type" mode="table-copy"/>
+
+
+    <!-- ============================================================= -->
+    <!--  Lists                                                        -->
+    <!-- ============================================================= -->
+
+
     <xsl:template match="list">
         <div class="list">
             <xsl:call-template name="named-anchor"/>
@@ -226,26 +262,6 @@
     </xsl:template>
 
 
-    <xsl:template match="media">
-        <a>
-            <xsl:call-template name="assign-id"/>
-            <xsl:call-template name="assign-href"/>
-            <xsl:apply-templates/>
-        </a>
-    </xsl:template>
-
-
-    <xsl:template match="p">
-        <p>
-            <xsl:if test="not(preceding-sibling::*)">
-                <xsl:attribute name="class">first</xsl:attribute>
-            </xsl:if>
-            <xsl:call-template name="assign-id"/>
-            <xsl:apply-templates/>
-        </p>
-    </xsl:template>
-
-
     <xsl:template match="list-item/p[not(preceding-sibling::*[not(self::label)])]">
         <p>
             <xsl:call-template name="assign-id"/>
@@ -260,20 +276,9 @@
     </xsl:template>
 
 
-    <xsl:template match="permissions">
-        <xsl:if test="normalize-space(string(copyright-statement)) or descendant-or-self::*/@*[normalize-space(.)]">
-            <div class="permissions">
-                <xsl:apply-templates select="copyright-statement"/>
-            </div>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="copyright-statement">
-        <p class="copyright">
-            <xsl:apply-templates></xsl:apply-templates>
-        </p>
-    </xsl:template>
+    <!-- ============================================================= -->
+    <!--  Other                                                        -->
+    <!-- ============================================================= -->
 
 
     <xsl:template match="def-list">
@@ -367,53 +372,5 @@
             <xsl:apply-templates/>
         </xsl:element>
     </xsl:template>
-
-
-
-    <!-- ============================================================= -->
-    <!--  Tables                                                       -->
-    <!-- ============================================================= -->
-    <!--  Tables are already in XHTML, and can simply be copied
-          through                                                      -->
-
-
-    <xsl:template match="table">
-        <xsl:copy>
-            <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:attribute name="class">
-                <xsl:choose>
-                    <xsl:when test="@class">table table-bordered
-                        <xsl:value-of select="@class"/>
-                    </xsl:when>
-                    <xsl:otherwise>table table-bordered</xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
-            <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates/>
-        </xsl:copy>
-    </xsl:template>
-
-    <xsl:template match="thead | tbody | tfoot | col | colgroup | tr">
-        <xsl:copy>
-            <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:apply-templates/>
-        </xsl:copy>
-    </xsl:template>
-
-    <xsl:template match="th | td">
-        <xsl:copy>
-            <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates/>
-        </xsl:copy>
-    </xsl:template>
-
-
-    <xsl:template match="@*" mode="table-copy">
-        <xsl:copy-of select="."/>
-    </xsl:template>
-
-
-    <xsl:template match="@content-type" mode="table-copy"/>
 
 </xsl:stylesheet>

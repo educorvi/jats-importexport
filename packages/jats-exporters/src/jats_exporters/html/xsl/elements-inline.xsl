@@ -40,7 +40,7 @@
     </xsl:template>
 
 
-    <!-- inline-graphic is handled above, with graphic -->
+    <!-- inline-graphic is with graphic at the block level elements -->
 
 
     <xsl:template match="inline-formula">
