@@ -64,20 +64,20 @@
   --dguv-space-xl: 48px;
 }
 
-.article-fragment #article-body,
-.article-fragment #article-back {
+.article-fragment .article-body,
+.article-fragment .article-back {
   color: var(--dguv-text);
   font-family: "Source Sans 3", Arial, sans-serif;
   font-size: 18px;
   line-height: 1.42;
 }
 
-.article-fragment #article-body > .section,
-.article-fragment #article-back > .section {
+.article-fragment .article-body > .section,
+.article-fragment .article-back > .section {
   margin-bottom: 48px;
 }
 
-.article-fragment #article-body p {
+.article-fragment .article-body p {
   margin-block: 1lh;
 }
 
@@ -89,7 +89,7 @@
   line-height: 1.35;
 }
 
-.article-fragment #article-body h2.title {
+.article-fragment .article-body h2.title {
   color: var(--dguv-primary);
 }
 
@@ -110,17 +110,17 @@
   height: auto;
 }
 
-.article-fragment #article-body > .section[data-sec-type=preamble] {
+.article-fragment .article-body > .section[data-sec-type=preamble] {
   padding: var(--dguv-space-lg);
   background: var(--dguv-background-blue);
 }
 
-.article-fragment #article-body > .section[data-sec-type=preamble] > h2.title {
+.article-fragment .article-body > .section[data-sec-type=preamble] > h2.title {
   margin-top: 0;
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info],
-.article-fragment #article-back .section[data-sec-type=highlight-info] {
+.article-fragment .article-body .section[data-sec-type=highlight-info],
+.article-fragment .article-back .section[data-sec-type=highlight-info] {
   margin-block: var(--dguv-space-lg);
   margin-block-end: var(--dguv-space-xl);
   padding: var(--dguv-space-lg);
@@ -128,7 +128,7 @@
   background: var(--dguv-advisory-background);
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info] > p.first {
+.article-fragment .article-body .section[data-sec-type=highlight-info] > p.first {
   margin-block-start: 0;
   font-weight: 700;
   font-style: italic;
@@ -143,74 +143,74 @@
   background: var(--dguv-advisory-background);
 }
 
-.article-fragment #article-body .list > :is(ul, ol),
-.article-fragment #article-back .list > :is(ul, ol) {
+.article-fragment .article-body .list > :is(ul, ol),
+.article-fragment .article-back .list > :is(ul, ol) {
   margin-block: 1lh;
   padding-inline-start: 1.5em;
   list-style-position: outside;
 }
 
-.article-fragment #article-body .list > ul,
-.article-fragment #article-back .list > ul {
+.article-fragment .article-body .list > ul,
+.article-fragment .article-back .list > ul {
   list-style-type: disc !important;
 }
 
-.article-fragment #article-body .list > ol,
-.article-fragment #article-back .list > ol {
+.article-fragment .article-body .list > ol,
+.article-fragment .article-back .list > ol {
   list-style-type: decimal;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li,
-.article-fragment #article-back .list > :is(ul, ol) > li {
+.article-fragment .article-body .list > :is(ul, ol) > li,
+.article-fragment .article-back .list > :is(ul, ol) > li {
   padding-inline-start: 0.25em;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li + li,
-.article-fragment #article-back .list > :is(ul, ol) > li + li {
+.article-fragment .article-body .list > :is(ul, ol) > li + li,
+.article-fragment .article-back .list > :is(ul, ol) > li + li {
   margin-block-start: 0.1lh;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li > p,
-.article-fragment #article-back .list > :is(ul, ol) > li > p {
+.article-fragment .article-body .list > :is(ul, ol) > li > p,
+.article-fragment .article-back .list > :is(ul, ol) > li > p {
   margin-block: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste {
+.article-fragment :is(.article-body, .article-back) .freie-liste {
   margin-block: 0.1lh;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste > p {
+.article-fragment :is(.article-body, .article-back) .freie-liste > p {
   display: grid;
   grid-template-columns: minmax(1.5em, max-content) minmax(0, 1fr);
   column-gap: var(--dguv-space-sm);
   margin-block: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste .list-label {
+.article-fragment :is(.article-body, .article-back) .freie-liste .list-label {
   grid-column: 1;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste .list-item {
+.article-fragment :is(.article-body, .article-back) .freie-liste .list-item {
   grid-column: 2;
   min-width: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-level="2"] > p {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-level="2"] > p {
   margin-inline-start: calc(1.5em + var(--dguv-space-sm));
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-type=ordered] + .list {
   margin-inline-start: calc(1.5em + var(--dguv-space-sm));
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
   margin-block-start: 0.5lh;
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
-.article-fragment #article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
+.article-fragment .article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
+.article-fragment .article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
   margin: 0;
 }
 
@@ -247,8 +247,8 @@
   font-weight: 700;
 }
 
-.article-fragment #article-body p:last-child,
-.article-fragment #article-body li:last-child p:last-child {
+.article-fragment .article-body p:last-child,
+.article-fragment .article-body li:last-child p:last-child {
   margin-bottom: 0;
 }
 
@@ -257,8 +257,8 @@
     --dguv-space-lg: 12px;
     --dguv-space-xl: 24px;
   }
-  .article-fragment #article-body,
-  .article-fragment #article-back {
+  .article-fragment .article-body,
+  .article-fragment .article-back {
     font-size: 16px;
     line-height: 1.48;
   }
@@ -271,9 +271,9 @@
   .article-fragment .section .section > .title {
     font-size: 16px;
   }
-  .article-fragment #article-body > .section[data-sec-type=preamble],
-  .article-fragment #article-body .section[data-sec-type=highlight-info],
-  .article-fragment #article-back .section[data-sec-type=highlight-info] {
+  .article-fragment .article-body > .section[data-sec-type=preamble],
+  .article-fragment .article-body .section[data-sec-type=highlight-info],
+  .article-fragment .article-back .section[data-sec-type=highlight-info] {
     padding: var(--dguv-space-sm);
   }
   .article-fragment .boxed-text,
@@ -282,37 +282,37 @@
     padding: 12px;
   }
 }
-.article-fragment #article-body,
-.article-fragment #article-back {
+.article-fragment .article-body,
+.article-fragment .article-back {
   font-size: 18px;
 }
 
-.article-fragment #article-body p {
+.article-fragment .article-body p {
   margin-block: 1lh;
 }
 
-.article-fragment #article-body h2.title {
+.article-fragment .article-body h2.title {
   color: var(--dguv-primary);
 }
 
-.article-fragment #article-body h2.title > .label {
+.article-fragment .article-body h2.title > .label {
   display: block;
   color: #000;
   font-size: 18px;
   font-weight: 400;
 }
 
-.article-fragment #article-body > .section[data-sec-type=preamble] {
+.article-fragment .article-body > .section[data-sec-type=preamble] {
   padding: var(--dguv-space-lg);
   background: var(--dguv-background-blue);
 }
 
-.article-fragment #article-body > .section[data-sec-type=preamble] > h2.title {
+.article-fragment .article-body > .section[data-sec-type=preamble] > h2.title {
   margin-top: 0;
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info],
-.article-fragment #article-back .section[data-sec-type=highlight-info] {
+.article-fragment .article-body .section[data-sec-type=highlight-info],
+.article-fragment .article-back .section[data-sec-type=highlight-info] {
   margin-block: var(--dguv-space-lg);
   margin-block-end: var(--dguv-space-xl);
   padding: var(--dguv-space-lg);
@@ -320,7 +320,7 @@
   background: var(--dguv-advisory-background);
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info] > p.first {
+.article-fragment .article-body .section[data-sec-type=highlight-info] > p.first {
   margin-block-start: 0;
   font-weight: 700;
   font-style: italic;
@@ -339,13 +339,13 @@
   border-bottom: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table {
+.article-fragment :is(.article-body, .article-back) div.table {
   width: 100%;
   margin-block: 32px;
   border-block: 1px solid #000;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > .row {
+.article-fragment :is(.article-body, .article-back) div.table > .row {
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -353,11 +353,11 @@
   border-bottom: 1px solid #000;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > .row:last-child {
+.article-fragment :is(.article-body, .article-back) div.table > .row:last-child {
   border-bottom: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > .row > :is(.col-2, .col) {
+.article-fragment :is(.article-body, .article-back) div.table > .row > :is(.col-2, .col) {
   min-width: 0;
   width: auto;
   max-width: none;
@@ -365,23 +365,23 @@
   padding: 8px 10px;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > .row > .col-2 {
+.article-fragment :is(.article-body, .article-back) div.table > .row > .col-2 {
   flex: 0 0 16.666667%;
   width: 16.666667%;
   max-width: 16.666667%;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > .row > .col:not(.col-2) {
+.article-fragment :is(.article-body, .article-back) div.table > .row > .col:not(.col-2) {
   flex: 1 1 0;
   overflow-wrap: anywhere;
 }
 
-.article-fragment :is(#article-body, #article-back) div.table > :not(caption) > * > p {
+.article-fragment :is(.article-body, .article-back) div.table > :not(caption) > * > p {
   padding: 0;
   margin: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) :is(table, .table) p {
+.article-fragment :is(.article-body, .article-back) :is(table, .table) p {
   padding: 0;
   margin: 0;
 }
@@ -400,85 +400,85 @@
   margin-block: 0 !important;
 }
 
-.article-fragment #article-body .list > :is(ul, ol),
-.article-fragment #article-back .list > :is(ul, ol) {
+.article-fragment .article-body .list > :is(ul, ol),
+.article-fragment .article-back .list > :is(ul, ol) {
   margin-block: 1lh;
   padding-inline-start: 1.5em;
   list-style-position: outside;
 }
 
-.article-fragment #article-body .list > ul,
-.article-fragment #article-back .list > ul {
+.article-fragment .article-body .list > ul,
+.article-fragment .article-back .list > ul {
   padding-inline-start: 1.25em;
   list-style-type: disc !important;
 }
 
-.article-fragment #article-body .list > ul > li,
-.article-fragment #article-back .list > ul > li {
+.article-fragment .article-body .list > ul > li,
+.article-fragment .article-back .list > ul > li {
   padding-inline-start: 0;
 }
 
-.article-fragment #article-body .list > ul > li::marker,
-.article-fragment #article-back .list > ul > li::marker {
+.article-fragment .article-body .list > ul > li::marker,
+.article-fragment .article-back .list > ul > li::marker {
   font-size: 0.75em;
 }
 
-.article-fragment #article-body .list > ol,
-.article-fragment #article-back .list > ol {
+.article-fragment .article-body .list > ol,
+.article-fragment .article-back .list > ol {
   list-style-type: decimal;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li,
-.article-fragment #article-back .list > :is(ul, ol) > li {
+.article-fragment .article-body .list > :is(ul, ol) > li,
+.article-fragment .article-back .list > :is(ul, ol) > li {
   padding-inline-start: 0.25em;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li + li,
-.article-fragment #article-back .list > :is(ul, ol) > li + li {
+.article-fragment .article-body .list > :is(ul, ol) > li + li,
+.article-fragment .article-back .list > :is(ul, ol) > li + li {
   margin-block-start: 0.1lh;
 }
 
-.article-fragment #article-body .list > :is(ul, ol) > li > p,
-.article-fragment #article-back .list > :is(ul, ol) > li > p {
+.article-fragment .article-body .list > :is(ul, ol) > li > p,
+.article-fragment .article-back .list > :is(ul, ol) > li > p {
   margin-block: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste {
+.article-fragment :is(.article-body, .article-back) .freie-liste {
   margin-block: 0.1lh;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste > p {
+.article-fragment :is(.article-body, .article-back) .freie-liste > p {
   display: grid;
   grid-template-columns: minmax(1.5em, max-content) minmax(0, 1fr);
   column-gap: var(--dguv-space-sm);
   margin-block: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste .list-label {
+.article-fragment :is(.article-body, .article-back) .freie-liste .list-label {
   grid-column: 1;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste .list-item {
+.article-fragment :is(.article-body, .article-back) .freie-liste .list-item {
   grid-column: 2;
   min-width: 0;
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-level="2"] > p {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-level="2"] > p {
   margin-inline-start: calc(1.5em + var(--dguv-space-sm));
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-type=ordered] + .list {
   margin-inline-start: calc(1.5em + var(--dguv-space-sm));
 }
 
-.article-fragment :is(#article-body, #article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
+.article-fragment :is(.article-body, .article-back) .freie-liste[data-list-type=ordered] + .list > :is(ul, ol) {
   margin-block-start: 0.5lh;
 }
 
-.article-fragment #article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
-.article-fragment #article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
+.article-fragment .article-body .section[data-sec-type=highlight-info] .list > :is(ul, ol),
+.article-fragment .article-back .section[data-sec-type=highlight-info] .list > :is(ul, ol) {
   margin: 0;
 }
 
@@ -506,65 +506,65 @@
   mask: url("/assets/icons/arrow-right.svg") center/contain no-repeat;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-title,
-.article-fragment .jats-html-export-toc > ul > li > .toc-label,
-.article-fragment .jats-html-export-toc > ul > li > a {
+.article-fragment .toc .toc-entry[data-toc-level="1"] > .toc-title,
+.article-fragment .toc > ul > li > .toc-label,
+.article-fragment .toc > ul > li > a {
   color: var(--dguv-primary);
   font-weight: 700;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) {
+.article-fragment .toc .toc-entry:has(> .toc-label) {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
   column-gap: 0.25em;
   align-items: start;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) > .toc-label {
+.article-fragment .toc .toc-entry:has(> .toc-label) > .toc-label {
   grid-column: 1;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry:has(> .toc-label) > .toc-title {
+.article-fragment .toc .toc-entry:has(> .toc-label) > .toc-title {
   grid-column: 2;
   min-width: 0;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] {
+.article-fragment .toc .toc-entry[data-toc-level="1"] {
   display: block;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-label {
+.article-fragment .toc .toc-entry[data-toc-level="1"] > .toc-label {
   display: block;
   color: #000;
   font-weight: 400;
 }
 
-.article-fragment .jats-html-export-toc .toc-entry[data-toc-level="1"] > .toc-title {
+.article-fragment .toc .toc-entry[data-toc-level="1"] > .toc-title {
   display: block;
 }
 
-.article-fragment .jats-html-export-toc > ul > li:not(:last-child) {
+.article-fragment .toc > ul > li:not(:last-child) {
   margin-block-end: var(--dguv-space-sm);
 }
 
-.article-fragment #article-body p:last-child,
-.article-fragment #article-body li:last-child p:last-child {
+.article-fragment .article-body p:last-child,
+.article-fragment .article-body li:last-child p:last-child {
   margin-bottom: 0;
 }
 
 @media (max-width: 991.98px) {
-  .article-fragment #article-body,
-  .article-fragment #article-back {
+  .article-fragment .article-body,
+  .article-fragment .article-back {
     font-size: 16px;
   }
-  .article-fragment #article-body h2.title > .label {
+  .article-fragment .article-body h2.title > .label {
     font-size: 16px;
   }
-  .article-fragment #article-body > .section[data-sec-type=preamble] {
+  .article-fragment .article-body > .section[data-sec-type=preamble] {
     padding: var(--dguv-space-sm);
   }
-  .article-fragment #article-body .section[data-sec-type=highlight-info],
-  .article-fragment #article-back .section[data-sec-type=highlight-info] {
+  .article-fragment .article-body .section[data-sec-type=highlight-info],
+  .article-fragment .article-back .section[data-sec-type=highlight-info] {
     padding: var(--dguv-space-sm);
   }
 }
@@ -798,6 +798,10 @@ a {
   font-size: 8.5pt;
 }
 
+.pdf-toc .toc-meta-title {
+  display: none;
+}
+
 .pdf-toc {
   break-after: page;
   color: var(--pdf-ink);
@@ -872,31 +876,31 @@ a {
 
 /* The portal's front column contains duplicate metadata and its own shell.
    Metadata is represented on the cover; the article body/back remain intact. */
-.pdf-document #article-front,
+.pdf-document .article-front,
 .pdf-document .metadata-and-toc,
 .pdf-document .metadata-small,
-.pdf-document .jats-html-export-toc {
+.pdf-document .toc {
   display: none !important;
 }
 
-.pdf-document #article-all,
-.pdf-document #article-content,
-.pdf-document #article-body,
-.pdf-document #article-back {
+.pdf-document .article-all,
+.pdf-document .article-content,
+.pdf-document .article-body,
+.pdf-document .article-back {
   display: block;
   width: auto;
   max-width: none;
   margin: 0;
 }
 
-.pdf-document #article-body,
-.pdf-document #article-back {
+.pdf-document .article-body,
+.pdf-document .article-back {
   font-size: 10.5pt;
   line-height: 1.42;
 }
 
-.pdf-document #article-body > .section,
-.pdf-document #article-back > .section,
+.pdf-document .article-body > .section,
+.pdf-document .article-back > .section,
 .pdf-document .back-section {
   margin-bottom: 10mm;
 }
@@ -924,10 +928,10 @@ a {
 
 /* H3s are article subheads, not DGUV section anchors: keep them in the
    document text colour while H2/section titles retain the DGUV blue. */
-.pdf-document #article-body h3,
-.pdf-document #article-back h3,
-.pdf-document #article-body .section .section > .title,
-.pdf-document #article-back .section .section > .title {
+.pdf-document .article-body h3,
+.pdf-document .article-back h3,
+.pdf-document .article-body .section .section > .title,
+.pdf-document .article-back .section .section > .title {
   color: var(--pdf-ink);
 }
 
@@ -1038,18 +1042,18 @@ a {
   break-inside: avoid;
 }
 
-.pdf-document #article-body > .section[data-sec-type=preamble] {
+.pdf-document .article-body > .section[data-sec-type=preamble] {
   padding: 5mm;
   background: var(--pdf-panel);
   break-inside: auto;
 }
 
-.pdf-document #article-body > .section[data-sec-type=preamble] > h2.title {
+.pdf-document .article-body > .section[data-sec-type=preamble] > h2.title {
   margin-top: 0;
 }
 
-.pdf-document #article-body .section[data-sec-type=highlight-info],
-.pdf-document #article-back .section[data-sec-type=highlight-info] {
+.pdf-document .article-body .section[data-sec-type=highlight-info],
+.pdf-document .article-back .section[data-sec-type=highlight-info] {
   margin: 6mm 0;
   padding: 5mm;
   border-left: 1.2mm solid var(--pdf-green);
