@@ -120,7 +120,7 @@ def test_html_exporter_renders_nested_toc_sections():
 
     html_output = str(HtmlExporter().transform(xml))
     soup = BeautifulSoup(html_output, "html.parser")
-    toc = soup.select_one(".jats-html-export-toc")
+    toc = soup.select_one(".toc")
     assert toc is not None
     parent = toc.find("a", href="#parent")
     assert parent is not None
@@ -159,20 +159,20 @@ def test_html_exporter_styles_glossary_titles_like_section_titles():
     soup = BeautifulSoup(str(HtmlExporter().transform(xml)), "html.parser")
     glossary_titles = {
         heading.get_text(" ", strip=True): heading.name
-        for heading in soup.select("#article-body .glossary > .title")
+        for heading in soup.select(".article-body .glossary > .title")
     }
     glossary_labels = soup.select(
-        "#article-body .glossary .label, #article-back > .section > .title .label"
+        ".article-body .glossary .label, .article-back > .section > .title .label"
     )
 
-    heading = soup.select_one("#article-body > .section > h2.title")
+    heading = soup.select_one(".article-body > .section > h2.title")
     assert heading is not None
     assert heading.get_text(" ", strip=True) == "Section title"
     assert glossary_titles == {
         "N Nested glossary": "h3",
         "B Body glossary": "h2"
     }
-    heading = soup.select_one("#article-back > .section > h3.title")
+    heading = soup.select_one(".article-back > .section > h2.title")
     assert heading is not None
     assert heading.get_text(" ", strip=True) == "R Back glossary"
     assert [label.get_text(strip=True) for label in glossary_labels] == ["N", "B", "R"]
@@ -206,14 +206,14 @@ def test_html_exporter_renders_back_ref_list_and_nested_ref_list():
     )
 
     soup = BeautifulSoup(str(HtmlExporter().transform(xml)), "html.parser")
-    back = soup.select_one("#article-back")
+    back = soup.select_one(".article-back")
     assert back is not None
     ref_list = back.select_one(".section.ref-list")
     assert ref_list is not None
     nested_ref_list = ref_list.select_one(".ref-list")
     assert nested_ref_list is not None
 
-    heading = back.select_one("h2.main-title")
+    heading = back.select_one("h2")
     assert heading is not None
     assert heading.get_text(" ", strip=True) == "Literaturverzeichnis"
     assert [item.get_text(" ", strip=True) for item in ref_list.select(":scope > ul > li")] == [

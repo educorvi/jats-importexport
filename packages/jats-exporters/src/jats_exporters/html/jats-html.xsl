@@ -274,6 +274,15 @@
         <xsl:call-template name="make-section">
             <xsl:with-param name="sec-class" select="'ref-list'"/>
             <xsl:with-param name="generated-title">Literaturverzeichnis</xsl:with-param>
+            <xsl:with-param name="content">
+                <xsl:apply-templates select="*[not(self::ref | self::ref-list)]" mode="drop-title"/>
+                <xsl:if test="ref">
+                    <ul>
+                        <xsl:apply-templates select="ref"/>
+                    </ul>
+                </xsl:if>
+                <xsl:apply-templates select="ref-list"/>
+            </xsl:with-param>
         </xsl:call-template>
     </xsl:template>
 

@@ -346,7 +346,7 @@
                     <xsl:text> </xsl:text>
                 </span>
             </xsl:if>
-            <xsl:apply-templates/>
+            <xsl:apply-templates mode="drop-title"/>
         </li>
     </xsl:template>
 

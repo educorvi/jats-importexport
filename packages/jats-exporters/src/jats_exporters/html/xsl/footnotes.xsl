@@ -16,7 +16,7 @@
     <xsl:template match="fn" mode="footnote">
         <div class="footnote">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates/>
+            <xsl:apply-templates mode="drop-title"/>
         </div>
     </xsl:template>
 
@@ -29,7 +29,7 @@
                 <xsl:apply-templates select="parent::fn" mode="fn-label-text"/>
                 <xsl:text> </xsl:text>
             </xsl:if>
-            <xsl:apply-templates/>
+            <xsl:apply-templates mode="drop-title"/>
         </p>
     </xsl:template>
 
