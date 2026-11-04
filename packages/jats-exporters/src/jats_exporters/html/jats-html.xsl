@@ -64,13 +64,13 @@
                 xmlns:mml="http://www.w3.org/1998/Math/MathML"
                 exclude-result-prefixes="xlink mml">
 
-    <xsl:import href="xsl/utils.xsl"/>
-    <xsl:import href="xsl/metadata-toc.xsl"/>
-    <xsl:import href="xsl/label-title.xsl"/>
-    <xsl:import href="xsl/footnotes.xsl"/>
-    <xsl:import href="xsl/dguv-liste-frei.xsl"/>
-    <xsl:import href="xsl/elements-block.xsl"/>
-    <xsl:import href="xsl/elements-inline.xsl"/>
+    <xsl:include href="xsl/utils.xsl"/>
+    <xsl:include href="xsl/metadata-toc.xsl"/>
+    <xsl:include href="xsl/label-title.xsl"/>
+    <xsl:include href="xsl/footnotes.xsl"/>
+    <xsl:include href="xsl/dguv-liste-frei.xsl"/>
+    <xsl:include href="xsl/elements-block.xsl"/>
+    <xsl:include href="xsl/elements-inline.xsl"/>
 
     <xsl:output method="html"
                 doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
