@@ -617,8 +617,17 @@
     font-size: 8.5pt;
   }
   @bottom-left {
+    content: "";
+    width: 38mm;
+    height: auto;
+    background-image: url("assets/logos/dguv-rgb-logo-korrigiert.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+  @bottom-center {
     color: var(--pdf-muted);
-    content: "DGUV Kompendium";
+    content: "DGUV Vorschriften- und Regelwerk";
     font-size: 8pt;
   }
   @bottom-right {
@@ -657,8 +666,17 @@
     font-size: 8.5pt;
   }
   @bottom-left {
+    content: "";
+    width: 38mm;
+    height: auto;
+    background-image: url("assets/logos/dguv-rgb-logo-korrigiert.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+  @bottom-center {
     color: var(--pdf-muted);
-    content: "DGUV Kompendium";
+    content: "DGUV Vorschriften- und Regelwerk";
     font-size: 8pt;
   }
   @bottom-right {
