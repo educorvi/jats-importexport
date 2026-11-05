@@ -142,6 +142,7 @@
             </xsl:choose>
         </xsl:variable>
         <xsl:element name="{$tag}">
+            <xsl:attribute name="class">title</xsl:attribute>
             <xsl:apply-templates/>
         </xsl:element>
     </xsl:template>

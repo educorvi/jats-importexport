@@ -15,6 +15,9 @@
     <!-- ============================================================= -->
 
 
+    <xsl:template match="sec-meta" />
+
+
     <xsl:template match="fig-group">
         <div class="{local-name()}">
             <xsl:apply-templates/>

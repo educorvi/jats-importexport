@@ -129,7 +129,7 @@
                 </table>
             </div>
             <nav class="toc">
-                <p class="toc-meta-title">Inhaltsverzeichnis</p>
+                <p class="metadata-title">Inhaltsverzeichnis</p>
                 <xsl:call-template name="toc-sections">
                     <xsl:with-param name="sections"
                 select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |

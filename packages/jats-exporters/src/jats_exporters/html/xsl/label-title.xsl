@@ -91,9 +91,9 @@
     <!-- default: any other titles found -->
     <xsl:template match="title">
         <xsl:if test="normalize-space(string(.))">
-            <h3 class="title">
+            <h4 class="title">
                 <xsl:apply-templates/>
-            </h3>
+            </h4>
         </xsl:if>
     </xsl:template>
 
