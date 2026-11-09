@@ -64,6 +64,10 @@ class PloneUploadService:
             return result_path[len(base_path) :]
         return result_path
 
+    def _clean_title(self, title: str) -> str:
+        """TODO: Temporary fix of plone rest API bug where names / ids created from titles are not properly sanitized."""
+        return title.replace("\"", "").lstrip("_")
+
     @staticmethod
     def __jats_status_to_plone_transitions(jats_status: str | None) -> list[str]:
         if jats_status is None or jats_status not in WORKFLOW_MAPPING:
@@ -108,7 +112,7 @@ class PloneUploadService:
             container_url,
             json={
                 "@type": portal_type,
-                "title": filename,
+                "title": self._clean_title(filename),
                 field_name: {
                     "data": encoded,
                     "encoding": "base64",
@@ -193,7 +197,7 @@ class PloneUploadService:
                 response.raise_for_status()
 
             parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
-            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": part, "id": new_content_id})
+            response = self.httpx_client.post(parent_url, json={"@type": "Folder", "title": self._clean_title(part), "id": new_content_id})
             response.raise_for_status()
 
             # Set the workflow state of the newly created folder to 'intern veröffentlicht' to make it accessible.
@@ -292,7 +296,7 @@ class PloneUploadService:
             container_url,
             json={
                 "@type": portal_type,
-                "title": title,
+                "title": self._clean_title(title),
                 "sec_type": section.sec_type or None,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
@@ -320,7 +324,7 @@ class PloneUploadService:
 
         json_data = {
             "@type": "EasySection",
-            "title": title,
+            "title": self._clean_title(title),
             "label": label,
             "content": html_content,
         }
