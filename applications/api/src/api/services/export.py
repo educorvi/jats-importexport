@@ -88,8 +88,8 @@ async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter:
             try:
                 url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
                 related_articles_url[url] = title
-            except Exception:
-                logger.warning(f"Failed to get URL for related article with webcode {webcode}")
+            except Exception as e:
+                logger.warning(f"Failed to get URL for related article with webcode {webcode}, error: {e}")
                 continue
         doc.article.front.related_articles_map = related_articles_url
 
@@ -100,8 +100,8 @@ async def _replace_related_articles_webcode_with_url(doc: JATSDocument, adapter:
             try:
                 url = adapter.get_url_from_path(await asyncio.to_thread(adapter.get_path_from_webcode, webcode))
                 related_articles_translations_url[url] = title_lang
-            except Exception:
-                logger.warning(f"Failed to get URL for related article translation with webcode {webcode}")
+            except Exception as e:
+                logger.warning(f"Failed to get URL for related article translation with webcode {webcode}, error: {e}")
                 continue
         doc.article.front.related_articles_translations_map = related_articles_translations_url
 
