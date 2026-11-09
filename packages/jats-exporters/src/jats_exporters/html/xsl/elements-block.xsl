@@ -34,7 +34,13 @@
 
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
+        <xsl:variable name="content-type" select="@content-type"/>
         <div class="{$gi} panel">
+            <xsl:if test="$content-type">
+                <xsl:attribute name="data-content-type">
+                    <xsl:value-of select="$content-type"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:if test="not(@position != 'float')">
                 <!-- the test respects @position='float' as the default -->
                 <xsl:attribute name="style">display: float; clear: both</xsl:attribute>
@@ -130,6 +136,12 @@
 
     <xsl:template match="p">
         <p>
+            <xsl:variable name="content-type" select="@content-type"/>
+            <xsl:if test="$content-type">
+                <xsl:attribute name="data-content-type">
+                    <xsl:value-of select="$content-type"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:if test="not(preceding-sibling::*)">
                 <xsl:attribute name="class">first</xsl:attribute>
             </xsl:if>
