@@ -8,45 +8,65 @@
         <xsl:param name="front-node" select="front"/>
         <table class="article-metadata">
             <tbody>
-                <!-- Journal Title -->
+                <!-- Journal Title and Subtitle -->
                 <xsl:variable name="journal-title" select="normalize-space(string($front-node/journal-meta/journal-title-group/journal-title))" />
-                <xsl:if test="$journal-title">
-                    <tr data-meta-field="journal-title">
-                        <td>
-                            <xsl:value-of select="$journal-title"/>
-                        </td>
-                    </tr>
-                </xsl:if>
-                <!-- Journal Subtitle -->
                 <xsl:variable name="journal-subtitle" select="normalize-space(string($front-node/journal-meta/journal-title-group/journal-subtitle))" />
-                <xsl:if test="$journal-subtitle">
-                    <tr data-meta-field="journal-subtitle">
+                <xsl:if test="$journal-title or $journal-subtitle">
+                    <tr data-meta-field="journal-title-group">
                         <td>
-                            <xsl:value-of select="$journal-subtitle"/>
+                            <span><xsl:value-of select="$journal-title"/></span>
+                            <xsl:if test="$journal-title and $journal-subtitle">
+                                <span> &#x2022; </span>
+                            </xsl:if>
+                            <span><xsl:value-of select="$journal-subtitle"/></span>
                         </td>
                     </tr>
                 </xsl:if>
-                <!-- Vom -->
+                <!-- Pub Dates -->
                 <xsl:variable name="issue-date" select="$front-node/article-meta/pub-date[@date-type='Ausgabedatum'][1] | $front-node/article-meta/pub-date[not(@date-type) and not(../pub-date[@date-type='Ausgabedatum'])][1]" />
-                <xsl:if test="$issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                    <tr data-meta-field="issue-date">
+                <xsl:variable name="has-issue-date" select="boolean($issue-date[normalize-space(day) or normalize-space(month) or normalize-space(year)])" />
+                <xsl:variable name="revision-date" select="$front-node/article-meta/pub-date[@date-type='AktualisierteFassung'][1]" />
+                <xsl:variable name="has-revision-date" select="boolean($revision-date[normalize-space(day) or normalize-space(month) or normalize-space(year)])" />
+                <xsl:if test="$has-issue-date or $has-revision-date">
+                    <tr data-meta-field="pub-dates">
                         <td>
-                            Vom
-                            <xsl:for-each select="$issue-date">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
+                            <xsl:if test="$has-issue-date">
+                                <span>Vom
+                                <xsl:for-each select="$issue-date">
+                                    <xsl:call-template name="format-date"/>
+                                </xsl:for-each>
+                                </span>
+                            </xsl:if>
+                            <xsl:if test="$has-issue-date and $has-revision-date">
+                                <span> &#x2022; </span>
+                            </xsl:if>
+                            <xsl:if test="$has-revision-date">
+                                <span>In der Fassung vom
+                                <xsl:for-each select="$revision-date">
+                                    <xsl:call-template name="format-date"/>
+                                </xsl:for-each>
+                                </span>
+                            </xsl:if>
                         </td>
                     </tr>
                 </xsl:if>
-                <!-- In der Fassung vom -->
-                <xsl:variable name="revision-date" select="$front-node/article-meta/pub-date[@date-type='AktualisierteFassung'][1]" />
-                <xsl:if test="$revision-date[normalize-space(day) or normalize-space(month) or normalize-space(year)]">
-                    <tr data-meta-field="revision-date">
+                <!-- Fachbereich -->
+                <xsl:variable name="fachbereich" select="$front-node/article-meta/custom-meta-group/custom-meta[meta-name='Fachbereich']/meta-value" />
+                <xsl:if test="$fachbereich">
+                    <tr data-meta-field="fachbereich">
                         <td>
-                            In der Fassung vom
-                            <xsl:for-each select="$revision-date">
-                                <xsl:call-template name="format-date"/>
-                            </xsl:for-each>
+                            <p class="metadata-title">Fachbereich</p>
+                            <xsl:value-of select="$fachbereich"/>
+                        </td>
+                    </tr>
+                </xsl:if>
+                <!-- Sachgebiet -->
+                <xsl:variable name="sachgebiet" select="$front-node/article-meta/custom-meta-group/custom-meta[meta-name='Sachgebiet']/meta-value" />
+                <xsl:if test="$sachgebiet">
+                    <tr data-meta-field="sachgebiet">
+                        <td>
+                            <p class="metadata-title">Sachgebiet</p>
+                            <xsl:value-of select="$sachgebiet"/>
                         </td>
                     </tr>
                 </xsl:if>
