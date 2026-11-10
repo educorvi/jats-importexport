@@ -14,16 +14,16 @@
             <!-- Article Title -->
             <xsl:variable name="article-title" select="normalize-space(string($front-node/article-meta/title-group/article-title))" />
             <xsl:if test="$article-title">
-                <div class="article-title">
+                <h1 class="article-title">
                     <xsl:value-of select="$article-title"/>
-                </div>
+                </h1>
             </xsl:if>
             <!-- Article Subtitle - only the first subtitle element is considered -->
             <xsl:variable name="article-subtitle" select="normalize-space(string($front-node/article-meta/title-group/subtitle[1]))" />
             <xsl:if test="$article-subtitle">
-                <div class="article-subtitle">
+                <h2 class="article-subtitle">
                     <xsl:value-of select="$article-subtitle"/>
-                </div>
+                </h2>
             </xsl:if>
         </div>
     </xsl:template>
