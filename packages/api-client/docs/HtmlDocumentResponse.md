@@ -5,8 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**html** | **str** | The HTML document (main content) | 
-**front** | **str** | The HTML of the front matter / metadata section | 
+**toc** | **str** | The HTML of the table of contents | 
+**header** | **str** | The HTML of the article header | 
+**metadata** | **str** | The HTML of the metadata section | 
+**content** | **str** | The HTML of the main content section | 
 
 ## Example
 
