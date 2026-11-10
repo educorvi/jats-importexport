@@ -51,14 +51,14 @@ async def test_delete_path_removes_all_formats_but_preserves_other_paths(cache):
 async def test_html_variants_round_trip_independently(cache):
     assert await cache.get_html("article", False) is None
     assert await cache.get_html("article", True) is None
-    await cache.set_html("/article/", False, "<p>Normal</p>", "<header>Title</header>")
-    await cache.set_html("article", True, '<a href="/edit">Edit</a>', "")
+    await cache.set_html("/article/", False, "<nav>TOC</nav>", "<header>Title</header>", "<meta>Metadata</meta>", "<p>Normal</p>")
+    await cache.set_html("article", True, "<nav>TOC</nav>", "<header>Title</header>", "<meta>Metadata</meta>", '<a href="/edit">Edit</a>')
 
     assert await cache.get_html("article", False) == {
-        "html": "<p>Normal</p>", "front": "<header>Title</header>",
+        "content": "<p>Normal</p>", "header": "<header>Title</header>", "toc": "<nav>TOC</nav>", "metadata": "<meta>Metadata</meta>"
     }
     assert await cache.get_html("/article/", True) == {
-        "html": '<a href="/edit">Edit</a>', "front": "",
+        "content": '<a href="/edit">Edit</a>', "header": "<header>Title</header>", "toc": "<nav>TOC</nav>", "metadata": "<meta>Metadata</meta>"
     }
     await cache.delete("article", ExportType.HTML_EDIT_LINKS)
     assert await cache.get_html("article", True) is None
