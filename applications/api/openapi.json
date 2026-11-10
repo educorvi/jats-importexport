@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a54"
+    "version": "1.0.0a56"
   },
   "paths": {
     "/": {
@@ -3323,21 +3323,33 @@
       },
       "HtmlDocumentResponse": {
         "properties": {
-          "html": {
+          "toc": {
             "type": "string",
-            "title": "Html",
-            "description": "The HTML document (main content)"
+            "title": "Toc",
+            "description": "The HTML of the table of contents"
           },
-          "front": {
+          "header": {
             "type": "string",
-            "title": "Front",
-            "description": "The HTML of the front matter / metadata section"
+            "title": "Header",
+            "description": "The HTML of the article header"
+          },
+          "metadata": {
+            "type": "string",
+            "title": "Metadata",
+            "description": "The HTML of the metadata section"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The HTML of the main content section"
           }
         },
         "type": "object",
         "required": [
-          "html",
-          "front"
+          "toc",
+          "header",
+          "metadata",
+          "content"
         ],
         "title": "HtmlDocumentResponse"
       },

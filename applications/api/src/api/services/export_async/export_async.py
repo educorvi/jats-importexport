@@ -18,7 +18,7 @@ async def _export_and_write_html(path: str, include_edit_links: bool = False):
     export_type = ExportType.HTML_EDIT_LINKS if include_edit_links else ExportType.HTML
     try:
         html: HtmlDocumentResponse = await html_export(path, include_edit_links)
-        await EXPORT_CACHE.set_html(path, include_edit_links, html.html, html.front)
+        await EXPORT_CACHE.set_html(path, include_edit_links, html.toc, html.header, html.metadata, html.content)
         await EXPORT_STATE_CACHE.set(path, export_type, ExportState.COMPLETE.value)
         logger.info(f"HTML exported and written to {path}")
     except Exception as e:

@@ -107,13 +107,12 @@ class PdfExporter:
         )
 
         if isinstance(part, JATSDocument):
-            html_content = self.html_exporter.export(part)
-            toc_html = self._get_toc_html(html_content)
-            isPartial = False
+            html_toc, _, _, html_content = self.html_exporter.export_parts(part)
+            is_partial = False
         else:
             html_content = self.html_exporter.export_partial(part)
-            toc_html = None
-            isPartial = True
+            html_toc = None
+            is_partial = True
         css = self._get_css()
 
         generated_at = self._to_german_date(datetime.datetime.now())
@@ -121,9 +120,9 @@ class PdfExporter:
         return {
             "metadata": article_metadata,
             "css_content": css,
+            "html_toc": html_toc,
             "html_content": html_content,
-            "tocHtml": toc_html,
-            "isPartial": isPartial,
+            "is_partial": is_partial,
             "generated_at": generated_at,
         }
 
@@ -131,12 +130,6 @@ class PdfExporter:
         """Load the CSS for PDF generation."""
         with open(self.STYLE, encoding="utf-8") as css_file:
             return css_file.read()
-
-    def _get_toc_html(self, html_content: str) -> str:
-        """Extract the table of contents from the HTML content."""
-        soup = BeautifulSoup(html_content, "html.parser")
-        toc_div = soup.find("nav", class_="toc")
-        return str(toc_div) if toc_div else ""
 
     def _to_german_date(self, date_obj: datetime.date | datetime.datetime | None) -> str | None:
         """Convert a datetime.date object to a German date string (DD. MMMM YYYY)."""

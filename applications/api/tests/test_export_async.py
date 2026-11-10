@@ -13,8 +13,8 @@ async def test_html_variants_have_independent_tasks_and_caches(mocker, include_e
     export_type = ExportType.HTML_EDIT_LINKS if include_edit_links else ExportType.HTML
     other_type = ExportType.HTML if include_edit_links else ExportType.HTML_EDIT_LINKS
     await EXPORT_STATE_CACHE.set("article", other_type, ExportState.RUNNING.value)
-    await EXPORT_CACHE.set_html("article", not include_edit_links, "other html", "other front")
-    document = HtmlDocumentResponse(html="requested html", front="requested front")
+    await EXPORT_CACHE.set_html("article", not include_edit_links, "other toc", "other header", "other metadata", "other html")
+    document = HtmlDocumentResponse(toc="requested toc", header="requested header", metadata="requested metadata", content="requested html")
     exporter = mocker.patch("api.services.export_async.export_async.html_export", return_value=document)
     tasks = BackgroundTasks()
 
@@ -32,12 +32,15 @@ async def test_html_variants_have_independent_tasks_and_caches(mocker, include_e
     assert await html_export_async("article", cached_tasks, include_edit_links) == document
     assert cached_tasks.tasks == []
     assert await EXPORT_CACHE.get_html("article", not include_edit_links) == {
-        "html": "other html", "front": "other front"
+        "header": "other header",
+        "toc": "other toc",
+        "metadata": "other metadata",
+        "content": "other html"
     }
 
 
 async def test_html_edit_link_failure_can_be_retried(mocker):
-    document = HtmlDocumentResponse(html="html", front="front")
+    document = HtmlDocumentResponse(toc="toc", header="header", metadata="metadata", content="content")
     mocker.patch(
         "api.services.export_async.export_async.html_export",
         side_effect=[RuntimeError("render failed"), document],
@@ -58,7 +61,7 @@ async def test_html_edit_link_failure_can_be_retried(mocker):
 
 @pytest.mark.parametrize("params, include_edit_links", [({}, False), ({"include_edit_links": "true"}, True)])
 async def test_html_async_endpoint_edit_links(mocker, params, include_edit_links):
-    document = HtmlDocumentResponse(html="html", front="front")
+    document = HtmlDocumentResponse(toc="toc", header="header", metadata="metadata", content="content")
     exporter = mocker.patch("api.services.export_async.export_async.html_export", return_value=document)
     app = FastAPI()
     app.include_router(router)

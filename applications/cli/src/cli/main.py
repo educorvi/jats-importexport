@@ -305,7 +305,7 @@ def export_command(
                     content = api.export_jats(path=path).jats
                 elif export_type == ExportType.HTML:
                     response = api.export_html(path=path)
-                    content = response.front + "\n" + response.html
+                    content = response.toc + "\n" + response.header + "\n" + response.metadata + "\n" + response.content
                 elif export_type == ExportType.MD:
                     content = api.export_md(path=path).md
                 else:

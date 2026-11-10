@@ -12,8 +12,8 @@ from cli.main import app
     ("export_type", "response", "expected"),
     [
         ("jats", SimpleNamespace(jats="<article>ä</article>"), "<article>ä</article>".encode()),
-        ("html", SimpleNamespace(front="<header>Title</header>", html="<p>Body</p>"),
-         b"<header>Title</header>\n<p>Body</p>"),
+        ("html", SimpleNamespace(toc="<header>Title</header>", header="<header>Title</header>", metadata="<span>Metadata</span>", content="<p>Body</p>"),
+         b"<header>Title</header>\n<header>Title</header>\n<span>Metadata</span>\n<p>Body</p>"),
         ("md", SimpleNamespace(md="# Title\nä"), "# Title\nä".encode()),
         ("pdf", b"%PDF-1.7\n\x00\xff", b"%PDF-1.7\n\x00\xff"),
         ("metadata", SimpleNamespace(metadata=Mock(model_dump_json=Mock(return_value='{"title": "Title"}'))),

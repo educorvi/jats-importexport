@@ -65,7 +65,9 @@
                 exclude-result-prefixes="xlink mml">
 
     <xsl:include href="xsl/utils.xsl"/>
-    <xsl:include href="xsl/metadata-toc.xsl"/>
+    <xsl:include href="xsl/toc.xsl"/>
+    <xsl:include href="xsl/metadata.xsl"/>
+    <xsl:include href="xsl/header.xsl"/>
     <xsl:include href="xsl/label-title.xsl"/>
     <xsl:include href="xsl/footnotes.xsl"/>
     <xsl:include href="xsl/dguv-liste-frei.xsl"/>
@@ -108,19 +110,23 @@
 
 
     <xsl:template name="make-article">
-        <div class="article-all row">
-            <div class="article-front">
-                <xsl:call-template name="metadata-and-toc"/>
-            </div>
-            <div class="article-content">
-                <div class="article-body">
-                    <xsl:apply-templates select="body"/>
-                </div>
-                <xsl:if test="back | $loose-footnotes">
-                    <div class="article-back">
-                        <xsl:call-template name="make-back"/>
+        <div class="article-shell">
+            <aside class="article-sidebar">
+                <xsl:call-template name="make-toc"/>
+            </aside>
+            <div class="article-main">
+                <xsl:call-template name="make-header"/>
+                <xsl:call-template name="make-metadata"/>
+                <div class="article-content">
+                    <div class="article-body">
+                        <xsl:apply-templates select="body"/>
                     </div>
-                </xsl:if>
+                    <xsl:if test="back | $loose-footnotes">
+                        <div class="article-back">
+                            <xsl:call-template name="make-back"/>
+                        </div>
+                    </xsl:if>
+                </div>
             </div>
         </div>
     </xsl:template>

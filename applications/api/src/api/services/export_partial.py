@@ -51,10 +51,10 @@ async def jats_export(path: str, sub_path: str):
 async def html_export(path: str, sub_path: str, include_edit_links: bool = False):
     cached = await PARTIAL_EXPORT_CACHE.get_html(path, include_edit_links, sub_path)
     if cached is not None:
-        return HtmlDocumentPartialResponse(html=cached["html"])
+        return HtmlDocumentPartialResponse(html=cached["content"])
     document_part, _ = await __load_document_part(path, sub_path, {"include_edit_links": include_edit_links})
     html_content = await asyncio.to_thread(HTML_EXPORTER.export_partial, document_part)
-    await PARTIAL_EXPORT_CACHE.set_html(path, include_edit_links, html_content, "", sub_path)
+    await PARTIAL_EXPORT_CACHE.set_html(path, include_edit_links, "", "", "", html_content, sub_path)
     return HtmlDocumentPartialResponse(html=html_content)
 
 
