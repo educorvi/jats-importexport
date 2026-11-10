@@ -41,8 +41,10 @@ class ExportType(Enum):
 
 
 class HtmlData(TypedDict):
-    html: str
-    front: str
+    toc: str
+    header: str
+    metadata: str
+    content: str
 
 
 class CacheStatus(BaseModel):
@@ -115,9 +117,16 @@ class CacheImplementation(abc.ABC):
             return None
         return json.loads(cache_string)
 
-    async def set_html(self, path: str, edit_links: bool, html: str, front: str, sub_path: str = "") -> None:
+    async def set_html(
+        self, path: str, edit_links: bool, toc: str, header: str, metadata: str, content: str, sub_path: str = ""
+    ) -> None:
         export_type = ExportType.HTML_EDIT_LINKS if edit_links else ExportType.HTML
-        await self.set(path, export_type, json.dumps({"html": html, "front": front}), sub_path)
+        await self.set(
+            path,
+            export_type,
+            json.dumps({"toc": toc, "header": header, "metadata": metadata, "content": content}),
+            sub_path,
+        )
 
     async def get_md(self, path: str, edit_links: bool, sub_path: str = "") -> str | None:
         export_type = ExportType.MD_EDIT_LINKS if edit_links else ExportType.MD

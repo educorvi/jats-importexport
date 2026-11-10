@@ -4,7 +4,6 @@ import logging
 import pathlib
 from urllib.parse import parse_qs, urlparse
 
-from bs4 import BeautifulSoup
 from fastapi import HTTPException
 from jats_classes import Front, JATSDocument
 from jats_exporters import HtmlExporter, JatsExporter, MarkdownExporter, PdfExporter, ZipExporter
@@ -152,23 +151,12 @@ async def html_export(path: str, include_edit_links: bool = False):
     with exp_metric.labels("html").time(), exp_document_metric.labels("html", path).time():
         document = await __load_document(path, {"include_edit_links": include_edit_links})
         await _replace_related_articles_webcode_with_url(document, get_adapter_instance())
-        html_content = await asyncio.to_thread(HTML_EXPORTER.export, document)
-
-        soup = BeautifulSoup(html_content, "html.parser")
-        content = soup.find_all("div", class_="article-content")
-        if content is None or len(content) == 0:
-            raise HTTPException(
-                status_code=500, detail="HTML export failed: 'article-content' not found in the output."
-            )
-        content = content[0]
-        # content.attrs["class"] = "content"
-        front = soup.find_all("div", class_="article-front")
-        if front is None or len(front) == 0:
-            raise HTTPException(status_code=500, detail="HTML export failed: 'article-front' not found in the output.")
-        front = front[0]
-        # front.attrs["class"] = "front"
-        await EXPORT_CACHE.set_html(path, include_edit_links, str(content), str(front))
-        return HtmlDocumentResponse(html=str(content), front=str(front))
+        try:
+            toc, header, metadata, content = await asyncio.to_thread(HTML_EXPORTER.export_parts, document)
+        except ValueError as e:
+            raise HTTPException(status_code=500, detail=f"HTML export failed: {str(e)}")
+        await EXPORT_CACHE.set_html(path, include_edit_links, toc, header, metadata, content)
+        return HtmlDocumentResponse(toc=toc, header=header, metadata=metadata, content=content)
 
 
 async def md_export(path: str, include_edit_links: bool = False):

@@ -62,8 +62,10 @@ class JatsDocumentResponse(BaseModel):
 
 
 class HtmlDocumentResponse(BaseModel):
-    html: str = Field(description="The HTML document (main content)")
-    front: str = Field(description="The HTML of the front matter / metadata section")
+    toc: str = Field(description="The HTML of the table of contents")
+    header: str = Field(description="The HTML of the article header")
+    metadata: str = Field(description="The HTML of the metadata section")
+    content: str = Field(description="The HTML of the main content section")
 
 
 class HtmlDocumentPartialResponse(BaseModel):
