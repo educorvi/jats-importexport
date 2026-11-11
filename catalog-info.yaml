@@ -15,6 +15,8 @@ spec:
   owner: group:default/developers
   providesApis:
     - jats-importexport-api
+  consumesApi:
+    - vur-plone-rest-api
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
