@@ -2,6 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: jats-importexport
+  title: Import/Export Hub
   description: Upload, parse, convert, and store JATS XML documents.
   annotations:
     github.com/project-slug: educorvi/jats-importexport
@@ -24,6 +25,7 @@ apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: jats-importexport-api
+  title: JATS Import/Export API
   description: REST API for uploading, storing, and exporting JATS documents.
 spec:
   type: openapi
@@ -37,6 +39,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: jats-importexport-client
+  title: JATS Import/Export API Client
   description: Generated Python client for the JATS Import/Export REST API.
   annotations:
     github.com/project-slug: educorvi/jats-importexport
