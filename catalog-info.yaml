@@ -11,6 +11,7 @@ metadata:
     - jats
 spec:
   type: service
+  system: vorschriften-und-regeln
   lifecycle: experimental
   owner: group:default/developers
   providesApis:
@@ -25,6 +26,7 @@ metadata:
   description: REST API for uploading, storing, and exporting JATS documents.
 spec:
   type: openapi
+  system: vorschriften-und-regeln
   lifecycle: experimental
   owner: group:default/developers
   definition:
@@ -44,6 +46,7 @@ metadata:
     - jats
 spec:
   type: library
+  system: vorschriften-und-regeln
   lifecycle: experimental
   owner: group:default/developers
   consumesApis:
