@@ -20,6 +20,8 @@ spec:
   consumesApis:
     - vur-plone-rest-api
     - api:default/api-key-manager
+  dependsOn:
+    - resource:default/vur-demo
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
