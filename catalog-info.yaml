@@ -49,5 +49,3 @@ spec:
   system: vorschriften-und-regeln
   lifecycle: experimental
   owner: group:default/developers
-  consumesApis:
-    - jats-importexport-api
