@@ -66,12 +66,17 @@
     <xsl:template match="named-content">
         <span>
             <xsl:for-each select="@content-type">
-                <xsl:attribute name="class">
+                <xsl:attribute name="data-content-type">
                     <xsl:value-of select="translate(.,' ','-')"/>
                 </xsl:attribute>
             </xsl:for-each>
             <xsl:apply-templates/>
         </span>
+    </xsl:template>
+
+
+    <xsl:template match="named-content[@specific-use='br']">
+        <br class="br"/>
     </xsl:template>
 
 
