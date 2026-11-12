@@ -224,8 +224,7 @@
     </xsl:template>
 
 
-    <xsl:template priority="2" mode="list"
-                  match="list[@list-type='simple' or list-item/label]">
+    <xsl:template priority="2" mode="list" match="list[list-item/label]">
         <ul style="list-style-type: none">
             <xsl:apply-templates select="list-item"/>
         </ul>
@@ -246,6 +245,7 @@
                 <xsl:when test="@list-type='alpha-upper'">upper-alpha</xsl:when>
                 <xsl:when test="@list-type='roman-lower'">lower-roman</xsl:when>
                 <xsl:when test="@list-type='roman-upper'">upper-roman</xsl:when>
+                <xsl:when test="@list-type='simple'">none</xsl:when>
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
