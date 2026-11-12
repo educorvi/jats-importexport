@@ -54,7 +54,7 @@
         <span>
             <xsl:copy-of select="@style"/>
             <xsl:for-each select="@style-type">
-                <xsl:attribute name="class">
+                <xsl:attribute name="data-style-type">
                     <xsl:value-of select="."/>
                 </xsl:attribute>
             </xsl:for-each>
@@ -107,9 +107,9 @@
 
 
     <xsl:template match="italic">
-        <em>
+        <i>
             <xsl:apply-templates/>
-        </em>
+        </i>
     </xsl:template>
 
 
