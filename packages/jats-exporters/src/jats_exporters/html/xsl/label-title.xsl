@@ -17,16 +17,18 @@
             </xsl:choose>
         </xsl:variable>
         <xsl:choose>
-            <xsl:when test="label or title">
+            <xsl:when test="normalize-space(string(label)) or normalize-space(string(title))">
                 <xsl:element name="{$heading-tag}">
                     <xsl:attribute name="class">title</xsl:attribute>
-                    <xsl:if test="label">
+                    <xsl:if test="normalize-space(string(label))">
                         <span class="label">
                             <xsl:apply-templates select="label/node()"/>
                         </span>
                         <xsl:text> </xsl:text>
                     </xsl:if>
-                    <xsl:apply-templates select="title/node()"/>
+                    <xsl:if test="normalize-space(string(title))">
+                        <xsl:apply-templates select="title/node()"/>
+                    </xsl:if>
                     <xsl:if test="processing-instruction('section-edit-link')">
                         <a aria-label="Bearbeiten" class="section-edit-link" href="{normalize-space(processing-instruction('section-edit-link'))}">
                             <i class="bi bi-pen-fill"></i>
