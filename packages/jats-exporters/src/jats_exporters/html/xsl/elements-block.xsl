@@ -25,13 +25,6 @@
     </xsl:template>
 
 
-    <xsl:template match="attrib">
-        <p class="attrib">
-            <xsl:apply-templates/>
-        </p>
-    </xsl:template>
-
-
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
@@ -41,13 +34,9 @@
                     <xsl:value-of select="$content-type"/>
                 </xsl:attribute>
             </xsl:if>
-            <xsl:if test="not(@position != 'float')">
-                <!-- the test respects @position='float' as the default -->
-                <xsl:attribute name="style">display: float; clear: both</xsl:attribute>
-            </xsl:if>
             <xsl:call-template name="named-anchor"/>
             <xsl:choose>
-                <xsl:when test="self::fig and graphic">
+                <xsl:when test="self::fig">
                     <xsl:apply-templates select="graphic"/>
                     <xsl:call-template name="make-caption"/>
                     <xsl:apply-templates select="*[not(self::graphic or self::alt-text)]" mode="drop-title"/>
@@ -58,6 +47,12 @@
                         <xsl:apply-templates mode="drop-title"/>
                     </div>
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
+                </xsl:when>
+                <xsl:when test="self::boxed-text">
+                    <xsl:call-template name="make-caption"/>
+                    <div class="boxed-text-content">
+                        <xsl:apply-templates mode="drop-title"/>
+                    </div>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:call-template name="make-caption"/>
@@ -174,17 +169,16 @@
           through                                                      -->
 
 
+    <xsl:template match="abstract">
+        <div class="abstract">
+            <xsl:apply-templates/>
+        </div>
+    </xsl:template>
+
+
     <xsl:template match="table">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:attribute name="class">
-                <xsl:choose>
-                    <xsl:when test="@class">table table-bordered
-                        <xsl:value-of select="@class"/>
-                    </xsl:when>
-                    <xsl:otherwise>table table-bordered</xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
             <xsl:call-template name="named-anchor"/>
             <xsl:apply-templates/>
         </xsl:copy>
@@ -230,8 +224,7 @@
     </xsl:template>
 
 
-    <xsl:template priority="2" mode="list"
-                  match="list[@list-type='simple' or list-item/label]">
+    <xsl:template priority="2" mode="list" match="list[list-item/label]">
         <ul style="list-style-type: none">
             <xsl:apply-templates select="list-item"/>
         </ul>
@@ -252,6 +245,7 @@
                 <xsl:when test="@list-type='alpha-upper'">upper-alpha</xsl:when>
                 <xsl:when test="@list-type='roman-lower'">lower-roman</xsl:when>
                 <xsl:when test="@list-type='roman-upper'">upper-roman</xsl:when>
+                <xsl:when test="@list-type='simple'">none</xsl:when>
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
@@ -347,7 +341,16 @@
     <xsl:template match="disp-quote">
         <div class="blockquote">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates/>
+            <div class="blockquote-content">
+                <xsl:apply-templates select="node()[not(self::attrib)]"/>
+            </div>
+            <xsl:if test="attrib">
+                <xsl:for-each select="attrib">
+                    <div class="blockquote-attrib">
+                        <xsl:apply-templates/>
+                    </div>
+                </xsl:for-each>
+            </xsl:if>
         </div>
     </xsl:template>
 

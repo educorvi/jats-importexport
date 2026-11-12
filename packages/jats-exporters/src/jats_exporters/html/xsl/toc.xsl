@@ -7,7 +7,7 @@
             <p class="metadata-title">Inhaltsverzeichnis</p>
             <xsl:call-template name="toc-sections">
                 <xsl:with-param name="sections"
-                                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
+                                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc' and @sec-type != '_4octextparaPrologZwischenueberschrift'] |
                                     //back/app-group[title[normalize-space(string(.))]] |
                                     //back/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
                                     //back/app[title[normalize-space(string(.))]] |
@@ -51,7 +51,7 @@
                             </a>
                         </span>
                         <xsl:variable name="subsections"
-                                      select="sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
+                                      select="sec[title[normalize-space(string(.))] and @sec-type != 'toc' and @sec-type != '_4octextparaPrologZwischenueberschrift'] |
                                             app[title[normalize-space(string(.))]] |
                                             ref-list[title[normalize-space(string(.))]] |
                                             glossary[title[normalize-space(string(.))]]"/>

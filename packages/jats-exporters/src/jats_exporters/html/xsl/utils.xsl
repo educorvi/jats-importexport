@@ -37,7 +37,7 @@
         <xsl:variable name="id">
             <xsl:apply-templates select="." mode="id"/>
         </xsl:variable>
-        <a id="{$id}">
+        <a id="{$id}" class="named-anchor">
             <xsl:comment>named anchor</xsl:comment>
         </a>
     </xsl:template>
