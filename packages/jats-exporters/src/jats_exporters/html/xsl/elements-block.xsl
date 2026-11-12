@@ -41,10 +41,6 @@
                     <xsl:value-of select="$content-type"/>
                 </xsl:attribute>
             </xsl:if>
-            <xsl:if test="not(@position != 'float')">
-                <!-- the test respects @position='float' as the default -->
-                <xsl:attribute name="style">display: float; clear: both</xsl:attribute>
-            </xsl:if>
             <xsl:call-template name="named-anchor"/>
             <xsl:choose>
                 <xsl:when test="self::fig">
@@ -180,17 +176,16 @@
           through                                                      -->
 
 
+    <xsl:template match="abstract">
+        <div class="abstract">
+            <xsl:apply-templates/>
+        </div>
+    </xsl:template>
+
+
     <xsl:template match="table">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:attribute name="class">
-                <xsl:choose>
-                    <xsl:when test="@class">table table-bordered
-                        <xsl:value-of select="@class"/>
-                    </xsl:when>
-                    <xsl:otherwise>table table-bordered</xsl:otherwise>
-                </xsl:choose>
-            </xsl:attribute>
             <xsl:call-template name="named-anchor"/>
             <xsl:apply-templates/>
         </xsl:copy>
