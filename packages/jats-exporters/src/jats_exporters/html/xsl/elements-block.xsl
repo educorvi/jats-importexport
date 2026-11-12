@@ -47,7 +47,7 @@
             </xsl:if>
             <xsl:call-template name="named-anchor"/>
             <xsl:choose>
-                <xsl:when test="self::fig and graphic">
+                <xsl:when test="self::fig">
                     <xsl:apply-templates select="graphic"/>
                     <xsl:call-template name="make-caption"/>
                     <xsl:apply-templates select="*[not(self::graphic or self::alt-text)]" mode="drop-title"/>
@@ -58,6 +58,12 @@
                         <xsl:apply-templates mode="drop-title"/>
                     </div>
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
+                </xsl:when>
+                <xsl:when test="self::boxed-text">
+                    <xsl:call-template name="make-caption"/>
+                    <div class="boxed-text-content">
+                        <xsl:apply-templates mode="drop-title"/>
+                    </div>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:call-template name="make-caption"/>
