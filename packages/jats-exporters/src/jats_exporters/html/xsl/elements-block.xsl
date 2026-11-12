@@ -25,13 +25,6 @@
     </xsl:template>
 
 
-    <xsl:template match="attrib">
-        <p class="attrib">
-            <xsl:apply-templates/>
-        </p>
-    </xsl:template>
-
-
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
@@ -348,7 +341,16 @@
     <xsl:template match="disp-quote">
         <div class="blockquote">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates/>
+            <div class="blockquote-content">
+                <xsl:apply-templates select="node()[not(self::attrib)]"/>
+            </div>
+            <xsl:if test="attrib">
+                <xsl:for-each select="attrib">
+                    <div class="blockquote-attrib">
+                        <xsl:apply-templates/>
+                    </div>
+                </xsl:for-each>
+            </xsl:if>
         </div>
     </xsl:template>
 
