@@ -25,30 +25,17 @@
             </xsl:call-template>
         </xsl:variable>
 
-        <xsl:choose>
-            <xsl:when test="count(*) = 1 and count(list) = 1">
-                <div class="list" data-list-level="{$level}">
-                    <xsl:call-template name="named-anchor"/>
-                    <xsl:apply-templates select="label | title"/>
-                    <xsl:apply-templates select="." mode="list"/>
+        <div class="freie-liste" data-list-type="{$type}" data-list-level="{$level}">
+            <xsl:call-template name="assign-id"/>
+            <xsl:if test="normalize-space(string($label))">
+                <div class="list-label">
+                    <xsl:copy-of select="$label"/>
                 </div>
-            </xsl:when>
-            <xsl:otherwise>
-                <div class="freie-liste" data-list-type="{$type}" data-list-level="{$level}">
-                    <p>
-                        <xsl:call-template name="assign-id"/>
-                        <xsl:if test="normalize-space(string($label))">
-                            <span class="list-label">
-                                <xsl:copy-of select="$label"/>
-                            </span>
-                        </xsl:if>
-                        <span class="list-item">
-                            <xsl:apply-templates select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
-                        </span>
-                    </p>
-                </div>
-            </xsl:otherwise>
-        </xsl:choose>
+            </xsl:if>
+            <div class="list-item">
+                <xsl:apply-templates select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
+            </div>
+        </div>
     </xsl:template>
 
     <xsl:template name="free-list-level">
