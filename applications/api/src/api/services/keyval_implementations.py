@@ -188,6 +188,7 @@ class InMemoryCache(CacheImplementation):
         return "InMemory"
 
     _data: dict[tuple[str, ExportType, str], str]
+    _max_cache_size: int = 100
 
     async def init(self) -> None:
         self._data = {}
@@ -197,6 +198,9 @@ class InMemoryCache(CacheImplementation):
 
     async def _set(self, path: str, export_type: ExportType, value: str, sub_path: str = ""):
         self._data[(path, export_type, sub_path)] = value
+        if len(self._data) > self._max_cache_size:
+            oldest_key = next(iter(self._data))
+            del self._data[oldest_key]
 
     async def _delete(self, path: str, export_type: ExportType | None):
         if export_type is None:
