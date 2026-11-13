@@ -17,7 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "lxml-stubs>=0.5.1",
+    "types-lxml",
     "ruff>=0.9",
     "ty>=0.0.40",
 ]
