@@ -3,7 +3,7 @@
 import argparse
 import json
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -33,7 +33,7 @@ def create_app() -> FastAPI:
         )
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         await init_caches()
         yield
         await close_caches()

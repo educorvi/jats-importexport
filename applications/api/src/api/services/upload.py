@@ -7,7 +7,7 @@ import stat
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, cast
 from urllib.parse import unquote, urlparse
 
 import pypandoc
@@ -34,27 +34,30 @@ _JATS_DTD_DIRECTORY = Path(__file__).parent / "dtd-files"
 
 
 class _LocalDTDResolver(etree.Resolver):
-    """Resolve the configured JATS DTD without allowing external network access."""
+    """Resolve only bundled DTD resources; never fall back to external loading."""
 
     def __init__(self, dtd_directory: Path):
         super().__init__()
         self.dtd_directory = dtd_directory.resolve()
 
-    def resolve(  # ty: ignore[invalid-method-override] # temporary fix because lxml-stubs doesn't exist in newer version
-        self, system_url: str, public_id: str, context: Any
-    ):
+    def resolve(self, system_url: str | None, public_id: str | None, context: object):
+        if not system_url:
+            raise etree.XMLSyntaxError("External XML resource is not allowed", 0, 0, 0)
         requested_path = Path(unquote(urlparse(system_url).path))
         if ".." in requested_path.parts:
-            return self.resolve_string("", context)  # ty: ignore[missing-argument] # temporary fix because lxml-stubs doesn't exist in newer version
+            raise etree.XMLSyntaxError("External XML resource is not allowed", 0, 0, 0)
 
         dtd_path = (self.dtd_directory / requested_path).resolve() if not requested_path.is_absolute() else None
         if dtd_path is None or not _is_path_within(self.dtd_directory, dtd_path) or not dtd_path.is_file():
             matches = list(self.dtd_directory.rglob(requested_path.name))
             if len(matches) != 1:
-                return None
+                raise etree.XMLSyntaxError("External XML resource is not allowed", 0, 0, 0)
             dtd_path = matches[0].resolve()
 
-        return self.resolve_filename(str(dtd_path), context)  # ty: ignore[unresolved-attribute] # temporary fix because lxml-stubs doesn't exist in newer version
+        if not _is_path_within(self.dtd_directory, dtd_path) or dtd_path.suffix not in {".dtd", ".ent", ".mod"}:
+            raise etree.XMLSyntaxError("External XML resource is not allowed", 0, 0, 0)
+
+        return self.resolve_filename(str(dtd_path), context)
 
 
 def _create_xml_parser() -> etree.XMLParser:
@@ -128,7 +131,8 @@ async def upload_zip(uploaded_file: UploadFile = File(...), container: str | Non
                 urls = []
                 for xml_file in xml_files:
                     parser = _create_xml_parser()
-                    xml_tree = etree.parse(str(xml_file), parser=parser)
+                    with xml_file.open("rb") as xml_source:
+                        xml_tree = etree.parse(xml_source, parser=parser)
 
                     document = _create_JATSDocument_from_xml_tree(xml_tree)
                     local_files = _get_files(xml_tree.getroot(), xml_file, tmp_dir_path)
@@ -227,7 +231,10 @@ async def upload_docx(
 
             # Synchronous XML parsing, offload to thread
             parser = etree.XMLParser(resolve_entities=False, no_network=True)
-            xml_tree = await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser)
+            xml_tree = cast(
+                etree._Element,
+                await asyncio.to_thread(etree.fromstring, xml_text.encode("utf-8"), parser=parser),
+            )
 
             # Adapt the converted DOCX XML tree to conform to JATS structure and conventions
             await asyncio.to_thread(adapt_docx_xml, xml_tree, XML_NAMESPACE, XLINK_NAMESPACE, media_dir)
