@@ -26,10 +26,10 @@ def create_app() -> FastAPI:
 
     setup_logging()
 
-    if not APIConfig.API_KEY:
+    if not APIConfig.API_KEY and not (APIConfig.API_KEY_MANAGER_URL and APIConfig.API_KEY_MANAGER_API_ID):
         logger.warning(
-            "API_KEY is not set — authentication is DISABLED for /upload/* and /export/* endpoints. "
-            "Set the API_KEY environment variable to require the X-API-Key header."
+            "No authentication provider is configured — protected endpoints will reject all requests. "
+            "Configure API_KEY or the API key manager to authorize requests."
         )
 
     @asynccontextmanager

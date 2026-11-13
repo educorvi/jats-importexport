@@ -27,8 +27,8 @@ def require_permission(permission: str = "write"):
     async def verify_api_key(api_key: str | None = Security(_api_key_header)) -> None:
         """Validate the X-API-Key header for the requested permission.
 
-        When API_KEY is not configured the check is skipped (auth disabled).
-        When API_KEY is configured the header must be present and match exactly.
+        A matching static API_KEY or approval from the configured key manager is required.
+        Requests are rejected when no authentication provider is configured.
         Raises HTTP 401 on failure.
         """
         if APIConfig.API_KEY and api_key and secrets.compare_digest(api_key, APIConfig.API_KEY):
