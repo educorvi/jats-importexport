@@ -9,7 +9,7 @@ dependencies = [
     "markdownify~=1.2.2",
     "xmlschema~=4.3.1",
     "jinja2~=3.1.6",
-    "weasyprint~=69.0",
+    "weasyprint~=70.0",
     "beautifulsoup4~=4.15.0",
     "jats_classes",
     "ziamath~=0.13.0",
