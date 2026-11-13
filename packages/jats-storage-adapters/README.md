@@ -47,6 +47,7 @@ Implement `StorageAdapter` to support other backends:
 ```python
 from jats_storage_adapters.interface import StorageAdapter
 
+
 class MyAdapter(StorageAdapter):
     def upload_file(self, file, container, status): ...
     def get_jats_document(self, path): ...
