@@ -31,9 +31,7 @@ def require_permission(permission: str = "write"):
         When API_KEY is configured the header must be present and match exactly.
         Raises HTTP 401 on failure.
         """
-        if not APIConfig.API_KEY:
-            return
-        if api_key and secrets.compare_digest(api_key, APIConfig.API_KEY):
+        if APIConfig.API_KEY and api_key and secrets.compare_digest(api_key, APIConfig.API_KEY):
             return
         if APIConfig.API_KEY_MANAGER_URL and APIConfig.API_KEY_MANAGER_API_ID:
             try:
