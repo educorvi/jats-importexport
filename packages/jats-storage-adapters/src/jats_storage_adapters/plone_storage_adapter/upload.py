@@ -8,7 +8,6 @@ import json
 import logging
 import mimetypes
 import re
-from typing import cast
 from urllib.parse import urlparse
 
 import httpx
@@ -26,7 +25,6 @@ from jats_classes import (
 from jats_classes.section import Appendix
 from jats_exporters import HtmlExporter
 from lxml import etree, html
-from lxml.html import HtmlElement
 
 from ..interface import SaveJATSDocumentOptions
 
@@ -365,7 +363,6 @@ class PloneUploadService:
     def __sanitize_html_for_richtext(self, html_content: str, article_container_url: str) -> str:
         """Sanitize HTML content of an easy section for Plone richtext fields."""
         tree = html.fromstring(html_content, parser=html.HTMLParser(recover=True, remove_comments=True))
-        tree = cast(HtmlElement, tree)
 
         # remove <a> tags that have no content and only an id attribute
         empty_a_tags = tree.xpath("//a[not(*) and normalize-space(.) = '' and @id and count(@*) = 1]")

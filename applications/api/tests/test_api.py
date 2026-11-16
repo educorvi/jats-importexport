@@ -169,14 +169,16 @@ class MockStorageAdapter(StorageAdapter):
 
 
 @pytest.fixture
-def mock_adapter(mocker):
+def mock_adapter(mocker, request, monkeypatch):
     adapter = MockStorageAdapter()
     mocker.patch("api.services.upload.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.export.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.modify.get_adapter_instance", return_value=adapter)
     mocker.patch("api.services.common.get_adapter_instance", return_value=adapter)
-    mocker.patch.object(APIConfig, "API_KEY", None)
+    mocker.patch.object(APIConfig, "API_KEY", "test-key")
     mocker.patch.object(APIConfig, "API_KEY_MANAGER_URL", None)
+    if "auth" not in request.node.name:
+        monkeypatch.setitem(client.headers, "X-API-Key", "test-key")
     return adapter
 
 
@@ -474,10 +476,10 @@ def test_auth_status_is_always_public(mocker):
     assert response.status_code == 200
 
 
-def test_auth_disabled_when_no_api_key_set(mocker, mock_adapter):
+def test_auth_rejects_when_no_auth_provider_configured(mocker, mock_adapter):
     mocker.patch.object(APIConfig, "API_KEY", None)
     response = client.get("/export/jats?path=doc1")
-    assert response.status_code == 200
+    assert response.status_code == 401
 
 
 def test_auth_rejects_missing_key(mocker, mock_adapter):

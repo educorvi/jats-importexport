@@ -46,7 +46,7 @@ Set `IEH_BASE_URL` to the public URL used by clients to reach this API. Generate
 
 ## Authentication
 
-All `/upload/*` and `/export/*` endpoints require an API key when `API_KEY` is set.
+Protected endpoints always require an API key. Configure `API_KEY` or an external key manager to authorize requests.
 `/status` is always public.
 
 Pass the key in the `X-API-Key` request header:
@@ -55,10 +55,8 @@ Pass the key in the `X-API-Key` request header:
 curl -H "X-API-Key: <your-key>" http://localhost:8000/export/jats?path=vol1/article
 ```
 
-When `API_KEY` is **not** set, authentication is disabled and all endpoints are open.
-The server logs a warning on startup in that case.
+When neither a static key nor an external key manager is configured, protected endpoints reject all requests.
 
-> **Production note:** always set `API_KEY` in production deployments.
 
 ## Configuration
 
@@ -68,7 +66,7 @@ All settings are read from environment variables.
 
 | Variable                 | Default   | Description                                                                                       |
 |--------------------------|-----------|---------------------------------------------------------------------------------------------------|
-| `API_KEY`                | *(unset)* | API key required in `X-API-Key` header; auth disabled when unset                                  |
+| `API_KEY`                | *(unset)* | Static API key accepted in the `X-API-Key` header                                  |
 | `API_KEY_MANAGER_URL`    | *(unset)* | Base URL of an external API key manager used to validate keys (requires `API_KEY_MANAGER_API_ID`) |
 | `API_KEY_MANAGER_API_ID` | *(unset)* | API ID sent to the API key manager when validating keys                                           |
 | `API_HOST`               | `0.0.0.0` | Bind host                                                                                         |
