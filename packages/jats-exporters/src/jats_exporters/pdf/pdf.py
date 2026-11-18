@@ -100,30 +100,45 @@ class PdfExporter:
 
     def _get_template_context(self, part: JATSClassInterface, front: Front) -> dict[str, Any]:
         """Prepare the context for rendering the PDF template."""
-        article_metadata = front.to_dict()
-        article_metadata["pub_date_ausgabedatum_german"] = self._to_german_date(front.pub_date_ausgabedatum)
-        article_metadata["pub_date_aktualisierte_fassung_german"] = self._to_german_date(
-            front.pub_date_aktualisierte_fassung
-        )
+        article_meta = front.to_dict()
+        pdf_meta = {}
+        css_content = self._get_css()
 
         if isinstance(part, JATSDocument):
             html_toc, _, _, html_content = self.html_exporter.export_parts(part)
-            is_partial = False
+            pdf_meta["is_partial"] = False
         else:
             html_content = self.html_exporter.export_partial(part)
             html_toc = None
-            is_partial = True
-        css = self._get_css()
+            pdf_meta["is_partial"] = True
 
-        generated_at = self._to_german_date(datetime.datetime.now())
+        pdf_meta["head_generator"] = "DGUV Vorschriften- und Regelwerk PDF"
+        pdf_meta["head_author"] = "Deutsche Gesetzliche Unfallversicherung e. V. (DGUV)"
+        pdf_meta["head_created"] = front.pub_date_ausgabedatum or front.pub_date_aktualisierte_fassung or "1970-01-01"
+        pdf_meta["head_modified"] = front.pub_date_aktualisierte_fassung or front.pub_date_ausgabedatum or "1970-01-01"
+        titles = [front.journal_title, front.journal_subtitle, front.article_id, front.title]
+        pdf_meta["head_title"] = " - ".join(filter(None, titles)) if any(titles) else "DGUV-Dokument"
+
+        pdf_meta["pub_date_ausgabedatum_german"] = self._to_german_date(front.pub_date_ausgabedatum)
+        pdf_meta["pub_date_aktualisierte_fassung_german"] = self._to_german_date(front.pub_date_aktualisierte_fassung)
+
+        pdf_meta["generated_at"] = self._to_german_date(datetime.datetime.now())
+
+        # find impressum in html - should be rendered before the toc
+        soup = BeautifulSoup(html_content, "html.parser")
+        impressum = soup.find("div", attrs={"data-sec-type": "_4octextparaAnlageImpressum"})
+        if impressum:
+            html_impressum = str(impressum)
+        else:
+            html_impressum = None
 
         return {
-            "metadata": article_metadata,
-            "css_content": css,
+            "article_meta": article_meta,
+            "pdf_meta": pdf_meta,
+            "css_content": css_content,
             "html_toc": html_toc,
             "html_content": html_content,
-            "is_partial": is_partial,
-            "generated_at": generated_at,
+            "html_impressum": html_impressum,
         }
 
     def _get_css(self) -> str:
