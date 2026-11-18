@@ -239,6 +239,7 @@
 .article-toc a {
   color: var(--dguv-text);
   text-decoration: none;
+  vertical-align: baseline;
 }
 
 .article-toc a:hover {
@@ -260,19 +261,8 @@
   color: var(--dguv-primary);
 }
 
-.article-toc .toc-entry:has(> .toc-label) {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: var(--space-xxs);
-  align-items: baseline;
-}
-
-.article-toc .toc-entry:has(> .toc-label) > .toc-label {
-  grid-column: 1;
-}
-
-.article-toc .toc-entry:has(> .toc-label) > .toc-title {
-  grid-column: 2;
+.article-toc .toc-entry > .toc-label {
+  margin-inline-end: var(--space-xxs);
 }
 
 /* =================================================== */
