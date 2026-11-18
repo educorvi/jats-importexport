@@ -91,16 +91,16 @@
 }
 
 /* Other titles */
-.article-content .section h4.title,
-.article-content .section h4.title * {
+.article-content .section title.other,
+.article-content .section title.other * {
   margin: var(--space-l) 0 var(--space-sm);
   font: var(--font-h4);
   color: var(--dguv-text);
 }
 
 /* Other labels */
-.article-content .section h5.label,
-.article-content .section h5.label * {
+.article-content .section label.other,
+.article-content .section label.other * {
   font: var(--font-h5);
   color: var(--dguv-text);
 }

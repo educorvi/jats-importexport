@@ -4,17 +4,8 @@
     <!-- Template for making label and title elements -->
     <xsl:template name="make-label-title">
         <xsl:param name="generated-title"/>
-        <xsl:variable name="level"
-                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
         <xsl:variable name="heading-tag">
-            <xsl:choose>
-                <xsl:when test="$level &lt;= 6">
-                    <xsl:value-of select="concat('h', $level)"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="'h6'"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:call-template name="nested-heading-tag" />
         </xsl:variable>
         <xsl:choose>
             <xsl:when test="normalize-space(string(label)) or normalize-space(string(title))">
@@ -75,6 +66,19 @@
     </xsl:template>
 
 
+    <!-- template for determining the nested heading tag -->
+    <xsl:template name="nested-heading-tag">
+        <xsl:variable name="level"
+                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
+        <xsl:choose>
+            <xsl:when test="$level &lt;= 6">
+                <xsl:value-of select="concat('h', $level)"/>
+            </xsl:when>
+            <xsl:otherwise>h6</xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
     <!-- ============================================================= -->
     <!--  Drop labels, titles and captions in certain contexts         -->
     <!-- ============================================================= -->
@@ -95,10 +99,14 @@
 
     <!-- default: any other titles found -->
     <xsl:template match="title">
+        <xsl:variable name="heading-tag">
+            <xsl:call-template name="nested-heading-tag"/>
+        </xsl:variable>
         <xsl:if test="normalize-space(string(.))">
-            <h4 class="title">
+            <xsl:element name="{$heading-tag}">
+                <xsl:attribute name="class">title other</xsl:attribute>
                 <xsl:apply-templates/>
-            </h4>
+            </xsl:element>
         </xsl:if>
     </xsl:template>
 
@@ -121,9 +129,13 @@
 
     <!-- default: any other labels found -->
     <xsl:template match="label" name="label">
-        <h5 class="label">
+        <xsl:variable name="heading-tag">
+            <xsl:call-template name="nested-heading-tag"/>
+        </xsl:variable>
+        <xsl:element name="{$heading-tag}">
+            <xsl:attribute name="class">label other</xsl:attribute>
             <xsl:apply-templates/>
-        </h5>
+        </xsl:element>
     </xsl:template>
 
 </xsl:stylesheet>
