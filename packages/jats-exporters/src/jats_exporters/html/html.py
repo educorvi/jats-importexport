@@ -90,7 +90,7 @@ class HtmlExporter(HtmlExporterGeneric):
         soup = BeautifulSoup(html_content, "html.parser")
         toc = soup.find_all("nav", class_="article-toc")
         header = soup.find_all("div", class_="article-header")
-        metadata = soup.find_all("table", class_="article-metadata")
+        metadata = soup.find_all("dl", class_="article-metadata")
         content = soup.find_all("div", class_="article-content")
         if (
             toc is None
