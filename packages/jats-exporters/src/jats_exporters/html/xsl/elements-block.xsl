@@ -236,15 +236,8 @@
     </xsl:template>
 
 
-    <xsl:template priority="2" mode="list" match="list[list-item/label]">
-        <ul style="list-style-type: none">
-            <xsl:apply-templates select="list-item"/>
-        </ul>
-    </xsl:template>
-
-
     <xsl:template match="list[@list-type='bullet' or not(@list-type)]" mode="list">
-        <ul>
+        <ul role="list">
             <xsl:apply-templates select="list-item"/>
         </ul>
     </xsl:template>
@@ -261,7 +254,7 @@
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <ol style="list-style-type: {$style}">
+        <ol style="list-style-type: {$style}" role="list">
             <xsl:apply-templates select="list-item"/>
         </ol>
     </xsl:template>
@@ -274,16 +267,7 @@
     </xsl:template>
 
 
-    <xsl:template match="list-item/label">
-        <!-- if the next sibling is a p, the label will be called as
-             a run-in -->
-        <xsl:if test="following-sibling::*[1][not(self::p)]">
-            <xsl:call-template name="label"/>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="list-item/p[not(preceding-sibling::*[not(self::label)])]">
+    <xsl:template match="list-item/p">
         <p>
             <xsl:call-template name="assign-id"/>
             <xsl:for-each select="preceding-sibling::label">
