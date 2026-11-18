@@ -8,6 +8,14 @@
 
     <xsl:template match="/">
         <html>
+            <xsl:attribute name="lang">
+                <xsl:choose>
+                    <xsl:when test="normalize-space(/article/@xml:lang)">
+                        <xsl:value-of select="normalize-space(/article/@xml:lang)"/>
+                    </xsl:when>
+                    <xsl:otherwise>de</xsl:otherwise>
+                </xsl:choose>
+            </xsl:attribute>
             <head>
                 <meta charset="UTF-8"/>
                 <title>
