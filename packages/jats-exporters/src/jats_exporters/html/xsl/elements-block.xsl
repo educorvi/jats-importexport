@@ -28,7 +28,14 @@
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
-        <div class="{$gi} panel">
+        <div>
+            <xsl:attribute name="class">
+                <xsl:value-of select="$gi"/>
+                <xsl:text> panel</xsl:text>
+                <xsl:if test="self::boxed-text and caption/title/*[(self::graphic or self::inline-graphic) and @specific-use='image-size:icon']">
+                    <xsl:text> boxed-text--has-icon</xsl:text>
+                </xsl:if>
+            </xsl:attribute>
             <xsl:if test="$content-type">
                 <xsl:attribute name="data-content-type">
                     <xsl:value-of select="$content-type"/>

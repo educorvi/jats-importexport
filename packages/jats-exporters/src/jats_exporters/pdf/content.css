@@ -1,0 +1,589 @@
+@charset "UTF-8";
+
+/* =================================================== */
+/* ================= Article Content ================= */
+/* =================================================== */
+
+.article-content {
+  color: var(--dguv-text);
+  font: var(--font-l);
+  margin-bottom: var(--space-l);
+}
+
+.article-content :last-child {
+  margin-bottom: 0 !important;
+}
+
+/* =================================================== */
+/* ============= Sections and headings =============== */
+/* =================================================== */
+
+.article-content .article-body > .section,
+.article-content .article-back > .section {
+  margin-bottom: var(--space-l3);
+}
+
+/* _4octextparaUeberschriftVorwort as Heading Level 1 */
+.article-content .section[data-sec-type=_1KapitelUeberschrift] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1KapitelUeberschrift] > :nth-child(1 of .title) *,
+.article-content .section[data-sec-type=_4octextparaUeberschriftVorwort] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_4octextparaUeberschriftVorwort] > :nth-child(1 of .title) *,
+.article-content .section > :is(h1, h2).title,
+.article-content .section > :is(h1, h2).title * {
+  margin: var(--space-l3) 0 var(--space-l);
+  font: var(--font-h2);
+  color: var(--dguv-primary);
+}
+
+.article-content .section[data-sec-type=_1Ueberschrift2] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1Ueberschrift2] > :nth-child(1 of .title) *,
+.article-content .section > h3.title,
+.article-content .section > h3.title * {
+  margin: var(--space-l2) 0 var(--space-m);
+  font: var(--font-h3);
+  color: var(--dguv-text);
+}
+
+.article-content .section[data-sec-type=_1Ueberschrift3] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1Ueberschrift3] > :nth-child(1 of .title) *,
+.article-content .section > h4.title,
+.article-content .section > h4.title * {
+  margin: var(--space-l) 0 var(--space-sm);
+  font: var(--font-h4);
+  color: var(--dguv-text);
+}
+
+.article-content .section[data-sec-type=_1Ueberschrift4] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1Ueberschrift4] > :nth-child(1 of .title) *,
+.article-content .section > h5.title,
+.article-content .section > h5.title * {
+  margin: var(--space-m) 0 var(--space-s);
+  font: var(--font-h5);
+  color: var(--dguv-text);
+}
+
+.article-content .section[data-sec-type=_1Ueberschrift5] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1Ueberschrift5] > :nth-child(1 of .title) *,
+.article-content .section[data-sec-type=_1Ueberschrift6] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_1Ueberschrift6] > :nth-child(1 of .title) *,
+.article-content .section > h6.title,
+.article-content .section > h6.title * {
+  margin: var(--space-m) 0 var(--space-s);
+  font: var(--font-h6);
+  color: var(--dguv-text);
+}
+
+/* Other titles */
+.article-content .section h4.title,
+.article-content .section h4.title * {
+  margin: var(--space-l) 0 var(--space-sm);
+  font: var(--font-h4);
+  color: var(--dguv-text);
+}
+
+/* Other labels */
+.article-content .section h5.label,
+.article-content .section h5.label * {
+  font: var(--font-h5);
+  color: var(--dguv-text);
+}
+
+/* =========== Special headings with type ============ */
+
+.article-content .section[data-sec-type=_4octextparaPrologZwischenueberschrift] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_4octextparaPrologZwischenueberschrift] > :nth-child(1 of .title) * {
+  font: var(--font-l-bold);
+}
+
+.article-content p[data-content-type=_1UnterUeberschrift],
+.article-content p[data-content-type=_1UnterUeberschrift] * {
+  font: var(--font-l-bold);
+  font-size: calc(1em + 1pt);
+}
+
+.article-content .section[data-sec-type=_4octextparaUeberschrift3BR] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_4octextparaUeberschrift4BR] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_4octextparaUeberschrift3BR] > :nth-child(1 of .title) *,
+.article-content .section[data-sec-type=_4octextparaUeberschrift4BR] > :nth-child(1 of .title) * {
+  margin: var(--space-l) 0 var(--space-sm);
+  font: var(--font-h4);
+}
+
+.article-content .section[data-sec-type=_4octextparaUeberschrift3BR] > :nth-child(1 of .title),
+.article-content .section[data-sec-type=_4octextparaUeberschrift4BR] > :nth-child(1 of .title) {
+  background: var(--dguv-green);
+  padding: var(--space-m);
+}
+
+/* =================================================== */
+/* ============ Boxed text, DA, Preamble ============= */
+/* =================================================== */
+
+/* ================ General spacing ================== */
+
+.article-content .boxed-text {
+  margin-block: var(--space-l);
+}
+
+.article-content .boxed-text > .boxed-text-content {
+  padding: var(--space-l);
+}
+
+.article-content .boxed-text > .caption {
+  padding: var(--space-m) var(--space-l);
+}
+
+.article-content .boxed-text > .caption * {
+  font: var(--font-l-bold);
+}
+
+.article-content .boxed-text--has-icon {
+    position: relative;
+    margin-top: calc(var(--space-l) + 0.5 * 5cqw);
+}
+
+.article-content .boxed-text--has-icon > .caption > .title > img.image-size-icon:first-child {
+    position: absolute;
+    left: var(--space-m);
+    top: 0;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.article-content .boxed-text--has-icon > .caption > .title {
+    padding-left: calc(2 * var(--space-m) + 5cqw - var(--space-l));
+}
+
+/* ============= Default - oct_ext_Blau ============== */
+
+.article-content .boxed-text[data-content-type=oct_ext_Blau] {
+  background: var(--dguv-primary-light);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Blau] > .caption {
+  background: var(--dguv-primary);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Blau] > .caption * {
+  color: var(--dguv-white);
+}
+
+/* ====== oct_ext_Gruen und oct_ext_BR-Hinweis ======= */
+
+.article-content .boxed-text[data-content-type=oct_ext_Gruen],
+.article-content .boxed-text[data-content-type=oct_ext_BR-Hinweis] {
+  background: var(--dguv-green-light);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Gruen] > .caption,
+.article-content .boxed-text[data-content-type=oct_ext_BR-Hinweis] > .caption {
+  background: var(--dguv-green);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Gruen] > .caption *,
+.article-content .boxed-text[data-content-type=oct_ext_BR-Hinweis] > .caption * {
+  color: var(--dguv-black);
+}
+
+/* ================== oct_ext_Rot ==================== */
+
+.article-content .boxed-text[data-content-type=oct_ext_Rot] {
+  background: var(--dguv-red-light);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Rot] > .caption {
+  background: var(--dguv-red);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Rot] > .caption * {
+  color: var(--dguv-white);
+}
+
+/* ================== oct_ext_Grau =================== */
+
+.article-content .boxed-text[data-content-type=oct_ext_Grau] {
+  background: var(--dguv-secondary-light);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Grau] > .caption {
+  background: var(--dguv-secondary);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Grau] > .caption * {
+  color: var(--dguv-white);
+}
+
+/* ===================== Hinweis ===================== */
+
+.article-content .boxed-text[data-content-type=Hinweis] {
+  border: 2px solid var(--dguv-border);
+}
+
+/* ========= Literaturhinweis / Norm-Auszug ========== */
+
+.article-content .boxed-text[data-content-type=oct_ext_Literaturhinweis],
+.article-content .boxed-text[data-content-type=oct_ext_Norm-Auszug] {
+  border-bottom: 2px solid var(--dguv-border);
+  border-top: 2px solid var(--dguv-border);
+}
+
+.article-content .boxed-text[data-content-type=oct_ext_Literaturhinweis] *,
+.article-content .boxed-text[data-content-type=oct_ext_Norm-Auszug] * {
+  color: var(--dguv-secondary);
+  font-style: italic;
+}
+
+/* Durchführungsanweisungen */
+
+.article-content .section[data-sec-type=highlight-info] {
+  margin-block: var(--space-l);
+  padding: var(--space-l);
+  border-left: 2px solid var(--dguv-green);
+  background: var(--dguv-green-light);
+}
+
+.article-content .section[data-sec-type=highlight-info] > .title {
+  margin-top: 0;
+}
+
+/* Vorbemerkungen */
+
+.article-content .section[data-sec-type=preamble] {
+  margin-block: var(--space-l);
+  padding: var(--space-l);
+  border-left: 2px solid var(--dguv-primary);
+  background: var(--dguv-primary-light);
+}
+
+.article-content .section[data-sec-type=preamble] > .title {
+  margin-top: 0;
+}
+
+/* =================================================== */
+/* ===================== Tables ====================== */
+/* =================================================== */
+
+.article-content .table-wrap {
+  width: 100%;
+  margin-block: var(--space-l2);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.article-content .table-wrap .caption,
+.article-content .table-wrap .abstract {
+  margin-bottom: var(--space-s);
+  color: var(--dguv-text-secondary);
+  display: flex;
+  gap: var(--space-s);
+}
+
+.article-content .table-wrap .caption *,
+.article-content .table-wrap .abstract * {
+  color: inherit;
+}
+
+.article-content .table-wrap .caption .label {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ================ Width / Spacing ================== */
+
+.article-content .table-wrap table {
+  border-collapse: collapse;
+  border-left: hidden;
+  border-right: hidden;
+  width: 100%;
+}
+
+@media (max-width: 64rem) {
+  .article-content .table-wrap table {
+    min-width: 48rem;
+  }
+}
+
+.article-content .table-wrap table p {
+  padding: 0;
+  margin: 0;
+}
+
+.article-content .table-wrap table :is(th, td) {
+  padding: var(--space-s);
+  vertical-align: top;
+  border: 0;
+}
+
+.article-content .table-wrap table :is(th, td)[rowspan] {
+  vertical-align: middle;
+}
+
+.article-content .table-wrap table th,
+.article-content .table-wrap table th * {
+  font-weight: 700;
+}
+
+.article-content .table-wrap table :is(th, td) {
+  border: 1px solid var(--dguv-border);
+}
+
+/* ===================== Colors ====================== */
+
+.article-content .table-wrap table tbody tr.even {
+  background: var(--dguv-background-light);
+}
+
+.article-content .table-wrap table th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfblau] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1blau] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1blau] td:first-of-type {
+  background: var(--dguv-primary);
+  color: var(--dguv-white);
+  border-color: var(--dguv-white);
+}
+
+.article-content .table-wrap table[style=_4octextparaTabelleKopfgrau] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1grau] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1grau] td:first-of-type {
+  background: var(--dguv-secondary);
+  color: var(--dguv-white);
+  border-color: var(--dguv-white);
+}
+
+.article-content .table-wrap table[style=_4octextparaTabelleKopfgruen] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1gruen] th,
+.article-content .table-wrap table[style=_4octextparaTabelleKopfSpalte1gruen] td:first-of-type {
+  background: var(--dguv-green);
+  color: var(--dguv-black);
+  border-color: var(--dguv-border);
+}
+
+.article-content .table-wrap table th *,
+.article-content .table-wrap table td:first-of-type * {
+  color: inherit;
+}
+
+/* =================================================== */
+/* =============== Figures and Images ================ */
+/* =================================================== */
+
+.article-content .fig {
+  margin-block: var(--space-l2);
+}
+
+.article-content .fig .caption {
+  margin-top: var(--space-s);
+  color: var(--dguv-text-secondary);
+  display: flex;
+  gap: var(--space-s);
+}
+
+.article-content .fig .caption * {
+  color: inherit;
+}
+
+.article-content .fig .caption .label {
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.article-content .fig .permissions * {
+  color: var(--dguv-text-secondary);
+  font: var(--font-m);
+  margin-block: 0 !important;
+}
+
+/* ============= Relative image sizes ================ */
+
+.article-content {
+  container-type: inline-size;
+}
+
+.article-content img.image-size-icon {
+  width: 5cqw;
+}
+
+.article-content img.image-size-small {
+  width: 25cqw;
+}
+
+.article-content img.image-size-medium {
+  width: 50cqw;
+}
+
+.article-content img.image-size-large {
+  width: 100cqw;
+}
+
+.article-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =================================================== */
+/* ===================== Lists ======================= */
+/* =================================================== */
+
+.article-content .list {
+  margin-bottom: var(--space-l);
+}
+
+.article-content .list .list {
+  margin-bottom: 0;
+}
+
+.article-content .list > :is(ul, ol) {
+  padding-left: var(--space-l);
+}
+
+.article-content .list > :is(ul, ol) > li {
+  padding-left: var(--space-s);
+  margin-block: var(--space-xs);
+}
+
+.article-content .list > :is(ul, ol) > li > p {
+  margin-block: 0;
+}
+
+.article-content .list > ul {
+  list-style-type: disc !important;
+}
+
+.article-content .list > ol {
+  list-style-type: decimal;
+}
+
+/* =================================================== */
+/* ================== Free Lists ===================== */
+/* =================================================== */
+
+.article-content .freie-liste {
+  display: grid;
+  grid-template-columns: minmax(var(--space-l), max-content) minmax(0, 1fr);
+  column-gap: var(--space-s);
+  margin-block: var(--space-xs);
+}
+
+.article-content .freie-liste .list-label {
+  grid-column: 1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.article-content .freie-liste .list-item {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.article-content .freie-liste[data-list-level="2"] {
+  margin-left: calc(var(--space-l) + var(--space-s));
+}
+
+.article-content .freie-liste[data-list-level="3"] {
+  margin-left: calc(2 * (var(--space-l) + var(--space-s)));
+}
+
+/* =================================================== */
+/* ===================== Other ======================= */
+/* =================================================== */
+
+/* =================== disp-formula ================== */
+.article-content .disp-formula {
+  margin-block: var(--space-m);
+}
+
+/* =================== disp-quote ==================== */
+
+.article-content .blockquote {
+  border-bottom: 2px solid var(--dguv-border);
+  border-top: 2px solid var(--dguv-border);
+}
+
+.article-content .blockquote .blockquote-content,
+.article-content .blockquote .blockquote-content * {
+  font-style: italic;
+}
+
+.article-content .blockquote .blockquote-attrib {
+  text-align: right;
+}
+
+/* ================== inline styles =================== */
+
+/* also children of i italic */
+.article-content i,
+.article-content i > * {
+  font-style: italic;
+}
+
+/* also children of b bold */
+.article-content b,
+.article-content b > * {
+  font-weight: 700;
+}
+
+/* sup and sub elements smaller */
+.article-content sup,
+.article-content sub {
+  font-size: 0.75em;
+}
+
+/* ================== styled content ================== */
+
+.article-content *[data-style-type="_4octextinline_Medium"] {
+  font-weight: 600;
+}
+
+.article-content *[data-style-type="_4octextinline_MediumItalic"] {
+  font-weight: 600;
+  font-style: italic;
+}
+
+.article-content *[data-style-type="_WFarbeRot"] {
+  color: var(--dguv-red);
+}
+
+.article-content *[data-style-type="_WFarbeBlau"] {
+  color: var(--dguv-primary);
+}
+
+/* Grau */
+.article-content *[data-style-type="_4Farbe1"] {
+  color: var(--dguv-secondary);
+}
+
+/* Grün */
+.article-content *[data-style-type="_4Farbe2"] {
+  color: var(--dguv-green);
+}
+
+/* Pink */
+.article-content *[data-style-type="_4Farbe3"] {
+  color: var(--dguv-pink);
+}
+
+/* Hellblau */
+.article-content *[data-style-type="_4octextinline_Farbe4"] {
+  color: var(--dguv-light-blue);
+}
+
+/* ================== other styles ==================== */
+
+.article-content p {
+  margin-top: 0;
+  margin-bottom: var(--space-m);
+}
+
+.article-content ol,
+.article-content ul {
+  margin-top: 0;
+}
+
+/* External JATS links must look like surrounding running text.
+   The dguv theme styles links inside an @layer, so these unlayered
+   overrides always win, no !important needed. */
+.article-content a {
+  color: var(--dguv-primary);
+  font: inherit;
+  vertical-align: baseline;
+}
