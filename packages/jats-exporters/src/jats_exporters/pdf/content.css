@@ -598,7 +598,7 @@
 
 /* Grün */
 .article-content *[data-style-type="_4Farbe2"] {
-  color: var(--dguv-green);
+  color: var(--dguv-green-dark);
 }
 
 /* Pink */
