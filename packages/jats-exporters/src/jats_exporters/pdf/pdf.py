@@ -129,6 +129,8 @@ class PdfExporter:
         impressum = soup.find("div", attrs={"data-sec-type": "_4octextparaAnlageImpressum"})
         if impressum:
             html_impressum = str(impressum)
+            impressum.decompose()
+            html_content = str(soup)
         else:
             html_impressum = None
 
