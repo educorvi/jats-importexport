@@ -5,6 +5,7 @@ Defines a JATS <app> (Appendix) element and its parser/converter logic.
 
 from __future__ import annotations
 
+from jats_classes.common import element_attribute
 from lxml import etree
 
 from ..JATSClassInterface import JATSClassInterface
@@ -24,6 +25,7 @@ class Appendix(GenericSection, JATSClassInterface):
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
+        section_id: str | None,
         sections: list[Section | RefList | Glossary],
     ):
         """Initialize Appendix with metadata and nested sections."""
@@ -31,6 +33,7 @@ class Appendix(GenericSection, JATSClassInterface):
             sec_type=sec_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
         )
         self._sections = sections
 
@@ -57,6 +60,7 @@ class Appendix(GenericSection, JATSClassInterface):
             An Appendix instance.
         """
         app_type = app.attrib.get("app-type")
+        section_id = element_attribute(app, ".", "id")
         label_title_raw = cls._get_raw_label_title(app)
         content_raw = cls._get_raw_content(app)
 
@@ -73,6 +77,7 @@ class Appendix(GenericSection, JATSClassInterface):
             sec_type=app_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
             sections=sections,
         )
 

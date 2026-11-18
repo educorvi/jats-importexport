@@ -49,6 +49,7 @@ def test_body_and_sections_recursive():
 	assert sec.title == "Introduction"
 	assert "1." in sec.label_title_raw
 	assert "Introduction" in sec.label_title_raw
+	assert sec.section_id == "sec1"
 	assert sec.content_raw is not None
 	assert "This is the first paragraph." in sec.content_raw
 
@@ -59,6 +60,7 @@ def test_body_and_sections_recursive():
 	assert sub_sec.sec_type == "subsection"
 	assert sub_sec.label == "1.1"
 	assert sub_sec.title == "Nested Subsection"
+	assert sub_sec.section_id == "sub1"
 	assert sub_sec.content_raw is not None
 	assert "Nested content." in sub_sec.content_raw
 
@@ -72,6 +74,7 @@ def test_back_appendix_parsing():
 	app_group = back.sections[0]
 	assert isinstance(app_group, AppendixGroup)
 	assert app_group.sec_type == "appendices"  # maps to content-type attribute
+	assert app_group.section_id == "app-group"
 	assert app_group.label == "Appendix Group Label"
 	assert app_group.title == "Appendix Group Title"
 
@@ -79,6 +82,7 @@ def test_back_appendix_parsing():
 	app = app_group.sections[0]
 	assert isinstance(app, Appendix)
 	assert app.sec_type == "annex"  # maps to app-type attribute
+	assert app.section_id == "app1"
 	assert app.label == "A"
 	assert app.title == "First Appendix"
 	assert app.content_raw is not None
@@ -88,6 +92,7 @@ def test_back_appendix_parsing():
 	assert len(app.sections) == 1
 	app_sub_sec = app.sections[0]
 	assert isinstance(app_sub_sec, Section)
+	assert app_sub_sec.section_id == "app-sub1"
 	assert app_sub_sec.title == "Appendix Subsection"
 	assert app_sub_sec.content_raw is not None
 	assert "Subtext." in app_sub_sec.content_raw
@@ -215,17 +220,17 @@ def test_appendix_without_app_type_has_none_sec_type():
 
 
 def test_generic_section_get_title_returns_none_for_malformed_raw_xml():
-	section = Section(sec_type=None, label_title_raw="<title>Unclosed", content_raw=None, sections=[])
+	section = Section(sec_type=None, label_title_raw="<title>Unclosed", content_raw=None, section_id=None, sections=[])
 	assert section.title is None
 
 
 def test_generic_section_get_label_returns_none_for_malformed_raw_xml():
-	section = Section(sec_type=None, label_title_raw="<label>Unclosed", content_raw=None, sections=[])
+	section = Section(sec_type=None, label_title_raw="<label>Unclosed", content_raw=None, section_id=None, sections=[])
 	assert section.label is None
 
 
 def test_generic_section_get_title_returns_none_when_title_missing():
-	section = Section(sec_type=None, label_title_raw="<label>1.</label>", content_raw=None, sections=[])
+	section = Section(sec_type=None, label_title_raw="<label>1.</label>", content_raw=None, section_id=None, sections=[])
 	assert section.title is None
 
 

@@ -1,9 +1,9 @@
 from jats_classes import JATSDocument, Section, Appendix, AppendixGroup, Front, Body, Back, Article, RefList, Glossary
 
 def test_jats_constructors():
-    section = Section(sec_type=None, label_title_raw="", content_raw="", sections=[])
-    appendix = Appendix(sec_type=None, label_title_raw="", content_raw="", sections=[section])
-    appendix_group = AppendixGroup(sec_type=None, label_title_raw="", content_raw="", sections=[appendix])
+    section = Section(sec_type=None, label_title_raw="", content_raw="", section_id=None, sections=[])
+    appendix = Appendix(sec_type=None, label_title_raw="", content_raw="", section_id=None, sections=[section])
+    appendix_group = AppendixGroup(sec_type=None, label_title_raw="", content_raw="", section_id=None, sections=[appendix])
     front = Front(
                 xml_lang="de",
                 journal_id=None,
@@ -54,5 +54,5 @@ def test_jats_constructors():
     back = Back(sections=[appendix_group])
     article = Article(front=front, body=body, back=back)
     doc = JATSDocument(article=article)
-    ref_list = RefList(label_title_raw="", content_raw="")
-    glossary = Glossary(label_title_raw="", content_raw="")
+    ref_list = RefList(label_title_raw="", content_raw="", section_id=None)
+    glossary = Glossary(label_title_raw="", content_raw="", section_id=None)

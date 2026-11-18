@@ -37,6 +37,7 @@ def create_mock_document() -> JATSDocument:
         sec_type="subsection",
         label_title_raw="<label>1.1</label><title>Sub-title</title>",
         content_raw="<p>Nested section content.</p>",
+        section_id="sub-sec-1.1",
         sections=[],
     )
 
@@ -44,6 +45,7 @@ def create_mock_document() -> JATSDocument:
         sec_type="intro",
         label_title_raw="<label>1.</label><title>Intro title</title>",
         content_raw="<p>Intro content.</p>",
+        section_id="sec-1",
         sections=[sub_section],
     )
 
@@ -53,6 +55,7 @@ def create_mock_document() -> JATSDocument:
         sec_type=None,
         label_title_raw="<title>Appendix Subsection</title>",
         content_raw="<p>Appendix sub-content.</p>",
+        section_id="app-sec-1",
         sections=[],
     )
 
@@ -60,23 +63,27 @@ def create_mock_document() -> JATSDocument:
         sec_type="annex",
         label_title_raw="<label>A</label><title>Annex Title</title>",
         content_raw="<p>Appendix raw content.</p>",
+        section_id="app-1",
         sections=[app_sec],
     )
 
     glossary = Glossary(
         label_title_raw="<label>G</label><title>Glossary Title</title>",
         content_raw="<p>Glossary content.</p>",
+        section_id="glossary-1",
     )
 
     ref_list = RefList(
         label_title_raw="<label>R</label><title>References</title>",
         content_raw="<p>Reference content.</p>",
+        section_id="ref-list-1",
     )
 
     app_group = AppendixGroup(
         sec_type="appendices",
         label_title_raw="<label>Group Label</label><title>Group Title</title>",
         content_raw="<p>Group content.</p>",
+        section_id="app-group-1",
         sections=[appendix, ref_list],
     )
 
@@ -103,6 +110,21 @@ def test_html_exporter_transform():
     # The XSL stylesheet typically converts body, sections, titles, and paragraphs.
     assert "Intro title" in html_output
     assert "Annex Title" in html_output
+
+
+def test_jats_exporter_preserves_section_ids():
+    xml = JatsExporter().export(create_mock_document())
+
+    root = etree.fromstring(xml.encode())
+    assert set(root.xpath(".//@id")) >= {
+        "sec-1",
+        "sub-sec-1.1",
+        "app-sec-1",
+        "app-1",
+        "glossary-1",
+        "ref-list-1",
+        "app-group-1",
+    }
 
 
 def test_html_exporter_renders_nested_toc_sections():

@@ -5,6 +5,7 @@ Represents a JATS <app-group> container wrapping multiple Appendix sections.
 
 from __future__ import annotations
 
+from jats_classes.common import element_attribute
 from lxml import etree
 
 from ..JATSClassInterface import JATSClassInterface
@@ -23,6 +24,7 @@ class AppendixGroup(GenericSection, JATSClassInterface):
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
+        section_id: str | None,
         sections: list[Appendix | RefList],
     ):
         """Initialize AppendixGroup containing child appendixes."""
@@ -30,6 +32,7 @@ class AppendixGroup(GenericSection, JATSClassInterface):
             sec_type=sec_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
         )
         self._sections = sections
 
@@ -56,6 +59,7 @@ class AppendixGroup(GenericSection, JATSClassInterface):
             An AppendixGroup instance.
         """
         content_type = app_group.attrib.get("content-type")
+        section_id = element_attribute(app_group, ".", "id")
         label_title_raw = cls._get_raw_label_title(app_group)
         content_raw = cls._get_raw_content(app_group)
 
@@ -70,6 +74,7 @@ class AppendixGroup(GenericSection, JATSClassInterface):
             sec_type=content_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
             sections=sections,
         )
 

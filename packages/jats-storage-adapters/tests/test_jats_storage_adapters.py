@@ -285,6 +285,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "title": "Intro Title",
                     "label_title_raw": "<label>1.</label><title>Intro Title</title>",
                     "content_raw": "<p>Content</p>",
+                    "section_id": "sec1",
                     "items": [
                         {"@type": "Glossary", "@id": "http://localhost:8080/Plone/my-doc/body/sec1/glossary"},
                         {"@type": "RefList", "@id": "http://localhost:8080/Plone/my-doc/body/sec1/ref-list"},
@@ -304,6 +305,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "title": "Sub Title",
                     "label_title_raw": "<title>Sub Title</title>",
                     "content_raw": "Sub Content",
+                    "section_id": "sub1",
                     "items": [],
                 },
                 url=url,
@@ -333,6 +335,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "title": "App Group",
                     "label_title_raw": "<label>G1</label><title>App Group</title>",
                     "content_raw": "Group Content",
+                    "section_id": "app-group-1",
                     "items": [
                         {"@type": "RefList", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/ref-list"},
                         {"@type": "Appendix", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1"},
@@ -350,6 +353,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "sec_type": "appendix",
                     "label_title_raw": "<label>A1</label><title>Appendix 1</title>",
                     "title": "Appendix 1",
+                    "section_id": "app1",
                     "content_raw": "Appendix Content",
                     "items": [
                         {"@type": "RefList", "@id": "http://localhost:8080/Plone/my-doc/back/appg1/app1/ref-list"},
@@ -362,7 +366,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
         elif url == "http://localhost:8080/Plone/my-doc/back/appg1/app1/appsec1":
             # Section inside Appendix
             return make_response(
-                status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "label_title_raw": "<title>App Sec Title</title>", "items": []}, url=url
+                status_code=200, json={"@id": url, "@type": "Section", "title": "App Sec Title", "label_title_raw": "<title>App Sec Title</title>", "section_id": "appsec1", "items": []}, url=url
             )
         elif url in {
             "http://localhost:8080/Plone/my-doc/back/appg1/ref-list",
@@ -377,6 +381,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@type": "RefList",
                     "label_title_raw": "<label>R</label><title>References</title>",
                     "content_raw": "<p>Reference content.</p>",
+                    "section_id": "ref-list",
                 },
                 url=url,
             )
@@ -392,6 +397,7 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                     "@type": "Glossary",
                     "label_title_raw": "<label>G</label><title>Glossary</title>",
                     "content_raw": "<p>Glossary content.</p>",
+                    "section_id": "glossary",
                 },
                 url=url,
             )
@@ -421,22 +427,26 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert isinstance(sec, Section)
     assert sec.title == "Intro Title"
     assert sec.sec_type == "intro"
+    assert sec.section_id == "sec1"
     assert len(sec.sections) == 3
 
     sub = sec.sections[0]
     assert isinstance(sub, Section)
     assert sub.title == "Sub Title"
+    assert sub.section_id == "sub1"
 
     glossary = sec.sections[1]
     assert isinstance(glossary, Glossary)
     assert glossary.title == "Glossary"
     assert glossary.label == "G"
+    assert glossary.section_id == "glossary"
     assert glossary.content_raw == "<p>Glossary content.</p>\n"
 
     ref_list = sec.sections[2]
     assert isinstance(ref_list, RefList)
     assert ref_list.title == "References"
     assert ref_list.label == "R"
+    assert ref_list.section_id == "ref-list"
     assert ref_list.content_raw == "<p>Reference content.</p>\n"
 
     back = doc.article.back
@@ -447,46 +457,54 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
     assert isinstance(back_glossary, Glossary)
     assert back_glossary.title == "Glossary"
     assert back_glossary.label == "G"
+    assert back_glossary.section_id == "glossary"
     assert back_glossary.content_raw == "<p>Glossary content.</p>\n"
 
     back_reflist = back.sections[1]
     assert isinstance(back_reflist, RefList)
     assert back_reflist.title == "References"
     assert back_reflist.label == "R"
+    assert back_reflist.section_id == "ref-list"
     assert back_reflist.content_raw == "<p>Reference content.</p>\n"
 
     app_group = back.sections[2]
     assert isinstance(app_group, AppendixGroup)
     assert app_group.label == "G1"
+    assert app_group.section_id == "app-group-1"
     assert len(app_group.sections) == 2
 
     appg_reflist = app_group.sections[0]
     assert isinstance(appg_reflist, RefList)
     assert appg_reflist.title == "References"
     assert appg_reflist.label == "R"
+    assert appg_reflist.section_id == "ref-list"
     assert appg_reflist.content_raw == "<p>Reference content.</p>\n"
 
     app = app_group.sections[1]
     assert isinstance(app, Appendix)
     app = app_group.sections[1]
     assert isinstance(app, Appendix)
+    assert app.section_id == "app1"
     assert app.title == "Appendix 1"
     assert len(app.sections) == 3
 
     app_sec = app.sections[0]
     assert isinstance(app_sec, Section)
     assert app_sec.title == "App Sec Title"
+    assert app_sec.section_id == "appsec1"
 
     app_ref_list = app.sections[1]
     assert isinstance(app_ref_list, RefList)
     assert app_ref_list.title == "References"
     assert app_ref_list.label == "R"
+    assert app_ref_list.section_id == "ref-list"
     assert app_ref_list.content_raw == "<p>Reference content.</p>\n"
 
     app_glossary = app.sections[2]
     assert isinstance(app_glossary, Glossary)
     assert app_glossary.title == "Glossary"
     assert app_glossary.label == "G"
+    assert app_glossary.section_id == "glossary"
     assert app_glossary.content_raw == "<p>Glossary content.</p>\n"
 
 
@@ -589,21 +607,44 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     front = Front.empty()
     front.title = "Save Test"
     sub_sec = Section(
-        sec_type="sub", label_title_raw="<title>Sub</title>", content_raw="Subcontent", sections=[]
+        sec_type="sub", label_title_raw="<title>Sub</title>", content_raw="Subcontent", section_id="sub1", sections=[]
     )
     body_sec = Section(
-        sec_type="main", label_title_raw="<title>Main</title>", content_raw="Maincontent", sections=[sub_sec]
+        sec_type="main", label_title_raw="<title>Main</title>", content_raw="Maincontent", section_id="sec1", sections=[sub_sec]
     )
     body = Body(sections=[body_sec])
+    appendix_section = Section(
+        sec_type=None,
+        label_title_raw="<title>Appendix section</title>",
+        content_raw="Appendix content",
+        section_id="appsec1",
+        sections=[],
+    )
+    appendix = Appendix(
+        sec_type="annex",
+        label_title_raw="<title>Appendix</title>",
+        content_raw=None,
+        section_id="app1",
+        sections=[appendix_section],
+    )
     back = Back(
         sections=[
             Glossary(
                 label_title_raw="<label>G</label><title>Glossary</title>",
                 content_raw="<p>Glossary content.</p>",
+                section_id="glossary",
             ),
             RefList(
                 label_title_raw="<label>R</label><title>References</title>",
                 content_raw="<p>Reference content.</p>",
+                section_id="ref-list",
+            ),
+            AppendixGroup(
+                sec_type="appendices",
+                label_title_raw="<title>Appendix group</title>",
+                content_raw=None,
+                section_id="app-group1",
+                sections=[appendix],
             ),
         ]
     )
@@ -626,20 +667,34 @@ def test_plone_storage_adapter_save_jats_document_success(clean_env, mocker):
     assert "Section" in post_types
     assert "Glossary" in post_types
     assert "RefList" in post_types
+    assert "AppendixGroup" in post_types
+    assert "Appendix" in post_types
 
     glossary_post = next(post for _, post in created_posts if post.get("@type") == "Glossary")
     assert glossary_post["title"] == "Glossary"
     assert glossary_post["label_title_raw"] == "<label>G</label><title>Glossary</title>"
+    assert glossary_post["section_id"] == "glossary"
     assert glossary_post["content_raw"] == "<p>Glossary content.</p>"
 
     ref_list_post = next(post for _, post in created_posts if post.get("@type") == "RefList")
     assert ref_list_post["title"] == "References"
     assert ref_list_post["label_title_raw"] == "<label>R</label><title>References</title>"
+    assert ref_list_post["section_id"] == "ref-list"
     assert ref_list_post["content_raw"] == "<p>Reference content.</p>"
+
+    section_ids = {
+        post["section_id"] for _, post in created_posts
+        if post.get("@type") == "Section"
+    }
+    assert section_ids == {"sec1", "sub1", "appsec1"}
+    appendix_group_post = next(post for _, post in created_posts if post.get("@type") == "AppendixGroup")
+    assert appendix_group_post["section_id"] == "app-group1"
+    appendix_post = next(post for _, post in created_posts if post.get("@type") == "Appendix")
+    assert appendix_post["section_id"] == "app1"
 
     # Verify section nesting posting URL
     sec_posts = [p for p in created_posts if p[1].get("@type") == "Section"]
-    assert len(sec_posts) == 2
+    assert len(sec_posts) == 3
 
     sub_sec_url = sec_posts[1][0]
     # Subsection is posted *inside* parent section URL
@@ -662,6 +717,7 @@ def make_article_with_content(content_raw: str) -> Article:
         sec_type="main",
         label_title_raw="<title>Main</title>",
         content_raw=content_raw,
+        section_id="sec1",
         sections=[],
     )
     return Article(front=Front.empty(), body=Body(sections=[section]), back=None)
