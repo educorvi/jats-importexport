@@ -335,7 +335,7 @@
 
 
     <xsl:template match="disp-quote">
-        <div class="blockquote">
+        <blockquote class="blockquote">
             <xsl:call-template name="named-anchor"/>
             <div class="blockquote-content">
                 <xsl:apply-templates select="node()[not(self::attrib)]"/>
@@ -347,7 +347,7 @@
                     </div>
                 </xsl:for-each>
             </xsl:if>
-        </div>
+        </blockquote>
     </xsl:template>
 
 
