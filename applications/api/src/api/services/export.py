@@ -14,7 +14,14 @@ from jats_storage_adapters.errors import (
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 from prometheus_client import Histogram, Summary
 
-from api.models import HtmlDocumentResponse, JatsDocumentResponse, MarkdownDocumentResponse, MetadataResponse
+from api.models import (
+    DEFAULT_PDF_VARIANT,
+    HtmlDocumentResponse,
+    JatsDocumentResponse,
+    MarkdownDocumentResponse,
+    MetadataResponse,
+    PdfVariantEnum,
+)
 from api.services.common import get_adapter_instance, get_media_downloader, pdf_replace_media_links_callback
 from api.services.keyval_implementations import EXPORT_CACHE, ExportType
 
@@ -177,17 +184,19 @@ async def md_export(path: str, include_edit_links: bool = False):
         return MarkdownDocumentResponse(md=md_content)
 
 
-async def pdf_export(path: str):
-    cached = await EXPORT_CACHE.get_pdf(path)
-    if cached is not None:
-        return cached
+async def pdf_export(path: str, pdf_variant: PdfVariantEnum = DEFAULT_PDF_VARIANT):
+    if pdf_variant == DEFAULT_PDF_VARIANT:
+        cached = await EXPORT_CACHE.get_pdf(path)
+        if cached is not None:
+            return cached
     with exp_metric.labels("pdf").time(), exp_document_metric.labels("pdf", path).time():
         adapter = get_adapter_instance()
         document = await __load_document(path, adapter=adapter)
         media_downloader = get_media_downloader(adapter)
         await asyncio.to_thread(document.replace_media_links, pdf_replace_media_links_callback, media_downloader)
-        pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document)
-        await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
+        pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export, document, pdf_variant.value)
+        if pdf_variant == DEFAULT_PDF_VARIANT:
+            await EXPORT_CACHE.set_pdf(path, pdf_content, filename)
         return pdf_content, filename
 
 

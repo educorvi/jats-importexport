@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, Response
 
 from api.models import (
+    DEFAULT_PDF_VARIANT,
     HtmlDocumentResponse,
     HTTP404NotFound,
     HTTP409Conflict,
@@ -10,6 +11,7 @@ from api.models import (
     JatsDocumentResponse,
     MarkdownDocumentResponse,
     MetadataResponse,
+    PdfVariantEnum,
     StructureTreeResponse,
 )
 from api.services.common import resolve_path
@@ -84,8 +86,8 @@ async def export_md(path: str = Depends(resolve_path), include_edit_links: bool 
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_pdf(path: str = Depends(resolve_path)):
-    pdf_content, filename = await pdf_export(path)
+async def export_pdf(path: str = Depends(resolve_path), pdf_variant: PdfVariantEnum = DEFAULT_PDF_VARIANT):
+    pdf_content, filename = await pdf_export(path, pdf_variant)
     return Response(
         content=pdf_content,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},

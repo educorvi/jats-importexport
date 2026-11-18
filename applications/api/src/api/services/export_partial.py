@@ -10,7 +10,13 @@ from jats_storage_adapters.errors import (
 )
 from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 
-from api.models import HtmlDocumentPartialResponse, JatsDocumentResponse, MarkdownDocumentResponse
+from api.models import (
+    DEFAULT_PDF_VARIANT,
+    HtmlDocumentPartialResponse,
+    JatsDocumentResponse,
+    MarkdownDocumentResponse,
+    PdfVariantEnum,
+)
 from api.services.common import get_adapter_instance, get_media_downloader, pdf_replace_media_links_callback
 from api.services.keyval_implementations import PARTIAL_EXPORT_CACHE, ExportType
 
@@ -68,14 +74,18 @@ async def md_export(path: str, sub_path: str, include_edit_links: bool = False):
     return MarkdownDocumentResponse(md=md_content)
 
 
-async def pdf_export(path: str, sub_path: str):
-    cached = await PARTIAL_EXPORT_CACHE.get_pdf(path, sub_path)
-    if cached is not None:
-        return cached
+async def pdf_export(path: str, sub_path: str, pdf_variant: PdfVariantEnum = DEFAULT_PDF_VARIANT):
+    if pdf_variant == DEFAULT_PDF_VARIANT:
+        cached = await PARTIAL_EXPORT_CACHE.get_pdf(path, sub_path)
+        if cached is not None:
+            return cached
     adapter = get_adapter_instance()
     document_part, front = await __load_document_part(path, sub_path, adapter=adapter)
     media_downloader = get_media_downloader(adapter)
     await asyncio.to_thread(document_part.replace_media_links, pdf_replace_media_links_callback, media_downloader)
-    pdf_content, filename = await asyncio.to_thread(PDF_EXPORTER.export_partial, document_part, front)
-    await PARTIAL_EXPORT_CACHE.set_pdf(path, pdf_content, filename, sub_path)
+    pdf_content, filename = await asyncio.to_thread(
+        PDF_EXPORTER.export_partial, document_part, front, pdf_variant.value
+    )
+    if pdf_variant == DEFAULT_PDF_VARIANT:
+        await PARTIAL_EXPORT_CACHE.set_pdf(path, pdf_content, filename, sub_path)
     return pdf_content, filename
