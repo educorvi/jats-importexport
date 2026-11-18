@@ -245,6 +245,11 @@
   text-decoration: underline;
 }
 
+.article-toc a:focus-visible {
+  outline: 2px solid var(--dguv-primary);
+  outline-offset: 2px;
+}
+
 .article-toc .toc-entry[data-toc-level="1"] > .toc-title,
 .article-toc .toc-entry[data-toc-level="1"] > .toc-title * {
   color: var(--dguv-primary);
