@@ -28,13 +28,13 @@
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
-        <xsl:variable name="wrapper">
-            <xsl:choose>
-                <xsl:when test="self::fig or self::table-wrap">figure</xsl:when>
-                <xsl:otherwise>div</xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
-        <xsl:element name="{$wrapper}">
+        <div>
+            <xsl:if test="(self::fig or self::table-wrap) and (label or caption)">
+                <xsl:attribute name="role">figure</xsl:attribute>
+                <xsl:attribute name="aria-labelledby">
+                    <xsl:value-of select="concat(generate-id(), '-caption')"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:attribute name="class">
                 <xsl:value-of select="$gi"/>
                 <xsl:text> panel</xsl:text>
@@ -72,7 +72,7 @@
                     <xsl:apply-templates mode="drop-title"/>
                 </xsl:otherwise>
             </xsl:choose>
-        </xsl:element>
+        </div>
     </xsl:template>
 
 
@@ -102,8 +102,9 @@
                     <xsl:when test="ancestor::fig/alt-text">
                         <xsl:value-of select="normalize-space(string((ancestor::fig/alt-text)[1]))"/>
                     </xsl:when>
-                    <!-- no alt-text in the source: leave alt empty rather than expose the file name -->
-                    <xsl:otherwise/>
+                    <xsl:otherwise>
+                        <xsl:value-of select="@xlink:href"/>
+                    </xsl:otherwise>
                 </xsl:choose>
             </xsl:attribute>
             <xsl:if test="@specific-use">

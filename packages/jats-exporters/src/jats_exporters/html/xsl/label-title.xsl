@@ -51,6 +51,9 @@
     <xsl:template name="make-caption">
         <xsl:if test="label or caption">
             <div class="caption">
+                <xsl:attribute name="id">
+                    <xsl:value-of select="concat(generate-id(), '-caption')"/>
+                </xsl:attribute>
                 <xsl:variable name="label-text" select="normalize-space(string(label))" />
                 <xsl:if test="$label-text">
                     <span class="label">
