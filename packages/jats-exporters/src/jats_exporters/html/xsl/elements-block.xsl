@@ -290,48 +290,42 @@
     <xsl:template match="def-list">
         <div class="def-list">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="label | title"/>
-            <div class="def-list">
+            <xsl:call-template name="make-label-title"/>
+            <dl>
                 <xsl:if test="term-head|def-head">
-                    <div class="row">
-                        <div class="col def-list-head">
-                            <xsl:apply-templates select="term-head"/>
-                        </div>
-                        <div class="col def-list-head">
-                            <xsl:apply-templates select="def-head"/>
-                        </div>
+                    <div class="def-item">
+                        <xsl:apply-templates select="term-head"/>
+                        <xsl:apply-templates select="def-head"/>
                     </div>
                 </xsl:if>
                 <xsl:apply-templates select="def-item"/>
-            </div>
+            </dl>
             <xsl:apply-templates select="def-list"/>
         </div>
     </xsl:template>
 
 
     <xsl:template match="def-item">
-        <div class="row def-item">
+        <div class="def-item">
             <xsl:call-template name="assign-id"/>
             <xsl:apply-templates/>
         </div>
     </xsl:template>
 
 
-    <xsl:template match="term">
-        <div class="col def-term">
+    <xsl:template match="term | term-head">
+        <dt class="def-term">
             <xsl:call-template name="assign-id"/>
-            <p>
-                <xsl:apply-templates/>
-            </p>
-        </div>
+            <xsl:apply-templates/>
+        </dt>
     </xsl:template>
 
 
-    <xsl:template match="def">
-        <div class="col def-def">
+    <xsl:template match="def | def-head">
+        <dd class="def-def">
             <xsl:call-template name="assign-id"/>
             <xsl:apply-templates/>
-        </div>
+        </dd>
     </xsl:template>
 
 

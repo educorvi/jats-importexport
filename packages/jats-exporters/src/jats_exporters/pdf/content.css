@@ -525,6 +525,33 @@
   text-align: right;
 }
 
+/* ===================== def-list ===================== */
+
+.article-content .def-list {
+  margin-block: var(--space-m);
+}
+
+.article-content .def-list > dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+
+.article-content .def-item {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  column-gap: var(--space-m);
+}
+
+.article-content .def-term {
+  font-weight: 700;
+  grid-column: 1;
+}
+
+.article-content .def-def {
+  grid-column: 2;
+}
+
 /* ================== inline styles =================== */
 
 /* also children of i italic */
