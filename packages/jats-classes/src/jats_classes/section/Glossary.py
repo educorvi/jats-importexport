@@ -7,8 +7,9 @@ from __future__ import annotations
 
 from typing import override
 
-from jats_classes.common import element_attribute
 from lxml import etree
+
+from jats_classes.common import element_attribute
 
 from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection

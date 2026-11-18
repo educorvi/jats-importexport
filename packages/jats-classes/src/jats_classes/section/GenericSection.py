@@ -118,7 +118,9 @@ class GenericSection(JATSClassInterface, metaclass=abc.ABCMeta):
         content = self.content_raw or ""
         if content:
             content = f"{content}\n"
-        return f"<{self._tag_name}{sec_type}{sec_id}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+        return (
+            f"<{self._tag_name}{sec_type}{sec_id}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+        )
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:
