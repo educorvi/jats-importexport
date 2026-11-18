@@ -51,7 +51,7 @@ class Body(JATSClassInterface):
                 "Body element contains raw content outside of <sec> elements. Content will be moved to a new section."
             )
             body_as_section = Section(
-                sec_type=None, label_title_raw=_DUMMY_TITLE, content_raw=body_content_raw, sections=[]
+                sec_type=None, label_title_raw=_DUMMY_TITLE, content_raw=body_content_raw, section_id=None, sections=[]
             )
             sections.insert(0, body_as_section)
 

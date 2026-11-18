@@ -34,6 +34,7 @@ class GenericSection(JATSClassInterface, metaclass=abc.ABCMeta):
     sec_type: str | None
     label_title_raw: str
     content_raw: str | None
+    section_id: str | None
 
     @property
     def title(self) -> str | None:
@@ -80,11 +81,13 @@ class GenericSection(JATSClassInterface, metaclass=abc.ABCMeta):
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
+        section_id: str | None,
     ):
         """Initialize the GenericSection base properties."""
         self.sec_type = sec_type
         self.label_title_raw = label_title_raw
         self.content_raw = content_raw
+        self.section_id = section_id
 
     @property
     @abc.abstractmethod
@@ -108,13 +111,16 @@ class GenericSection(JATSClassInterface, metaclass=abc.ABCMeta):
     def to_xml(self) -> str:
         """Serialize the GenericSection back to XML."""
         sec_type = f' {self._sec_type_attr_name}="{self.sec_type}"' if self.sec_type else ""
+        sec_id = f' id="{self.section_id}"' if self.section_id else ""
         sub_content = "\n".join(section.to_xml() for section in self.sections)
         if sub_content:
             sub_content = f"{sub_content}\n"
         content = self.content_raw or ""
         if content:
             content = f"{content}\n"
-        return f"<{self._tag_name}{sec_type}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+        return (
+            f"<{self._tag_name}{sec_type}{sec_id}>\n{self.label_title_raw}\n{content}{sub_content}</{self._tag_name}>"
+        )
 
     @classmethod
     def _get_raw_label_title(cls, section: etree._Element) -> str:

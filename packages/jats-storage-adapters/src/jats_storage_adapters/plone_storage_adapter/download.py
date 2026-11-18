@@ -353,6 +353,7 @@ class PloneDownloadService:
             sec_type=data.get("sec_type"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
+            section_id=data.get("section_id"),
             sections=sections,
         )
 
@@ -374,6 +375,7 @@ class PloneDownloadService:
             sec_type=data.get("sec_type"),
             label_title_raw=self.__get_label_title_raw(data, url, options),
             content_raw=data.get("content_raw"),
+            section_id=data.get("section_id"),
             sections=sections,
         )
 
@@ -382,6 +384,7 @@ class PloneDownloadService:
         data = self.__get_json(url, options)
         return Glossary(
             label_title_raw=self.__get_label_title_raw(data, url, options),
+            section_id=data.get("section_id"),
             content_raw=data.get("content_raw"),
         )
 
@@ -390,6 +393,7 @@ class PloneDownloadService:
         data = self.__get_json(url, options)
         return RefList(
             label_title_raw=self.__get_label_title_raw(data, url, options),
+            section_id=data.get("section_id"),
             content_raw=data.get("content_raw"),
         )
 
@@ -414,6 +418,7 @@ class PloneDownloadService:
                 sec_type=data.get("sec_type"),
                 label_title_raw=label_title_raw,
                 content_raw=data.get("content_raw"),
+                section_id=data.get("section_id"),
                 sections=sections,
             )
         elif data.get("@type") == "EasySection":
@@ -433,6 +438,7 @@ class PloneDownloadService:
                 sec_type="",
                 label_title_raw=label_title_raw,
                 content_raw=jats_content,
+                section_id=data.get("section_id"),
                 sections=sections,
             )
         else:

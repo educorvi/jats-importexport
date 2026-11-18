@@ -28,6 +28,7 @@ class Section(GenericSection, JATSClassInterface):
         sec_type: str | None,
         label_title_raw: str,
         content_raw: str | None,
+        section_id: str | None,
         sections: list[Section | Glossary | RefList],
     ):
         """Initialize Section with type, title, label, contents, and nested sections."""
@@ -35,6 +36,7 @@ class Section(GenericSection, JATSClassInterface):
             sec_type=sec_type,
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
         )
         self._sections = sections
 
@@ -151,6 +153,7 @@ class Section(GenericSection, JATSClassInterface):
         cls._split_on_vorbemerkungen(section)
         cls._split_on_inhaltsverzeichnis(section)
         sec_type = element_attribute(section, ".", "sec-type")
+        section_id = element_attribute(section, ".", "id")
         label_title_raw = cls._get_raw_label_title(section)
         content_raw = cls._get_raw_content(section)
 
@@ -168,6 +171,7 @@ class Section(GenericSection, JATSClassInterface):
             label_title_raw=label_title_raw,
             content_raw=content_raw,
             sections=sections,
+            section_id=section_id,
         )
 
     def extract_keywords(self) -> list[str]:

@@ -1,11 +1,11 @@
 from .base import get_jats_doc
 
 _BODY = """
-<sec sec-type="intro">
+<sec id="sec1" sec-type="intro">
     <label>1.</label>
     <title>Introduction</title>
     <p>This is the first paragraph.</p>
-    <sec sec-type="subsection">
+    <sec id="sub1" sec-type="subsection">
         <label>1.1</label>
         <title>Nested Subsection</title>
         <p>Nested content.</p>
@@ -13,14 +13,14 @@ _BODY = """
 </sec>"""
 
 _BACK = """
-<app-group content-type="appendices">
+<app-group id="app-group" content-type="appendices">
     <label>Appendix Group Label</label>
     <title>Appendix Group Title</title>
-    <app app-type="annex">
+    <app id="app1" app-type="annex">
         <label>A</label>
         <title>First Appendix</title>
         <p>Appendix text content.</p>
-        <sec>
+        <sec id="app-sub1">
             <title>Appendix Subsection</title>
             <p>Subtext.</p>
         </sec>

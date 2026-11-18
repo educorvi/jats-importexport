@@ -300,6 +300,7 @@ class PloneUploadService:
                 "sec_type": section.sec_type or None,
                 "label_title_raw": section.label_title_raw,
                 "content_raw": section.content_raw,
+                "section_id": section.section_id or None,
             },
         )
         response.raise_for_status()

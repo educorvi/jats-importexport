@@ -9,6 +9,8 @@ from typing import override
 
 from lxml import etree
 
+from jats_classes.common import element_attribute
+
 from ..JATSClassInterface import JATSClassInterface
 from .GenericSection import GenericSection
 
@@ -20,12 +22,14 @@ class Glossary(GenericSection, JATSClassInterface):
         self,
         label_title_raw: str,
         content_raw: str | None,
+        section_id: str | None,
     ):
         """Initialize Glossary with title, label and contents."""
         super().__init__(
             sec_type="",
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
         )
 
     @property
@@ -51,18 +55,21 @@ class Glossary(GenericSection, JATSClassInterface):
         Returns:
             A Glossary instance.
         """
+        section_id = element_attribute(glossary, ".", "id")
         label_title_raw = cls._get_raw_label_title(glossary)
         content_raw = cls._get_raw_content(glossary)
 
         return cls(
             label_title_raw=label_title_raw,
             content_raw=content_raw,
+            section_id=section_id,
         )
 
     @override
     def to_xml(self) -> str:
         """Serialize the Glossary back to XML."""
         content = self.content_raw or ""
+        sec_id = f' id="{self.section_id}"' if self.section_id else ""
         if content:
             content = f"{content}\n"
-        return f"<glossary>\n{self.label_title_raw}\n{content}</glossary>"
+        return f"<glossary{sec_id}>\n{self.label_title_raw}\n{content}</glossary>"

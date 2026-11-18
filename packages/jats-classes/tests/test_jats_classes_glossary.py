@@ -4,12 +4,12 @@ from jats_classes import Back, Glossary, Section, Appendix
 
 
 EXAMPLE_GLOSSARY_XML = (
-    "<glossary><label>Appendix A</label><title>Glossary</title>"
+    '<glossary id="terms"><label>Appendix A</label><title>Glossary</title>'
     "<def-list><def-item><term>XML</term><def><p>Markup language.</p></def></def-item></def-list>"
     "</glossary>"
 )
 
-EXAMPLE_GLOSSARY_XML_SHORT = "<glossary><title>Terms</title><p>Glossary content.</p></glossary>"
+EXAMPLE_GLOSSARY_XML_SHORT = '<glossary id="short-terms"><title>Terms</title><p>Glossary content.</p></glossary>'
 
 
 def test_glossary_from_xml_element_extracts_label_title_and_content():
@@ -26,7 +26,7 @@ def test_glossary_from_xml_element_extracts_label_title_and_content():
 
 
 def test_section_from_xml_element_parses_glossary_child():
-    string = f"<sec><title>References</title><p>Section content.</p>{EXAMPLE_GLOSSARY_XML_SHORT}</sec>"
+    string = f'<sec id="section"><title>References</title><p>Section content.</p>{EXAMPLE_GLOSSARY_XML_SHORT}</sec>'
     element = etree.fromstring(
         string
     )
@@ -57,7 +57,7 @@ def test_back_from_xml_element_parses_and_serializes_glossary():
     assert back.to_xml().replace("\n", "") == string
 
 def test_appendix_from_xml_element_parses_glossary_child():
-    string = f"<app><title>Appendix</title>{EXAMPLE_GLOSSARY_XML_SHORT}</app>"
+    string = f'<app id="appendix"><title>Appendix</title>{EXAMPLE_GLOSSARY_XML_SHORT}</app>'
     element = etree.fromstring(string)
 
     appendix = Appendix.from_xml_element(element)
