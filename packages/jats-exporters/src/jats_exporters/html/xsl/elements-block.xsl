@@ -28,7 +28,13 @@
     <xsl:template match="boxed-text | fig | table-wrap">
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
-        <div>
+        <xsl:variable name="wrapper">
+            <xsl:choose>
+                <xsl:when test="self::fig or self::table-wrap">figure</xsl:when>
+                <xsl:otherwise>div</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:element name="{$wrapper}">
             <xsl:attribute name="class">
                 <xsl:value-of select="$gi"/>
                 <xsl:text> panel</xsl:text>
@@ -50,7 +56,7 @@
                 </xsl:when>
                 <xsl:when test="self::table-wrap">
                     <xsl:call-template name="make-caption"/>
-                    <div class="table-responsive">
+                    <div class="table-responsive" tabindex="0">
                         <xsl:apply-templates mode="drop-title"/>
                     </div>
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
@@ -66,7 +72,7 @@
                     <xsl:apply-templates mode="drop-title"/>
                 </xsl:otherwise>
             </xsl:choose>
-        </div>
+        </xsl:element>
     </xsl:template>
 
 
@@ -96,9 +102,8 @@
                     <xsl:when test="ancestor::fig/alt-text">
                         <xsl:value-of select="normalize-space(string((ancestor::fig/alt-text)[1]))"/>
                     </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="@xlink:href"/>
-                    </xsl:otherwise>
+                    <!-- no alt-text in the source: leave alt empty rather than expose the file name -->
+                    <xsl:otherwise/>
                 </xsl:choose>
             </xsl:attribute>
             <xsl:if test="@specific-use">
@@ -186,7 +191,7 @@
     <xsl:template match="table">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:call-template name="named-anchor"/>
+            <xsl:call-template name="assign-id"/>
             <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
