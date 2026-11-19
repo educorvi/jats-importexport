@@ -5,7 +5,7 @@
     <xsl:template name="make-label-title">
         <xsl:param name="generated-title"/>
         <xsl:variable name="heading-tag">
-            <xsl:call-template name="nested-heading-tag" />
+            <xsl:call-template name="get-heading-tag" />
         </xsl:variable>
         <xsl:choose>
             <xsl:when test="normalize-space(string(label)) or normalize-space(string(title))">
@@ -66,16 +66,25 @@
     </xsl:template>
 
 
-    <!-- template for determining the nested heading tag -->
-    <xsl:template name="nested-heading-tag">
+    <!-- templates for determining the heading level / tag -->
+
+
+    <xsl:template name="get-heading-level">
         <xsl:variable name="level"
                       select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
         <xsl:choose>
             <xsl:when test="$level &lt;= 6">
-                <xsl:value-of select="concat('h', $level)"/>
+                <xsl:value-of select="$level"/>
             </xsl:when>
-            <xsl:otherwise>h6</xsl:otherwise>
+            <xsl:otherwise>6</xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="get-heading-tag">
+        <xsl:variable name="level">
+            <xsl:call-template name="get-heading-level"/>
+        </xsl:variable>
+        <xsl:value-of select="concat('h', $level)"/>
     </xsl:template>
 
 
@@ -100,7 +109,7 @@
     <!-- default: any other titles found -->
     <xsl:template match="title">
         <xsl:variable name="heading-tag">
-            <xsl:call-template name="nested-heading-tag"/>
+            <xsl:call-template name="get-heading-tag"/>
         </xsl:variable>
         <xsl:if test="normalize-space(string(.))">
             <xsl:element name="{$heading-tag}">
@@ -130,7 +139,7 @@
     <!-- default: any other labels found -->
     <xsl:template match="label" name="label">
         <xsl:variable name="heading-tag">
-            <xsl:call-template name="nested-heading-tag"/>
+            <xsl:call-template name="get-heading-tag"/>
         </xsl:variable>
         <xsl:element name="{$heading-tag}">
             <xsl:attribute name="class">label other</xsl:attribute>

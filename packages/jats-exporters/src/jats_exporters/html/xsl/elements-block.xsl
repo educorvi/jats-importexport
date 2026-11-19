@@ -149,6 +149,15 @@
                 <xsl:attribute name="data-content-type">
                     <xsl:value-of select="$content-type"/>
                 </xsl:attribute>
+                <xsl:if test="$content-type='_1UnterUeberschrift'">
+                    <xsl:variable name="heading-level">
+                        <xsl:call-template name="get-heading-level"/>
+                    </xsl:variable>
+                    <xsl:attribute name="role">heading</xsl:attribute>
+                    <xsl:attribute name="aria-level">
+                        <xsl:value-of select="$heading-level"/>
+                    </xsl:attribute>
+                </xsl:if>
             </xsl:if>
             <xsl:if test="not(preceding-sibling::*)">
                 <xsl:attribute name="class">first</xsl:attribute>
