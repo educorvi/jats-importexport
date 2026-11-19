@@ -34,27 +34,29 @@ class PdfExporter:
         """Initialize the PDF exporter with an HTML exporter."""
         self.html_exporter = HtmlExporter()
 
-    def export(self, document: JATSDocument) -> tuple[bytes, str]:
+    def export(self, document: JATSDocument, pdf_variant: str = "pdf/ua-2") -> tuple[bytes, str]:
         """Export the JATSDocument to a PDF file using WeasyPrint.
         Returns:
             A tuple containing the PDF bytes and the suggested filename.
         """
         front = document.article.front
         html = HTML(string=self._get_html(document, front), base_url=f"{self.ROOT.as_uri()}/")
-        pdf_bytes = html.write_pdf()
+        pdf_bytes = html.write_pdf(pdf_variant=pdf_variant)
 
         title_escaped = "".join(c if c.isalnum() else "_" for c in front.title or "Dokument")
         filename = f"{title_escaped}.pdf"
 
         return pdf_bytes, filename
 
-    def export_partial(self, part: JATSClassInterface, front: Front) -> tuple[bytes, str]:
+    def export_partial(
+        self, part: JATSClassInterface, front: Front, pdf_variant: str = "pdf/ua-2"
+    ) -> tuple[bytes, str]:
         """Export a part of the JATSDocument to a PDF file using WeasyPrint.
         Returns:
             A tuple containing the PDF bytes and the suggested filename.
         """
         html = HTML(string=self._get_html(part, front), base_url=f"{self.ROOT.as_uri()}/")
-        pdf_bytes = html.write_pdf()
+        pdf_bytes = html.write_pdf(pdf_variant=pdf_variant)
 
         title_escaped = "".join(c if c.isalnum() else "_" for c in front.title or "Dokument")
         filename = f"{title_escaped}.pdf"

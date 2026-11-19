@@ -29,6 +29,12 @@
         <xsl:variable name="gi" select="local-name(.)"/>
         <xsl:variable name="content-type" select="@content-type"/>
         <div>
+            <xsl:if test="(self::fig or self::table-wrap) and (label or caption)">
+                <xsl:attribute name="role">figure</xsl:attribute>
+                <xsl:attribute name="aria-labelledby">
+                    <xsl:value-of select="concat(generate-id(), '-caption')"/>
+                </xsl:attribute>
+            </xsl:if>
             <xsl:attribute name="class">
                 <xsl:value-of select="$gi"/>
                 <xsl:text> panel</xsl:text>
@@ -50,7 +56,7 @@
                 </xsl:when>
                 <xsl:when test="self::table-wrap">
                     <xsl:call-template name="make-caption"/>
-                    <div class="table-responsive">
+                    <div class="table-responsive" tabindex="0">
                         <xsl:apply-templates mode="drop-title"/>
                     </div>
                     <xsl:apply-templates mode="footnote" select="self::table-wrap//fn"/>
@@ -143,6 +149,15 @@
                 <xsl:attribute name="data-content-type">
                     <xsl:value-of select="$content-type"/>
                 </xsl:attribute>
+                <xsl:if test="$content-type='_1UnterUeberschrift'">
+                    <xsl:variable name="heading-level">
+                        <xsl:call-template name="get-heading-level"/>
+                    </xsl:variable>
+                    <xsl:attribute name="role">heading</xsl:attribute>
+                    <xsl:attribute name="aria-level">
+                        <xsl:value-of select="$heading-level"/>
+                    </xsl:attribute>
+                </xsl:if>
             </xsl:if>
             <xsl:if test="not(preceding-sibling::*)">
                 <xsl:attribute name="class">first</xsl:attribute>
@@ -186,7 +201,9 @@
     <xsl:template match="table">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:call-template name="named-anchor"/>
+            <xsl-if test="not(@id)">
+                <xsl:call-template name="assign-id"/>
+            </xsl-if>
             <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
@@ -231,15 +248,8 @@
     </xsl:template>
 
 
-    <xsl:template priority="2" mode="list" match="list[list-item/label]">
-        <ul style="list-style-type: none">
-            <xsl:apply-templates select="list-item"/>
-        </ul>
-    </xsl:template>
-
-
     <xsl:template match="list[@list-type='bullet' or not(@list-type)]" mode="list">
-        <ul>
+        <ul role="list">
             <xsl:apply-templates select="list-item"/>
         </ul>
     </xsl:template>
@@ -256,7 +266,7 @@
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <ol style="list-style-type: {$style}">
+        <ol style="list-style-type: {$style}" role="list">
             <xsl:apply-templates select="list-item"/>
         </ol>
     </xsl:template>
@@ -269,24 +279,9 @@
     </xsl:template>
 
 
-    <xsl:template match="list-item/label">
-        <!-- if the next sibling is a p, the label will be called as
-             a run-in -->
-        <xsl:if test="following-sibling::*[1][not(self::p)]">
-            <xsl:call-template name="label"/>
-        </xsl:if>
-    </xsl:template>
-
-
-    <xsl:template match="list-item/p[not(preceding-sibling::*[not(self::label)])]">
+    <xsl:template match="list-item/p">
         <p>
             <xsl:call-template name="assign-id"/>
-            <xsl:for-each select="preceding-sibling::label">
-                <span class="label">
-                    <xsl:apply-templates/>
-                </span>
-                <xsl:text> </xsl:text>
-            </xsl:for-each>
             <xsl:apply-templates/>
         </p>
     </xsl:template>
@@ -300,53 +295,47 @@
     <xsl:template match="def-list">
         <div class="def-list">
             <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="label | title"/>
-            <div class="def-list">
+            <xsl:call-template name="make-label-title"/>
+            <dl>
                 <xsl:if test="term-head|def-head">
-                    <div class="row">
-                        <div class="col def-list-head">
-                            <xsl:apply-templates select="term-head"/>
-                        </div>
-                        <div class="col def-list-head">
-                            <xsl:apply-templates select="def-head"/>
-                        </div>
+                    <div class="def-item">
+                        <xsl:apply-templates select="term-head"/>
+                        <xsl:apply-templates select="def-head"/>
                     </div>
                 </xsl:if>
                 <xsl:apply-templates select="def-item"/>
-            </div>
+            </dl>
             <xsl:apply-templates select="def-list"/>
         </div>
     </xsl:template>
 
 
     <xsl:template match="def-item">
-        <div class="row def-item">
+        <div class="def-item">
             <xsl:call-template name="assign-id"/>
             <xsl:apply-templates/>
         </div>
     </xsl:template>
 
 
-    <xsl:template match="term">
-        <div class="col def-term">
+    <xsl:template match="term | term-head">
+        <dt class="def-term">
             <xsl:call-template name="assign-id"/>
-            <p>
-                <xsl:apply-templates/>
-            </p>
-        </div>
+            <xsl:apply-templates/>
+        </dt>
     </xsl:template>
 
 
-    <xsl:template match="def">
-        <div class="col def-def">
+    <xsl:template match="def | def-head">
+        <dd class="def-def">
             <xsl:call-template name="assign-id"/>
             <xsl:apply-templates/>
-        </div>
+        </dd>
     </xsl:template>
 
 
     <xsl:template match="disp-quote">
-        <div class="blockquote">
+        <blockquote class="blockquote">
             <xsl:call-template name="named-anchor"/>
             <div class="blockquote-content">
                 <xsl:apply-templates select="node()[not(self::attrib)]"/>
@@ -358,7 +347,7 @@
                     </div>
                 </xsl:for-each>
             </xsl:if>
-        </div>
+        </blockquote>
     </xsl:template>
 
 

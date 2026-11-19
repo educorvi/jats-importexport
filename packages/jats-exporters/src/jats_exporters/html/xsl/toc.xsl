@@ -3,8 +3,8 @@
 
     <xsl:template name="make-toc">
         <xsl:param name="front-node" select="front"/>
-        <nav class="article-toc">
-            <p class="metadata-title">Inhaltsverzeichnis</p>
+        <nav class="article-toc" aria-labelledby="toc-title">
+            <p id="toc-title" class="metadata-title">Inhaltsverzeichnis</p>
             <xsl:call-template name="toc-sections">
                 <xsl:with-param name="sections"
                                 select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc' and @sec-type != '_4octextparaPrologZwischenueberschrift'] |
@@ -23,7 +23,7 @@
         <xsl:param name="sections"/>
         <xsl:param name="depth"/>
         <xsl:if test="$sections">
-            <ul>
+            <ul role="list">
                 <xsl:for-each select="$sections">
                     <li>
                         <xsl:variable name="anchor-id">

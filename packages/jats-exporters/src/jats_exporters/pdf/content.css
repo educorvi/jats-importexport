@@ -1,6 +1,23 @@
 @charset "UTF-8";
 
 /* =================================================== */
+/* ================== Miscellaneous ================== */
+/* =================================================== */
+
+/* Visually hidden but still announced by assistive technology */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* =================================================== */
 /* ================= Article Content ================= */
 /* =================================================== */
 
@@ -74,16 +91,16 @@
 }
 
 /* Other titles */
-.article-content .section h4.title,
-.article-content .section h4.title * {
+.article-content .section title.other,
+.article-content .section title.other * {
   margin: var(--space-l) 0 var(--space-sm);
   font: var(--font-h4);
   color: var(--dguv-text);
 }
 
 /* Other labels */
-.article-content .section h5.label,
-.article-content .section h5.label * {
+.article-content .section label.other,
+.article-content .section label.other * {
   font: var(--font-h5);
   color: var(--dguv-text);
 }
@@ -508,6 +525,33 @@
   text-align: right;
 }
 
+/* ===================== def-list ===================== */
+
+.article-content .def-list {
+  margin-block: var(--space-m);
+}
+
+.article-content .def-list > dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+}
+
+.article-content .def-item {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  column-gap: var(--space-m);
+}
+
+.article-content .def-term {
+  font-weight: 700;
+  grid-column: 1;
+}
+
+.article-content .def-def {
+  grid-column: 2;
+}
+
 /* ================== inline styles =================== */
 
 /* also children of i italic */
@@ -554,7 +598,7 @@
 
 /* Grün */
 .article-content *[data-style-type="_4Farbe2"] {
-  color: var(--dguv-green);
+  color: var(--dguv-green-dark);
 }
 
 /* Pink */

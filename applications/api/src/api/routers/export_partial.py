@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, Response
 
 from api.models import (
+    DEFAULT_PDF_VARIANT,
     HtmlDocumentPartialResponse,
     HTTP400BadRequest,
     HTTP404NotFound,
@@ -10,6 +11,7 @@ from api.models import (
     HTTP422UnprocessableEntity,
     JatsDocumentResponse,
     MarkdownDocumentResponse,
+    PdfVariantEnum,
 )
 from api.services.common import resolve_path_with_sub_path
 from api.services.export_partial import html_export, jats_export, md_export, pdf_export
@@ -86,9 +88,11 @@ async def export_md(
         422: {"model": HTTP422UnprocessableEntity},
     },
 )
-async def export_pdf(path_tuple: tuple[str, str] = Depends(resolve_path_with_sub_path)):
+async def export_pdf(
+    path_tuple: tuple[str, str] = Depends(resolve_path_with_sub_path), pdf_variant: PdfVariantEnum = DEFAULT_PDF_VARIANT
+):
     path, sub_path = path_tuple
-    pdf_content, filename = await pdf_export(path, sub_path)
+    pdf_content, filename = await pdf_export(path, sub_path, pdf_variant)
     return Response(
         content=pdf_content,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},

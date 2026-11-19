@@ -27,8 +27,9 @@
   --dguv-green-light: #ecf3da;
   --dguv-red: #9b1c18;
   --dguv-red-light: #f8c7c8;
-  --dguv-pink: #cb5d9f;
-  --dguv-light-blue: #0095db;
+  --dguv-green-dark: #00812c;
+  --dguv-pink: #b81178;
+  --dguv-light-blue: #0063af;
 
   --dguv-text: var(--dguv-black);
   --dguv-text-secondary: var(--dguv-secondary);

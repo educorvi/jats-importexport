@@ -8,6 +8,7 @@
             <xsl:apply-templates select="." mode="id"/>
         </xsl:variable>
         <a href="#{$id}">
+            <span class="visually-hidden">Fu&#223;note </span>
             <xsl:apply-templates select="." mode="fn-label-text"/>
         </a>
     </xsl:template>

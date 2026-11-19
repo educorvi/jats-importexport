@@ -239,10 +239,16 @@
 .article-toc a {
   color: var(--dguv-text);
   text-decoration: none;
+  vertical-align: baseline;
 }
 
 .article-toc a:hover {
   text-decoration: underline;
+}
+
+.article-toc a:focus-visible {
+  outline: 2px solid var(--dguv-primary);
+  outline-offset: 2px;
 }
 
 .article-toc .toc-entry[data-toc-level="1"] > .toc-title,
@@ -255,19 +261,8 @@
   color: var(--dguv-primary);
 }
 
-.article-toc .toc-entry:has(> .toc-label) {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  column-gap: var(--space-xxs);
-  align-items: baseline;
-}
-
-.article-toc .toc-entry:has(> .toc-label) > .toc-label {
-  grid-column: 1;
-}
-
-.article-toc .toc-entry:has(> .toc-label) > .toc-title {
-  grid-column: 2;
+.article-toc .toc-entry > .toc-label {
+  margin-inline-end: var(--space-xxs);
 }
 
 /* =================================================== */

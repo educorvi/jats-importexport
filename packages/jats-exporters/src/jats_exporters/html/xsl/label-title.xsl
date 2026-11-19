@@ -4,17 +4,8 @@
     <!-- Template for making label and title elements -->
     <xsl:template name="make-label-title">
         <xsl:param name="generated-title"/>
-        <xsl:variable name="level"
-                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
         <xsl:variable name="heading-tag">
-            <xsl:choose>
-                <xsl:when test="$level &lt;= 6">
-                    <xsl:value-of select="concat('h', $level)"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="'h6'"/>
-                </xsl:otherwise>
-            </xsl:choose>
+            <xsl:call-template name="get-heading-tag" />
         </xsl:variable>
         <xsl:choose>
             <xsl:when test="normalize-space(string(label)) or normalize-space(string(title))">
@@ -51,6 +42,9 @@
     <xsl:template name="make-caption">
         <xsl:if test="label or caption">
             <div class="caption">
+                <xsl:attribute name="id">
+                    <xsl:value-of select="concat(generate-id(), '-caption')"/>
+                </xsl:attribute>
                 <xsl:variable name="label-text" select="normalize-space(string(label))" />
                 <xsl:if test="$label-text">
                     <span class="label">
@@ -69,6 +63,28 @@
                 </xsl:if>
             </div>
         </xsl:if>
+    </xsl:template>
+
+
+    <!-- templates for determining the heading level / tag -->
+
+
+    <xsl:template name="get-heading-level">
+        <xsl:variable name="level"
+                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
+        <xsl:choose>
+            <xsl:when test="$level &lt;= 6">
+                <xsl:value-of select="$level"/>
+            </xsl:when>
+            <xsl:otherwise>6</xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="get-heading-tag">
+        <xsl:variable name="level">
+            <xsl:call-template name="get-heading-level"/>
+        </xsl:variable>
+        <xsl:value-of select="concat('h', $level)"/>
     </xsl:template>
 
 
@@ -92,10 +108,14 @@
 
     <!-- default: any other titles found -->
     <xsl:template match="title">
+        <xsl:variable name="heading-tag">
+            <xsl:call-template name="get-heading-tag"/>
+        </xsl:variable>
         <xsl:if test="normalize-space(string(.))">
-            <h4 class="title">
+            <xsl:element name="{$heading-tag}">
+                <xsl:attribute name="class">title other</xsl:attribute>
                 <xsl:apply-templates/>
-            </h4>
+            </xsl:element>
         </xsl:if>
     </xsl:template>
 
@@ -118,9 +138,13 @@
 
     <!-- default: any other labels found -->
     <xsl:template match="label" name="label">
-        <h5 class="label">
+        <xsl:variable name="heading-tag">
+            <xsl:call-template name="get-heading-tag"/>
+        </xsl:variable>
+        <xsl:element name="{$heading-tag}">
+            <xsl:attribute name="class">label other</xsl:attribute>
             <xsl:apply-templates/>
-        </h5>
+        </xsl:element>
     </xsl:template>
 
 </xsl:stylesheet>

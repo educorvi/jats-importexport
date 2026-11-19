@@ -36,6 +36,7 @@
             <xsl:if test="not(normalize-space(string(.)))">
                 <xsl:value-of select="@xlink:href"/>
             </xsl:if>
+            <span class="visually-hidden"> (&#246;ffnet in neuem Fenster)</span>
         </a>
     </xsl:template>
 

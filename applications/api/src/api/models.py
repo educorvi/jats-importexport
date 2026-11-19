@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from jats_classes import Front
 from pydantic import BaseModel, Field, RootModel
 
@@ -74,6 +76,15 @@ class HtmlDocumentPartialResponse(BaseModel):
 
 class MarkdownDocumentResponse(BaseModel):
     md: str = Field(description="The Markdown document")
+
+
+class PdfVariantEnum(StrEnum):
+    A_3A = "pdf/a-3a"
+    UA_1 = "pdf/ua-1"
+    UA_2 = "pdf/ua-2"
+
+
+DEFAULT_PDF_VARIANT = PdfVariantEnum.UA_2
 
 
 class MetadataResponse(BaseModel):
