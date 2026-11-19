@@ -270,7 +270,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_partial_pdf**
-> bytes export_partial_pdf(path=path, webcode=webcode, sub_path=sub_path)
+> bytes export_partial_pdf(pdf_variant=pdf_variant, path=path, webcode=webcode, sub_path=sub_path)
 
 Export Pdf
 
@@ -304,13 +304,14 @@ configuration.api_key['APIKeyHeader'] = os.environ["API_KEY"]
 with jats_importexport_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = jats_importexport_client.PartialExportApi(api_client)
+    pdf_variant = jats_importexport_client.PdfVariantEnum() # PdfVariantEnum |  (optional)
     path = 'path_example' # str |  (optional)
     webcode = 'webcode_example' # str |  (optional)
     sub_path = '' # str |  (optional) (default to '')
 
     try:
         # Export Pdf
-        api_response = api_instance.export_partial_pdf(path=path, webcode=webcode, sub_path=sub_path)
+        api_response = api_instance.export_partial_pdf(pdf_variant=pdf_variant, path=path, webcode=webcode, sub_path=sub_path)
         print("The response of PartialExportApi->export_partial_pdf:\n")
         pprint(api_response)
     except Exception as e:
@@ -324,6 +325,7 @@ with jats_importexport_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **pdf_variant** | [**PdfVariantEnum**](.md)|  | [optional] 
  **path** | **str**|  | [optional] 
  **webcode** | **str**|  | [optional] 
  **sub_path** | **str**|  | [optional] [default to &#39;&#39;]

@@ -3,7 +3,7 @@
   "info": {
     "title": "JATS Import/Export API",
     "description": "An API for uploading JATS documents, importing them to different storage backends (e.g. Plone), and converting them to various formats.",
-    "version": "1.0.0a57"
+    "version": "1.0.0a58"
   },
   "paths": {
     "/": {
@@ -775,6 +775,15 @@
         ],
         "parameters": [
           {
+            "name": "pdf_variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PdfVariantEnum",
+              "default": "pdf/ua-2"
+            }
+          },
+          {
             "name": "path",
             "in": "query",
             "required": false,
@@ -1503,6 +1512,15 @@
           }
         ],
         "parameters": [
+          {
+            "name": "pdf_variant",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PdfVariantEnum",
+              "default": "pdf/ua-2"
+            }
+          },
           {
             "name": "path",
             "in": "query",
@@ -3556,6 +3574,15 @@
           "metadata"
         ],
         "title": "MetadataResponse"
+      },
+      "PdfVariantEnum": {
+        "type": "string",
+        "enum": [
+          "pdf/a-3a",
+          "pdf/ua-1",
+          "pdf/ua-2"
+        ],
+        "title": "PdfVariantEnum"
       },
       "StructureTreeEntry": {
         "properties": {
