@@ -201,7 +201,9 @@
     <xsl:template match="table">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="table-copy"/>
-            <xsl:call-template name="assign-id"/>
+            <xsl-if test="not(@id)">
+                <xsl:call-template name="assign-id"/>
+            </xsl-if>
             <xsl:apply-templates/>
         </xsl:copy>
     </xsl:template>
@@ -280,12 +282,6 @@
     <xsl:template match="list-item/p">
         <p>
             <xsl:call-template name="assign-id"/>
-            <xsl:for-each select="preceding-sibling::label">
-                <span class="label">
-                    <xsl:apply-templates/>
-                </span>
-                <xsl:text> </xsl:text>
-            </xsl:for-each>
             <xsl:apply-templates/>
         </p>
     </xsl:template>
