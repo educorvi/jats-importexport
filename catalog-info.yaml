@@ -6,6 +6,7 @@ metadata:
   description: Upload, parse, convert, and store JATS XML documents.
   annotations:
     github.com/project-slug: educorvi/jats-importexport
+    educorvi.de/version-endpoint: https://hub.uvnexus.vur.uv-kooperation.org/
   tags:
     - python
     - fastapi
