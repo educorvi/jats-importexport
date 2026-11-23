@@ -7,6 +7,7 @@ metadata:
   annotations:
     github.com/project-slug: educorvi/jats-importexport
     educorvi.de/version-endpoint: https://hub.uvnexus.vur.uv-kooperation.org/
+    educorvi.de/website-url: https://hub.uvnexus.vur.uv-kooperation.org/
   tags:
     - python
     - fastapi
