@@ -40,9 +40,6 @@ class PloneGetJATSDocumentOptions(BaseGetJATSDocumentOptions):
     pre_requested_sections: NotRequired[dict[str, dict[str, Any]] | None]
 
 
-# Path to the XSLT file used for transforming HTML to JATS (EasySections)
-XSL_PATH = os.path.join(os.path.dirname(__file__), "xslt", "html_to_jats.xslt")
-
 # Processing Instruction to append to Label / Title
 EDIT_PI_PLONE = EDIT_PI.format(url="{url}/edit")
 
@@ -77,13 +74,10 @@ class PloneDownloadService:
     ieh_base_url: str
     external_url: str
     httpx_client: httpx.Client
-    transform: etree.XSLT
 
     def __init__(self, base_url: str, httpx_client: httpx.Client):
         self.base_url = base_url
         self.httpx_client = httpx_client
-        xsl_path = os.path.abspath(XSL_PATH)
-        self.transform = etree.XSLT(etree.parse(xsl_path))
 
         external_url = os.environ.get("PLONE_EXTERNAL_URL")
         if external_url is None:
@@ -201,7 +195,7 @@ class PloneDownloadService:
                 part = self.__fetch_appendix_group(part_url, options)
             case "Appendix":
                 part = self.__fetch_appendix(part_url, options)
-            case "Section" | "EasySection":
+            case "Section":
                 part = self.__fetch_section(part_url, options)
             case "Glossary":
                 part = self.__fetch_glossary(part_url, options)
@@ -321,7 +315,7 @@ class PloneDownloadService:
         sections = [
             self.__fetch_section(item["@id"], options)
             for item in data.get("items", [])
-            if item.get("@type") == "Section" or item.get("@type") == "EasySection"
+            if item.get("@type") == "Section"
         ]
         return Body(sections=sections)
 
@@ -404,7 +398,7 @@ class PloneDownloadService:
         sections: list[Section | RefList | Glossary] = []
         last_sections: list[RefList | Glossary] = []
         for item in data.get("items", []):
-            if item.get("@type") in ["Section", "EasySection"]:
+            if item.get("@type") in ["Section"]:
                 sections.append(self.__fetch_section(item["@id"], options))
             elif item.get("@type") == "RefList":
                 last_sections.append(self.__fetch_ref_list(item["@id"], options))
@@ -412,37 +406,13 @@ class PloneDownloadService:
                 last_sections.append(self.__fetch_glossary(item["@id"], options))
         sections.extend(last_sections)  # append glossaries and ref lists at the end of the section's subsections list
 
-        label_title_raw = self.__get_label_title_raw(data, url, options)
-        if data.get("@type") == "Section":
-            return Section(
-                sec_type=data.get("sec_type"),
-                label_title_raw=label_title_raw,
-                content_raw=data.get("content_raw"),
-                section_id=data.get("section_id"),
-                sections=sections,
-            )
-        elif data.get("@type") == "EasySection":
-            content = data.get("content", {}).get("data", "")
-            content = f"<main>{content}</main>"
-            try:
-                # Use HTML parser to recover from malformed HTML
-                # (e.g. unclosed <col> and <img> tags from plone richtext editor)
-                html_tree = etree.fromstring(content, parser=etree.HTMLParser(recover=True))
-                # HTMLParser wraps in <html><body> — extract the <main>
-                main_elem = html_tree.find(".//main")
-                xml_content = main_elem if main_elem is not None else html_tree
-            except Exception:
-                raise InternalError(f"Error parsing HTML content for EasySection at {url}")
-            jats_content = str(self.transform(xml_content))
-            return Section(
-                sec_type="",
-                label_title_raw=label_title_raw,
-                content_raw=jats_content,
-                section_id=data.get("section_id"),
-                sections=sections,
-            )
-        else:
-            raise ValueError(f"Unsupported section type: {data.get('@type')}")
+        return Section(
+            sec_type=data.get("sec_type"),
+            label_title_raw=self.__get_label_title_raw(data, url, options),
+            content_raw=data.get("content_raw"),
+            section_id=data.get("section_id"),
+            sections=sections,
+        )
 
     def __get_json(self, url: str, options: PloneGetJATSDocumentOptions | None) -> dict:
         """Fetch JSON data from a Plone API endpoint."""
@@ -464,16 +434,6 @@ class PloneDownloadService:
         section_type = data.get("@type")
         if section_type in ["Section", "AppendixGroup", "Appendix", "RefList", "Glossary"]:
             label_title_raw = data.get("label_title_raw") or ""
-        elif section_type == "EasySection":
-            label = data.get("label") or ""
-            title = data.get("title") or ""
-            label_raw = f"<label>{label}</label>" if label else ""
-            title_raw = (
-                f'<title><named-content content-type="span" specific-use="keyword">{title}</named-content></title>'
-                if title
-                else ""
-            )
-            label_title_raw = label_raw + title_raw
         else:
             raise ValueError(f"Unsupported section type: {section_type}")
 

@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 
 import httpx
 from jats_classes import (
+    Appendix,
     AppendixGroup,
     Article,
     Back,
@@ -22,11 +23,6 @@ from jats_classes import (
     RefList,
     Section,
 )
-from jats_classes.section import Appendix
-from jats_exporters import HtmlExporter
-from lxml import etree, html
-
-from ..interface import SaveJATSDocumentOptions
 
 logger = logging.getLogger(__name__)
 
@@ -153,12 +149,10 @@ class PloneUploadService:
         self.__change_workflow_status(result_url, front.veroeffentlichungsstatus)
         return (self.__get_path_from_url(result_url), media_container_path)
 
-    def create_article_content(
-        self, article: Article, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
+    def create_article_content(self, article: Article, container: str) -> str:
         """Create Body and Back children in Plone."""
         url = f"{self.base_url}/{container.strip('/')}"
-        self.__create_body(article.body, url, options)
+        self.__create_body(article.body, url)
         self.__create_back(article.back, url)
 
         # set to workflow state derived from veroeffentlichungsstatus
@@ -220,7 +214,7 @@ class PloneUploadService:
         response.raise_for_status()
         return response.json().get("@id")
 
-    def __create_body(self, body: Body, container_url: str, options: SaveJATSDocumentOptions | None = None) -> str:
+    def __create_body(self, body: Body, container_url: str) -> str:
         """Create a Body node inside a Plone Article and upload its sections."""
         logger.debug(f"Creating body node for article: {container_url}")
         response = self.httpx_client.post(
@@ -232,21 +226,8 @@ class PloneUploadService:
         )
         response.raise_for_status()
         response_url: str = response.json().get("@id")
-
-        if options and options.get("use_html_sections"):
-            # check if the first section is the table of contents (always create as normal section)
-            # TODO: This is a temporary workaround. Ideally, the TOC should be handled in a more robust way.
-            sections_start_index = 0
-            if len(body.sections) > 0:
-                first_section = body.sections[0]
-                if first_section.title and first_section.title.lower() == "inhaltsverzeichnis":
-                    self.__create_section(first_section, response_url)
-                    sections_start_index = 1
-            for section in body.sections[sections_start_index:]:
-                self.__create_easy_section(section, response_url, container_url)
-        else:
-            for section in body.sections:
-                self.__create_section(section, response_url)
+        for section in body.sections:
+            self.__create_section(section, response_url)
         return response_url
 
     def __create_back(self, back: Back | None, container_url: str) -> str | None:
@@ -308,133 +289,3 @@ class PloneUploadService:
         for sub_section in section.sections:
             self.__create_section(sub_section, response_url)
         return response_url
-
-    def __create_easy_section(self, section: GenericSection, container_url: str, article_container_url: str) -> str:
-        """Create an EasySection node in Plone with HTML content.
-        Uses the HTML exporter to convert JATS content to HTML for storage in Plone.
-        """
-        html_exporter = HtmlExporter()
-        label, title, html_content = self.__transform_section_to_easy_section(
-            section, html_exporter, article_container_url
-        )
-        if title is None:
-            title = "HTML-Abschnitt"
-
-        logger.debug(f"Creating easy section node for article: {container_url}")
-        logger.debug(f"EasySection title: {json.dumps(title)}")
-
-        json_data = {
-            "@type": "EasySection",
-            "title": self._clean_title(title),
-            "label": label,
-            "content": html_content,
-        }
-
-        response = self.httpx_client.post(container_url, json=json_data)
-        response.raise_for_status()
-        response_url: str = response.json().get("@id")
-        return response_url
-
-    def __transform_section_to_easy_section(
-        self, section: GenericSection, html_exporter: HtmlExporter, article_container_url: str, level: int = 3
-    ) -> tuple[str | None, str | None, str]:
-        """Recursively transform a Section instance to an EasySection representation."""
-        label = section.label
-        title = section.title
-        xml_content = section.content_raw
-        html_content = html_exporter.transform_xml(xml_content) if xml_content else ""
-        if html_content:
-            html_content = self.__sanitize_html_for_richtext(html_content, article_container_url)
-
-        for child in section.sections:
-            child_label, child_title, child_content = self.__transform_section_to_easy_section(
-                child, html_exporter, article_container_url, level + 1
-            )
-            heading_tag = f"h{min(level, 6)}"
-            if child_title:
-                if child_label:
-                    heading = f"{child_label} {child_title}"
-                else:
-                    heading = child_title
-                html_content += f"<{heading_tag}>{heading}</{heading_tag}>"
-            html_content += child_content
-
-        return label, title, html_content
-
-    def __sanitize_html_for_richtext(self, html_content: str, article_container_url: str) -> str:
-        """Sanitize HTML content of an easy section for Plone richtext fields."""
-        tree = html.fromstring(html_content, parser=html.HTMLParser(recover=True, remove_comments=True))
-
-        # remove <a> tags that have no content and only an id attribute
-        empty_a_tags = tree.xpath("//a[not(*) and normalize-space(.) = '' and @id and count(@*) = 1]")
-        if isinstance(empty_a_tags, list):
-            for a in empty_a_tags:
-                a.drop_tag()
-
-        # remove <div> tags but keep their content
-        etree.strip_tags(tree, "div")
-
-        # wrap <img> in <picture> tags
-        imgs = tree.xpath("//img")
-        if isinstance(imgs, list):
-            for img in imgs:
-                parent = img.getparent()
-                label = None
-                label_element = None
-                title = None
-                title_element = None
-
-                old_src = img.get("src") or ""
-                if old_src.startswith("/") and not old_src.startswith("//"):
-                    old_src = f"{article_container_url}/articlemedia{old_src}"
-                new_src = old_src
-
-                # Look at preceding siblings for optional caption elements
-                prev = img.getprevious()
-                if prev is not None and prev.tag == "h3" and "title" in prev.get("class", "").split():
-                    title = prev.text_content().strip()
-                    title_element = prev
-                    prev = prev.getprevious()
-                if prev is not None and prev.tag == "h5" and "label" in prev.get("class", "").split():
-                    label = prev.text_content().strip()
-                    label_element = prev
-
-                # Create new structure
-                p = etree.Element("p")
-
-                if label or title:
-                    figure = etree.SubElement(
-                        p, "figure", attrib={"class": "image-richtext picture-variant-medium captioned"}
-                    )
-
-                    picture = etree.SubElement(figure, "picture", attrib={"class": "captioned"})
-
-                    _ = etree.SubElement(picture, "img", attrib={"alt": img.get("alt", ""), "src": new_src})
-
-                    caption = etree.SubElement(figure, "figcaption", attrib={"class": "image-caption"})
-                    caption.text = f"{label or ''} {title or ''}".strip()
-
-                else:
-                    picture = etree.SubElement(p, "picture")
-
-                    _ = etree.SubElement(
-                        picture,
-                        "img",
-                        attrib={
-                            "alt": img.get("alt", ""),
-                            "class": "image-richtext picture-variant-medium",
-                            "src": new_src,
-                        },
-                    )
-
-                # Replace img with new structure
-                parent.replace(img, p)
-
-                # Remove consumed caption elements
-                if label_element is not None:
-                    label_element.drop_tree()
-
-                if title_element is not None:
-                    title_element.drop_tree()
-
-        return etree.tostring(tree, encoding="unicode", method="html", pretty_print=True)

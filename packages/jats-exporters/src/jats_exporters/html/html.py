@@ -52,15 +52,6 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
         html_content = self._remove_doctype(html_content)
         return "<!DOCTYPE html>\n" + html_content
 
-    def transform_xml(self, xml_doc: str) -> str:
-        """Apply XSLT transformation to the JATS XML string.
-        The XML string does not need to have a single root element.
-        The returned HTML string does not include the <!DOCTYPE html> declaration.
-        """
-        wrapped_xml = f"<root>{xml_doc}</root>"
-        html_content = self._transform(wrapped_xml)
-        return self._remove_doctype(html_content)
-
     def export(self, document: JATSDocument) -> str:
         """Export the JATSDocument into an HTML string representation."""
         xml_doc = self.jats_exporter.export(document)

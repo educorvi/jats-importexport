@@ -164,12 +164,10 @@ async def upload_xml(request: Request, container: str | None = None):
         " The target containers for the uploaded files and assets can be specified using"
         " the `container` and `assets_container` query parameters."
         " If not specified, the default containers will be used."
-        " The `use_html_sections` query parameter can be set to `true` to transform sections into EasySection."
-        " This only works when using storage adapters that support EasySection, like PloneStorageAdapter."
     ),
     openapi_extra=_request_body_extra("docx_file"),
 )
-async def upload_docx(request: Request, container: str | None = None, use_html_sections: bool = False):
+async def upload_docx(request: Request, container: str | None = None):
     content_type = request.headers.get("content-type", "")
     if content_type.startswith("multipart/"):
         form = await request.form()
@@ -184,7 +182,7 @@ async def upload_docx(request: Request, container: str | None = None, use_html_s
         if not data_uri:
             raise HTTPException(status_code=422, detail="Missing 'docx_file' field in JSON body.")
         docx_file = _upload_file_from_data_uri(data_uri, "upload.docx")
-    articles = await upload_docx_service(cast(UploadFile, docx_file), container, use_html_sections)
+    articles = await upload_docx_service(cast(UploadFile, docx_file), container)
     for url in articles.urls:
         await EXPORT_CACHE.delete(url, None)
     return articles

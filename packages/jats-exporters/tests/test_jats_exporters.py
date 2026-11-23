@@ -378,7 +378,7 @@ def test_pdf_exporter_typesets_mathml_as_svg(mathml_equation, display):
 def test_pdf_exporter_renders_mathml_document(mathml_equation, monkeypatch, caplog):
     doc = create_mock_document()
     exporter = PdfExporter()
-    fragment = exporter.html_exporter.transform_xml(f"<disp-formula>{mathml_equation}</disp-formula>")
+    fragment = f"<div>{mathml_equation}</div>"
     monkeypatch.setattr(exporter.html_exporter, "export_parts", lambda document: ("", "", "", fragment))
 
     html = exporter._get_html(doc, doc.article.front)
