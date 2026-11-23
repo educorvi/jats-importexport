@@ -13,7 +13,7 @@ from urllib.parse import unquote, urlparse
 import pypandoc
 from fastapi import File, HTTPException, UploadFile
 from jats_classes import JATSDocument
-from jats_storage_adapters.interface import SaveJATSDocumentOptions, StorageAdapter
+from jats_storage_adapters.interface import StorageAdapter
 from lxml import etree
 
 from ..config import StorageConfig
@@ -172,7 +172,6 @@ async def upload_zip(uploaded_file: UploadFile = File(...), container: str | Non
 async def upload_docx(
     uploaded_file: UploadFile = File(...),
     container: str | None = None,
-    use_html_sections: bool = False,
 ) -> UploadFileResponse:
     adapter_instance = get_adapter_instance()
 
@@ -262,7 +261,6 @@ async def upload_docx(
                 adapter_instance,
                 modified_document,
                 article_path,
-                {"use_html_sections": use_html_sections},
             )
 
             return UploadFileResponse(urls=[url])
@@ -334,10 +332,9 @@ def _create_article_content(
     adapter_instance: StorageAdapter,
     document: JATSDocument,
     container: str | None = None,
-    options: SaveJATSDocumentOptions | None = None,
 ) -> str:
     try:
-        return adapter_instance.create_article_content(document, container or CONTAINER, options)
+        return adapter_instance.create_article_content(document, container or CONTAINER)
     except Exception as e:
         logger.error(f"Error creating article content: {e}")
         raise HTTPException(status_code=500, detail=f"Could not create article content in the storage adapter: {e}")

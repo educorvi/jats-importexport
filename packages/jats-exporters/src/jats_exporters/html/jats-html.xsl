@@ -133,28 +133,6 @@
 
 
     <!-- ============================================================= -->
-    <!--  HTML / EasySection spefific (no valid JATS)                  -->
-    <!-- ============================================================= -->
-
-
-    <xsl:template match="heading">
-        <xsl:variable name="tag">
-            <xsl:choose>
-                <xsl:when test="@level = 'h1' or @level = 'h2' or @level = 'h3' or
-                                @level = 'h4' or @level = 'h5' or @level = 'h6'">
-                    <xsl:value-of select="@level"/>
-                </xsl:when>
-                <xsl:otherwise>h2</xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
-        <xsl:element name="{$tag}">
-            <xsl:attribute name="class">title</xsl:attribute>
-            <xsl:apply-templates/>
-        </xsl:element>
-    </xsl:template>
-
-
-    <!-- ============================================================= -->
     <!--  SECTIONS                                                     -->
     <!-- ============================================================= -->
 

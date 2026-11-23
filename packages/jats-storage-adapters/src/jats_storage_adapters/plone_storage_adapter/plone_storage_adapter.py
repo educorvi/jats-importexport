@@ -15,7 +15,7 @@ from jats_classes import Front, JATSClassInterface, JATSDocument
 
 from ..errors import InternalError, PathNotFoundExpection
 from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
-from ..interface import SaveJATSDocumentOptions, StorageAdapter
+from ..interface import StorageAdapter
 from .download import PloneDownloadService, PloneGetJATSDocumentOptions
 from .listing import PloneListingService
 from .modify import PloneModifyService
@@ -113,12 +113,10 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception:
             raise InternalError(f"Error creating empty article in {container}")
 
-    def create_article_content(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
+    def create_article_content(self, document: JATSDocument, container: str) -> str:
         try:
             upload_service = PloneUploadService(self.base_url, self.httpx_client)
-            return upload_service.create_article_content(document.article, container, options)
+            return upload_service.create_article_content(document.article, container)
         except Exception:
             raise InternalError(f"Error creating article content in {container}")
 

@@ -20,12 +20,6 @@ class GetJATSDocumentOptions(TypedDict):
     include_edit_links: bool | None
 
 
-class SaveJATSDocumentOptions(TypedDict):
-    """Options for saving a JATSDocument to a storage adapter."""
-
-    use_html_sections: bool | None
-
-
 class StorageAdapter(metaclass=abc.ABCMeta):
     """Abstract base class for all storage adapter implementations.
 
@@ -86,15 +80,12 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create_article_content(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
-    ) -> str:
+    def create_article_content(self, document: JATSDocument, container: str) -> str:
         """Create the content of an article in the specified container.
 
         Args:
             document: The JATSDocument containing the article content.
             container: The path to the container in the storage system.
-            options: Additional options for saving the article content.
 
         Returns:
             The path of the article.

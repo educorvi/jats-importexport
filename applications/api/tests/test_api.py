@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 
 from jats_storage_adapters.errors import InternalError, PathNotFoundExpection
 
-from jats_storage_adapters.interface import GetJATSDocumentOptions, SaveJATSDocumentOptions, StorageAdapter
+from jats_storage_adapters.interface import GetJATSDocumentOptions, StorageAdapter
 import pytest
 from api.config import APIConfig
 from api.main import app
@@ -114,7 +114,7 @@ class MockStorageAdapter(StorageAdapter):
         return article_path, media_path
 
     def create_article_content(
-        self, document: JATSDocument, container: str, options: SaveJATSDocumentOptions | None = None
+        self, document: JATSDocument, container: str
     ) -> str:
         self.saved_docs.append((document, container))
         title = document.article.front.title or "article"
