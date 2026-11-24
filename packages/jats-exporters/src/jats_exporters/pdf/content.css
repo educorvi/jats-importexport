@@ -147,6 +147,7 @@
 }
 
 .article-content .boxed-text > .caption {
+  margin-bottom: 0;
   padding: var(--space-m) var(--space-l);
 }
 
@@ -390,6 +391,7 @@
 
 .article-content .fig .caption {
   margin-top: var(--space-s);
+  margin-bottom: 0;
   color: var(--dguv-text-secondary);
   display: flex;
   gap: var(--space-s);
@@ -449,24 +451,24 @@
   margin-bottom: 0;
 }
 
-.article-content .list > :is(ul, ol) {
+.article-content :is(ul.list, ol.list) {
   padding-left: var(--space-l);
 }
 
-.article-content .list > :is(ul, ol) > li {
+.article-content :is(ul.list, ol.list) > li {
   padding-left: var(--space-s);
   margin-block: var(--space-xs);
 }
 
-.article-content .list > :is(ul, ol) > li > p {
+.article-content :is(ul.list, ol.list) > li > p {
   margin-block: 0;
 }
 
-.article-content .list > ul {
+.article-content ul.list {
   list-style-type: disc !important;
 }
 
-.article-content .list > ol {
+.article-content ol.list {
   list-style-type: decimal;
 }
 
@@ -479,6 +481,10 @@
   grid-template-columns: minmax(var(--space-l), max-content) minmax(0, 1fr);
   column-gap: var(--space-s);
   margin-block: var(--space-xs);
+}
+
+.article-content .freie-liste p {
+  margin-block: 0;
 }
 
 .article-content .freie-liste .list-label {
@@ -613,7 +619,8 @@
 
 /* ================== other styles ==================== */
 
-.article-content p {
+.article-content p,
+.article-content div.div-p {
   margin-top: 0;
   margin-bottom: var(--space-m);
 }

@@ -21,7 +21,7 @@
 
       <div class="article-header">
         {% if article_meta.article_id %}
-        <div class="article-id">{{ article_meta.article_id }}</div>
+        <p class="article-id">{{ article_meta.article_id }}</p>
         {% endif %}
         {% if article_meta.title %}
         <h1 class="article-title" id="article-title">{{ article_meta.title }}</h1>
@@ -32,64 +32,62 @@
       </div>
 
       <div class="article-metadata">
-        <dl>
-          {% if article_meta.journal_title or article_meta.journal_subtitle %}
-          <div class="article-metadata-row article-metadata-row-2">
-            {% if article_meta.journal_title %}
-            <div>
-              <dt>Rubrik</dt>
-              <dd>{{ article_meta.journal_title }}</dd>
-            </div>
-            {% endif %}
-            {% if article_meta.journal_subtitle %}
-            <div>
-              <dt>Unterrubrik</dt>
-              <dd>{{ article_meta.journal_subtitle }}</dd>
-            </div>
-            {% endif %}
-          </div>
+        {% if article_meta.journal_title or article_meta.journal_subtitle %}
+        <div class="article-metadata-row article-metadata-row-2">
+          {% if article_meta.journal_title %}
+          <dl>
+            <dt>Rubrik</dt>
+            <dd>{{ article_meta.journal_title }}</dd>
+          </dl>
           {% endif %}
-          {% if pdf_meta.pub_date_ausgabedatum_german or pdf_meta.pub_date_aktualisierte_fassung_german %}
-          <div class="article-metadata-row article-metadata-row-2">
-            {% if pdf_meta.pub_date_ausgabedatum_german %}
-            <div>
-              <dt>Ausgabedatum</dt>
-              <dd>{{ pdf_meta.pub_date_ausgabedatum_german }}</dd>
-            </div>
-            {% endif %}
-            {% if pdf_meta.pub_date_aktualisierte_fassung_german %}
-            <div>
-              <dt>Aktualisierte Fassung</dt>
-              <dd>{{ pdf_meta.pub_date_aktualisierte_fassung_german }}</dd>
-            </div>
-            {% endif %}
-          </div>
+          {% if article_meta.journal_subtitle %}
+          <dl>
+            <dt>Unterrubrik</dt>
+            <dd>{{ article_meta.journal_subtitle }}</dd>
+          </dl>
           {% endif %}
-          {% if article_meta.fachbereich or article_meta.sachgebiet %}
-          <div class="article-metadata-row article-metadata-row-2">
-            {% if article_meta.fachbereich %}
-            <div>
-              <dt>Fachbereich</dt>
-              <dd>{{ article_meta.fachbereich }}</dd>
-            </div>
-            {% endif %}
-            {% if article_meta.sachgebiet %}
-            <div>
-              <dt>Sachgebiet</dt>
-              <dd>{{ article_meta.sachgebiet }}</dd>
-            </div>
-            {% endif %}
-          </div>
+        </div>
+        {% endif %}
+        {% if pdf_meta.pub_date_ausgabedatum_german or pdf_meta.pub_date_aktualisierte_fassung_german %}
+        <div class="article-metadata-row article-metadata-row-2">
+          {% if pdf_meta.pub_date_ausgabedatum_german %}
+          <dl>
+            <dt>Ausgabedatum</dt>
+            <dd>{{ pdf_meta.pub_date_ausgabedatum_german }}</dd>
+          </dl>
           {% endif %}
-          {% if article_meta.self_uri %}
-          <div class="article-metadata-row article-metadata-row-1">
-            <div>
-              <dt>DGUV Medien</dt>
-              <dd><a href="{{ article_meta.self_uri|e }}">{{ article_meta.self_uri }}</a></dd>
-            </div>
-          </div>
+          {% if pdf_meta.pub_date_aktualisierte_fassung_german %}
+          <dl>
+            <dt>Aktualisierte Fassung</dt>
+            <dd>{{ pdf_meta.pub_date_aktualisierte_fassung_german }}</dd>
+          </dl>
           {% endif %}
-        </dl>
+        </div>
+        {% endif %}
+        {% if article_meta.fachbereich or article_meta.sachgebiet %}
+        <div class="article-metadata-row article-metadata-row-2">
+          {% if article_meta.fachbereich %}
+          <dl>
+            <dt>Fachbereich</dt>
+            <dd>{{ article_meta.fachbereich }}</dd>
+          </dl>
+          {% endif %}
+          {% if article_meta.sachgebiet %}
+          <dl>
+            <dt>Sachgebiet</dt>
+            <dd>{{ article_meta.sachgebiet }}</dd>
+          </dl>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% if article_meta.self_uri %}
+        <div class="article-metadata-row article-metadata-row-1">
+          <dl>
+            <dt>DGUV Medien</dt>
+            <dd><a href="{{ article_meta.self_uri|e }}">{{ article_meta.self_uri }}</a></dd>
+          </dl>
+        </div>
+        {% endif %}
         <p class="note">PDF automatisch generiert · {{ pdf_meta.generated_at }}</p>
         {% if pdf_meta.is_partial %}
         <p class="note">Bei diesem Dokument handelt es sich um einen Auszug des gesamten Dokuments.</p>

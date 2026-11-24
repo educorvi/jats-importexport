@@ -7,9 +7,9 @@
             <!-- Article ID -->
             <xsl:variable name="article-id" select="normalize-space(string($front-node/article-meta/article-id))" />
             <xsl:if test="$article-id">
-                <div class="article-id">
+                <p class="article-id">
                     <xsl:value-of select="$article-id"/>
-                </div>
+                </p>
             </xsl:if>
             <!-- Article Title -->
             <xsl:variable name="article-title" select="normalize-space(string($front-node/article-meta/title-group/article-title))" />

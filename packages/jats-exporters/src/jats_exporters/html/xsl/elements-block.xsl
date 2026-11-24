@@ -143,7 +143,13 @@
 
 
     <xsl:template match="p">
-        <p>
+        <xsl:variable name="tag">
+            <xsl:choose>
+                <xsl:when test="*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text]">div</xsl:when>
+                <xsl:otherwise>p</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:element name="{$tag}">
             <xsl:variable name="content-type" select="@content-type"/>
             <xsl:if test="$content-type">
                 <xsl:attribute name="data-content-type">
@@ -159,12 +165,50 @@
                     </xsl:attribute>
                 </xsl:if>
             </xsl:if>
-            <xsl:if test="not(preceding-sibling::*)">
-                <xsl:attribute name="class">first</xsl:attribute>
-            </xsl:if>
             <xsl:call-template name="assign-id"/>
-            <xsl:apply-templates/>
-        </p>
+            <xsl:choose>
+                <xsl:when test="$tag = 'div'">
+                    <xsl:attribute name="class">div-p</xsl:attribute>
+                    <xsl:call-template name="mixed-content"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template name="mixed-content">
+        <xsl:param name="nodes" select="node()"/>
+        <xsl:for-each select="$nodes">
+            <xsl:choose>
+                <xsl:when test="self::*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text]">
+                    <xsl:apply-templates select="."/>
+                </xsl:when>
+                <!-- start of an inline run: previous node is a block or none -->
+                <xsl:when test="not(preceding-sibling::node()[1][not(self::*[self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])])
+                                and (normalize-space(.)
+                                    or self::*[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)]
+                                    or following-sibling::node()[1][self::*[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)]])">
+                    <p>
+                        <xsl:call-template name="inline-run">
+                            <xsl:with-param name="node" select="."/>
+                        </xsl:call-template>
+                    </p>
+                </xsl:when>
+            </xsl:choose>
+        </xsl:for-each>
+    </xsl:template>
+
+    <!-- Emits the node, then every directly following inline sibling -->
+    <xsl:template name="inline-run">
+        <xsl:param name="node"/>
+        <xsl:apply-templates select="$node"/>
+        <xsl:for-each select="$node/following-sibling::node()[1][not(self::*[self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])]">
+            <xsl:call-template name="inline-run">
+                <xsl:with-param name="node" select="."/>
+            </xsl:call-template>
+        </xsl:for-each>
     </xsl:template>
 
 
@@ -240,16 +284,14 @@
 
 
     <xsl:template match="list">
-        <div class="list">
-            <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="label | title"/>
-            <xsl:apply-templates select="." mode="list"/>
-        </div>
+        <xsl:call-template name="named-anchor"/>
+        <xsl:apply-templates select="label | title"/>
+        <xsl:apply-templates select="." mode="list"/>
     </xsl:template>
 
 
     <xsl:template match="list[@list-type='bullet' or not(@list-type)]" mode="list">
-        <ul role="list">
+        <ul role="list" class="list">
             <xsl:apply-templates select="list-item"/>
         </ul>
     </xsl:template>
@@ -266,7 +308,7 @@
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <ol style="list-style-type: {$style}" role="list">
+        <ol style="list-style-type: {$style}" role="list" class="list">
             <xsl:apply-templates select="list-item"/>
         </ol>
     </xsl:template>
@@ -276,14 +318,6 @@
         <li>
             <xsl:apply-templates/>
         </li>
-    </xsl:template>
-
-
-    <xsl:template match="list-item/p">
-        <p>
-            <xsl:call-template name="assign-id"/>
-            <xsl:apply-templates/>
-        </p>
     </xsl:template>
 
 
@@ -343,7 +377,9 @@
             <xsl:if test="attrib">
                 <xsl:for-each select="attrib">
                     <div class="blockquote-attrib">
-                        <xsl:apply-templates/>
+                        <p>
+                            <xsl:apply-templates/>
+                        </p>
                     </div>
                 </xsl:for-each>
             </xsl:if>
