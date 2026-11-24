@@ -343,7 +343,9 @@
             <xsl:if test="attrib">
                 <xsl:for-each select="attrib">
                     <div class="blockquote-attrib">
-                        <xsl:apply-templates/>
+                        <p>
+                            <xsl:apply-templates/>
+                        </p>
                     </div>
                 </xsl:for-each>
             </xsl:if>
