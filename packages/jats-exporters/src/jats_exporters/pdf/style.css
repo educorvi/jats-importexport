@@ -143,8 +143,12 @@
 
 .article-metadata {
   margin-top: var(--space-l3);
-  padding-top: var(--space-l);
+  padding-top: var(--space-l2);
   border-top: 1px solid var(--dguv-border);
+}
+
+.article-metadata dl {
+  margin: 0;
 }
 
 .article-metadata-row {
