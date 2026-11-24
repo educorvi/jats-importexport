@@ -619,7 +619,8 @@
 
 /* ================== other styles ==================== */
 
-.article-content p {
+.article-content p,
+.article-content div.div-p {
   margin-top: 0;
   margin-bottom: var(--space-m);
 }
