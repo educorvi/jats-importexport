@@ -483,6 +483,10 @@
   margin-block: var(--space-xs);
 }
 
+.article-content .freie-liste p {
+  margin-block: 0;
+}
+
 .article-content .freie-liste .list-label {
   grid-column: 1;
   font-weight: 700;

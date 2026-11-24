@@ -28,13 +28,23 @@
         <div class="freie-liste" data-list-type="{$type}" data-list-level="{$level}">
             <xsl:call-template name="assign-id"/>
             <xsl:if test="normalize-space(string($label))">
-                <div class="list-label">
+                <p class="list-label">
                     <xsl:copy-of select="$label"/>
-                </div>
+                </p>
             </xsl:if>
-            <div class="list-item">
-                <xsl:apply-templates select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
-            </div>
+            <xsl:variable name="item-nodes" select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
+            <xsl:choose>
+                <xsl:when test="$item-nodes/self::*">
+                    <div class="list-item">
+                        <xsl:apply-templates select="$item-nodes"/>
+                    </div>
+                </xsl:when>
+                <xsl:otherwise>
+                    <p class="list-item">
+                        <xsl:apply-templates select="$item-nodes"/>
+                    </p>
+                </xsl:otherwise>
+            </xsl:choose>
         </div>
     </xsl:template>
 
