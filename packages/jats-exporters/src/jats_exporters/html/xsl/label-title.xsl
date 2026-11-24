@@ -41,7 +41,7 @@
     <!-- template for making a caption -->
     <xsl:template name="make-caption">
         <xsl:if test="label or caption">
-            <div class="caption">
+            <p class="caption">
                 <xsl:attribute name="id">
                     <xsl:value-of select="concat(generate-id(), '-caption')"/>
                 </xsl:attribute>
@@ -61,7 +61,7 @@
                         <xsl:apply-templates select="caption/p/node()"/>
                     </span>
                 </xsl:if>
-            </div>
+            </p>
         </xsl:if>
     </xsl:template>
 

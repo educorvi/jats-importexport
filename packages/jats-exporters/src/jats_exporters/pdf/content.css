@@ -147,6 +147,7 @@
 }
 
 .article-content .boxed-text > .caption {
+  margin-bottom: 0;
   padding: var(--space-m) var(--space-l);
 }
 
@@ -390,6 +391,7 @@
 
 .article-content .fig .caption {
   margin-top: var(--space-s);
+  margin-bottom: 0;
   color: var(--dguv-text-secondary);
   display: flex;
   gap: var(--space-s);
