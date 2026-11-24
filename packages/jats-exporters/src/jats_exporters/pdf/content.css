@@ -449,24 +449,24 @@
   margin-bottom: 0;
 }
 
-.article-content .list > :is(ul, ol) {
+.article-content :is(ul.list, ol.list) {
   padding-left: var(--space-l);
 }
 
-.article-content .list > :is(ul, ol) > li {
+.article-content :is(ul.list, ol.list) > li {
   padding-left: var(--space-s);
   margin-block: var(--space-xs);
 }
 
-.article-content .list > :is(ul, ol) > li > p {
+.article-content :is(ul.list, ol.list) > li > p {
   margin-block: 0;
 }
 
-.article-content .list > ul {
+.article-content ul.list {
   list-style-type: disc !important;
 }
 
-.article-content .list > ol {
+.article-content ol.list {
   list-style-type: decimal;
 }
 

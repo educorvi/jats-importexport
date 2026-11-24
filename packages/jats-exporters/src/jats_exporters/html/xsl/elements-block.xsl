@@ -240,16 +240,14 @@
 
 
     <xsl:template match="list">
-        <div class="list">
-            <xsl:call-template name="named-anchor"/>
-            <xsl:apply-templates select="label | title"/>
-            <xsl:apply-templates select="." mode="list"/>
-        </div>
+        <xsl:call-template name="named-anchor"/>
+        <xsl:apply-templates select="label | title"/>
+        <xsl:apply-templates select="." mode="list"/>
     </xsl:template>
 
 
     <xsl:template match="list[@list-type='bullet' or not(@list-type)]" mode="list">
-        <ul role="list">
+        <ul role="list" class="list">
             <xsl:apply-templates select="list-item"/>
         </ul>
     </xsl:template>
@@ -266,7 +264,7 @@
                 <xsl:otherwise>decimal</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <ol style="list-style-type: {$style}" role="list">
+        <ol style="list-style-type: {$style}" role="list" class="list">
             <xsl:apply-templates select="list-item"/>
         </ol>
     </xsl:template>
