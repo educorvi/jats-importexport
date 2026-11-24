@@ -179,14 +179,17 @@
     </xsl:template>
 
     <xsl:template name="mixed-content">
-        <xsl:for-each select="node()">
+        <xsl:param name="nodes" select="node()"/>
+        <xsl:for-each select="$nodes">
             <xsl:choose>
                 <xsl:when test="self::*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text]">
                     <xsl:apply-templates select="."/>
                 </xsl:when>
                 <!-- start of an inline run: previous node is a block or none -->
-                <xsl:when test="not(preceding-sibling::node()[1][not(self::*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])])
-                                and (normalize-space(.) or self::*[not(self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)] or following-sibling::node()[1][self::*[not(self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)]])">
+                <xsl:when test="not(preceding-sibling::node()[1][not(self::*[self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])])
+                                and (normalize-space(.)
+                                    or self::*[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)]
+                                    or following-sibling::node()[1][self::*[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text)]])">
                     <p>
                         <xsl:call-template name="inline-run">
                             <xsl:with-param name="node" select="."/>
@@ -201,7 +204,7 @@
     <xsl:template name="inline-run">
         <xsl:param name="node"/>
         <xsl:apply-templates select="$node"/>
-        <xsl:for-each select="$node/following-sibling::node()[1][not(self::*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])]">
+        <xsl:for-each select="$node/following-sibling::node()[1][not(self::*[self::named-content[@specific-use='_4octextinline_ListenpunktFrei'] or self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text])]">
             <xsl:call-template name="inline-run">
                 <xsl:with-param name="node" select="."/>
             </xsl:call-template>

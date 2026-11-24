@@ -33,18 +33,25 @@
                 </p>
             </xsl:if>
             <xsl:variable name="item-nodes" select="node()[not(self::named-content[@specific-use='_4octextinline_ListenpunktFrei'])]"/>
-            <xsl:choose>
-                <xsl:when test="$item-nodes/self::*">
-                    <div class="list-item">
+            <xsl:variable name="tag">
+                <xsl:choose>
+                    <xsl:when test="*[self::fig or self::disp-formula or self::list or self::table-wrap or self::boxed-text]">div</xsl:when>
+                    <xsl:otherwise>p</xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+            <xsl:element name="{$tag}">
+                <xsl:attribute name="class">list-item</xsl:attribute>
+                <xsl:choose>
+                    <xsl:when test="$tag = 'div'">
+                        <xsl:call-template name="mixed-content">
+                            <xsl:with-param name="nodes" select="$item-nodes"/>
+                        </xsl:call-template>
+                    </xsl:when>
+                    <xsl:otherwise>
                         <xsl:apply-templates select="$item-nodes"/>
-                    </div>
-                </xsl:when>
-                <xsl:otherwise>
-                    <p class="list-item">
-                        <xsl:apply-templates select="$item-nodes"/>
-                    </p>
-                </xsl:otherwise>
-            </xsl:choose>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:element>
         </div>
     </xsl:template>
 
