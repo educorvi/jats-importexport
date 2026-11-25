@@ -154,6 +154,25 @@ def test_html_exporter_renders_nested_toc_sections():
     assert ul.get_text() == "Child section"
 
 
+def test_html_exporter_lists_toc_sections_without_sec_type_and_named_content_title():
+    xml = etree.fromstring(
+        b"""<article>
+            <front/>
+            <body>
+                <sec id="scope">
+                    <title><named-content content-type="span" specific-use="keyword">Scope</named-content></title>
+                </sec>
+            </body>
+        </article>"""
+    )
+
+    html_output = str(HtmlExporter().transform(xml))
+    soup = BeautifulSoup(html_output, "html.parser")
+    entry = soup.select_one(".article-toc a[href='#scope']")
+    assert entry is not None
+    assert entry.get_text() == "Scope"
+
+
 def test_html_exporter_styles_glossary_titles_like_section_titles():
     xml = etree.fromstring(
         b"""<article>

@@ -7,9 +7,9 @@
             <p id="toc-title" class="metadata-title">Inhaltsverzeichnis</p>
             <xsl:call-template name="toc-sections">
                 <xsl:with-param name="sections"
-                                select="//body/sec[title[normalize-space(string(.))] and @sec-type != 'toc' and @sec-type != '_4octextparaPrologZwischenueberschrift'] |
+                                select="//body/sec[title[normalize-space(string(.))] and not(@sec-type = 'toc' or @sec-type = '_4octextparaPrologZwischenueberschrift')] |
                                     //back/app-group[title[normalize-space(string(.))]] |
-                                    //back/sec[title[normalize-space(string(.))] and @sec-type != 'toc'] |
+                                    //back/sec[title[normalize-space(string(.))] and not(@sec-type = 'toc')] |
                                     //back/app[title[normalize-space(string(.))]] |
                                     //back/ref-list[title[normalize-space(string(.))]] |
                                     //back/glossary[title[normalize-space(string(.))]]"/>
@@ -40,7 +40,7 @@
                             <xsl:attribute name="data-toc-level">
                                 <xsl:value-of select="$depth + 1"/>
                             </xsl:attribute>
-                            <xsl:if test="label">
+                            <xsl:if test="normalize-space(string(label))">
                                 <span class="toc-label">
                                     <xsl:apply-templates select="label/node()"/>
                                 </span>
@@ -51,7 +51,7 @@
                             </a>
                         </span>
                         <xsl:variable name="subsections"
-                                      select="sec[title[normalize-space(string(.))] and @sec-type != 'toc' and @sec-type != '_4octextparaPrologZwischenueberschrift'] |
+                                      select="sec[title[normalize-space(string(.))] and not(@sec-type = 'toc' or @sec-type = '_4octextparaPrologZwischenueberschrift')] |
                                             app[title[normalize-space(string(.))]] |
                                             ref-list[title[normalize-space(string(.))]] |
                                             glossary[title[normalize-space(string(.))]]"/>
