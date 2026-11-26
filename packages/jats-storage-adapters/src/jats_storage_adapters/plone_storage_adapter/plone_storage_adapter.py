@@ -174,7 +174,7 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error fetching article part at {part_url}") from e
 
         # Minus 2 because of body / back part and the part itself
-        level = len(sub_path.strip("/").split("/")) - 2
+        level = max(0, len(sub_path.strip("/").split("/")) - 2)
 
         return part, front, level
 
