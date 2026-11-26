@@ -355,10 +355,10 @@ def test_plone_storage_adapter_get_jats_document_success(clean_env, mocker):
                 },
                 url=url,
             )
-        elif url in {
-            "http://localhost:8080/Plone/@relations?source=/my-doc",
-            "http://localhost:8080/Plone/@relations?target=/my-doc",
-        }:
+        elif url == "http://localhost:8080/Plone/@relations" and kwargs.get("params") in (
+            {"source": "/my-doc"},
+            {"target": "/my-doc"},
+        ):
             return make_response(
                 status_code=200,
                 json={"relations": {"relatedItems": {"items": []}}},
@@ -469,7 +469,7 @@ def test_plone_storage_adapter_get_jats_document_part_rejects_traversal(clean_en
     adapter = PloneStorageAdapter()
     fetch_part = mocker.patch.object(PloneDownloadService, "fetch_article_part")
 
-    with pytest.raises(ValueError, match="parent directory segments"):
+    with pytest.raises(ValueError, match="parent directory references"):
         adapter.get_jats_document_part("/my-doc", "body/%2e%2e/other")
 
     fetch_part.assert_not_called()

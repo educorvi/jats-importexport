@@ -8,7 +8,6 @@ import json
 import logging
 import mimetypes
 import re
-from urllib.parse import urlparse
 
 import httpx
 from jats_classes import (
@@ -23,6 +22,8 @@ from jats_classes import (
     RefList,
     Section,
 )
+
+from .utils import get_path_from_url, get_url_from_path
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +51,6 @@ class PloneUploadService:
         self.httpx_client = httpx_client
 
     # Private helper methods
-
-    def __get_path_from_url(self, url: str) -> str:
-        base_path = urlparse(self.base_url).path.rstrip("/")
-        result_path = urlparse(url).path
-        if result_path.lower().startswith(base_path.lower()):
-            return result_path[len(base_path) :]
-        return result_path
 
     def _clean_title(self, title: str) -> str:
         """TODO Temporary fix of plone rest API bug where names / ids created from titles are not properly sanitized."""
@@ -100,7 +94,7 @@ class PloneUploadService:
         portal_type = "Image" if is_image else "File"
         field_name = "image" if is_image else "file"
 
-        container_url = f"{self.base_url}/{container.strip('/')}"
+        container_url = get_url_from_path(self.base_url, container)
 
         response = self.httpx_client.post(
             container_url,
@@ -130,7 +124,7 @@ class PloneUploadService:
     ) -> tuple[str, str | None]:
         """Create an empty Article in the specified container."""
         new_container = self.__create_container(container)
-        url = f"{self.base_url}/{new_container.strip('/')}"
+        url = get_url_from_path(self.base_url, new_container)
         metadata = front.to_dict()
         if not metadata.get("title"):
             metadata["title"] = "Empty Article"
@@ -144,14 +138,14 @@ class PloneUploadService:
 
         media_container_path: str | None = None
         if create_media_container:
-            media_container_path = self.__get_path_from_url(self.__create_article_media_container(result_url))
+            media_container_path = get_path_from_url(self.base_url, self.__create_article_media_container(result_url))
 
         self.__change_workflow_status(result_url, front.veroeffentlichungsstatus)
-        return (self.__get_path_from_url(result_url), media_container_path)
+        return (get_path_from_url(self.base_url, result_url), media_container_path)
 
     def create_article_content(self, article: Article, container: str) -> str:
         """Create Body and Back children in Plone."""
-        url = f"{self.base_url}/{container.strip('/')}"
+        url = get_url_from_path(self.base_url, container)
         self.__create_body(article.body, url)
         self.__create_back(article.back, url)
 
@@ -174,31 +168,30 @@ class PloneUploadService:
         logger.debug(f"Creating container: {container}")
         parts = [p for p in container.strip("/").split("/") if p]
         current_path = ""
-        object_url = self.base_url
+        parent_url = self.base_url
 
         for part in parts:
             new_content_id = self.__make_path_part_id_safe(part)
-            current_path = f"{current_path}/{new_content_id}" if current_path else part
-            url = f"{self.base_url}/{current_path}"
-            object_url = url
+            current_path = f"{current_path}/{new_content_id}" if current_path else new_content_id
+            url = get_url_from_path(self.base_url, current_path)
 
             response = self.httpx_client.get(url)
             if response.status_code == 200:
+                parent_url = url
                 continue
             if response.status_code != 404:
                 response.raise_for_status()
 
-            parent_url = f"{self.base_url}/{current_path.rsplit('/', 1)[0]}" if "/" in current_path else self.base_url
             response = self.httpx_client.post(
                 parent_url, json={"@type": "Folder", "title": self._clean_title(part), "id": new_content_id}
             )
             response.raise_for_status()
 
             # Set the workflow state of the newly created folder to 'intern veröffentlicht' to make it accessible.
-            object_url = response.json().get("@id", url)
-            self._apply_workflow_transition(object_url, PUBLISH_FOLDER_TRANSITION, include_children=False)
+            parent_url = response.json().get("@id", url)
+            self._apply_workflow_transition(parent_url, PUBLISH_FOLDER_TRANSITION, include_children=False)
 
-        return self.__get_path_from_url(object_url)
+        return get_path_from_url(self.base_url, parent_url)
 
     def __create_article_media_container(self, container_url: str) -> str:
         """Create a media container inside a Plone Article for storing media files."""

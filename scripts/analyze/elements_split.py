@@ -9,6 +9,7 @@ import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from lxml import etree
 
@@ -136,7 +137,8 @@ def _detect(section: etree._Element, document: str) -> Iterator[Finding]:
 
 
 def _detect_dguv_toc(root: etree._Element, document: str) -> Iterator[Finding]:
-    for pi in root.iter(etree.PI):
+    for node in root.iter(etree.PI):
+        pi = cast(etree._ProcessingInstruction, node)
         if pi.target != "dguv" or (pi.text or "").strip() != "toc":
             continue
         parent = pi.getparent()

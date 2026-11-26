@@ -8,7 +8,7 @@ import os
 import re
 from collections.abc import Callable
 from typing import Any, NotRequired
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode
 
 import httpx
 from jats_classes import (
@@ -29,7 +29,13 @@ from lxml import etree
 from ..errors import DuplicateException, InternalError, PathNotFoundExpection
 from ..interface import EDIT_PI
 from ..interface import GetJATSDocumentOptions as BaseGetJATSDocumentOptions
-from .utils import sign_media, verify_media_signature
+from .utils import (
+    get_path_from_plone_object,
+    get_path_from_url,
+    get_url_from_path,
+    sign_media,
+    verify_media_signature,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -90,19 +96,6 @@ class PloneDownloadService:
             raise ValueError("IEH_BASE_URL environment variable is not set")
         self.ieh_base_url = ieh_base_url.rstrip("/")
 
-    # Private helper methods
-
-    def __get_path_from_url(self, url: str) -> str:
-        base_path = urlparse(self.base_url).path.rstrip("/")
-        result_path = urlparse(url).path
-        if result_path.lower().startswith(base_path.lower()):
-            return result_path[len(base_path) :]
-        return result_path
-
-    def __get_path_from_plone_object(self, obj: dict) -> str:
-        obj_id = obj.get("@id", "")
-        return self.__get_path_from_url(obj_id)
-
     @staticmethod
     def __plone_status_to_jats_status(plone_status: str | None) -> str:
         if plone_status is None or plone_status not in REVIEW_STATE_MAPPING:
@@ -111,27 +104,17 @@ class PloneDownloadService:
 
     def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
         """Retrieve the binary content of a media file from the Plone storage system."""
-        if not verify_media_signature(path, filename, signature):
+        normalized_path, normalized_filename, valid = verify_media_signature(path, filename, signature)
+        if not valid:
             raise ValueError("Invalid path, filename or signature.")
-        url = f"{self.base_url}/{path.strip('/')}/articlemedia/{filename.lstrip('/')}"
-        response_1 = self.httpx_client.get(url, headers={"Accept": "*/*"})
-        response_1.raise_for_status()
-        content_type_1 = response_1.headers.get("content-type")
-        if not content_type_1 or not isinstance(content_type_1, str):
+        full_path = f"{normalized_path}/articlemedia/{normalized_filename}"
+        url = get_url_from_path(self.base_url, full_path)
+        response = self.httpx_client.get(url, headers={"Accept": "*/*"})
+        response.raise_for_status()
+        content_type = response.headers.get("content-type")
+        if not content_type or not isinstance(content_type, str):
             raise InternalError(f"Could not determine content-type for media file {filename} at {path}")
-        if content_type_1 == "application/json":
-            plone_type = response_1.json().get("@type")
-            if plone_type == "Image" or plone_type == "File":
-                field = response_1.json().get("image") or response_1.json().get("file")
-                download_url = field.get("download") if field else None
-                if not download_url:
-                    raise InternalError(f"No downloadable media file found for {filename} at {path}")
-                response_2 = self.httpx_client.get(download_url, headers={"Accept": "*/*"})
-                response_2.raise_for_status()
-                content_type_2_field = field.get("content-type")
-                content_type_2_header = response_2.headers.get("content-type", "application/octet-stream")
-                return response_2.content, content_type_2_field or content_type_2_header
-        return response_1.content, content_type_1
+        return response.content, content_type
 
     def fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""
@@ -248,17 +231,17 @@ class PloneDownloadService:
         related_articles_translations = {rat: ("", "") for rat in data.get("related_articles_translations") or []}
         if resolve_related_items:
             related_items, related_items_translations = self.get_related_articles(
-                self.__get_path_from_plone_object(data)
+                get_path_from_plone_object(self.base_url, data)
             )
             if related_items:
                 for item in related_items:
-                    item_url = f"{self.base_url}/{item.strip('/')}"
+                    item_url = get_url_from_path(self.base_url, item)
                     metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
                         related_articles[metadata.webcode] = metadata.article_id or ""
             if related_items_translations:
                 for item in related_items_translations:
-                    item_url = f"{self.base_url}/{item.strip('/')}"
+                    item_url = get_url_from_path(self.base_url, item)
                     metadata = self.get_metadata(item_url, resolve_related_items=False)
                     if metadata.webcode:
                         related_articles_translations[metadata.webcode] = (
@@ -422,7 +405,7 @@ class PloneDownloadService:
     def __get_replace_media_links_callback(self, article_url: str) -> Callable[[str, tuple[bytes, str] | None], str]:
         """Return a callback function that replaces media links for a given URL."""
 
-        article_path = self.__get_path_from_url(article_url)
+        article_path = get_path_from_url(self.base_url, article_url)
         ARTICLEMEDIA = "/articlemedia/"
 
         def replace_media_link(url: str, _: tuple[bytes, str] | None = None) -> str:
@@ -434,8 +417,8 @@ class PloneDownloadService:
                     url = f"/{url}"
             if url.startswith("/"):
                 filename = url[1:]
-                signature = sign_media(article_path, filename)
-                query = urlencode({"path": article_path, "filename": filename, "signature": signature})
+                normalized_path, normalized_filename, signature = sign_media(article_path, filename)
+                query = urlencode({"path": normalized_path, "filename": normalized_filename, "signature": signature})
                 return f"{self.ieh_base_url}/media/?{query}"
             return url
 
@@ -549,23 +532,23 @@ class PloneDownloadService:
         path_set_related: set[str] = set()
         path_set_translations: set[str] = set()
 
-        url = self.base_url + "/@relations?source=/" + path.lstrip("/")
-        response = self.httpx_client.get(url)
+        url = get_url_from_path(self.base_url, "@relations")
+        response = self.httpx_client.get(url, params={"source": "/" + path.lstrip("/")})
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
-            path_set_related.add(self.__get_path_from_plone_object(item["target"]))
+            path_set_related.add(get_path_from_plone_object(self.base_url, item["target"]))
         for item in data.get("relations", {}).get("related_items_translations", {}).get("items", []):
-            path_set_translations.add(self.__get_path_from_plone_object(item["target"]))
+            path_set_translations.add(get_path_from_plone_object(self.base_url, item["target"]))
 
-        url = self.base_url + "/@relations?target=/" + path.lstrip("/")
-        response = self.httpx_client.get(url)
+        url = get_url_from_path(self.base_url, "@relations")
+        response = self.httpx_client.get(url, params={"target": "/" + path.lstrip("/")})
         response.raise_for_status()
         data = response.json()
         for item in data.get("relations", {}).get("relatedItems", {}).get("items", []):
-            path_set_related.add(self.__get_path_from_plone_object(item["source"]))
+            path_set_related.add(get_path_from_plone_object(self.base_url, item["source"]))
         for item in data.get("relations", {}).get("related_items_translations", {}).get("items", []):
-            path_set_translations.add(self.__get_path_from_plone_object(item["source"]))
+            path_set_translations.add(get_path_from_plone_object(self.base_url, item["source"]))
 
         return list(path_set_related), list(path_set_translations)
 
@@ -584,7 +567,7 @@ class PloneDownloadService:
             raise DuplicateException(webcode)
 
         result = search_results[0]
-        path = self.__get_path_from_plone_object(result)
+        path = get_path_from_plone_object(self.base_url, result)
         return path
 
     def __get_href_from_article_id(self, article_id: str, language: str) -> str | None:
