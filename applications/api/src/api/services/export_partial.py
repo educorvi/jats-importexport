@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 async def __load_document_part(
     path: str, sub_path: str, options: GetJATSDocumentOptions | None = None, adapter: StorageAdapter | None = None
-) -> tuple[JATSClassInterface, Front]:
+) -> tuple[JATSClassInterface, Front, int]:
     try:
         adapter = adapter or get_adapter_instance()
         return await asyncio.to_thread(adapter.get_jats_document_part, path, sub_path, options)
@@ -48,7 +48,7 @@ async def jats_export(path: str, sub_path: str):
     cached = await PARTIAL_EXPORT_CACHE.get(path, ExportType.JATS, sub_path)
     if cached is not None:
         return JatsDocumentResponse(jats=cached)
-    document_part, _ = await __load_document_part(path, sub_path)
+    document_part, _, _ = await __load_document_part(path, sub_path)
     jats = await asyncio.to_thread(JATS_EXPORTER.export_partial, document_part)
     await PARTIAL_EXPORT_CACHE.set(path, ExportType.JATS, jats, sub_path)
     return JatsDocumentResponse(jats=jats)
@@ -58,8 +58,10 @@ async def html_export(path: str, sub_path: str, include_edit_links: bool = False
     cached = await PARTIAL_EXPORT_CACHE.get_html(path, include_edit_links, sub_path)
     if cached is not None:
         return HtmlDocumentPartialResponse(html=cached["content"])
-    document_part, _ = await __load_document_part(path, sub_path, {"include_edit_links": include_edit_links})
-    html_content = await asyncio.to_thread(HTML_EXPORTER.export_partial, document_part)
+    document_part, _, extra_level = await __load_document_part(
+        path, sub_path, {"include_edit_links": include_edit_links}
+    )
+    html_content = await asyncio.to_thread(HTML_EXPORTER.export_partial, document_part, extra_level)
     await PARTIAL_EXPORT_CACHE.set_html(path, include_edit_links, "", "", "", html_content, sub_path)
     return HtmlDocumentPartialResponse(html=html_content)
 
@@ -68,8 +70,10 @@ async def md_export(path: str, sub_path: str, include_edit_links: bool = False):
     cached = await PARTIAL_EXPORT_CACHE.get_md(path, include_edit_links, sub_path)
     if cached is not None:
         return MarkdownDocumentResponse(md=cached)
-    document_part, _ = await __load_document_part(path, sub_path, {"include_edit_links": include_edit_links})
-    md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export_partial, document_part)
+    document_part, _, extra_level = await __load_document_part(
+        path, sub_path, {"include_edit_links": include_edit_links}
+    )
+    md_content = await asyncio.to_thread(MARKDOWN_EXPORTER.export_partial, document_part, extra_level)
     await PARTIAL_EXPORT_CACHE.set_md(path, include_edit_links, md_content, sub_path)
     return MarkdownDocumentResponse(md=md_content)
 
@@ -80,11 +84,11 @@ async def pdf_export(path: str, sub_path: str, pdf_variant: PdfVariantEnum = DEF
         if cached is not None:
             return cached
     adapter = get_adapter_instance()
-    document_part, front = await __load_document_part(path, sub_path, adapter=adapter)
+    document_part, front, extra_level = await __load_document_part(path, sub_path, adapter=adapter)
     media_downloader = get_media_downloader(adapter)
     await asyncio.to_thread(document_part.replace_media_links, pdf_replace_media_links_callback, media_downloader)
     pdf_content, filename = await asyncio.to_thread(
-        PDF_EXPORTER.export_partial, document_part, front, pdf_variant.value
+        PDF_EXPORTER.export_partial, document_part, front, pdf_variant.value, extra_level
     )
     if pdf_variant == DEFAULT_PDF_VARIANT:
         await PARTIAL_EXPORT_CACHE.set_pdf(path, pdf_content, filename, sub_path)

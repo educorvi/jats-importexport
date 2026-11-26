@@ -7,7 +7,6 @@ import logging
 import os
 from datetime import datetime
 from typing import cast, overload
-from urllib.parse import unquote, urlparse
 
 import httpx
 from httpx import HTTPStatusError
@@ -20,6 +19,7 @@ from .download import PloneDownloadService, PloneGetJATSDocumentOptions
 from .listing import PloneListingService
 from .modify import PloneModifyService
 from .upload import PloneUploadService
+from .utils import get_path_from_plone_object, get_path_from_url, get_url_from_path
 
 logger = logging.getLogger(__name__)
 
@@ -65,29 +65,13 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception:
             pass
 
-    # Private helper methods
-
-    def __get_path_from_url(self, url: str) -> str:
-        base_path = urlparse(self.base_url).path.rstrip("/")
-        result_path = urlparse(url).path
-        if result_path.lower().startswith(base_path.lower()):
-            return result_path[len(base_path) :]
-        return result_path
-
-    def __get_path_from_plone_object(self, obj: dict) -> str:
-        obj_id = obj.get("@id", "")
-        return self.__get_path_from_url(obj_id)
-
-    def __get_webcode_from_plone_object(self, obj: dict) -> str:
-        return obj.get("webcode") or ""
-
     # General methods
 
     def get_url_from_path(self, path: str) -> str:
-        return f"{self.base_url}/{path.strip('/')}"
+        return get_url_from_path(self.base_url, path)
 
     def get_path_from_url(self, url: str) -> str:
-        return self.__get_path_from_url(url)
+        return get_path_from_url(self.base_url, url)
 
     # Upload related methods
 
@@ -121,22 +105,6 @@ class PloneStorageAdapter(StorageAdapter):
             raise InternalError(f"Error creating article content in {container}")
 
     # Download / export related methods
-
-    def download_file(self, url: str) -> tuple[bytes, str]:
-        """Download the binary content of a file/image object hosted in Plone.
-
-        Refuses to download from URLs outside of the configured PLONE_BASE_URL,
-        to avoid this adapter being used to fetch arbitrary external resources.
-        """
-        try:
-            download_service = PloneDownloadService(self.base_url, self.httpx_client)
-            return download_service.download_file(url)
-        except InternalError:
-            raise
-        except ValueError:
-            raise
-        except Exception as e:
-            raise InternalError(f"Error downloading file from {url}") from e
 
     def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
         """Retrieve the binary content of a media file from Plone."""
@@ -178,18 +146,18 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document_part(
         self, path: str, sub_path: str, options: BaseGetJATSDocumentOptions | None = None
-    ) -> tuple[JATSClassInterface, Front]:
-        """Retrieve a part of a JATSDocument from Plone."""
-        decoded_sub_path = unquote(sub_path).replace("\\", "/")
-        if ".." in decoded_sub_path.split("/"):
-            raise ValueError("Sub-path must not contain parent directory segments")
+    ) -> tuple[JATSClassInterface, Front, int]:
+        """Retrieve a part of a JATSDocument from Plone.
+
+        Returns a tuple containing the requested part of the JATS document, its front matter,
+        and the additional level of the sub-path (meaning the offset needed to add to the heading levels)
+        """
+        article_url = self.get_url_from_path(path)
+        part_path = f"{path.strip('/')}/{sub_path.strip('/')}"
+        part_url = self.get_url_from_path(part_path)
 
         plone_options = cast(PloneGetJATSDocumentOptions | None, options)
         download_service = PloneDownloadService(self.base_url, self.httpx_client)
-
-        article_url = self.get_url_from_path(path)
-        part_path = f"{path.strip('/')}/{sub_path.lstrip('/')}"
-        part_url = self.get_url_from_path(part_path)
 
         try:
             part, front = download_service.fetch_article_part(article_url, part_url, plone_options)
@@ -205,7 +173,10 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error fetching article part at {part_url}") from e
 
-        return part, front
+        # Minus 2 because of body / back part and the part itself
+        level = len(sub_path.strip("/").split("/")) - 2
+
+        return part, front, level
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
@@ -284,9 +255,9 @@ class PloneStorageAdapter(StorageAdapter):
             batch_size=batch_size,
         )
         if get_webcodes:
-            articles = list(map(self.__get_webcode_from_plone_object, items))
+            articles = [item.get("webcode") or "" for item in items]
         else:
-            articles = list(map(self.__get_path_from_plone_object, items))
+            articles = [get_path_from_plone_object(self.base_url, item) for item in items]
         return articles, total
 
     def list_fachbereiche(self) -> list[str]:

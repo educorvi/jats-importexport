@@ -12,8 +12,8 @@ class MarkdownExporter:
         html = HtmlExporter().export(document)
         return self._export_html(html)
 
-    def export_partial(self, part: JATSClassInterface) -> str:
-        html = HtmlExporter().export_partial(part)
+    def export_partial(self, part: JATSClassInterface, extra_level: int = 0) -> str:
+        html = HtmlExporter().export_partial(part, extra_level)
         return self._export_html(html)
 
     def _export_html(self, html: str) -> str:

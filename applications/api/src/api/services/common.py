@@ -66,7 +66,7 @@ async def resolve_path_with_sub_path(
 
 
 def get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tuple[bytes, str]]:
-    """Returns a callable that downloads media from the signed API URL or a StorageAdapter URL."""
+    """Returns a callable that downloads media from the signed API URL."""
     IEH_BASE_URL = os.environ.get("IEH_BASE_URL")
     if IEH_BASE_URL is None:
         raise OSError("IEH_BASE_URL environment variable is not set.")
@@ -90,7 +90,7 @@ def get_media_downloader(storage_adapter: StorageAdapter) -> Callable[[str], tup
                 values["signature"][0],
             )
         else:
-            return storage_adapter.download_file(url)
+            raise ValueError(f"Unsupported media URL: {url}")
 
     return downloader
 

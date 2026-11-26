@@ -58,10 +58,11 @@ class HtmlExporterGeneric(metaclass=abc.ABCMeta):
         html_content = self._transform(xml_doc)
         return self._add_doctype(html_content)
 
-    def export_partial(self, part: JATSClassInterface) -> str:
+    def export_partial(self, part: JATSClassInterface, extra_level: int = 0) -> str:
         """Export a partial JATS class instance into an HTML string representation."""
         xml_doc = self.jats_exporter.export_partial(part)
-        html_content = self._transform(xml_doc)
+        wrapped_xml_doc = f'<root extra-level="{extra_level}">{xml_doc}</root>'
+        html_content = self._transform(wrapped_xml_doc)
         return self._remove_doctype(html_content)
 
 

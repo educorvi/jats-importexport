@@ -49,13 +49,13 @@ class PdfExporter:
         return pdf_bytes, filename
 
     def export_partial(
-        self, part: JATSClassInterface, front: Front, pdf_variant: str = "pdf/ua-2"
+        self, part: JATSClassInterface, front: Front, pdf_variant: str = "pdf/ua-2", extra_level: int = 0
     ) -> tuple[bytes, str]:
         """Export a part of the JATSDocument to a PDF file using WeasyPrint.
         Returns:
             A tuple containing the PDF bytes and the suggested filename.
         """
-        html = HTML(string=self._get_html(part, front), base_url=f"{self.ROOT.as_uri()}/")
+        html = HTML(string=self._get_html(part, front, extra_level), base_url=f"{self.ROOT.as_uri()}/")
         pdf_bytes = html.write_pdf(pdf_variant=pdf_variant)
 
         title_escaped = "".join(c if c.isalnum() else "_" for c in front.title or "Dokument")
@@ -63,9 +63,9 @@ class PdfExporter:
 
         return pdf_bytes, filename
 
-    def _get_html(self, part: JATSClassInterface, front: Front) -> str:
+    def _get_html(self, part: JATSClassInterface, front: Front, extra_level: int = 0) -> str:
         """Load and render the HTML for PDF generation."""
-        context = self._get_template_context(part, front)
+        context = self._get_template_context(part, front, extra_level)
         with open(self.TEMPLATE, encoding="utf-8") as template_file:
             template: Template = Template(template_file.read())
             return self._render_mathml(template.render(**context))
@@ -100,7 +100,7 @@ class PdfExporter:
             formula.replace_with(image)
         return str(soup)
 
-    def _get_template_context(self, part: JATSClassInterface, front: Front) -> dict[str, Any]:
+    def _get_template_context(self, part: JATSClassInterface, front: Front, extra_level: int = 0) -> dict[str, Any]:
         """Prepare the context for rendering the PDF template."""
         article_meta = front.to_dict()
         pdf_meta = {}
@@ -110,7 +110,8 @@ class PdfExporter:
             html_toc, _, _, html_content = self.html_exporter.export_parts(part)
             pdf_meta["is_partial"] = False
         else:
-            html_content = self.html_exporter.export_partial(part)
+            html_content = self.html_exporter.export_partial(part, extra_level)
+            html_content = f'<div class="article-content"><div class="article-body">{html_content}</div></div>'
             html_toc = None
             pdf_meta["is_partial"] = True
 
