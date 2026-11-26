@@ -161,9 +161,6 @@ class MockStorageAdapter(StorageAdapter):
     def list_sachgebiete(self, fachbereich: str | None = None) -> list[str]:
         raise NotImplementedError("list_sachgebiete is not implemented in MockStorageAdapter")
 
-    def download_file(self, url: str) -> tuple[bytes, str]:
-        return b"", "application/octet-stream"
-
     def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
         return b"", "application/octet-stream"
 

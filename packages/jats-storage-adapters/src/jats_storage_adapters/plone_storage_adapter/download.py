@@ -109,30 +109,6 @@ class PloneDownloadService:
             plone_status = DEFAULT_REVIEW_STATE
         return REVIEW_STATE_MAPPING.get(plone_status, "")
 
-    def download_file(self, url: str) -> tuple[bytes, str]:
-        """Download a file from the given URL."""
-        if not self.__is_url_within_base(url):
-            raise ValueError(f"Refusing to download file from outside the configured Plone instance: {url}")
-        response1 = self.httpx_client.get(url)
-        response1.raise_for_status()
-        content_type = response1.headers.get("content-type")
-        if not content_type or not isinstance(content_type, str):
-            raise InternalError(f"Could not determine content-type for {url}")
-        if content_type.startswith("image/"):
-            return response1.content, content_type
-        elif content_type == "application/json":
-            data = response1.json()
-            field = data.get("image") or data.get("file")
-            download_url = field.get("download") if field else None
-            if not download_url:
-                raise InternalError(f"No downloadable file found for {url}")
-            response = self.httpx_client.get(download_url, headers={"Accept": "*/*"})
-            response.raise_for_status()
-            content_type = field.get("content-type") or response.headers.get("content-type", "application/octet-stream")
-            return response.content, content_type
-        else:
-            raise InternalError(f"Unsupported content-type for {url}: {content_type}")
-
     def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
         """Retrieve the binary content of a media file from the Plone storage system."""
         if not verify_media_signature(path, filename, signature):
@@ -156,16 +132,6 @@ class PloneDownloadService:
                 content_type_2_header = response_2.headers.get("content-type", "application/octet-stream")
                 return response_2.content, content_type_2_field or content_type_2_header
         return response_1.content, content_type_1
-
-    def __is_url_within_base(self, url: str) -> bool:
-        """Check whether a URL points into this adapter's configured Plone instance."""
-        base = urlparse(self.base_url)
-        target = urlparse(url)
-        return (
-            target.scheme in ("http", "https")
-            and target.netloc.lower() == base.netloc.lower()
-            and target.path.lower().startswith(base.path.lower())
-        )
 
     def fetch_article(self, url: str, options: PloneGetJATSDocumentOptions | None = None) -> Article:
         """Fetch and build an Article node with Front, Body, and Back from Plone."""

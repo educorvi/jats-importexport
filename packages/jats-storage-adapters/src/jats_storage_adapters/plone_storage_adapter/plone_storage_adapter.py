@@ -122,22 +122,6 @@ class PloneStorageAdapter(StorageAdapter):
 
     # Download / export related methods
 
-    def download_file(self, url: str) -> tuple[bytes, str]:
-        """Download the binary content of a file/image object hosted in Plone.
-
-        Refuses to download from URLs outside of the configured PLONE_BASE_URL,
-        to avoid this adapter being used to fetch arbitrary external resources.
-        """
-        try:
-            download_service = PloneDownloadService(self.base_url, self.httpx_client)
-            return download_service.download_file(url)
-        except InternalError:
-            raise
-        except ValueError:
-            raise
-        except Exception as e:
-            raise InternalError(f"Error downloading file from {url}") from e
-
     def get_media(self, path: str, filename: str, signature: str) -> tuple[bytes, str]:
         """Retrieve the binary content of a media file from Plone."""
         try:
