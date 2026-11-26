@@ -124,7 +124,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_jats_document_part(
         self, path: str, sub_path: str, options: GetJATSDocumentOptions | None = None
-    ) -> tuple[JATSClassInterface, Front]:
+    ) -> tuple[JATSClassInterface, Front, int]:
         """Retrieve a part of a JATSDocument from the storage system.
 
         Args:
@@ -136,6 +136,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             A tuple containing:
                 - A JATSClassInterface instance representing the requested part of the document.
                 - The Front of the article associated with the requested part of the document.
+                - An integer representing the additional level of the sub-path (offset for heading levels).
         """
         raise NotImplementedError
 

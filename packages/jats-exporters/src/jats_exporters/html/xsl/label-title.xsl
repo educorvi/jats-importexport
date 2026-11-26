@@ -71,7 +71,7 @@
 
     <xsl:template name="get-heading-level">
         <xsl:variable name="level"
-                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2"/>
+                      select="count(ancestor::sec | ancestor::app-group | ancestor::app | ancestor::glossary | ancestor::ref-list) + 2 + sum(/root/@extra-level)"/>
         <xsl:choose>
             <xsl:when test="$level &lt;= 6">
                 <xsl:value-of select="$level"/>

@@ -146,8 +146,12 @@ class PloneStorageAdapter(StorageAdapter):
 
     def get_jats_document_part(
         self, path: str, sub_path: str, options: BaseGetJATSDocumentOptions | None = None
-    ) -> tuple[JATSClassInterface, Front]:
-        """Retrieve a part of a JATSDocument from Plone."""
+    ) -> tuple[JATSClassInterface, Front, int]:
+        """Retrieve a part of a JATSDocument from Plone.
+
+        Returns a tuple containing the requested part of the JATS document, its front matter,
+        and the additional level of the sub-path (meaning the offset needed to add to the heading levels)
+        """
         article_url = self.get_url_from_path(path)
         part_path = f"{path.strip('/')}/{sub_path.strip('/')}"
         part_url = self.get_url_from_path(part_path)
@@ -169,7 +173,10 @@ class PloneStorageAdapter(StorageAdapter):
         except Exception as e:
             raise InternalError(f"Error fetching article part at {part_url}") from e
 
-        return part, front
+        # Minus 2 because of body / back part and the part itself
+        level = len(sub_path.strip("/").split("/")) - 2
+
+        return part, front, level
 
     def get_metadata(self, path: str) -> Front:
         """Fetch the metadata of a JATS document from Plone."""
